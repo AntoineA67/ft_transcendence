@@ -1,0 +1,13 @@
+node_modules
+.vscode
+
+# tests
+/test
+/coverage
+/.nyc_output
+
+# dist
+/dist
+
+# environment
+.env
