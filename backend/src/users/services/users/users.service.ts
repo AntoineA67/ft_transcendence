@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/typeorm';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from 'src/users/dto/users.dtos';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,11 @@ export class UsersService {
 		return this.userRepository.save(newUser);
 	}
 
-	findUsersById(id: number) {
-		return this.userRepository.findOne(id);
+	// findUsersById(id: number) {
+	// 	return this.userRepository.findOne(id);
+	// }
+
+	getUsers() {
+		return this.userRepository.find();
 	}
 }
