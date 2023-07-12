@@ -17,3 +17,8 @@ Dockerfile
 README.md
 tslint.json
 nodemon.json
+
+node_modules
+npm-debug.log
+build
+.dockerignore
