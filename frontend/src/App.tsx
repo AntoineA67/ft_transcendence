@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -9,6 +9,7 @@ interface User {
   email: string;
 }
 
+axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
 function App() {
 
@@ -39,12 +40,12 @@ function App() {
         >
           Learn React
         </a>
+        <ul>
+          {users.map(user => (
+            <li key={user.id}>{user.username}</li>
+          ))}
+        </ul>
       </header>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>{user.username}</li>
-        ))}
-      </ul>
     </div>
   );
 }
