@@ -31,4 +31,4 @@ jobs:
       env:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
       run: |
-        python .github/workflows/rebuild-droplet.py
+        python .github/rebuild-droplet.py
