@@ -29,4 +29,4 @@ jobs:
         pip install pydo
     - name: Test with pytest
       run: |
-        python .github/workflows/rebuild-droplet.py
+        python .github/rebuild-droplet.py
