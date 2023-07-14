@@ -28,6 +28,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Clone and run docker
         uses: appleboy/ssh-action@master
@@ -36,7 +37,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PWD }}
+          password: ${{ secrets.SSH_PWD }}
           envs: CLONE_DIR
           port: 22
           script: |
