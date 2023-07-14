@@ -9,4 +9,4 @@ req = {
 }
 
 resp = client.droplet_actions.post(droplet_id=365187067, body=req)
-time.sleep(30)
+time.sleep(60)
