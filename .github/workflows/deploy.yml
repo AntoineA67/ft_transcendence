@@ -45,5 +45,6 @@ jobs:
             echo git@github.com:${{github.repository}}.git
             mkdir $CLONE_DIR/../test/
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
+            git clone -b master https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git
             cd $CLONE_DIR
             docker compose up
