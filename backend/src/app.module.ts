@@ -3,6 +3,11 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import entities from './typeorm';
+import { MessagesModule } from './message/message.module';
+import { MessagesController } from './message/messages.controller';
+import { MessagesService } from './message/messages.service';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 
 @Module({
@@ -12,8 +17,10 @@ import entities from './typeorm';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: +configService.get<number>('DB_PORT'),
+        host: 'localhost',
+        // host: configService.get('DB_HOST'),
+        // port: +configService.get<number>('DB_PORT'),
+        port: 5432,
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
@@ -23,8 +30,9 @@ import entities from './typeorm';
       inject: [ConfigService],
     }),
     UsersModule,
+    MessagesModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule { }
