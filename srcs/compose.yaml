@@ -24,9 +24,7 @@ services:
     secrets:
       - db
     volumes:
-      - "./${ENVPATH}/db/db_data:/var/lib/postgresql/data"
-      # - dbdata:/var/lib/postgresql/data
-      #   - external: true
+      - dbdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=example
       - POSTGRES_PASSWORD_FILE=/run/secrets/db
@@ -60,7 +58,7 @@ secrets:
 volumes:
   dbdata:
     # driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: './srcs/db/db_data'
+    # driver_opts:
+    #   type: 'none'
+    #   o: 'bind'
+    #   device: './srcs/db/db_data'
