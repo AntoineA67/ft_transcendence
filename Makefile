@@ -16,19 +16,19 @@ $(NAME) : build
 
 build :
 	@echo "${YELLOW}> Image building 🎉${END}"
-	@docker-compose -f ./srcs/docker-compose.yml build
+	@docker compose -f ./srcs/compose.yaml build
 		
 up :
 	@echo "${YELLOW}> Turning up images 🎉${END}"
-	@docker-compose -f ./srcs/docker-compose.yml up
+	@docker compose -f ./srcs/compose.yaml up
 
 prod :
 	@echo "${YELLOW}> Turning up images 🎉${END}"
-	@docker-compose -f ./srcs/docker-compose.yml up -d -e PROD=1
+	@docker compose -f ./srcs/compose.yaml up -d -e PROD=1
 	
 down :
 	@echo "${YELLOW}> Turning down images ❌${END}"
-	@docker-compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./srcs/compose.yaml down
 
 re:
 	@make down
