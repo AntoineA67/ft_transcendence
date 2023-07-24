@@ -3,11 +3,11 @@ FROM node:lts AS dev
 
 RUN echo "I'm dev"
 
-RUN echo $();
+WORKDIR /app/
 
-ENV PORT=3000
+EXPOSE 8000
 
-ENTRYPOINT [ "ls", "/app/"]
+ENTRYPOINT ["sh", "-c", "npm i && npm start"]
 
 # 1. For build React app
 FROM node:lts AS prod
