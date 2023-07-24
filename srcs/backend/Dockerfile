@@ -6,7 +6,7 @@ WORKDIR /app
 # COPY . .
 
 FROM base as DEV
-ENTRYPOINT ["sh", "-c", "npm i && npm start"]
+ENTRYPOINT ["sh", "-c", "npm i && npm run start:dev"]
 
 
 FROM base as PROD
