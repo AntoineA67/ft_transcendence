@@ -21,7 +21,7 @@ dev :
 
 prod :
 	@echo "${YELLOW}> Image building 🎉${END}"
-	@docker compose --env-file=./.env.prod -f ./srcs/compose.yaml build
+	@docker compose --env-file=./build/.env -f ./srcs/compose.yaml build
 	@echo "${YELLOW}> Turning up images 🎉${END}"
 	@docker compose -f ./srcs/compose.yaml up -d
 
