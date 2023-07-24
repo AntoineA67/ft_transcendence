@@ -1,71 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
-import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { socket } from './socket';
-
-interface Message {
-  id: number;
-  content: string;
-  createdAt: string;
-}
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import Home from './Home';
+import Game from './Game';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
-function App() {
+let router = createBrowserRouter([
+  {
+    path: "/",
+    loader: () => ({ message: "Hello Data Router!" }),
+    Component() {
+      return Home();
+    },
+  },
+  {
+    path: "/game",
+    loader: () => ({ message: "Hello Data Router!" }),
+    Component() {
+      return Game();
+    },
+  },
+]);
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [msg, setMsg] = useState('');
-
-  useEffect(() => {
-    axios.get('/messages')
-      .then(response => {
-        setMessages(response.data);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-  }, []);
-
-  socket.on('connect', () => {
-    console.log('connected');
-  });
-
-  const sendMsg = () => {
-
-    socket.emit('sendMessage', msg);
-    console.log('sent');
-  }
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <input
-          name="send"
-          type="text"
-          onChange={(e) => setMsg(e.target.value)}
-        />
-        <button onClick={() => sendMsg()}>Envoyer</button>
-        <ul>
-          {messages.map(message => (
-            <li key={message.id}>{message.content}</li>
-          ))}
-        </ul>
-      </header>
-    </div>
-  );
+export default function App() {
+  return <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />;
 }
-
-export default App;
