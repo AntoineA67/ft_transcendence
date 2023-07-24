@@ -1,58 +1,65 @@
 version: '3.3'
 services:
-  # backend:
-  #   build:
-  #     context: backend
-  #   ports:
-  #     - 3000:3000
-  #   secrets:
-  #     - db-password
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
+
+  backend:
+    build:
+      context: backend
+    ports:
+      - 3000:3000
+    secrets:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: postgres
-    ports:
-      - "5432:5432"
     restart: always
     user: postgres
     secrets:
-      - db-password
+      - db
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=example
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db
+    expose:
+      - "5432:5432"
     healthcheck:
       test: [ "CMD", "pg_isready" ]
       interval: 10s
       timeout: 5s
       retries: 5
-  # frontend:
-  #   build:
-  #     context: frontend
-  #   container_name: frontend
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - backend
-  # proxy:
-  #   image: nginx
-  #   volumes:
-  #     - type: bind
-  #       source: ./proxy/nginx.conf
-  #       target: /etc/nginx/conf.d/default.conf
-  #       read_only: true
-  #   ports:
-  #     - 80:80
-  #   depends_on:
-  #     - backend
 
-volumes:
-  db-data:
-
+  frontend:
+    build:
+      context: frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
 
 secrets:
-  db-password:
+  db:
     file: db/password.txt
+
+volumes:
+  db:
+    driver_opts:
+      device: ./db/data
+      type: none
+      o: bind
+  backend:
+    driver_opts:
+      device: ./backend
+      type: none
+      o: bind
+  frontend:
+    driver_opts:
+      device: ./frontend
+      type: none
+      o: bind
+networks:
+  transcendance_network:
