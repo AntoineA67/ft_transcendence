@@ -1,7 +1,7 @@
 # 1. For build React app
 FROM node:lts AS dev
 
-RUN echo "I'm dev"
+RUN echo "dev"
 
 WORKDIR /app/
 
@@ -9,12 +9,18 @@ EXPOSE 8000
 
 ENTRYPOINT ["sh", "-c", "npm i && npm start"]
 
-# 1. For build React app
-FROM node:lts AS prod
+FROM node:lts
 
-CMD echo "I'm prod"
+CMD echo "prod"
 
-WORKDIR /app
+WORKDIR /app/
+
+ENV BUILD_PATH="/build/"
+
+COPY . /app/
+
+RUN npm i
+RUN npm run build
 
 # # 
 # COPY package.json /app/package.json
@@ -50,20 +56,16 @@ WORKDIR /app
 # COPY --from=gloursdocker/docker / /
 # CMD [ "npm", "start" ]
 
-# # 2. For Nginx setup
-# FROM nginx:alpine
+# 2. For Nginx setup
 
-# # Copy config nginx
-# COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
+FROM nginx:alpine AS prod
 
-# WORKDIR /usr/share/nginx/html
+# Copy config nginx
+#COPY --from=build /app/.nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-# # Remove default nginx static assets
-# RUN rm -rf ./*
+WORKDIR /build/
 
-# # Copy static assets from builder stage
-# COPY --from=build /app/build .
+EXPOSE 80
 
-# # Containers run nginx with global directives and daemon off
-# ENTRYPOINT ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
