@@ -1,35 +1,42 @@
 version: '3.3'
 services:
 
-  # backend:
-  #   build:
-  #     context: backend
-  #   ports:
-  #     - 3000:3000
-  #   secrets:
-  #     - db
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
+  backend:
+    build:
+      context: backend
+      target: ${ENV}
+    container_name: backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./${ENVPATH}/backend/:/app"
+    secrets:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
 
-  # db:
-  #   image: postgres
-  #   restart: always
-  #   user: postgres
-  #   secrets:
-  #     - db
-  #   # volumes:
-  #   #   - db:/var/lib/postgresql/data
-  #   environment:
-  #     - POSTGRES_DB=example
-  #     - POSTGRES_PASSWORD_FILE=/run/secrets/db
-  #   expose:
-  #     - "5432:5432"
-  #   healthcheck:
-  #     test: [ "CMD", "pg_isready" ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    container_name: db
+    secrets:
+      - db
+    volumes:
+      - "./${ENVPATH}/db/db_data:/var/lib/postgresql/data"
+      # - dbdata:/var/lib/postgresql/data
+      #   - external: true
+    environment:
+      - POSTGRES_DB=example
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db
+    expose:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
@@ -42,12 +49,17 @@ services:
       - "8000:8000"
     volumes:
       - "./${ENVPATH}/frontend/:/app"
-    # depends_on:
-    #   - backend
+    depends_on:
+      - backend
 
 secrets:
   db:
     file: db/password.txt
 
-networks:
-  transcendance_network:
+volumes:
+  dbdata:
+    # driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './srcs/db/db_data'

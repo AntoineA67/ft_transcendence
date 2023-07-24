@@ -15,13 +15,14 @@ $(NAME) : dev
 
 dev :
 	@echo "${YELLOW}> Image building 🎉${END}"
+	@chmod 777 ./srcs/db/db_data
 	@docker compose --env-file ./srcs/.env -f ./srcs/compose.yaml build
 	@echo "${YELLOW}> Turning up images 🎉${END}"
 	@docker compose -f ./srcs/compose.yaml up -d
 
 prod :
 	@echo "${YELLOW}> Image building 🎉${END}"
-	@docker compose --env-file=./.env.prod -f ./srcs/compose.yaml build
+	@docker compose --env-file=./build/.env -f ./srcs/compose.yaml build
 	@echo "${YELLOW}> Turning up images 🎉${END}"
 	@docker compose -f ./srcs/compose.yaml up -d
 
