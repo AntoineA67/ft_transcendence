@@ -1,64 +1,67 @@
 version: '3.3'
 services:
 
-  backend:
-    build:
-      context: backend
-    ports:
-      - 3000:3000
-    secrets:
-      - db
-    depends_on:
-      db:
-        condition: service_healthy
+  # backend:
+  #   build:
+  #     context: backend
+  #   ports:
+  #     - 3000:3000
+  #   secrets:
+  #     - db
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
 
-  db:
-    image: postgres
-    restart: always
-    user: postgres
-    secrets:
-      - db
-    volumes:
-      - db:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=example
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db
-    expose:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD", "pg_isready" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # db:
+  #   image: postgres
+  #   restart: always
+  #   user: postgres
+  #   secrets:
+  #     - db
+  #   # volumes:
+  #   #   - db:/var/lib/postgresql/data
+  #   environment:
+  #     - POSTGRES_DB=example
+  #     - POSTGRES_PASSWORD_FILE=/run/secrets/db
+  #   expose:
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: [ "CMD", "pg_isready" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   frontend:
     build:
       context: frontend
+      target: ${ENV}
     container_name: frontend
     ports:
       - "80:80"
       - "443:443"
-    depends_on:
-      - backend
+    volumes:
+      - frontend:/app
+    # depends_on:
+    #   - backend
 
 secrets:
   db:
     file: db/password.txt
 
 volumes:
-  db:
-    driver_opts:
-      device: ./db/data
-      type: none
-      o: bind
-  backend:
-    driver_opts:
-      device: ./backend
-      type: none
-      o: bind
+  # db:
+  #   driver_opts:
+  #     device: ./db/data
+  #     type: none
+  #     o: bind
+  # backend:
+  #   driver_opts:
+  #     device: ./${ROOTPATH}/backend/
+  #     type: none
+  #     o: bind
   frontend:
     driver_opts:
-      device: ./frontend
+      device: .
       type: none
       o: bind
 networks:

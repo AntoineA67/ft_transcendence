@@ -11,34 +11,33 @@ NAME = inception
 
 all : $(NAME)
 
-$(NAME) : build
-	@make up
+$(NAME) : dev
 
-build :
+dev :
 	@echo "${YELLOW}> Image building 🎉${END}"
-	@docker compose -f ./srcs/compose.yaml build
-		
-up :
+	@docker compose --env-file ./srcs/.env -f ./srcs/compose.yaml build
 	@echo "${YELLOW}> Turning up images 🎉${END}"
-	@docker compose -f ./srcs/compose.yaml up
+	@docker compose -f ./srcs/compose.yaml up -d
 
 prod :
+	@echo "${YELLOW}> Image building 🎉${END}"
+	@docker compose --env-file=./.env.prod -f ./srcs/compose.yaml build
 	@echo "${YELLOW}> Turning up images 🎉${END}"
-	@docker compose -f ./srcs/compose.yaml up -d -e PROD=1
+	@docker compose -f ./srcs/compose.yaml up -d
+
+
 	
 down :
 	@echo "${YELLOW}> Turning down images ❌${END}"
-	@docker compose -f ./srcs/compose.yaml down
+	@docker compose -f ./srcs/compose.yaml down -v
 
 re:
 	@make down
 	@make clean
-	@make build
-	@make up
+	@make
 
 clean: down
 	@echo "${YELLOW}> Cleaning and deleting all images 🧹${END}"
-	@ { docker volume ls -q ; echo null; } | xargs -r docker volume rm --force
-	@sudo rm -rf ${HOME}/data/
+	@ { docker volume ls -q ; echo null; }
 
 .PHONY:	all re down clean up build
