@@ -39,6 +39,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8000:8000"
     volumes:
       - frontend:/app
     # depends_on:
@@ -61,7 +62,7 @@ volumes:
   #     o: bind
   frontend:
     driver_opts:
-      device: .
+      device: ${PWD}/${ENVPATH}/frontend
       type: none
       o: bind
 networks:
