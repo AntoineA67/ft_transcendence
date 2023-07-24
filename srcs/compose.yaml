@@ -41,7 +41,9 @@ services:
       - "443:443"
       - "8000:8000"
     volumes:
-      - "./${ENVPATH}/frontend/:/app"
+      - "./frontend/:/app"
+      - "../build/frontend/:/build"
+
     # depends_on:
     #   - backend
 
