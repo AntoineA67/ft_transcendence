@@ -48,8 +48,8 @@ services:
     volumes:
       - "./frontend/:/app"
       - "../build/frontend/:/build"
-    # depends_on:
-    #   - backend
+    depends_on:
+      - backend
 
 secrets:
   db:
@@ -57,8 +57,3 @@ secrets:
 
 volumes:
   dbdata:
-    # driver: local
-    # driver_opts:
-    #   type: 'none'
-    #   o: 'bind'
-    #   device: './srcs/db/db_data'
