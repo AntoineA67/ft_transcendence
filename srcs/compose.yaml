@@ -41,7 +41,7 @@ services:
       - "443:443"
       - "8000:8000"
     volumes:
-      - frontend:/app
+      - "./${ENVPATH}/frontend/:/app"
     # depends_on:
     #   - backend
 
@@ -49,21 +49,5 @@ secrets:
   db:
     file: db/password.txt
 
-volumes:
-  # db:
-  #   driver_opts:
-  #     device: ./db/data
-  #     type: none
-  #     o: bind
-  # backend:
-  #   driver_opts:
-  #     device: ./${ROOTPATH}/backend/
-  #     type: none
-  #     o: bind
-  frontend:
-    driver_opts:
-      device: ${PWD}/${ENVPATH}/frontend
-      type: none
-      o: bind
 networks:
   transcendance_network:
