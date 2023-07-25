@@ -54,6 +54,7 @@ function Game() {
 		})
 		socket.on('id', (id: any) => {
 			myId = id
+			console.log('id ' + id)
 			setInterval(() => {
 				socket.emit('update', {
 					t: Date.now(),
@@ -63,9 +64,9 @@ function Game() {
 			}, 50)
 		})
 		socket.on('clients', (clients: any) => {
-			// console.log(clients)
 			let pingStatsHtml = 'Socket Ping Stats<br/><br/>'
 			Object.keys(clients).forEach((p) => {
+				// if (p === myId) return
 				timestamp = Date.now()
 				pingStatsHtml += p + ' ' + (timestamp - clients[p].t) + 'ms<br/>'
 				if (!clientCubes[p]) {
@@ -73,7 +74,21 @@ function Game() {
 					clientCubes[p].name = p
 					scene.add(clientCubes[p])
 				} else {
+					// if (myId === p) {
+					// 	clientCubes[p].position.set(
+					// 		myObject3D.position.x,
+					// 		myObject3D.position.y,
+					// 		myObject3D.position.z)
+					// 	clientCubes[p].rotation.set(
+					// 		myObject3D.rotation.x,
+					// 		myObject3D.rotation.y,
+					// 		myObject3D.rotation.z)
+					// 	return
+					// }
 					if (clients[p].p) {
+						// clientCubes[p].position.x = clients[p].p.x
+						// clientCubes[p].position.y = clients[p].p.y
+						// clientCubes[p].position.z = clients[p].p.z
 						new TWEEN.Tween(clientCubes[p].position)
 							.to(
 								{
@@ -81,11 +96,14 @@ function Game() {
 									y: clients[p].p.y,
 									z: clients[p].p.z,
 								},
-								50
+								5
 							)
 							.start()
 					}
 					if (clients[p].r) {
+						// clientCubes[p].rotation.x = clients[p].r._x
+						// clientCubes[p].rotation.y = clients[p].r._y
+						// clientCubes[p].rotation.z = clients[p].r._z
 						new TWEEN.Tween(clientCubes[p].rotation)
 							.to(
 								{
@@ -93,7 +111,7 @@ function Game() {
 									y: clients[p].r._y,
 									z: clients[p].r._z,
 								},
-								50
+								5
 							)
 							.start()
 					}
