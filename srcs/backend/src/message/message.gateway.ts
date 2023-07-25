@@ -9,11 +9,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
+import { resolve } from 'path';
 
 interface ClientUpdate {
   t: number; //timestamp
   p: { x: number, y: number, z: number }; //position
-  r: { x: number, y: number, z: number }; //rotation
+  r: { isEuleur: boolean, _x: number, _y: number, _z: number, _order: string }; //rotation
 }
 
 @WebSocketGateway({ cors: true })
@@ -30,7 +31,7 @@ export class MessageGateway
     this.logger.log('Initialized');
     setInterval(() => {
       // console.log('sending clients')
-      this.wss.sockets.emit('clients', this.clients);
+      this.wss.emit('clients', this.clients);
     }, 50);
   }
 
@@ -57,11 +58,17 @@ export class MessageGateway
   }
   @SubscribeMessage('update')
   async handleUpdate(client: Socket, payload: ClientUpdate): Promise<void> {
+    //  await new Promise(resolve => setTimeout(resolve, 100))
     // console.log('update', payload)
     if (this.clients[client.id]) {
-      this.clients[client.id].t = payload.t //client timestamp
       this.clients[client.id].p = payload.p //position
       this.clients[client.id].r = payload.r //rotation
+      this.clients[client.id].t = payload.t //client timestamp
+      // if (!this.clients[client.id].t || (payload.t - this.clients[client.id].t < 500 && payload.t - this.clients[client.id].t > 0)) {
+      // }
+      // console.log(payload.t - this.clients[client.id].t)
+      // console.log(this.clients[client.id])
+      // this.wss.emit('clients', this.clients);
     }
   }
 }
