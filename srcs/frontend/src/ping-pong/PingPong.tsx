@@ -45,16 +45,6 @@ function Paddle({ ball }: any) {
       ball: ball,
     })
   })
-  // useEffect((paddleState) => {
-  //   setInterval(() => {
-  //     socket.emit('update', {
-  //     t: Date.now(),
-  //     p: [paddleState.mouse.x * 10, paddleState.mouse.y * 5, 0],
-  //     r: [0, 0, model.current.rotation.y],
-  //     ball: ball,
-  //   })
-  //   }, 50)
-  // }, [])
   return (
     <mesh ref={ref} dispose={null}>
       <group ref={model} position={[-0.05, 0.37, 0.3]} scale={0.15}>
@@ -161,6 +151,10 @@ const ControlsWrapper = ({ socket }: any) => {
 }
 
 const UserWrapper = ({ position, rotation, id }: any) => {
+  useFrame(() => {
+    console.log("position", position)
+    console.log("rotation", rotation)
+  })
   return (
     // <Paddle />
     <mesh
@@ -339,13 +333,15 @@ export default function PingPong({ ready }: PingPongProps) {
         {/* <ControlsWrapper socket={state.socketClient} /> */}
         {Object.keys(clients)
           .map((client) => {
-            const { p, r } = clients[client]
-            return (client !== id &&
+            const { y, dir } = clients[client]
+            return (
+              client === id &&
+
               <UserWrapper
                 key={client}
                 id={client}
-                position={p}
-                rotation={r}
+                position={[0, y * 100, 0]}
+                rotation={[0, dir, 0]}
               />
             )
           })}
