@@ -1,0 +1,61 @@
+version: '3.3'
+services:
+
+  backend:
+    build:
+      context: backend
+      target: ${ENV}
+    container_name: backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./${ENVPATH}/backend/:/app"
+    secrets:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    container_name: db
+    secrets:
+      - db
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=example
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: frontend
+      target: ${ENV}
+    container_name: frontend
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8000:8000"
+    volumes:
+      - "./frontend/:/app"
+      - "../build/frontend/:/build"
+    depends_on:
+      - backend
+
+secrets:
+  db:
+    file: db/password.txt
+
+volumes:
+  dbdata:
