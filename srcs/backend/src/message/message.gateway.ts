@@ -15,6 +15,7 @@ interface ClientUpdate {
   t: number; //timestamp
   p: { x: number, y: number, z: number }; //position
   r: { isEuleur: boolean, _x: number, _y: number, _z: number, _order: string }; //rotation
+  ball: {};
 }
 
 @WebSocketGateway({ cors: true })
@@ -24,6 +25,7 @@ export class MessageGateway
 
   private logger: Logger = new Logger('MessageGateway');
   private clients: any = {}
+  private ball: any = {}
 
   @WebSocketServer() wss: Server;
 
@@ -31,7 +33,7 @@ export class MessageGateway
     this.logger.log('Initialized');
     setInterval(() => {
       // console.log('sending clients')
-      this.wss.emit('clients', this.clients);
+      this.wss.emit('clients', { 'clients': this.clients, 'ball': this.ball });
     }, 50);
   }
 
@@ -41,13 +43,21 @@ export class MessageGateway
       console.log('deleting ' + client.id)
       delete this.clients[client.id]
       this.wss.emit('removeClient', client.id)
+      if (Object.keys(this.clients).length !== 2) {
+        this.wss.emit('ball', 'non')
+        console.log('removeBall')
+      }
     }
   }
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client Connected: ${client.id}`);
     this.clients[client.id] = {}
-    this.wss.emit('id', client.id)
+    client.emit('id', client.id)
+    if (Object.keys(this.clients).length === 2) {
+      client.emit('ball', 'oui')
+      console.log('ball')
+    }
   }
 
   @SubscribeMessage('sendMessage')
@@ -64,6 +74,9 @@ export class MessageGateway
       this.clients[client.id].p = payload.p //position
       this.clients[client.id].r = payload.r //rotation
       this.clients[client.id].t = payload.t //client timestamp
+      if (payload.ball) {
+        this.ball = payload.ball
+      }
       // if (!this.clients[client.id].t || (payload.t - this.clients[client.id].t < 500 && payload.t - this.clients[client.id].t > 0)) {
       // }
       // console.log(payload.t - this.clients[client.id].t)
