@@ -8,6 +8,7 @@ import Home from './Home';
 import Game from './Game';
 import Intro from './ping-pong/Intro';
 import PingPong from './ping-pong/PingPong';
+import Pong from './ping-pong/Pong';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
@@ -24,7 +25,7 @@ let router = createBrowserRouter([
     loader: () => ({ message: "Hello Data Router!" }),
     Component() {
       return <><Intro>
-        <PingPong ready={true} />
+        <Pong ready={true} />
       </Intro></>;
     },
   },
