@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { Box, KeyboardControls, OrbitControls, Text, useGLTF, useKeyboardControls, useTexture } from "@react-three/drei"
 import { Physics, useSphere, useBox, usePlane } from "@react-three/cannon"
@@ -163,15 +163,20 @@ const ControlsWrapper = ({ socket }: any) => {
 
 	return <OrbitControls ref={controlsRef} />
 }
-const BallWrapper = ({ ball }: any) => {
+const BallWrapper = ({ ball, client }: any) => {
 	// useFrame(() => {
 	// 	console.log("position", position)
 	// })
+	const ballClientPosition: THREE.Vector3 = useMemo(() => {
+		const invertedX = client.invertedSide ? 1 - ball.x : ball.x
+		console.log("client", client)
+		return new THREE.Vector3(invertedX * 20 - 10, ball.y * 20 - 10, 0);
+	}, [ball, client]);
 	return (
 		<>
-			<Box position={[ball.x * 20 - 10, ball.y * 20 - 10, 0]} />
+			<Box position={ballClientPosition} />
 			<mesh
-				position={[ball.x * 20 - 10, ball.y * 20 - 10, 0]}
+				position={ballClientPosition}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry()}
 				material={new THREE.MeshBasicMaterial()}
@@ -215,7 +220,7 @@ export default function Pong({ ready }: PongProps) {
 
 	const [clients, setClients] = useState({} as any)
 	const [id, setId] = useState('' as any)
-	const [renderBall, setRenderBall] = useState(false as boolean)
+	// const [renderBall, setRenderBall] = useState(false as boolean)
 	const [ball, setBall] = useState({} as any)
 
 	useEffect(() => {
@@ -225,6 +230,25 @@ export default function Pong({ ready }: PongProps) {
 		}
 	}, [])
 
+	// useEffect(() => {
+	// 	if (!id || !ball || !clients || !clients[id]) return ball
+	// 	const newBall = { ...ball }
+	// 	console.log(newBall)
+	// 	if (!clients[id].invertedSide) {
+	// 		newBall.x = 1 - ball.x
+	// 	}
+	// 	return newBall
+	// }, [ball])
+
+	// function normPosition(ball: any) {
+	// 	if (!id || !ball || !clients || !clients[id]) return ball
+	// 	const newBall = { ...ball }
+	// 	console.log(newBall)
+	// 	if (!clients[id].invertedSide) {
+	// 		newBall.x = 1 - ball.x
+	// 	}
+	// 	return newBall
+	// }
 
 	useEffect(() => {
 		if (state.socketClient) {
@@ -260,10 +284,10 @@ export default function Pong({ ready }: PongProps) {
 			}
 		});
 		window.addEventListener('keyup', (event: KeyboardEvent) => {
-			if (event.key === "ArrowUp" || event.key == "w") {
+			if (event.key === "ArrowUp" || event.key === "w") {
 				socket.emit("UpKeyReleased", Date.now());
 			}
-			if (event.key === "ArrowDown" || event.key == "s") {
+			if (event.key === "ArrowDown" || event.key === "s") {
 				socket.emit("DownKeyReleased", Date.now());
 			}
 		});
@@ -293,7 +317,7 @@ export default function Pong({ ready }: PongProps) {
 						/>
 					)
 				})}
-			{ball.position !== null && < BallWrapper ball={ball} />}
+			{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
 			{/* {ball.position !== null && !renderBall && <UserWrapper
 				key={ball.position}
 				id={ball.position}
