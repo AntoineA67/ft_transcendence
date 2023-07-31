@@ -1,8 +1,8 @@
 import logo from './logo.svg';
-import './App.css';
+// import './App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { socket } from './socket';
+import { socket } from '../socket';
 
 interface Message {
 	id: number;
