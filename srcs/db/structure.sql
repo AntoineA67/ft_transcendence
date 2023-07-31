@@ -52,8 +52,8 @@ create table game
 (
     game_id        serial
         primary key,
-    status     boolean                                               not null,
-    start_date date                                                  not null,
+    status     boolean  not null,
+    start_date date     not null,
     end_date   date,
     winner_id  integer
         constraint game_user_user_id_fk
@@ -125,23 +125,3 @@ create table user_friendship_link
     constraint userfriendship_pkey
     	primary key (user_id, friend_id)
 );
-
--- sequences
-create sequence user_user_id_seq
-    as integer;
-
-alter sequence user_user_id_seq owner to postgres;
-
-create sequence room_room_id_seq
-    as integer;
-
-alter sequence room_room_id_seq owner to postgres;
-
-create sequence game_game_id_seq
-    as integer;
-
-alter sequence game_game_id_seq owner to postgres;
-
-create sequence message_message_id_seq
-    as integer;
-
