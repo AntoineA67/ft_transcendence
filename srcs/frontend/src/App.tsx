@@ -27,6 +27,20 @@ let router = createBrowserRouter([
       return Menu();
     },
   },
+  {
+    path: "/profile",
+    loader: () => ({ message: "Hello Data Router!" }),
+    Component() {
+      return Menu();
+    },
+  },
+  {
+    path: "/game",
+    loader: () => ({ message: "Hello Data Router!" }),
+    Component() {
+      return Menu();
+    },
+  },
   // {
   //   path: "/game",
   //   loader: () => ({ message: "Hello Data Router!" }),
