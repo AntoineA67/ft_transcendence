@@ -4,7 +4,7 @@ create database transcendence;
 -- tables
 create table "user"
 (
-    id          integer      not null
+    user_id     serial
         primary key,
     email       varchar(255) not null
         unique,
@@ -20,14 +20,12 @@ create table "user"
     level       integer
 );
 
-alter table "user"
-    owner to postgres;
 
 alter sequence user_user_id_seq owned by "user".id;
 
 create table room
 (
-    id       integer      not null
+    id       serial
         primary key,
     title    varchar(255) not null,
     private  boolean      not null,
@@ -37,8 +35,6 @@ create table room
             references "user"
 );
 
-alter table room
-    owner to postgres;
 
 alter sequence room_room_id_seq owned by room.id;
 
@@ -51,12 +47,10 @@ create table custom
     puck    integer
 );
 
-alter table custom
-    owner to postgres;
 
 create table game
 (
-    id         integer default nextval('game_game_id_seq'::regclass) not null
+    game_id        serial
         primary key,
     status     boolean                                               not null,
     start_date date                                                  not null,
@@ -67,14 +61,12 @@ create table game
     score      varchar
 );
 
-alter table game
-    owner to postgres;
 
 alter sequence game_game_id_seq owned by game.id;
 
 create table message
 (
-    id        integer not null
+    id        serial
         primary key,
     room_id   integer not null
         constraint message_room_room_id_fk
@@ -86,8 +78,6 @@ create table message
     send_date date    not null
 );
 
-alter table message
-    owner to postgres;
 
 alter sequence message_message_id_seq owned by message.id;
 
@@ -95,52 +85,46 @@ create table game_user_link
 (
     game_id integer not null
         constraint gameuser_game_id_fkey
-            references game,
+        	references game,
     user_id integer not null
         constraint gameuser_user_id_fkey
-            references "user",
+        	references "user",
+	status	boolean not null,
     constraint gameuser_pkey
-        primary key (game_id, user_id)
+	    primary key (game_id, user_id)
 );
 
-alter table game_user_link
-    owner to postgres;
 
 create table room_user_link
 (
     room_id      integer not null
         constraint roomuser_room_id_fkey
-            references room,
+        	references room,
     user_id      integer not null
         constraint roomuser_user_id_fkey
-            references "user",
+        	references "user",
     owner_status boolean not null,
     admin_status boolean not null,
     ban_status   boolean not null,
     mute_status  boolean not null,
     constraint roomuser_pkey
-        primary key (room_id, user_id)
+    	primary key (room_id, user_id)
 );
 
-alter table room_user_link
-    owner to postgres;
 
 create table user_friendship_link
 (
     user_id        integer               not null
         constraint userfriendship_user_id_fkey
-            references "user",
+       		references "user",
     friend_id      integer               not null
         constraint userfriendship_friend_id_fkey
-            references "user",
+        	references "user",
     friend_status  boolean default false not null,
     blocked_status boolean default false not null,
     constraint userfriendship_pkey
-        primary key (user_id, friend_id)
+    	primary key (user_id, friend_id)
 );
-
-alter table user_friendship_link
-    owner to postgres;
 
 -- sequences
 create sequence user_user_id_seq
@@ -161,4 +145,3 @@ alter sequence game_game_id_seq owner to postgres;
 create sequence message_message_id_seq
     as integer;
 
-alter sequence message_message_id_seq owner to postgres;
