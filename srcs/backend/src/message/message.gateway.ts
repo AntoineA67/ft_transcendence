@@ -9,14 +9,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
-import { resolve } from 'path';
-
-interface ClientUpdate {
-  t: number; //timestamp
-  p: { x: number, y: number, z: number }; //position
-  r: { isEuleur: boolean, _x: number, _y: number, _z: number, _order: string }; //rotation
-  ball: {};
-}
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
@@ -24,88 +16,50 @@ export class MessageGateway
   constructor(private readonly messagesService: MessagesService) { }
 
   private logger: Logger = new Logger('MessageGateway');
-  private clients: any = {}
-  private ball: any = null
+  private clients: { [id: string]: Player } = {};
+  private ball: Ball | null = null;
+  private interval: NodeJS.Timeout | null = null;
 
   @WebSocketServer() wss: Server;
 
   afterInit(server: Server) {
     this.logger.log('Initialized');
-    setInterval(() => {
-      Object.keys(this.clients).forEach((key) => {
-        const client = this.clients[key]
-        if (client.direction) {
-          client.y += client.direction * .01
-          if (client.y < 0) {
-            client.y = 0
-          }
-          if (client.y > 1) {
-            client.y = 1
-          }
-        }
-      })
-      if (this.ball) {
-        this.ball.x += this.ball.velocityX
-        this.ball.y += this.ball.velocityY
-        if (this.ball.y < 0) {
-          this.ball.y = 0
-          this.ball.velocityY = -this.ball.velocityY
-        }
-        if (this.ball.y > 1) {
-          this.ball.y = 1
-          this.ball.velocityY = -this.ball.velocityY
-        }
-        if (this.ball.x < 0 || this.ball.x > 1) {
-          this.ball = {
-            'x': .5,
-            'y': .5,
-            'velocityX': Math.random() > .5 ? .01 : -.01,
-            'velocityY': 0,
-          }
-        }
-        Object.keys(this.clients).forEach((key) => {
-          const client = this.clients[key]
-          if (Math.abs(this.ball.x - client.y) > .02) {
-            return
-          }
-          let collidePoint = this.ball.y - (client.y + .5);
-          collidePoint = collidePoint / (client.y / 2);
-          const angleRad = (Math.PI / 4) * collidePoint;
-          const direction = this.ball.x < .5 ? 1 : -1;
-
-          this.ball.velocityX = direction * .01 * Math.cos(angleRad);
-          this.ball.velocityY = .1 * Math.sin(angleRad);
-        })
-      }
-      this.wss.emit('clients', { 'clients': this.clients, 'ball': this.ball });
+    this.interval = setInterval(() => {
+      this.updateGameTick();
+      this.wss.emit('clients', { clients: this.clients, ball: this.ball });
     }, 50);
   }
 
+  private updateGameTick() {
+    if (!this.ball) return
+    Object.values(this.clients).forEach((client) => {
+      client.update();
+    });
+    this.ball?.update(this.clients);
+  }
+
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client Disconnected: ${client.id}`);
+    this.logger.log(`Player Disconnected: ${client.id}`);
     if (this.clients && this.clients[client.id]) {
       console.log('deleting ' + client.id)
       delete this.clients[client.id]
-      this.wss.emit('removeClient', client.id)
-      // if (Object.keys(this.clients).length !== 2) {
-      //   this.wss.emit('ball', 'non')
-      //   console.log('removeBall')
-      // }
+      this.wss.emit('removePlayer', client.id)
+    }
+    if (Object.keys(this.clients).length < 2) {
+      this.ball = null
+      // this.clients[Object.keys(this.clients)[0]].invertedSide = false
     }
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log(`Client Connected: ${client.id}`);
-    this.clients[client.id] = { 'y': .5, 'direction': null }
-    client.emit('id', client.id)
-    if (Object.keys(this.clients).length === 2) {
-      this.ball = {
-        'x': .5,
-        'y': .5,
-        'velocityX': Math.random() > .5 ? .1 : -.1,
-        'velocityY': 0,
-      }
+    this.logger.log(`Player Connected: ${client.id}`);
+    if (Object.keys(this.clients).length === 1) {
+      this.clients[client.id] = new Player(client.id, true)
+      this.ball = new Ball()
+    } else {
+      this.clients[client.id] = new Player(client.id, false)
     }
+    client.emit('id', client.id)
   }
 
   @SubscribeMessage('sendMessage')
@@ -134,22 +88,75 @@ export class MessageGateway
     console.log('DownKeyReleased', payload)
     this.clients[client.id].direction = 0
   }
-  // @SubscribeMessage('update')
-  // async handleUpdate(client: Socket, payload: ClientUpdate): Promise<void> {
-  //   //  await new Promise(resolve => setTimeout(resolve, 100))
-  //   // console.log('update', payload)
-  //   if (this.clients[client.id]) {
-  //     this.clients[client.id].p = payload.p //position
-  //     this.clients[client.id].r = payload.r //rotation
-  //     this.clients[client.id].t = payload.t //client timestamp
-  //     if (payload.ball) {
-  //       this.ball = payload.ball
-  //     }
-  //     // if (!this.clients[client.id].t || (payload.t - this.clients[client.id].t < 500 && payload.t - this.clients[client.id].t > 0)) {
-  //     // }
-  //     // console.log(payload.t - this.clients[client.id].t)
-  //     // console.log(this.clients[client.id])
-  //     // this.wss.emit('clients', this.clients);
-  //   }
-  // }
+}
+
+class Ball {
+  static speed = .01
+  constructor(
+    public x: number = .5,
+    public y: number = .5,
+    public velocityX: number = Math.random() > 0.5 ? Ball.speed : -Ball.speed,
+    public velocityY: number = 0) { }
+
+  update(clients: { [id: string]: Player; }) {
+    // console.log(clients)
+    this.x += this.velocityX;
+    this.y += this.velocityY;
+    if (this.y < 0) {
+      this.y = 0;
+      this.velocityY = -this.velocityY;
+    }
+    else if (this.y > 1) {
+      this.y = 1;
+      this.velocityY = -this.velocityY;
+    }
+    if (this.x < 0 || this.x > 1) {
+      this.reset();
+    }
+    const client = clients[Object.keys(clients)[this.x < .5 ? 0 : 1]]
+    // console.log(client)
+    if (this.collide(client)) {
+      let collidePoint = this.y - client.y;
+      collidePoint = collidePoint / Player.halfPaddleHeight;
+      const angleRad = (Math.PI / 4) * collidePoint;
+      const direction = client.invertedSide ? -1 : 1;
+
+      this.velocityX = direction * .01 * Math.cos(angleRad);
+      this.velocityY = .01 * Math.sin(angleRad);
+    }
+  }
+
+  private collide(client: Player) {
+    return (client.invertedSide ? (this.x >= client.xDistance) : (this.x <= client.xDistance)) && Math.abs(this.y - client.y) <= Player.halfPaddleHeight
+  }
+
+  private reset() {
+    this.x = 0.5;
+    this.y = 0.5;
+    this.velocityX = Math.random() > 0.5 ? Ball.speed : -Ball.speed;
+    this.velocityY = 0;
+  }
+}
+
+class Player {
+  static speedFactor: number = .01;
+  static distanceFromWall: number = .02;
+  static halfPaddleHeight: number = .05;
+  public xDistance: number;
+
+  constructor(public id: string, public invertedSide: boolean = false, public y: number = .5, public direction: number = 0) {
+    this.xDistance = invertedSide ? 1 - Player.distanceFromWall : Player.distanceFromWall;
+  }
+
+  update() {
+    if (this.direction !== 0) {
+      this.y += this.direction * Player.speedFactor;
+      if (this.y < 0) {
+        this.y = 0;
+      }
+      else if (this.y > 1) {
+        this.y = 1;
+      }
+    }
+  }
 }
