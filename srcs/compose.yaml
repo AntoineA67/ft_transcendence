@@ -37,7 +37,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./db/data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     expose:
@@ -54,11 +54,12 @@ services:
       target: ${ENV}
     container_name: frontend
     ports:
-      - "80:80"
-      - "443:443"
       - "8000:8000"
     volumes:
       - "./frontend/:/app"
       - "../build/frontend/:/build"
     depends_on:
       - backend
+
+volumes:
+  db_data:
