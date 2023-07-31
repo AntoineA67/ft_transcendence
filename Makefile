@@ -49,5 +49,6 @@ re:
 clean: down
 	@echo "${GREEN}> Cleaning and deleting all images 🧹${END}"
 	@ { docker volume ls -q ; echo null; }
+	@rm -rf ./srcs/db/data
 
 .PHONY:	all re down clean up build
