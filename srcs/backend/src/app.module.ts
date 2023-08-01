@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { MessagesModule } from './message/message.module';
-import { MessagesController } from './message/messages.controller';
-import { MessagesService } from './message/messages.service';
+import { GameModule } from './game/game.module';
+import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresProviderModule } from './providers/db/provider.module';
@@ -13,7 +12,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
-    MessagesModule,
+    GameModule,
     PostgresProviderModule,
   ],
   controllers: [AppController],
