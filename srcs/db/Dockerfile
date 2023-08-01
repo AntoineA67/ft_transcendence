@@ -1,0 +1,10 @@
+# Base image
+FROM postgres
+
+ARG POSTGRES_HOST=;
+ARG POSTGRES_PORT=;
+ARG POSTGRES_USERNAME=;
+ARG POSTGRES_PASSWORD=;
+ARG POSTGRES_NAME=;
+
+RUN echo "CREATE DATABASE ${POSTGRES_NAME};" >> /docker-entrypoint-initdb.d/init.sql
