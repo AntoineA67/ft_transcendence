@@ -58,7 +58,7 @@ create table game
     score      varchar
 );
 
-alter sequence game_game_id_seq owned by game.id;
+alter sequence game_id_seq owned by game.id;
 
 create table message
 (
