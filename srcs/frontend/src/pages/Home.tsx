@@ -6,7 +6,8 @@ import { socket } from '../utils/socket';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
+import { Button, Nav } from 'react-bootstrap';
+
 import Stack from 'react-bootstrap/Stack';
 import { LinkContainer } from 'react-router-bootstrap'
 import { Card } from 'react-bootstrap';
@@ -30,14 +31,42 @@ function BasicExample() {
 
 function Home() {
 	return (
+		// !!! NOT SINGLE PAGE APP
 		<Container>
-			<BasicExample />
-			<Row>
-				<Button color='primary'> Primary </Button>
-
-			</Row>
-
-		</Container >
+			<Nav
+				activeKey="/"
+				onSelect={(selectedKey) => { }}
+			>
+				<Nav.Item>
+					<Nav.Link href="/game">Game</Nav.Link>
+				</Nav.Item>
+				<Nav.Item>
+					<Nav.Link href="/profile">Profile</Nav.Link>
+				</Nav.Item>
+				<Nav.Item>
+					<Nav.Link href="/test-db">Test DB</Nav.Link>
+				</Nav.Item>
+			</Nav>
+		</Container>
+		// <Container>
+		// 	<Stack direction="horizontal" gap={2}>
+		// 		<LinkContainer to="/game">
+		// 			<Button as="a" variant="primary">
+		// 				Game
+		// 			</Button>
+		// 		</LinkContainer>
+		// 		<LinkContainer to="/profile">
+		// 			<Button as="a" variant="primary">
+		// 				Profile
+		// 			</Button>
+		// 		</LinkContainer>
+		// 		<LinkContainer to="/test-db">
+		// 			<Button as="a" variant="primary">
+		// 				Test DB
+		// 			</Button>
+		// 		</LinkContainer>
+		// 	</Stack>
+		// </Container >
 	);
 
 }
