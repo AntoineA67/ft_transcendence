@@ -8,12 +8,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MessagesService } from './messages.service';
+import { GameService } from './game.service';
 
 @WebSocketGateway({ cors: true })
-export class MessageGateway
+export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly messagesService: MessagesService) { }
+  constructor(private readonly messagesService: GameService) { }
 
   private logger: Logger = new Logger('MessageGateway');
   private clients: { [id: string]: Player } = {};

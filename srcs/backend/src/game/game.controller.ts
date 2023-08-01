@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import Message from '../typeorm/message.entity';
-import { MessagesService } from './messages.service';
+import { GameService } from './game.service';
 
 @Controller('messages')
-export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) { }
+export class GameController {
+  constructor(private readonly messagesService: GameService) { }
 
   @Get()
   async getAllMessages(): Promise<Message[]> {
