@@ -5,10 +5,8 @@ import { Text, useGLTF, useTexture } from "@react-three/drei"
 import { Physics, useSphere, useBox, usePlane } from "@react-three/cannon"
 import { proxy, useSnapshot } from "valtio"
 import clamp from "lodash-es/clamp"
-const pingSound = require("./resources/ping.mp3");
-// import pingSound from "./resources/ping.mp3"
-const earthImg = require("./resources/cross.jpg");
-// import earthImg from "./resources/cross.jpg"
+import pingSound from "./resources/ping.mp3"
+import earthImg from "./resources/cross.jpg"
 
 const ping = new Audio(pingSound)
 const state = proxy({
@@ -24,12 +22,7 @@ const state = proxy({
   },
 })
 
-interface PaddleProps {
-  position: [number, number, number];
-  rotation: [number, number, number];
-}
-
-function Paddle({ position, rotation }: PaddleProps) {
+function Paddle() {
   const model = useRef()
   const { count } = useSnapshot(state)
   const { nodes, materials } = useGLTF("/pingpong.glb")
@@ -84,11 +77,7 @@ function Ball() {
   )
 }
 
-interface PingPongProps {
-  ready: boolean;
-}
-
-export default function PingPong({ ready }: PingPongProps) {
+export default function App({ ready }) {
   return (
     <Canvas shadows camera={{ position: [0, 5, 12], fov: 50 }}>
       <color attach="background" args={["#171720"]} />

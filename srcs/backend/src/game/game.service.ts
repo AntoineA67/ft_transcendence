@@ -2,9 +2,8 @@ import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import Message from '../typeorm/message.entity';
-import { MessageGateway } from './message.gateway';
 
-export class MessagesService {
+export class GameService {
   constructor(
     @InjectRepository(Message)
     private messagesRepository: Repository<Message>,
