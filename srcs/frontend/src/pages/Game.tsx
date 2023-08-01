@@ -1,11 +1,11 @@
-import './App.css';
+import '../styles/App.css';
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import Stats from 'three/examples/jsm/libs/stats.module'
 import { GUI } from 'dat.gui'
 import TWEEN from '@tweenjs/tween.js'
 import { useEffect } from 'react'
-import { socket } from './socket';
+import { socket } from '../utils/socket';
 
 function Game() {
 	useEffect(() => {
