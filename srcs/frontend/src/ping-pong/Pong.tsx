@@ -169,7 +169,7 @@ const BallWrapper = ({ ball, client }: any) => {
 	// })
 	const ballClientPosition: THREE.Vector3 = useMemo(() => {
 		const invertedX = client.invertedSide ? 1 - ball.x : ball.x
-		console.log("client", client)
+		// console.log("client", client)
 		return new THREE.Vector3(invertedX * 20 - 10, ball.y * 20 - 10, 0);
 	}, [ball, client]);
 	return (
@@ -222,6 +222,7 @@ export default function Pong({ ready }: PongProps) {
 	const [id, setId] = useState('' as any)
 	// const [renderBall, setRenderBall] = useState(false as boolean)
 	const [ball, setBall] = useState({} as any)
+	const jsp = useRef('non' as any)
 
 	useEffect(() => {
 		state.socketClient = socket
@@ -268,7 +269,7 @@ export default function Pong({ ready }: PongProps) {
 				setClients(newClients.clients)
 				if (newClients.ball) {
 					setBall(newClients.ball)
-					console.log(newClients.ball)
+					// console.log(newClients.ball)
 				}
 			})
 		}
@@ -277,20 +278,35 @@ export default function Pong({ ready }: PongProps) {
 		window.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (event.repeat) return
 			if (event.key === "ArrowUp" || event.key === "w") {
+				console.log(jsp)
 				socket.emit("UpKeyPressed", Date.now());
 			}
 			if (event.key === "ArrowDown" || event.key === "s") {
+				console.log(jsp)
 				socket.emit("DownKeyPressed", Date.now());
 			}
 		});
 		window.addEventListener('keyup', (event: KeyboardEvent) => {
 			if (event.key === "ArrowUp" || event.key === "w") {
+				console.log(jsp)
 				socket.emit("UpKeyReleased", Date.now());
 			}
 			if (event.key === "ArrowDown" || event.key === "s") {
+				console.log(jsp)
 				socket.emit("DownKeyReleased", Date.now());
 			}
 		});
+		return () => {
+			// unregister eventListener once
+			// window.removeEventListener('keydown', () => { console.log('remove keydown') });
+			// window.removeEventListener('keyup', () => { console.log('remove keyup') });
+		};
+	}, [jsp])
+	useEffect(() => {
+		setTimeout(() => {
+			jsp.current = "oui"
+			console.log("ouioui")
+		}, 5000)
 	}, [])
 
 	return (
