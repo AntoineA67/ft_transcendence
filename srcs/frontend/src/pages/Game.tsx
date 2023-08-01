@@ -1,174 +1,348 @@
-import '../styles/App.css';
-import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import Stats from 'three/examples/jsm/libs/stats.module'
-import { GUI } from 'dat.gui'
-import TWEEN from '@tweenjs/tween.js'
-import { useEffect } from 'react'
-import { socket } from '../utils/socket';
+import * as THREE from "three"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Canvas, useFrame } from "@react-three/fiber"
+import { Box, KeyboardControls, OrbitControls, Text, useGLTF, useKeyboardControls, useTexture } from "@react-three/drei"
+import { Physics, useSphere, useBox, usePlane } from "@react-three/cannon"
+import { proxy, useSnapshot } from "valtio"
+import clamp from "lodash-es/clamp"
+// import pingSound from "./resources/ping.mp3"
+// import earthImg from "./resources/cross.jpg"
+import { socket } from "../utils/socket"
+import { Socket } from "socket.io-client"
+import { stat } from "fs"
 
-function Game() {
+// const ping = new Audio(pingSound)
+const state = proxy({
+	count: 0,
+	// api: {
+	// 	pong(velocity: any) {
+	// 		ping.currentTime = 0
+	// 		ping.volume = clamp(velocity / 20, 0, 1)
+	// 		ping.play()
+	// 		if (velocity > 4) ++state.count
+	// 	},
+	// 	reset: () => (state.count = 0),
+	// },
+	socketClient: null as Socket | null,
+	ball: { 'position': null, 'rotation': null } as any,
+})
+
+function Paddle({ ball }: any) {
+	// const model = useRef<THREE.Mesh>(null!) as any
+	// const { count } = useSnapshot(state)
+	// const { nodes, materials } = useGLTF("/pingpong.glb") as any
+	// const [, get] = useKeyboardControls()
+	// const [ref, api] = useBox(() => ({ type: "Kinematic", args: [3.4, 1, 3.5], onCollide: (e) => state.api.pong(e.contact.impactVelocity) })) as any
+	useFrame((paddleState) => {
+		// const { up, down } = get()
+		// console.log(up, down)
+		// model.current.rotation.x = THREE.MathUtils.lerp(model.current.rotation.x, 0, 0.2)
+		// model.current.rotation.y = THREE.MathUtils.lerp(model.current.rotation.y, (paddleState.mouse.x * Math.PI) / 5, 0.2)
+		// api.position.set(paddleState.mouse.x * 10, paddleState.mouse.y * 5, 0)
+		// api.rotation.set(0, 0, model.current.rotation.y)
+		// console.log(state.ball)
+		// socket.emit('update', {
+		// 	t: Date.now(),
+		// 	p: [paddleState.mouse.x * 10, paddleState.mouse.y * 5, 0],
+		// 	r: [0, 0, model.current.rotation.y],
+		// 	ball: ball,
+		// })
+	})
+	// useEffect((paddleState) => {
+	//   setInterval(() => {
+	//     socket.emit('update', {
+	//     t: Date.now(),
+	//     p: [paddleState.mouse.x * 10, paddleState.mouse.y * 5, 0],
+	//     r: [0, 0, model.current.rotation.y],
+	//     ball: ball,
+	//   })
+	//   }, 50)
+	// }, [])
+	return (
+		<Box />
+		// <mesh ref={ref} dispose={null}>
+		// 	<group ref={model} position={[-0.05, 0.37, 0.3]} scale={0.15}>
+		// 		<Text anchorX="center" anchorY="middle" rotation={[-Math.PI / 2, 0, 0]} position={[0, 1, 0]} fontSize={10} children={count} />
+		// 		<group rotation={[1.88, -0.35, 2.32]} scale={[2.97, 2.97, 2.97]}>
+		// 			<primitive object={nodes.Bone} />
+		// 			<primitive object={nodes.Bone003} />
+		// 			<primitive object={nodes.Bone006} />
+		// 			<primitive object={nodes.Bone010} />
+		// 			<skinnedMesh castShadow receiveShadow material={materials.glove} material-roughness={1} geometry={nodes.arm.geometry} skeleton={nodes.arm.skeleton} />
+		// 		</group>
+		// 		<group rotation={[0, -0.04, 0]} scale={141.94}>
+		// 			<mesh castShadow receiveShadow material={materials.wood} geometry={nodes.mesh.geometry} />
+		// 			<mesh castShadow receiveShadow material={materials.side} geometry={nodes.mesh_1.geometry} />
+		// 			<mesh castShadow receiveShadow material={materials.foam} geometry={nodes.mesh_2.geometry} />
+		// 			<mesh castShadow receiveShadow material={materials.lower} geometry={nodes.mesh_3.geometry} />
+		// 			<mesh castShadow receiveShadow material={materials.upper} geometry={nodes.mesh_4.geometry} />
+		// 		</group>
+		// 	</group>
+		// </mesh>
+	)
+}
+
+// function Ball({ onBallChange }: any) {
+// 	// const map = useTexture(earthImg)
+// 	const prevPosition = useRef([0, 5, 0]);
+// 	const prevRotation = useRef([0, 0, 0]);
+// 	const [ref, api] = useSphere(() => ({ mass: 1, args: [0.5], position: [0, 5, 0] })) as any
+// 	usePlane(() => ({
+// 		type: "Static",
+// 		rotation: [-Math.PI / 2, 0, 0],
+// 		position: [0, -10, 0],
+// 		onCollide: () => {
+// 			api.position.set(0, 5, 0)
+// 			api.velocity.set(0, 5, 0)
+// 			state.api.reset()
+// 		},
+// 	}))
+// 	const position = useRef([0, 0, 0])
+// 	const rotation = useRef([0, 0, 0])
+// 	useEffect(() => {
+// 		const subscribe = api.position.subscribe((v: any) => (position.current = v))
+// 		if (subscribe !== position.current)
+// 			// console.log("position", position.current)
+// 			return subscribe
+// 	}, [])
+// 	useEffect(() => {
+// 		const subscribe = api.rotation.subscribe((v: any) => (rotation.current = v))
+// 		// console.log("rotation", rotation.current)
+// 		return subscribe
+// 	}, [])
+// 	useFrame(() => {
+// 		onBallChange({ 'position': position.current, 'rotation': rotation.current })
+// 	})
+
+// 	return (
+// 		<mesh castShadow ref={ref}>
+// 			<sphereGeometry args={[0.5, 64, 64]} />
+// 			{/* <meshStandardMaterial map={map} /> */}
+// 		</mesh>
+// 	)
+// }
+
+const ControlsWrapper = ({ socket }: any) => {
+	const controlsRef = useRef(null!) as any
+	const [updateCallback, setUpdateCallback] = useState(null)
+
+	// Register the update event and clean up
 	useEffect(() => {
-		const scene = new THREE.Scene()
+		const onControlsChange = (val: any) => {
+			const { position, rotation } = val.target.object
+			const { id } = socket
 
-		const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+			const posArray: any[] = []
+			const rotArray: any[] = []
 
-		const renderer = new THREE.WebGLRenderer()
-		renderer.setSize(window.innerWidth, window.innerHeight)
-		document.body.appendChild(renderer.domElement)
+			position.toArray(posArray)
+			rotation.toArray(rotArray)
 
-		const controls = new OrbitControls(camera, renderer.domElement)
-
-		const geometry = new THREE.BoxGeometry()
-		const material = new THREE.MeshBasicMaterial({
-			color: 0x00ff00,
-			wireframe: true,
-		})
-
-		const myObject3D = new THREE.Object3D()
-		myObject3D.position.x = Math.random() * 4 - 2
-		myObject3D.position.z = Math.random() * 4 - 2
-
-		const gridHelper = new THREE.GridHelper(10, 10)
-		gridHelper.position.y = -0.5
-		scene.add(gridHelper)
-
-		camera.position.z = 4
-
-		window.addEventListener('resize', onWindowResize, false)
-		function onWindowResize() {
-			camera.aspect = window.innerWidth / window.innerHeight
-			camera.updateProjectionMatrix()
-			renderer.setSize(window.innerWidth, window.innerHeight)
-			render()
+			socket.emit('move', {
+				id,
+				rotation: rotArray,
+				position: posArray,
+			})
 		}
 
-		let myId = ''
-		let timestamp = 0
-		const clientCubes: { [id: string]: THREE.Mesh } = {}
-		socket.on('connect', function () {
-			console.log('connect')
-		})
-		socket.on('disconnect', function (message: any) {
-			console.log('disconnect ' + message)
-		})
-		socket.on('id', (id: any) => {
-			myId = id
-			console.log('id ' + id)
-			setInterval(() => {
-				socket.emit('update', {
-					t: Date.now(),
-					p: myObject3D.position,
-					r: myObject3D.rotation,
-				})
-			}, 50)
-		})
-		socket.on('clients', (clients: any) => {
-			let pingStatsHtml = 'Socket Ping Stats<br/><br/>'
-			Object.keys(clients).forEach((p) => {
-				// if (p === myId) return
-				timestamp = Date.now()
-				pingStatsHtml += p + ' ' + (timestamp - clients[p].t) + 'ms<br/>'
-				if (!clientCubes[p]) {
-					clientCubes[p] = new THREE.Mesh(geometry, material)
-					clientCubes[p].name = p
-					scene.add(clientCubes[p])
-				} else {
-					// if (myId === p) {
-					// 	clientCubes[p].position.set(
-					// 		myObject3D.position.x,
-					// 		myObject3D.position.y,
-					// 		myObject3D.position.z)
-					// 	clientCubes[p].rotation.set(
-					// 		myObject3D.rotation.x,
-					// 		myObject3D.rotation.y,
-					// 		myObject3D.rotation.z)
-					// 	return
-					// }
-					if (clients[p].p) {
-						// clientCubes[p].position.x = clients[p].p.x
-						// clientCubes[p].position.y = clients[p].p.y
-						// clientCubes[p].position.z = clients[p].p.z
-						new TWEEN.Tween(clientCubes[p].position)
-							.to(
-								{
-									x: clients[p].p.x,
-									y: clients[p].p.y,
-									z: clients[p].p.z,
-								},
-								5
-							)
-							.start()
-					}
-					if (clients[p].r) {
-						// clientCubes[p].rotation.x = clients[p].r._x
-						// clientCubes[p].rotation.y = clients[p].r._y
-						// clientCubes[p].rotation.z = clients[p].r._z
-						new TWEEN.Tween(clientCubes[p].rotation)
-							.to(
-								{
-									x: clients[p].r._x,
-									y: clients[p].r._y,
-									z: clients[p].r._z,
-								},
-								5
-							)
-							.start()
-					}
+		if (controlsRef.current) {
+			setUpdateCallback(
+				controlsRef.current.addEventListener('change', onControlsChange)
+			)
+		}
+
+		// Dispose
+		return () => {
+			if (updateCallback && controlsRef.current)
+				controlsRef.current.removeEventListener(
+					'change',
+					onControlsChange
+				)
+		}
+	}, [controlsRef, socket])
+
+	return <OrbitControls ref={controlsRef} />
+}
+const BallWrapper = ({ ball, client }: any) => {
+	// useFrame(() => {
+	// 	console.log("position", position)
+	// })
+	const ballClientPosition: THREE.Vector3 = useMemo(() => {
+		const invertedX = client.invertedSide ? 1 - ball.x : ball.x
+		// console.log("client", client)
+		return new THREE.Vector3(invertedX * 20 - 10, ball.y * 20 - 10, 0);
+	}, [ball, client]);
+	return (
+		<>
+			<Box position={ballClientPosition} />
+			<mesh
+				position={ballClientPosition}
+				// rotation={rotation}
+				geometry={new THREE.BoxGeometry()}
+				material={new THREE.MeshBasicMaterial()}
+			>
+			</mesh>
+		</>
+	)
+}
+
+const UserWrapper = ({ position, rotation, id }: any) => {
+	// useFrame(() => {
+	// 	console.log("position", position)
+	// })
+	return (
+		<>
+			<Box position={position} />
+			<mesh
+				position={position}
+				// rotation={rotation}
+				geometry={new THREE.BoxGeometry()}
+				material={new THREE.MeshNormalMaterial()}
+			>
+				<Text
+					position={[0, 1.0, 0]}
+					color="black"
+					anchorX="center"
+					anchorY="middle"
+				>
+					{id}
+				</Text>
+			</mesh>
+		</>
+	)
+}
+
+
+export default function Game() {
+
+	const [clients, setClients] = useState({} as any)
+	const [id, setId] = useState('' as any)
+	// const [renderBall, setRenderBall] = useState(false as boolean)
+	const [ball, setBall] = useState({} as any)
+	const jsp = useRef('non' as any)
+
+	useEffect(() => {
+		state.socketClient = socket
+		return () => {
+			if (state.socketClient) state.socketClient.disconnect()
+		}
+	}, [])
+
+	// useEffect(() => {
+	// 	if (!id || !ball || !clients || !clients[id]) return ball
+	// 	const newBall = { ...ball }
+	// 	console.log(newBall)
+	// 	if (!clients[id].invertedSide) {
+	// 		newBall.x = 1 - ball.x
+	// 	}
+	// 	return newBall
+	// }, [ball])
+
+	// function normPosition(ball: any) {
+	// 	if (!id || !ball || !clients || !clients[id]) return ball
+	// 	const newBall = { ...ball }
+	// 	console.log(newBall)
+	// 	if (!clients[id].invertedSide) {
+	// 		newBall.x = 1 - ball.x
+	// 	}
+	// 	return newBall
+	// }
+
+	useEffect(() => {
+		if (state.socketClient) {
+			socket.on('connect', function () {
+				console.log('connect')
+			})
+			socket.on('disconnect', function (message: any) {
+				console.log('disconnect ' + message)
+			})
+
+			socket.on('id', (newId: any) => {
+				setId(newId)
+				console.log('id: ', id)
+			})
+
+			socket.on('clients', (newClients) => {
+				setClients(newClients.clients)
+				if (newClients.ball) {
+					setBall(newClients.ball)
+					// console.log(newClients.ball)
 				}
 			})
-				; (document.getElementById('pingStats') as HTMLDivElement).innerHTML = pingStatsHtml
-		})
-		socket.on('removeClient', (id: string) => {
-			scene.remove(scene.getObjectByName(id) as THREE.Object3D)
-		})
-
-		const stats = new Stats()
-		document.body.appendChild(stats.dom)
-
-		const gui = new GUI()
-		const cubeFolder = gui.addFolder('Cube')
-		const cubePositionFolder = cubeFolder.addFolder('Position')
-		cubePositionFolder.add(myObject3D.position, 'x', -5, 5)
-		cubePositionFolder.add(myObject3D.position, 'z', -5, 5)
-		cubePositionFolder.open()
-		const cubeRotationFolder = cubeFolder.addFolder('Rotation')
-		cubeRotationFolder.add(myObject3D.rotation, 'x', 0, Math.PI * 2, 0.01)
-		cubeRotationFolder.add(myObject3D.rotation, 'y', 0, Math.PI * 2, 0.01)
-		cubeRotationFolder.add(myObject3D.rotation, 'z', 0, Math.PI * 2, 0.01)
-		cubeRotationFolder.open()
-		cubeFolder.open()
-
-		const animate = function () {
-			requestAnimationFrame(animate)
-
-			controls.update()
-
-			TWEEN.update()
-
-			if (clientCubes[myId]) {
-				camera.lookAt(clientCubes[myId].position)
+		}
+	}, [state.socketClient])
+	useEffect(() => {
+		window.addEventListener('keydown', (event: KeyboardEvent) => {
+			if (event.repeat) return
+			if (event.key === "ArrowUp" || event.key === "w") {
+				console.log(jsp)
+				socket.emit("UpKeyPressed", Date.now());
 			}
-
-			render()
-
-			stats.update()
-		}
-
-		const render = function () {
-			renderer.render(scene, camera)
-		}
-
-		animate()
-
-		// Cleanup function to dispose of the Three.js objects when the component unmounts
+			if (event.key === "ArrowDown" || event.key === "s") {
+				console.log(jsp)
+				socket.emit("DownKeyPressed", Date.now());
+			}
+		});
+		window.addEventListener('keyup', (event: KeyboardEvent) => {
+			if (event.key === "ArrowUp" || event.key === "w") {
+				console.log(jsp)
+				socket.emit("UpKeyReleased", Date.now());
+			}
+			if (event.key === "ArrowDown" || event.key === "s") {
+				console.log(jsp)
+				socket.emit("DownKeyReleased", Date.now());
+			}
+		});
 		return () => {
-			controls.dispose();
-			renderer.dispose();
+			// unregister eventListener once
+			// window.removeEventListener('keydown', () => { console.log('remove keydown') });
+			// window.removeEventListener('keyup', () => { console.log('remove keyup') });
 		};
-	}, []); // Empty dependency array to run this effect only once on mount
+	}, [jsp])
+	useEffect(() => {
+		setTimeout(() => {
+			jsp.current = "oui"
+			console.log("ouioui")
+		}, 5000)
+	}, [])
 
-	return <div id="pingStats"></div>; // Empty fragment, as we don't need to render any specific React elements
-};
+	return (
 
-export default Game;
+		<Canvas shadows camera={{ position: [0, 5, 12], fov: 50 }}>
+			{/* {Object.keys(clients)
+				.map((client) => {
+					return (
+						<Text key={client} fontSize={.5}
+						>{client}</Text>
+					)
+				})} */}
+			{Object.keys(clients)
+				.map((client) => {
+					const { y, dir } = clients[client]
+					// console.log("y", y, client)
+					const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
+					return (
+						<UserWrapper
+							key={client}
+							id={client}
+							position={pos}
+							rotation={[0, dir, 0]}
+						/>
+					)
+				})}
+			{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
+			{/* {ball.position !== null && !renderBall && <UserWrapper
+				key={ball.position}
+				id={ball.position}
+				position={ball.position}
+				rotation={ball.rotation}
+			/>} */}
+			< color attach="background" args={["#171720"]} />
+			<ambientLight intensity={0.5} />
+			<pointLight position={[-10, -10, -10]} />
+			<spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
+			{/* <Paddle ball={ball} /> */}
+		</Canvas>
+		// </KeyboardControls>
+	)
+}
