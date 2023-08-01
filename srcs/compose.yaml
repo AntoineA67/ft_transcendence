@@ -6,29 +6,41 @@ services:
     build:
       context: backend
       target: ${ENV}
+      args:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
+      - POSTGRES_NAME
     container_name: backend
     ports:
       - "3000:3000"
     volumes:
       - "./${ENVPATH}/backend/:/app"
-    secrets:
-      - db
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
 
   db:
-    image: postgres
+    build:
+      context: db
+      args:
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
+      - POSTGRES_NAME
     restart: always
     user: postgres
     container_name: db
-    secrets:
-      - db
+    env_file:
+      - .env
     volumes:
-      - dbdata:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=example
-      - POSTGRES_PASSWORD_FILE=/run/secrets/db
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     expose:
       - "5432:5432"
     healthcheck:
@@ -44,8 +56,6 @@ services:
       target: ${ENV}
     container_name: frontend
     ports:
-      - "80:80"
-      - "443:443"
       - "8000:8000"
     volumes:
       - "./frontend/:/app"
@@ -53,9 +63,5 @@ services:
     depends_on:
       - backend
 
-secrets:
-  db:
-    file: db/password.txt
-
 volumes:
-  dbdata:
+  db_data:
