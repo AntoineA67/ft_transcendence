@@ -8,6 +8,7 @@ ARG POSTGRES_PASSWORD=;
 ARG POSTGRES_NAME=;
 
 WORKDIR /app
+RUN apk --no-cache add curl
 
 FROM base as DEV
 ENTRYPOINT ["sh", "-c", "npm i && npm run start:dev"]

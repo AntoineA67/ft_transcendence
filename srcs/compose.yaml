@@ -11,6 +11,7 @@ services:
       - POSTGRES_USERNAME
       - POSTGRES_PASSWORD
       - POSTGRES_NAME
+    restart: always
     container_name: backend
     ports:
       - "3000:3000"
@@ -21,6 +22,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db:
     build:
@@ -52,6 +59,7 @@ services:
     build:
       context: frontend
       target: ${ENV}
+    restart: always
     container_name: frontend
     ports:
       - "8000:8000"
@@ -59,7 +67,14 @@ services:
       - "./frontend/:/app"
       - "../build/frontend/:/build"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   db_data:
