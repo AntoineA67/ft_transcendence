@@ -2,9 +2,9 @@
 create database transcendence;
 
 -- tables
-create table "user"
+create table users
 (
-    user_id     serial
+    id     serial
         primary key,
     email       varchar(255) not null
         unique,
@@ -20,8 +20,7 @@ create table "user"
     level       integer
 );
 
-
-alter sequence user_user_id_seq owned by "user".id;
+alter sequence users_id_seq owned by users.id;
 
 create table room
 (
@@ -32,21 +31,19 @@ create table room
     password varchar(100),
     owner_id integer      not null
         constraint room_user_user_id_fk
-            references "user"
+            references users
 );
 
-
-alter sequence room_room_id_seq owned by room.id;
+alter sequence room_id_seq owned by room.id;
 
 create table custom
 (
     user_id integer not null
         constraint custom_user_user_id_fk
-            references "user",
+            references users,
     ball    integer,
     puck    integer
 );
-
 
 create table game
 (
@@ -57,12 +54,11 @@ create table game
     end_date   date,
     winner_id  integer
         constraint game_user_user_id_fk
-            references "user",
+            references users,
     score      varchar
 );
 
-
-alter sequence game_game_id_seq owned by game.id;
+alter sequence game_game_id_seq owned by game.game_id;
 
 create table message
 (
@@ -73,13 +69,12 @@ create table message
             references room,
     user_id   integer not null
         constraint message_user_user_id_fk
-            references "user",
+            references users,
     message   text    not null,
     send_date date    not null
 );
 
-
-alter sequence message_message_id_seq owned by message.id;
+alter sequence message_id_seq owned by message.id;
 
 create table game_user_link
 (
@@ -88,7 +83,7 @@ create table game_user_link
         	references game,
     user_id integer not null
         constraint gameuser_user_id_fkey
-        	references "user",
+        	references users,
 	status	boolean not null,
     constraint gameuser_pkey
 	    primary key (game_id, user_id)
@@ -102,7 +97,7 @@ create table room_user_link
         	references room,
     user_id      integer not null
         constraint roomuser_user_id_fkey
-        	references "user",
+        	references users,
     owner_status boolean not null,
     admin_status boolean not null,
     ban_status   boolean not null,
@@ -111,15 +106,14 @@ create table room_user_link
     	primary key (room_id, user_id)
 );
 
-
 create table user_friendship_link
 (
     user_id        integer               not null
         constraint userfriendship_user_id_fkey
-       		references "user",
+       		references users,
     friend_id      integer               not null
         constraint userfriendship_friend_id_fkey
-        	references "user",
+        	references users,
     friend_status  boolean default false not null,
     blocked_status boolean default false not null,
     constraint userfriendship_pkey
