@@ -13,6 +13,11 @@
   }
 }
 
+.btn-primary {
+  background-color: #ba8d24;
+  border-color: #289615;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -42,14 +47,3 @@ body {
   overflow: hidden;
   margin: 0px;
 }
-
-/* #pingStats {
-  position: absolute;
-  top: 60px;
-  left: 4px;
-  width: 400px;
-  height: 400px;
-  pointer-events: none;
-  color: white;
-  font-family: monospace;
-} */
