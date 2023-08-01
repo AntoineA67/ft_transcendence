@@ -47,7 +47,7 @@ create table custom
 
 create table game
 (
-    game_id        serial
+    id        serial
         primary key,
     status     boolean  not null,
     start_date date     not null,
@@ -58,7 +58,7 @@ create table game
     score      varchar
 );
 
-alter sequence game_game_id_seq owned by game.game_id;
+alter sequence game_game_id_seq owned by game.id;
 
 create table message
 (
