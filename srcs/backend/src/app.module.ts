@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresProviderModule } from './providers/db/provider.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -14,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     GameModule,
     PostgresProviderModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
