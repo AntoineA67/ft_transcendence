@@ -12,24 +12,32 @@ import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { AppResolver } from './app.resolver';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Game } from './typeorm/game.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // TypeOrmModule.forRoot({
+    //   entities: [Game]
+    // }),
     UsersModule,
     GameModule,
     PostgresProviderModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
     }),
     AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+    AppResolver,
   ],
 })
 export class AppModule { }

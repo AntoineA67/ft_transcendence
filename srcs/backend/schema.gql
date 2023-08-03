@@ -1,0 +1,19 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Game {
+  id: ID!
+  createdAt: String!
+  name: String!
+}
+
+type Query {
+  sayHello: String!
+  games: [Game!]!
+  game(id: Int!): Game!
+}
+
+type Mutation {
+  createGame(name: String!): Game!
+}
