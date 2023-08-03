@@ -8,12 +8,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameService } from './game.service';
+import { GamesService } from './game.service';
 
 @WebSocketGateway({ cors: true })
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly messagesService: GameService) { }
+  constructor(private readonly gamesService: GamesService) { }
 
   private logger: Logger = new Logger('MessageGateway');
   private clients: { [id: string]: Player } = {};
@@ -62,12 +62,12 @@ export class GameGateway
     client.emit('id', client.id)
   }
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload: string): Promise<void> {
-    this.logger.log('payload', payload);
-    const newMessage = await this.messagesService.createMessage(payload);
-    this.wss.emit('receiveMessage', newMessage);
-  }
+  // @SubscribeMessage('sendMessage')
+  // async handleSendMessage(client: Socket, payload: string): Promise<void> {
+  //   this.logger.log('payload', payload);
+  //   const newMessage = await this.messagesService.createMessage(payload);
+  //   this.wss.emit('receiveMessage', newMessage);
+  // }
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)

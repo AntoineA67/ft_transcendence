@@ -12,7 +12,7 @@ export class AppController {
   @Public()
   @Get('/')
   getHello(): string {
-    return 'Hello World!';
+    return 'Hello World Controller';
   }
 
   // Must be public before localAuthGuard to allow login
