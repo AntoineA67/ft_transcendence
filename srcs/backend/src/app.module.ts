@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PostgresProviderModule } from './providers/db/provider.module';
 import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
 
 @Module({
@@ -14,6 +16,9 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     GameModule,
     PostgresProviderModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
