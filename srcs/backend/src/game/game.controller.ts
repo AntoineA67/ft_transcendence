@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import Message from '../typeorm/message.entity';
-import { GameService } from './game.service';
+import { Message } from '../typeorm/message.entity';
+import { MessagesService } from './messages.service';
 
 @Controller('messages')
 export class GameController {
