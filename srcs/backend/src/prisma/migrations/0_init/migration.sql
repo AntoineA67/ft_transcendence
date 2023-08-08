@@ -1,0 +1,28 @@
+-- CreateTable
+CREATE TABLE "game" (
+    "id" SERIAL NOT NULL,
+    "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "name" VARCHAR NOT NULL,
+
+    CONSTRAINT "PK_352a30652cd352f552fef73dec5" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "message" (
+    "id" SERIAL NOT NULL,
+    "content" VARCHAR NOT NULL,
+    "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PK_ba01f0a3e0123651915008bc578" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "user" (
+    "user_id" BIGSERIAL NOT NULL,
+    "username" VARCHAR NOT NULL DEFAULT '',
+    "email_address" VARCHAR NOT NULL DEFAULT '',
+    "password" VARCHAR NOT NULL DEFAULT '',
+
+    CONSTRAINT "PK_758b8ce7c18b9d347461b30228d" PRIMARY KEY ("user_id")
+);
+
