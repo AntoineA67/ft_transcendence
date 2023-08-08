@@ -10,12 +10,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { ClientUpdate } from './message.dto';
-import { Message } from '../typeorm/message.entity';
+import { Message } from '../entities/message.entity';
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(private readonly messagesService: MessagesService) { }
 
   private logger: Logger = new Logger('MessageGateway');
   private clients: any = {};

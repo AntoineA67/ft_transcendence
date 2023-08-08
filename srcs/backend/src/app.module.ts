@@ -1,38 +1,44 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import entities from './typeorm';
 import { UsersModule } from './users/users.module';
-// import { MessagesModule } from './message/message.module';
+import { GameModule } from './game/game.module';
+import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CustomModule } from './other/custom.module';
-import { GameModule } from './other/game.module';
-import { RoomUserLinkModule } from './other/room-user-link.module';
-import { UserFriendshipLinkModule } from './other/user-friendship-link.module';
-import { GameUserLinkModule } from './other/game-user-link.module';
-import { MessagesModule } from './other/message.module';
-import { RoomModule } from './other/room.module';
+import { PostgresProviderModule } from './providers/db/provider.module';
+import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
+
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+// import { AppResolver } from './app.resolver';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Game } from './entities/game.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: +configService.get<number>('POSTGRES_PORT'),
-        username: configService.get('POSTGRES_USERNAME'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_NAME'),
-        entities: entities,
-        synchronize: true,
-      }),
-      inject: [ConfigService],
-    }),
+    // TypeOrmModule.forRoot({
+    //   entities: [Game]
+    // }),
+    PostgresProviderModule,
+    UsersModule,
+    GameModule,
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    //   autoSchemaFile: 'schema.gql',
+    // }),
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    // PrismaService
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+    // AppResolver,
+  ],
 })
-export class AppModule {}
+export class AppModule { }

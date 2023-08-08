@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Message } from '../typeorm/message.entity';
+import { Message } from '../entities/message.entity';
 
 @Injectable()
 export class MessagesService {
   constructor(
     @InjectRepository(Message)
     private messagesRepository: Repository<Message>,
-  ) {}
+  ) { }
 
   async getAllMessages(): Promise<Message[]> {
     return await this.messagesRepository.find();

@@ -1,34 +1,34 @@
 import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Game } from 'src/entities/game.entity';
 import { Repository } from 'typeorm';
-import Message from '../typeorm/message.entity';
 
-export class GameService {
+export class GamesService {
   constructor(
-    @InjectRepository(Message)
-    private messagesRepository: Repository<Message>,
+    @InjectRepository(Game)
+    private gamesRepository: Repository<Game>,
   ) { }
 
-  async getAllMessages() {
-    const messages = this.messagesRepository.find();
-    return messages;
+  async findAll() {
+    const games = await this.gamesRepository.find();
+    return games;
   }
 
-  async getMessageById(id: number) {
-    const message = await this.messagesRepository.findOne({
+  async find(id: number) {
+    const game = await this.gamesRepository.findOne({
       where: {
         id: id,
       },
     });
-    if (message) {
-      return message;
+    if (game) {
+      return game;
     }
-    throw new NotFoundException('Could not find the message');
+    throw new NotFoundException('Could not find the game');
   }
 
-  async createMessage(content: string) {
-    const newMessage = await this.messagesRepository.create({ content });
-    await this.messagesRepository.save(newMessage);
-    return newMessage;
+  async create(name: string) {
+    const newGame = await this.gamesRepository.create({ score: name });
+    await this.gamesRepository.save(newGame);
+    return newGame;
   }
 }
