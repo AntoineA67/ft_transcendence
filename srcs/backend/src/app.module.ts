@@ -17,6 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 // import { Game } from './entities/game.entity';
 import { PrismaService } from './prisma.service';
 import { PrismaModule } from './prisma.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -29,10 +30,11 @@ import { PrismaModule } from './prisma.module';
     // }),
     // PostgresProviderModule,
     // UsersModule,
-    // GraphQLModule.forRoot<ApolloDriverConfig>({
-    //   driver: ApolloDriver,
-    //   autoSchemaFile: 'schema.gql',
-    // }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      buildSchemaOptions: { dateScalarMode: 'timestamp' },
+    }),
     AuthModule,
   ],
   controllers: [AppController],
@@ -43,7 +45,7 @@ import { PrismaModule } from './prisma.module';
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
     // },
-    // AppResolver,
+    AppResolver,
   ],
 })
 export class AppModule { }
