@@ -1,29 +1,29 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { Message } from '../typeorm/message.entity';
-import { MessagesService } from './messages.service';
+import { GamesService } from './game.service';
+import { Game } from 'src/entities/game.entity';
 
-@Controller('messages')
+@Controller('games')
 export class GameController {
-  constructor(private readonly messagesService: GameService) { }
+  constructor(private readonly gamesService: GamesService) { }
 
   @Get()
-  async getAllMessages(): Promise<Message[]> {
-    const messages = await this.messagesService.getAllMessages();
-    return messages;
+  async getAllGames(): Promise<Game[]> {
+    const games = await this.gamesService.findAll();
+    return games;
   }
 
   @Get(':id')
-  async getMessageById(@Param('id') id: string): Promise<Message> {
-    const message = await this.messagesService.getMessageById(Number(id));
-    return message;
+  async getGameById(@Param('id') id: string): Promise<Game> {
+    const game = await this.gamesService.find(Number(id));
+    return game;
   }
 
   @Post()
-  async createMessage(@Body('content') content: string) {
-    if (!content) {
-      throw new Error('Content is required');
+  async createGame(@Body('name') name: string) {
+    if (!name) {
+      throw new Error('Content is required !');
     }
-    const newMessage = await this.messagesService.createMessage(content);
-    return newMessage;
+    const newGame = await this.gamesService.create(name);
+    return newGame;
   }
 }
