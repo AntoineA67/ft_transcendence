@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Message } from '../typeorm/message.entity';
+import { Message } from '../entities/message.entity';
 import { MessagesController } from './messages.controller';
 import { MessagesService } from './messages.service';
 import { MessageGateway } from './message.gateway';
@@ -10,4 +10,4 @@ import { MessageGateway } from './message.gateway';
   controllers: [MessagesController],
   providers: [MessagesService, MessageGateway],
 })
-export class MessagesModule {}
+export class MessagesModule { }

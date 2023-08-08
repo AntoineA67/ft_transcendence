@@ -1,7 +1,7 @@
 import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Game } from 'src/entities/game.entity';
 import { Repository } from 'typeorm';
-import { Game } from 'src/typeorm/game.entity';
 
 export class GamesService {
   constructor(
@@ -27,7 +27,7 @@ export class GamesService {
   }
 
   async create(name: string) {
-    const newGame = await this.gamesRepository.create({ name: name });
+    const newGame = await this.gamesRepository.create({ score: name });
     await this.gamesRepository.save(newGame);
     return newGame;
   }

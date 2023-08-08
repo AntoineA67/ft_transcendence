@@ -1,6 +1,6 @@
 // import { Resolver, Args, Int, ResolveField, Parent, Mutation, Query } from "@nestjs/graphql";
 // import { UsersService } from "./users.service";
-// import { User } from "src/typeorm/user.entity";
+// import { User } from "src/entities/user.entity";
 
 // @Resolver(() => Game)
 // export class GameResolver {
