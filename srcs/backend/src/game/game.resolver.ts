@@ -1,23 +1,40 @@
-// import { Resolver, Args, Int, ResolveField, Parent, Mutation, Query } from "@nestjs/graphql";
-// import { GamesService } from "./game.service";
-// import { Game } from "src/entities/game.entity";
+import 'reflect-metadata'
+import {
+	Resolver,
+	Query,
+	Mutation,
+	Args,
+	Context,
+	ResolveField,
+	Root,
+	InputType,
+	Field,
+} from '@nestjs/graphql'
+import { Inject } from '@nestjs/common'
+import { user } from 'src/prisma/@generated/user/user.model'
+import { PrismaService } from 'src/prisma.service'
+import { userCreateInput } from 'src/prisma/@generated/user/user-create.input'
+import { game } from 'src/prisma/@generated/game/game.model'
 
-// @Resolver(() => Game)
-// export class GameResolver {
-// 	constructor(private readonly gamesService: GamesService) { }
 
-// 	@Mutation(() => Game, { name: 'createGame' })
-// 	createGame(@Args('name') name: string) {
-// 		return this.gamesService.create(name);
-// 	}
+@Resolver(game)
+export class GameResolver {
+	constructor(@Inject(PrismaService) private prismaService: PrismaService) { }
 
-// 	@Query(() => [Game])
-// 	async games() {
-// 		return this.gamesService.findAll();
-// 	}
+	@Mutation((returns) => game)
+	async creategames(
+		@Context() ctx,
+	): Promise<game> {
 
-// 	@Query(() => Game)
-// 	async game(@Args('id', { type: () => Int }) id: number) {
-// 		return this.gamesService.find(id);
-// 	}
-// }
+		return await this.prismaService.game.create({
+			data: {
+				start_date: new Date(Date.now()).toISOString(),
+			},
+		})
+	}
+
+	@Query((returns) => [game], { nullable: true })
+	async allgames(@Context() ctx) {
+		return this.prismaService.game.findMany()
+	}
+}
