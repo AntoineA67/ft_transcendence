@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model game {
+  id        Int      @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  name      String   @db.VarChar
+}
+
+model message {
+  id        Int      @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
+  content   String   @db.VarChar
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model user {
+  user_id       BigInt @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
+  username      String @default("") @db.VarChar
+  email_address String @default("") @db.VarChar
+  password      String @default("") @db.VarChar
+}
