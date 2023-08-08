@@ -14,17 +14,21 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 // import { AppResolver } from './app.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Game } from './entities/game.entity';
+// import { Game } from './entities/game.entity';
+import { PrismaService } from './prisma.service';
+import { PrismaModule } from './prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    GameModule,
+    // PrismaModule,
     // TypeOrmModule.forRoot({
     //   entities: [Game]
     // }),
-    PostgresProviderModule,
-    UsersModule,
-    GameModule,
+    // PostgresProviderModule,
+    // UsersModule,
     // GraphQLModule.forRoot<ApolloDriverConfig>({
     //   driver: ApolloDriver,
     //   autoSchemaFile: 'schema.gql',
@@ -33,7 +37,8 @@ import { Game } from './entities/game.entity';
   ],
   controllers: [AppController],
   providers: [AppService,
-    // PrismaService
+    // PrismaService,
+
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,

@@ -1,23 +1,93 @@
-// import { Resolver, Args, Int, ResolveField, Parent, Mutation, Query } from "@nestjs/graphql";
-// import { UsersService } from "./users.service";
-// import { User } from "src/entities/user.entity";
+// import 'reflect-metadata'
+// import {
+// 	Resolver,
+// 	Query,
+// 	Mutation,
+// 	Args,
+// 	Context,
+// 	ResolveField,
+// 	Root,
+// 	InputType,
+// 	Field,
+// } from '@nestjs/graphql'
+// import { Inject } from '@nestjs/common'
 
-// @Resolver(() => Game)
-// export class GameResolver {
-// 	constructor(private readonly usersService: UsersService) { }
+// @InputType()
+// class UserUniqueInput {
+// 	@Field({ nullable: true })
+// 	id: number
 
-// 	@Mutation(() => Game, { name: 'createGame' })
-// 	createGame() {
-// 		return this.usersService.create();
+// 	@Field({ nullable: true })
+// 	email: string
+// }
+
+// @InputType()
+// class UserCreateInput {
+// 	@Field()
+// 	email: string
+
+// 	@Field({ nullable: true })
+// 	name: string
+
+// 	@Field((type) => [PostCreateInput], { nullable: true })
+// 	posts: [PostCreateInput]
+// }
+
+// @Resolver(User)
+// export class UserResolver {
+// 	constructor(@Inject(PrismaService) private prismaService: PrismaService) { }
+
+// 	@ResolveField()
+// 	async posts(@Root() user: User, @Context() ctx): Promise<Post[]> {
+// 		return this.prismaService.user
+// 			.findUnique({
+// 				where: {
+// 					id: user.id,
+// 				},
+// 			})
+// 			.posts()
 // 	}
 
-// 	@Query(() => [Game])
-// 	async games() {
-// 		return this.usersService.findAll();
+// 	@Mutation((returns) => User)
+// 	async signupUser(
+// 		@Args('data') data: UserCreateInput,
+// 		@Context() ctx,
+// 	): Promise<User> {
+// 		const postData = data.posts?.map((post) => {
+// 			return { title: post.title, content: post.content || undefined }
+// 		})
+
+// 		return this.prismaService.user.create({
+// 			data: {
+// 				email: data.email,
+// 				name: data.name,
+// 				posts: {
+// 					create: postData,
+// 				},
+// 			},
+// 		})
 // 	}
 
-// 	@Query(() => Game)
-// 	async game(@Args('id', { type: () => Int }) id: number) {
-// 		return this.usersService.find(id);
+// 	@Query((returns) => [User], { nullable: true })
+// 	async allUsers(@Context() ctx) {
+// 		return this.prismaService.user.findMany()
+// 	}
+
+// 	@Query((returns) => [Post], { nullable: true })
+// 	async draftsByUser(
+// 		@Args('userUniqueInput') userUniqueInput: UserUniqueInput,
+// 	): Promise<Post[]> {
+// 		return this.prismaService.user
+// 			.findUnique({
+// 				where: {
+// 					id: userUniqueInput.id || undefined,
+// 					email: userUniqueInput.email || undefined,
+// 				},
+// 			})
+// 			.posts({
+// 				where: {
+// 					published: false,
+// 				},
+// 			})
 // 	}
 // }
