@@ -4,5 +4,5 @@ import { Game } from "./game.entity";
 
 const entities = [User, Message, Game];
 
-export { User, Message, Game };
+// export { User, Message, Game };
 export default entities;

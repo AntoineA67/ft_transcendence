@@ -15,6 +15,7 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { AppResolver } from './app.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Game } from './typeorm/game.entity';
+import { FortyTwoAuthGuard } from './auth/forty-two-auth.guard';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { Game } from './typeorm/game.entity';
   providers: [AppService,
     // {
     //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
+    //   useClass: FortyTwoAuthGuard,
     // },
     AppResolver,
   ],
