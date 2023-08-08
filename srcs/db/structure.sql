@@ -1,6 +1,3 @@
--- database
-create database transcendence;
-
 -- tables
 create table users
 (
