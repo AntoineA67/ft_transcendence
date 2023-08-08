@@ -2,9 +2,6 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
-	static find(): User[] | PromiseLike<User[]> {
-		throw new Error('Method not implemented.');
-	}
 	@PrimaryGeneratedColumn({
 		type: 'bigint',
 		name: 'user_id',
