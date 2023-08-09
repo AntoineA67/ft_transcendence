@@ -4,7 +4,6 @@ import reportWebVitals from './reportWebVitals';
 import { RouterProvider } from 'react-router-dom';
 import router from './router';
 import axios from 'axios';
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';

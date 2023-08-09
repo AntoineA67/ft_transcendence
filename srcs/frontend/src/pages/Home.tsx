@@ -11,7 +11,7 @@ import { Button, Nav } from 'react-bootstrap';
 import Stack from 'react-bootstrap/Stack';
 import { LinkContainer } from 'react-router-bootstrap'
 import { Card } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 function BasicExample() {
 	return (
