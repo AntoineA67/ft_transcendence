@@ -3,6 +3,7 @@ import Game from './pages/Game';
 import { createBrowserRouter } from "react-router-dom";
 import TestDB from './pages/TestDB';
 import Profile from './pages/Profile';
+import Login from './pages/Login';
 
 const router = createBrowserRouter([
 	{
@@ -24,6 +25,13 @@ const router = createBrowserRouter([
 		loader: () => ({ message: "Hello Data Router!" }),
 		Component() {
 			return Profile();
+		},
+	},
+	{
+		path: "/login",
+		loader: () => ({ message: "Hello Data Router!" }),
+		Component() {
+			return Login();
 		},
 	},
 	{
