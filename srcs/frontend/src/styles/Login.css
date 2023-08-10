@@ -15,3 +15,9 @@
 	background-position-x: center;
 	background-size: auto 90%;
 }
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	color: gray;
+}

@@ -1,15 +1,20 @@
+.center {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
 
 .btn-magenta {
 	/* layout */
-	display: flex;
 	width: 325px;
 	height: 54px;
 	padding: 10px 24px;
 	margin: 10px;
-	justify-content: center;
-	align-items: center;
-	gap: 12px;
-	flex-shrink: 0;
+	/* display: flex; */
+	/* justify-content: center; */
+	/* align-items: center; */
+	/* gap: 12px; */
+	/* flex-shrink: 0; */
 	/* style */
 	color: #fff;
 	border-radius: 12px;
@@ -17,21 +22,22 @@
 }
 
 .btn-magenta:hover {
-	background: #ca0993;
+	color: #FA34C3;
+	background: #fff;
 	transition: all 0.3s;
 }
 
 .btn-cyan {
 	/* layout */
-	display: flex;
 	width: 325px;
 	height: 54px;
 	padding: 10px 24px;
 	margin: 10px;	
+	/* display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 12px;
-	flex-shrink: 0;
+	flex-shrink: 0; */
 	/* style */
 	border-radius: 16px;
 	background: #34FAFA;
@@ -42,16 +48,39 @@
 	transition: all 0.3s;
 }
 
+.btn-invisible {
+	/* layout */
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+	margin: 10px;
+	/* display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0; */
+	/* style */
+	color: #FA34C3;
+	border-radius: 16px;
+	border: transparent;
+	background: transparent;
+}
+
+.btn-invisible:hover {
+	color: #fff;
+	transition: all 0.3s;
+}
+
 .btn-outline-magenta {
-	display: flex;
 	width: 325px;
 	height: 54px;
 	padding: 10px 24px;
 	margin: 10px;	
+	/* display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 12px;
-	flex-shrink: 0;
+	flex-shrink: 0; */
 	
 	color: #fff;
 	border-radius: 16px;
@@ -65,15 +94,15 @@
 }
 
 .btn-outline-cyan {
-	display: flex;
 	width: 325px;
 	height: 54px;
 	padding: 10px 24px;
 	margin: 10px;
+	/* display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 12px;
-	flex-shrink: 0;
+	flex-shrink: 0; */
 
 	color:#fff;
 	border-radius: 16px;
