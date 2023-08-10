@@ -1,0 +1,17 @@
+.landingPage {
+	/* flex container */
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	align-content: center;
+	justify-content: space-evenly;
+	flex-direction: column;
+	/* text style */
+	color: white;
+	text-align: center;
+	/* background */
+	background-repeat: no-repeat;
+	background-position-x: center;
+	background-size: auto 90%;
+}

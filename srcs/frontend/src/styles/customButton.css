@@ -1,4 +1,93 @@
 
+.btn-magenta {
+	/* layout */
+	display: flex;
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+	margin: 10px;
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+	/* style */
+	color: #fff;
+	border-radius: 12px;
+	background: #FA34C3;
+}
+
+.btn-magenta:hover {
+	background: #ca0993;
+	transition: all 0.3s;
+}
+
+.btn-cyan {
+	/* layout */
+	display: flex;
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+	margin: 10px;	
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+	/* style */
+	border-radius: 16px;
+	background: #34FAFA;
+}
+
+.btn-cyan:hover {
+	background: #43cccc;
+	transition: all 0.3s;
+}
+
+.btn-outline-magenta {
+	display: flex;
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+	margin: 10px;	
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+	
+	color: #fff;
+	border-radius: 16px;
+	border: 2px solid #FA34C3;
+	background: transparent;
+}
+
+.btn-outline-magenta:hover {
+	border: 2px solid #fff;
+	transition: all 0.3s;
+}
+
+.btn-outline-cyan {
+	display: flex;
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+	margin: 10px;
+	justify-content: center;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
+
+	color:#fff;
+	border-radius: 16px;
+	border: 2px solid #34FAFA;
+	background: transparent;
+}
+
+.btn-outline-cyan:hover {
+	border: 2px solid #fff;
+	transition: all 0.3s;
+}
+
+
+/* customized bs button */
 
 .btn-primary {
 	--bs-btn-color: #fff;
