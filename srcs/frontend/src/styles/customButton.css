@@ -1,20 +1,19 @@
-.center {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
 
-.btn-magenta {
+button {
 	/* layout */
+	display: block;
 	width: 325px;
 	height: 54px;
 	padding: 10px 24px;
-	margin: 10px;
+	margin: 20px 0;  /*why not working ???*/
 	/* display: flex; */
 	/* justify-content: center; */
 	/* align-items: center; */
 	/* gap: 12px; */
 	/* flex-shrink: 0; */
+}
+
+.btn-magenta {
 	/* style */
 	color: #fff;
 	border-radius: 12px;
@@ -28,17 +27,6 @@
 }
 
 .btn-cyan {
-	/* layout */
-	width: 325px;
-	height: 54px;
-	padding: 10px 24px;
-	margin: 10px;	
-	/* display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 12px;
-	flex-shrink: 0; */
-	/* style */
 	border-radius: 16px;
 	background: #34FAFA;
 }
@@ -49,17 +37,6 @@
 }
 
 .btn-invisible {
-	/* layout */
-	width: 325px;
-	height: 54px;
-	padding: 10px 24px;
-	margin: 10px;
-	/* display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 12px;
-	flex-shrink: 0; */
-	/* style */
 	color: #FA34C3;
 	border-radius: 16px;
 	border: transparent;
@@ -72,38 +49,19 @@
 }
 
 .btn-outline-magenta {
-	width: 325px;
-	height: 54px;
-	padding: 10px 24px;
-	margin: 10px;	
-	/* display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 12px;
-	flex-shrink: 0; */
-	
 	color: #fff;
-	border-radius: 16px;
 	border: 2px solid #FA34C3;
 	background: transparent;
+	border-radius: 16px;
 }
 
 .btn-outline-magenta:hover {
 	border: 2px solid #fff;
+	color: #FA34C3;
 	transition: all 0.3s;
 }
 
 .btn-outline-cyan {
-	width: 325px;
-	height: 54px;
-	padding: 10px 24px;
-	margin: 10px;
-	/* display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 12px;
-	flex-shrink: 0; */
-
 	color:#fff;
 	border-radius: 16px;
 	border: 2px solid #34FAFA;
@@ -117,7 +75,7 @@
 
 
 /* customized bs button */
-
+/* unused: somehow bs button not compatible with typescript */
 .btn-primary {
 	--bs-btn-color: #fff;
 	--bs-btn-bg: #fa34c3;

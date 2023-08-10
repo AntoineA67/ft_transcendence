@@ -14,10 +14,30 @@
 	background-repeat: no-repeat;
 	background-position-x: center;
 	background-size: auto 90%;
+	background-image: url(../assets/landingBg.png);
 }
 
 .footer {
 	position: absolute;
 	bottom: 0;
 	color: gray;
+}
+
+.leftArrow {
+	display: flex;
+	width: 50px;
+	height: 50px;
+	padding: 8px;
+	margin: 20px;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	border-radius: 200px;
+	background: black;
+	border: transparent;
+}
+
+.leftArrow:hover {
+	background-color: grey;
+	transition: all 0.3s;
 }
