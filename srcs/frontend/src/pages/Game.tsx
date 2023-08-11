@@ -223,6 +223,8 @@ export default function Game() {
 
 	useEffect(() => {
 		state.socketClient = socket
+		socket.emit('match')
+		console.log('match')
 		return () => {
 			if (state.socketClient) state.socketClient.disconnect()
 		}
@@ -275,21 +277,21 @@ export default function Game() {
 		window.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (event.repeat) return
 			if (event.key === "ArrowUp" || event.key === "w") {
-				console.log(jsp)
+				// console.log(jsp)
 				socket.emit("UpKeyPressed", Date.now());
 			}
 			if (event.key === "ArrowDown" || event.key === "s") {
-				console.log(jsp)
+				// console.log(jsp)
 				socket.emit("DownKeyPressed", Date.now());
 			}
 		});
 		window.addEventListener('keyup', (event: KeyboardEvent) => {
 			if (event.key === "ArrowUp" || event.key === "w") {
-				console.log(jsp)
+				// console.log(jsp)
 				socket.emit("UpKeyReleased", Date.now());
 			}
 			if (event.key === "ArrowDown" || event.key === "s") {
-				console.log(jsp)
+				// console.log(jsp)
 				socket.emit("DownKeyReleased", Date.now());
 			}
 		});
@@ -300,10 +302,14 @@ export default function Game() {
 		};
 	}, [jsp])
 	useEffect(() => {
-		setTimeout(() => {
-			jsp.current = "oui"
-			console.log("ouioui")
-		}, 5000)
+		socket.on('start', (roomId) => {
+			jsp.current = roomId
+			console.log("start", roomId)
+		})
+		// setTimeout(() => {
+		// 	jsp.current = "oui"
+		// 	console.log("ouioui")
+		// }, 5000)
 	}, [])
 
 	return (

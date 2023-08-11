@@ -2,7 +2,7 @@ import logo from 'assets/logo.svg';
 import '../styles/App.css';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { socket } from '../utils/socket';
+// import { socket } from '../utils/socket';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
