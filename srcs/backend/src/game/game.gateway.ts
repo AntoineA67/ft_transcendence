@@ -19,6 +19,8 @@ export class GameGateway
   private clients: { [id: string]: Player } = {};
   private ball: Ball | null = null;
   private interval: NodeJS.Timeout | null = null;
+  private clientQueue: string[] = [];
+
 
   @WebSocketServer() wss: Server;
 
@@ -31,11 +33,11 @@ export class GameGateway
   }
 
   private updateGameTick() {
-    if (!this.ball) return
-    Object.values(this.clients).forEach((client) => {
+    if (!this.ball) return;
+    for (const client of Object.values(this.clients)) {
       client.update();
-    });
-    this.ball?.update(this.clients);
+    }
+    this.ball.update(this.clients);
   }
 
   handleDisconnect(client: Socket) {
@@ -51,15 +53,37 @@ export class GameGateway
     }
   }
 
+  // handleConnection(client: Socket, ...args: any[]) {
+  //   this.logger.log(`Player Connected: ${client.id}`);
+  //   if (Object.keys(this.clients).length === 1) {
+  //     this.clients[client.id] = new Player(client.id, true)
+  //     this.ball = new Ball()
+  //   } else {
+  //     this.clients[client.id] = new Player(client.id, false)
+  //   }
+  //   client.emit('id', client.id)
+  // }
   handleConnection(client: Socket, ...args: any[]) {
-    this.logger.log(`Player Connected: ${client.id}`);
-    if (Object.keys(this.clients).length === 1) {
-      this.clients[client.id] = new Player(client.id, true)
-      this.ball = new Ball()
-    } else {
-      this.clients[client.id] = new Player(client.id, false)
+    // Add the client ID to the client queue
+    this.clientQueue.push(client.id);
+
+    // Check if there are two clients in the client queue
+    if (this.clientQueue.length === 2) {
+      // Create a new room for the clients
+      const roomId = uuidv4();
+      this.clientQueue.forEach((clientId) => {
+        const player = new Player();
+        player.roomId = roomId;
+        this.clients[clientId] = player;
+        this.wss.to(clientId).emit('joinRoom', { roomId });
+      });
+
+      // Start the game in the new room
+      this.gamesService.startGame(roomId);
+
+      // Clear the client queue
+      this.clientQueue = [];
     }
-    client.emit('id', client.id)
   }
 
   // @SubscribeMessage('sendMessage')
@@ -160,3 +184,7 @@ class Player {
     }
   }
 }
+function uuidv4() {
+  throw new Error('Function not implemented.');
+}
+
