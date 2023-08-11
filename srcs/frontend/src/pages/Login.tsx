@@ -71,9 +71,7 @@ function Signup({setPage}: signupProps) {
 	}
 	
 	return (
-		// <div className="w-100 h-100 d-flex 
-		// 	justify-content-center align-items-center">
-		// </div>
+		<body style={{overflow: "auto"}}>
 		<Container>
 			<Row className="align-items-center justify-content-center">
 				<Col sm="6" lg="4" >
@@ -122,6 +120,7 @@ function Signup({setPage}: signupProps) {
 				</Col>
 			</Row>
 		</Container>
+		</body>
 	)
 }
 
