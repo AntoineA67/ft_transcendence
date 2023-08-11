@@ -8,9 +8,9 @@
 	color: rgba(255, 255, 255, 0.816);;
 	background-color: transparent;
 	border: 1px solid white;
-	width: 325px;
+	/* width: 325px;
 	height: 44px;
-	padding: 10px 24px;
+	padding: 10px 24px; */
 }
 
 .form-control:focus {

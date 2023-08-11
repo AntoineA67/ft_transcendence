@@ -1,5 +1,6 @@
 import '../styles/Login.css'
 import eyeopen from '../assets/eyeopen.svg';
+import eyeclose from '../assets/eyeclose.svg';
 // import '../styles/customButton.css'
 import bg from '../assets/landingBg.png';
 import githubLogo from '../assets/github.svg';
@@ -59,58 +60,67 @@ type signupProps = {
 function Signup({setPage}: signupProps) {
 	const togglePassword = () => {
 		let x = document.getElementById("password") as HTMLInputElement;
+		let eye = document.getElementById("eye") as HTMLImageElement;
 		if (x.type === "password") {
 			x.type = "text";
+			eye.src = eyeclose;
 		} else {
 			x.type = "password";
+			eye.src = eyeopen;
 		}
 	}
 	
-	
 	return (
-		<Container className="w-100 h-100 d-flex 
-			justify-content-center align-items-center">
-			<Form>
-				<div className="mb-4">
-					<LeftArrow
-						setPage={setPage}
-						goToPage={'landing'} />
-				</div>
+		// <div className="w-100 h-100 d-flex 
+		// 	justify-content-center align-items-center">
+		// </div>
+		<Container>
+			<Row className="align-items-center justify-content-center">
+				<Col sm="6" lg="4" >
+					<Form className="w-100 d-flex flex-column">
+						<div className="my-4">
+							<LeftArrow setPage={setPage} goToPage={'landing'} />
+						</div>
+						<h3 style={{ color: "white" }}>New Account!</h3>
+						
+						<Form.Group className="my-4" controlId="nickname">
+							<Form.Label>Nickname</Form.Label>
+							<Form.Control required type="text" placeholder="nickname" />
+						</Form.Group>
 
-				<h3 style={{color: "white"}}>New Account!</h3>
+						<Form.Group className="mb-4" controlId="email address">
+							<Form.Label>Email address</Form.Label>
+							<Form.Control required type="email" placeholder="email" />
+						</Form.Group>
 
-				<Form.Group className="my-4" controlId="nickname">
-					<Form.Label>Nickname</Form.Label>
-					<Form.Control required type="text" placeholder="nickname"/>
-				</Form.Group>
+						<Form.Group className="mb-4" controlId="password">
+							<Form.Label>Password</Form.Label>
+							<Form.Control required type="password" placeholder="password" />
+							<div className="d-flex justify-content-end">
+								<img
+									id="eye"
+									src={eyeopen}
+									onClick={togglePassword}
+									className="ms-5"
+									style={{
+										cursor: "pointer",
+										position: "relative",
+										bottom: "30px",
+										right: "20px"
+									}} />
+							</div>
+						</Form.Group>
 
-				<Form.Group className="mb-4" controlId="email address">
-					<Form.Label>Email address</Form.Label>
-					<Form.Control required type="email" placeholder="email" />
-				</Form.Group>
-				
-				<Form.Group className="mb-4" controlId="password">
-					<Form.Label>Password</Form.Label>
-					<Form.Control required type="password" placeholder="password"/>
-					<img 
-						src={eyeopen} 
-						onClick={togglePassword}
-						style={{
-						cursor: "pointer",
-						position: "relative",
-						bottom: "35px",
-						left: "285px",
-					}}/>				
-				</Form.Group>
-
-				<Form.Group className="mb-4" controlId="accept terms">
-					<Form.Check type="checkbox" label="I accept terms and conditions" />
-				</Form.Group>
-
-				<button type="submit" className="btn btn-secondary">
-					Sign up
-				</button>
-			</Form>	
+						<Form.Group className="mb-4" controlId="accept terms">
+							<Form.Check type="checkbox" label="I accept terms and conditions" />
+						</Form.Group>
+						
+						<button type="submit" className="btn btn-secondary w-100">
+							Sign up
+						</button>
+					</Form>	
+				</Col>
+			</Row>
 		</Container>
 	)
 }
@@ -178,7 +188,7 @@ function LandingPage({click1, click2}: landingPageProps) {
 			<footer className="footer">
 				Projet de fin de tronc-commun de l’école 42<br />
 				<a href="#">
-					<img src={`${githubLogo}`}></img>
+					<img src={githubLogo}></img>
 				</a>
 			</footer>
 		</div>
