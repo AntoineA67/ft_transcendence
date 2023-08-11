@@ -1,38 +1,43 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import entities from './typeorm';
-import { MessagesModule } from './message/message.module';
-import { MessagesController } from './message/messages.controller';
-import { MessagesService } from './message/messages.service';
+import { GameModule } from './game/game.module';
+import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { PrismaModule } from './prisma/prisma.module';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        // host: 'localhost',
-        host: configService.get('POSTGRES_HOST'),
-        port: +configService.get<number>('POSTGRES_PORT'),
-        // port: 5432,
-        username: configService.get('POSTGRES_USERNAME'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_NAME'),
-        entities: entities,
-        synchronize: true,
-      }),
-      inject: [ConfigService],
+    PrismaModule,
+    GameModule,
+    // PrismaModule,
+    // PostgresProviderModule,
+    // UsersModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      buildSchemaOptions: { dateScalarMode: 'timestamp' },
     }),
-    UsersModule,
-    MessagesModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    // PrismaService,
+
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
+    AppResolver,
+  ],
 })
 export class AppModule { }
