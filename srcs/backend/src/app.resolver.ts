@@ -1,7 +1,7 @@
 import { Query, Resolver } from '@nestjs/graphql';
-import Message from './typeorm/message.entity';
+// import Message from './entities/message.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Game } from './typeorm/game.entity';
+import { Game } from './entities/game.entity';
 
 @Resolver()
 export class AppResolver {
