@@ -9,12 +9,6 @@ import { PrismaService } from 'src/prisma.service';
 export class GameController {
   constructor(private readonly gamesService: GamesService, private readonly prisma: PrismaService) { }
 
-  // @Get()
-  // async getAllGames(): Promise<Game[]> {
-  //   const games = await this.gamesService.findAll();
-  //   return games;
-  // }
-
   @Public()
   @Get()
   async getAllGames(): Promise<any> {
@@ -26,6 +20,7 @@ export class GameController {
   getTest() {
     return this.prisma.game.findMany();
   }
+
   @Public()
   @Post()
   async createGame(
