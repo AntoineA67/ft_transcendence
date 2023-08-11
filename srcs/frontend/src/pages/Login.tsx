@@ -27,7 +27,7 @@ function Login() {
 	}
 	
 	return (
-		<body>
+		<>
 			{page == 'landing' && <LandingPage 
 				click1={gotoSignin}
 				click2={gotoSignup}
@@ -39,7 +39,7 @@ function Login() {
 			{page === 'signup' && <Signup
 				setPage={setPage}
 			></Signup>}
-		</body>
+		</>
 	);
 }
 
@@ -81,33 +81,40 @@ type landingPageProps = {
 }
 
 function LandingPage({click1, click2}: landingPageProps) {
+	
 	return (
 		<div className="landingPage">
-			<div>
-				<h2>PingPangPong</h2>
-				<p style={{ color: "gray" }}>
-					Si vous avez des amis, vous pouvez jouer à <br />
-					ce jeu en multi joueur, sinon, une IA va se <br />
-					charger de vous !
-				</p>
-			</div>
-			<div>
-				<button 
-					onClick={click1}
-					className="btn-magenta">
-					Login
-				</button>
-				<button
-					onClick={click2} 
-					className="btn-outline-magenta">
-					Sign up
-				</button>
-				<button 
-					// onClick={click3}
-					className="btn-invisible">
-					Sign in with 42
-				</button>
-			</div>
+			<Container className="text center">
+				<Row style={{ position: "relative", bottom: "70px" }}>
+					<h2>Ping Pang Pong</h2>
+					<p style={{ color: "gray" }}>
+						Si vous avez des amis, vous pouvez jouer à <br />
+						ce jeu en multi joueur, sinon, une IA va se <br />
+						charger de vous !
+					</p>
+				</Row>
+					
+				<div className="d-flex flex-column 
+					justify-content-center align-items-center"
+					style={{float: "inline-start"}}>
+					<button
+						onClick={click1}
+						className="btn-magenta">
+						Login
+					</button>
+					<button
+						onClick={click2}
+						className="btn-outline-magenta">
+						Sign up
+					</button>
+					<button
+						// onClick={click3}
+						className="btn-invisible">
+						Sign in with 42
+					</button>
+				</div>		
+			</Container>
+
 			<footer className="footer">
 				Projet de fin de tronc-commun de l’école 42<br />
 				<a href="#">
