@@ -6,8 +6,11 @@ ARG POSTGRES_PORT=;
 ARG POSTGRES_USERNAME=;
 ARG POSTGRES_PASSWORD=;
 ARG POSTGRES_NAME=;
+ARG JWT_SECRET=;
+ARG DATABASE_URL=;
 
 WORKDIR /app
+RUN apk --no-cache add curl
 
 FROM base as DEV
 ENTRYPOINT ["sh", "-c", "npm i && npm run start:dev"]
