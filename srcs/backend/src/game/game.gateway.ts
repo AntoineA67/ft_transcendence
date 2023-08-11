@@ -9,6 +9,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
+import { v4 as uuidv4 } from 'uuid';
+import Player from './Player.class';
+import Ball from './Ball.class';
+import Room from './Room.class';
 
 @WebSocketGateway({ cors: true })
 export class GameGateway
@@ -16,41 +20,49 @@ export class GameGateway
   constructor(private readonly gamesService: GamesService) { }
 
   private logger: Logger = new Logger('MessageGateway');
-  private clients: { [id: string]: Player } = {};
-  private ball: Ball | null = null;
-  private interval: NodeJS.Timeout | null = null;
-  private clientQueue: string[] = [];
+  // private clients: { [id: string]: Player } = {};
+  private clients: Map<string, string> = new Map(); // <socketId, gameId>
+  // private ball: Ball | null = null;
+  // private interval: NodeJS.Timeout | null = null;
+  private clientQueue: Socket[] = [];
+  private rooms: { [id: string]: Room } = {};
 
 
   @WebSocketServer() wss: Server;
 
   afterInit(server: Server) {
     this.logger.log('Initialized');
-    this.interval = setInterval(() => {
-      this.updateGameTick();
-      this.wss.emit('clients', { clients: this.clients, ball: this.ball });
-    }, 50);
+    // this.interval = setInterval(() => {
+    //   this.updateGameTick();
+    //   this.wss.emit('clients', { clients: this.clients, ball: this.ball });
+    // }, 50);
   }
 
-  private updateGameTick() {
-    if (!this.ball) return;
-    for (const client of Object.values(this.clients)) {
-      client.update();
-    }
-    this.ball.update(this.clients);
-  }
+  // private updateGameTick() {
+  //   if (!this.ball) return;
+  //   for (const client of Object.values(this.clients)) {
+  //     client.update();
+  //   }
+  //   this.ball.update(this.clients);
+  // }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Player Disconnected: ${client.id}`);
-    if (this.clients && this.clients[client.id]) {
-      console.log('deleting ' + client.id)
-      delete this.clients[client.id]
-      this.wss.emit('removePlayer', client.id)
-    }
-    if (Object.keys(this.clients).length < 2) {
-      this.ball = null
-      // this.clients[Object.keys(this.clients)[0]].invertedSide = false
-    }
+    // if (this.clients[client.id]) {
+    //   const roomId = this.clients[client.id];
+    //   this.wss.emit('removePlayer', client.id);
+    //   this.clients.delete(client.id);
+    //   this.rooms[roomId].removePlayer(client.id);
+    // }
+    // if (this.clients && this.clients[client.id]) {
+    //   console.log('deleting ' + client.id)
+    //   delete this.clients[client.id]
+    //   this.wss.emit('removePlayer', client.id)
+    // }
+    // if (Object.keys(this.clients).length < 2) {
+    // this.ball = null
+    // this.clients[Object.keys(this.clients)[0]].invertedSide = false
+    // }
   }
 
   // handleConnection(client: Socket, ...args: any[]) {
@@ -64,25 +76,48 @@ export class GameGateway
   //   client.emit('id', client.id)
   // }
   handleConnection(client: Socket, ...args: any[]) {
-    // Add the client ID to the client queue
-    this.clientQueue.push(client.id);
+    console.log('client connected', client.id)
+    client.emit('id', client.id)
+  }
 
+  @SubscribeMessage('match')
+  async handleMatch(client: Socket, payload: string): Promise<void> {
+    // Add the client ID to the client queue
+    this.clientQueue.push(client);
+    console.log('clientQueue', this.clientQueue.map((client) => client.id))
     // Check if there are two clients in the client queue
-    if (this.clientQueue.length === 2) {
+    while (this.clientQueue.length >= 2) {
       // Create a new room for the clients
       const roomId = uuidv4();
-      this.clientQueue.forEach((clientId) => {
-        const player = new Player();
-        player.roomId = roomId;
-        this.clients[clientId] = player;
-        this.wss.to(clientId).emit('joinRoom', { roomId });
-      });
+      console.log('roomId', roomId)
+      const player1 = this.clientQueue.pop();
+      const player2 = this.clientQueue.pop();
 
-      // Start the game in the new room
-      this.gamesService.startGame(roomId);
+      player1.join(roomId);
+      player2.join(roomId);
 
-      // Clear the client queue
-      this.clientQueue = [];
+      this.clients[player1.id] = roomId;
+      this.clients[player2.id] = roomId;
+
+      console.log('player1', player1.id)
+      console.log('player2', player2.id)
+      this.rooms[roomId] = new Room(roomId, this.wss, player1.id, player2.id);
+    }
+  }
+
+  @SubscribeMessage('leave')
+  async handleLeave(client: Socket, payload: string): Promise<void> {
+    console.log('leave', payload)
+    const roomId = this.clients[client.id];
+    if (roomId) {
+      const room = this.rooms[roomId];
+      if (room) {
+        room.leave(client.id);
+        delete this.clients[client.id];
+        if (room.isEmpty()) {
+          delete this.rooms[roomId];
+        }
+      }
     }
   }
 
@@ -95,96 +130,26 @@ export class GameGateway
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)
-    this.clients[client.id].direction = 1
+    this.rooms[this.clients[client.id]].handleKey(client.id, 1)
+    // this.clients[client.id].direction = 1
   }
   @SubscribeMessage('UpKeyReleased')
   async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
+    this.rooms[this.clients[client.id]].handleKey(client.id, 0)
     console.log('UpKeyReleased', payload)
-    this.clients[client.id].direction = 0
+    // this.clients[client.id].direction = 0
   }
   @SubscribeMessage('DownKeyPressed')
   async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyPressed', payload)
-    this.clients[client.id].direction = -1
+    this.rooms[this.clients[client.id]].handleKey(client.id, -1)
+    // this.clients[client.id].direction = -1
   }
   @SubscribeMessage('DownKeyReleased')
   async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyReleased', payload)
-    this.clients[client.id].direction = 0
+    this.rooms[this.clients[client.id]].handleKey(client.id, 0)
+    // this.clients[client.id].direction = 0
   }
-}
-
-class Ball {
-  static speed = .01
-  constructor(
-    public x: number = .5,
-    public y: number = .5,
-    public velocityX: number = Math.random() > 0.5 ? Ball.speed : -Ball.speed,
-    public velocityY: number = 0) { }
-
-  update(clients: { [id: string]: Player; }) {
-    // console.log(clients)
-    this.x += this.velocityX;
-    this.y += this.velocityY;
-    if (this.y < 0) {
-      this.y = 0;
-      this.velocityY = -this.velocityY;
-    }
-    else if (this.y > 1) {
-      this.y = 1;
-      this.velocityY = -this.velocityY;
-    }
-    if (this.x < 0 || this.x > 1) {
-      this.reset();
-    }
-    const client = clients[Object.keys(clients)[this.x < .5 ? 0 : 1]]
-    // console.log(client)
-    if (this.collide(client)) {
-      let collidePoint = this.y - client.y;
-      collidePoint = collidePoint / Player.halfPaddleHeight;
-      const angleRad = (Math.PI / 4) * collidePoint;
-      const direction = client.invertedSide ? -1 : 1;
-
-      this.velocityX = direction * .01 * Math.cos(angleRad);
-      this.velocityY = .01 * Math.sin(angleRad);
-    }
-  }
-
-  private collide(client: Player) {
-    return (client.invertedSide ? (this.x >= client.xDistance) : (this.x <= client.xDistance)) && Math.abs(this.y - client.y) <= Player.halfPaddleHeight
-  }
-
-  private reset() {
-    this.x = 0.5;
-    this.y = 0.5;
-    this.velocityX = Math.random() > 0.5 ? Ball.speed : -Ball.speed;
-    this.velocityY = 0;
-  }
-}
-
-class Player {
-  static speedFactor: number = .01;
-  static distanceFromWall: number = .02;
-  static halfPaddleHeight: number = .05;
-  public xDistance: number;
-
-  constructor(public id: string, public invertedSide: boolean = false, public y: number = .5, public direction: number = 0) {
-    this.xDistance = invertedSide ? 1 - Player.distanceFromWall : Player.distanceFromWall;
-  }
-
-  update() {
-    if (this.direction !== 0) {
-      this.y += this.direction * Player.speedFactor;
-      if (this.y < 0) {
-        this.y = 0;
-      }
-      else if (this.y > 1) {
-        this.y = 1;
-      }
-    }
-  }
-}
-function uuidv4() {
-  throw new Error('Function not implemented.');
 }
 
