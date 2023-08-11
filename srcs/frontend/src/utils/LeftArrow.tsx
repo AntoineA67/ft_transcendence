@@ -9,7 +9,7 @@ type LeftArrowProps = {
 function LeftArrow({setPage, goToPage}:LeftArrowProps) {
 	return (
 		<button className="leftArrow" onClick={() => setPage(goToPage)}>
-			<img src={`${leftArr}`}></img>
+			<img src={leftArr}></img>
 		</button>
 	);
 }

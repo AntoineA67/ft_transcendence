@@ -6,6 +6,7 @@ import router from './router';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
+import './styles/customForm.css';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
