@@ -81,19 +81,17 @@ function Signup({setPage}: signupProps) {
 
 				<Form.Group className="my-4" controlId="nickname">
 					<Form.Label>Nickname</Form.Label>
-					<Form.Control type="text" placeholder="new nickname" />
+					<Form.Control required type="text" placeholder="nickname"/>
 				</Form.Group>
 
 				<Form.Group className="mb-4" controlId="email address">
 					<Form.Label>Email address</Form.Label>
-					<Form.Control type="email" placeholder="name@example.com" />
+					<Form.Control required type="email" placeholder="email" />
 				</Form.Group>
 				
 				<Form.Group className="mb-4" controlId="password">
 					<Form.Label>Password</Form.Label>
-					<Form.Control 
-						type="password" 
-						placeholder="password"/>
+					<Form.Control required type="password" placeholder="password"/>
 					<img 
 						src={eyeopen} 
 						onClick={togglePassword}
@@ -102,8 +100,7 @@ function Signup({setPage}: signupProps) {
 						position: "relative",
 						bottom: "35px",
 						left: "285px",
-					}}/>
-					
+					}}/>				
 				</Form.Group>
 
 				<Form.Group className="mb-4" controlId="accept terms">
