@@ -1,5 +1,5 @@
 import '../styles/Login.css'
-import '../styles/customButton.css'
+// import '../styles/customButton.css'
 import bg from '../assets/landingBg.png';
 import githubLogo from '../assets/github.svg';
 import { useState } from 'react';
@@ -85,7 +85,7 @@ function LandingPage({click1, click2}: landingPageProps) {
 	return (
 		<div className="landingPage">
 			<Container className="text center">
-				<Row style={{ position: "relative", bottom: "70px" }}>
+				<Row style={{ position: "relative", bottom: "60px" }}>
 					<h2>Ping Pang Pong</h2>
 					<p style={{ color: "gray" }}>
 						Si vous avez des amis, vous pouvez jouer à <br />
@@ -94,17 +94,17 @@ function LandingPage({click1, click2}: landingPageProps) {
 					</p>
 				</Row>
 					
-				<div className="d-flex flex-column 
-					justify-content-center align-items-center"
-					style={{float: "inline-start"}}>
+				<div className="d-flex flex-column gap-3 
+					justify-content-center align-items-center "
+					style={{position: "relative", top: "30px"}}>
 					<button
 						onClick={click1}
-						className="btn-magenta">
+						className="btn btn-primary">
 						Login
 					</button>
 					<button
 						onClick={click2}
-						className="btn-outline-magenta">
+						className="btn btn-outline-primary">
 						Sign up
 					</button>
 					<button
