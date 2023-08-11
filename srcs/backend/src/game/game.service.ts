@@ -8,7 +8,7 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class GamesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) { }
 
   async findAll(): Promise<any> {
     // const prisma = new PrismaClient()
