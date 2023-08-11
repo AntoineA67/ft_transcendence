@@ -57,6 +57,16 @@ type signupProps = {
 }
 
 function Signup({setPage}: signupProps) {
+	const togglePassword = () => {
+		let x = document.getElementById("password") as HTMLInputElement;
+		if (x.type === "password") {
+			x.type = "text";
+		} else {
+			x.type = "password";
+		}
+	}
+	
+	
 	return (
 		<Container className="w-100 h-100 d-flex 
 			justify-content-center align-items-center">
@@ -84,7 +94,11 @@ function Signup({setPage}: signupProps) {
 					<Form.Control 
 						type="password" 
 						placeholder="password"/>
-					<img src={eyeopen} style={{
+					<img 
+						src={eyeopen} 
+						onClick={togglePassword}
+						style={{
+						cursor: "pointer",
 						position: "relative",
 						bottom: "35px",
 						left: "285px",
