@@ -1,18 +1,32 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { Public } from './public.decorator';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-	constructor(private readonly usersService: UsersService) { }
+	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) { }
 
-	// @UseGuards(FortyTwoAuthGuard)
-	@Public()
+	@UseGuards(FortyTwoAuthGuard)
+	// @Public()
 	@Get('/42/callback')
-	async fortyTwoCallback(): Promise<any> {
+	async fortyTwoCallback(@Req() req, @Res() res: Response): Promise<any> {
 		// return { message: '42 callback' };
-		const users = await this.usersService.findAll();
-		return users;
+		// console.log('42 callback', req.user, res.headers);
+		// const users = await this.usersService.findAll();
+
+
+		const token = await this.authService.login(req.user);
+
+		// res.cookie('access_token', token, {
+		// 	maxAge: 2592000000,
+		// 	sameSite: true,
+		// 	secure: false,
+		// });
+
+		return { token };
+
+		// return users;
 	}
 }

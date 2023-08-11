@@ -12,6 +12,7 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 	}
 
 	canActivate(context: ExecutionContext) {
+		console.log('guard context', context.getHandler(), context.getClass());
 		const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
 			context.getHandler(),
 			context.getClass(),
