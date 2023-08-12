@@ -29,6 +29,7 @@ function Login() {
 	}
 	
 	return (
+		// <body> cannot appear as a child of <div>.
 		<body>
 			{page == 'landing' && <LandingPage 
 				handleSignin={() => setPage('signin')}
@@ -170,6 +171,10 @@ type landingPageProps = {
 
 function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 	
+	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
+
+	const github = "https://github.com/AntoineA67/ft_transcendence";
+
 	return (
 		<>
 		<Container className="text-center" style={{height: "650px"}}>
@@ -197,11 +202,9 @@ function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 								className="btn btn-outline-primary w-75">
 								Sign up
 							</button>
-							<button
-								// onClick={click3}
-								className="btn btn-invisible w-75">
+							<a href={oauth42} className="btn-invisible w-75">
 								Sign in with 42
-							</button>
+							</a>
 						</div>		
 					</div>
 				</Col>
@@ -210,7 +213,7 @@ function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 		<footer className="d-flex flex-column align-items-center"
 			style={{color: "grey"}}>
 			Projet de fin de tronc-commun de l’école 42
-			<a href="#"><img src={githubLogo} /></a>
+			<a href={github}><img src={githubLogo} /></a>
 		</footer>
 		</>
 	);

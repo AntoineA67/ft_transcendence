@@ -89,11 +89,13 @@ button {
 	border-radius: 16px;
 	border: transparent;
 	background: transparent;
+	text-decoration: none;
 }
 
 .btn-invisible:hover {
 	color: #fff;
 	transition: all 0.3s;
+	text-decoration: none;
 }
 
 
