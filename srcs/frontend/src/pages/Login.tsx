@@ -1,3 +1,4 @@
+import '../styles/index.css'
 import '../styles/Login.css'
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
@@ -34,7 +35,7 @@ function Login() {
 	}
 	
 	return (
-		<>
+		<body>
 			{page == 'landing' && <LandingPage 
 				click1={gotoSignin}
 				click2={gotoSignup}
@@ -46,7 +47,7 @@ function Login() {
 			{page === 'signup' && <Signup
 				setPage={setPage}
 			></Signup>}
-		</>
+		</body>
 	);
 }
 
@@ -71,11 +72,10 @@ function Signup({setPage}: signupProps) {
 	}
 	
 	return (
-		<body style={{overflow: "auto"}}>
 		<Container>
-			<Row className="align-items-center justify-content-center">
+			<Row className="justify-content-center">
 				<Col sm="6" lg="4" >
-					<Form className="w-100 d-flex flex-column">
+					<Form className="w-100">
 						<div className="my-4">
 							<LeftArrow setPage={setPage} goToPage={'landing'} />
 						</div>
@@ -120,7 +120,6 @@ function Signup({setPage}: signupProps) {
 				</Col>
 			</Row>
 		</Container>
-		</body>
 	)
 }
 
@@ -153,8 +152,8 @@ function LandingPage({click1, click2}: landingPageProps) {
 	
 	return (
 		<div className="landingPage">
-			<Container className="text center" >
-				<Row style={{ position: "relative", bottom: "60px" }}>
+			<Container className="text-center" >
+				<Row className="pb-0">
 					<h2>Ping Pang Pong</h2>
 					<p style={{ color: "gray" }}>
 						Si vous avez des amis, vous pouvez jouer à <br />
@@ -186,9 +185,7 @@ function LandingPage({click1, click2}: landingPageProps) {
 
 			<footer className="footer">
 				Projet de fin de tronc-commun de l’école 42<br />
-				<a href="#">
-					<img src={githubLogo}></img>
-				</a>
+				<a href="#"><img src={githubLogo} /></a>
 			</footer>
 		</div>
 	);
