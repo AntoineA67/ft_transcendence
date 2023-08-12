@@ -183,10 +183,10 @@ function Signin({ setPage }: signinProps) {
 						<button type="submit" className="btn btn-primary w-100">
 							Login
 						</button>
-						<button className="btn btn-invisible w-100">
-							Forget password
-						</button>
 					</Form>
+					<button className="btn btn-invisible w-100">
+						Forget password
+					</button>
 				</Col>
 			</Row>
 		</Container>
