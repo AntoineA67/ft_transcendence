@@ -1,26 +1,9 @@
-.landingPage {
-	/* flex container */
-	height: 100%;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	align-content: center;
-	justify-content: space-evenly;
-	flex-direction: column;
-	/* text style */
-	color: white;
-	text-align: center;
+.landingBg {
 	/* background */
 	background-repeat: no-repeat;
 	background-position-x: center;
-	background-size: auto 90%;
+	background-size: auto 100%;
 	background-image: url(../assets/landingBg.png);
-}
-
-.footer {
-	position: absolute;
-	bottom: 0;
-	color: gray;
 }
 
 .leftArrow {
