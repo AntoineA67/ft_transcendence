@@ -130,15 +130,67 @@ type signinProps = {
 }
 
 function Signin({ setPage }: signinProps) {
+	
+	const togglePassword = () => {
+		let x = document.getElementById("password") as HTMLInputElement;
+		let eye = document.getElementById("eye") as HTMLImageElement;
+		if (x.type === "password") {
+			x.type = "text";
+			eye.src = eyeclose;
+		} else {
+			x.type = "password";
+			eye.src = eyeopen;
+		}
+	}
+
 	return (
-		<div>
-			<LeftArrow
-				setPage={setPage}
-				goToPage={'landing'}
-			></LeftArrow>
-			<h1>signup</h1>
-		</div>
-	)
+		<Container>
+			<Row className="justify-content-center">
+				<Col sm="6" lg="4" >
+					<Form className="w-100">
+						<div className="my-4">
+							<LeftArrow setPage={setPage} goToPage={'landing'} />
+						</div>
+						<h3 style={{ color: "white" }}>Welcome back!</h3>
+
+						<Form.Group className="my-4" controlId="nickname">
+							<Form.Label>Nickname</Form.Label>
+							<Form.Control required type="text" placeholder="nickname" />
+						</Form.Group>
+
+						<Form.Group className="mb-4" controlId="password">
+							<Form.Label>Password</Form.Label>
+							<Form.Control required type="password" placeholder="password" />
+							<div className="d-flex justify-content-end">
+								<img
+									id="eye"
+									src={eyeopen}
+									onClick={togglePassword}
+									className="ms-5"
+									style={{
+										cursor: "pointer",
+										position: "relative",
+										bottom: "30px",
+										right: "20px"
+									}} />
+							</div>
+						</Form.Group>
+
+						<Form.Group className="mb-4" controlId="remember me">
+							<Form.Check type="checkbox" label="Remember me" />
+						</Form.Group>
+
+						<button type="submit" className="btn btn-primary w-100">
+							Login
+						</button>
+						<button className="btn btn-invisible w-100">
+							Forget password
+						</button>
+					</Form>
+				</Col>
+			</Row>
+		</Container>
+	);
 }
 
 /* landing page */
