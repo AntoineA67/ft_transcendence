@@ -151,43 +151,48 @@ type landingPageProps = {
 function LandingPage({click1, click2}: landingPageProps) {
 	
 	return (
-		<div className="landingPage">
-			<Container className="text-center" >
-				<Row className="pb-0">
-					<h2>Ping Pang Pong</h2>
-					<p style={{ color: "gray" }}>
-						Si vous avez des amis, vous pouvez jouer à <br />
-						ce jeu en multi joueur, sinon, une IA va se <br />
-						charger de vous !
-					</p>
-				</Row>
-					
-				<div className="d-flex flex-column gap-3 
-					justify-content-center align-items-center "
-					style={{position: "relative", top: "30px"}}>
-					<button
-						onClick={click1}
-						className="btn btn-primary">
-						Login
-					</button>
-					<button
-						onClick={click2}
-						className="btn btn-outline-primary">
-						Sign up
-					</button>
-					<button
-						// onClick={click3}
-						className="btn-invisible">
-						Sign in with 42
-					</button>
-				</div>		
-			</Container>
-
-			<footer className="footer">
-				Projet de fin de tronc-commun de l’école 42<br />
-				<a href="#"><img src={githubLogo} /></a>
-			</footer>
-		</div>
+		<>
+		<Container className="text-center" style={{height: "650px"}}>
+			<Row className="justify-content-center h-100 landingBg">
+				<Col sm="6" lg="4">
+					<div className="h-75 d-flex flex-column justify-content-evenly mt-5">
+						<div className="pt-5 w-75 align-self-center">
+							<h2 style={{color: "white"}}>Ping Pang Pong</h2>
+							<p style={{ color: "gray" }}>
+								Si vous avez des amis, vous pouvez jouer à 
+								ce jeu en multi joueur, sinon, une IA va se
+								charger de vous !
+							</p>
+						</div>
+						<div className="mt-5 d-flex flex-column gap-3 
+							justify-content-center align-items-center "
+							style={{position: "relative", top: "30px"}}>
+							<button
+								onClick={click1}
+								className="btn btn-primary w-75">
+								Login
+							</button>
+							<button
+								onClick={click2}
+								className="btn btn-outline-primary w-75">
+								Sign up
+							</button>
+							<button
+								// onClick={click3}
+								className="btn btn-invisible w-75">
+								Sign in with 42
+							</button>
+						</div>		
+					</div>
+				</Col>
+			</Row>	
+		</Container>
+		<footer className="d-flex flex-column align-items-center"
+			style={{color: "grey"}}>
+			Projet de fin de tronc-commun de l’école 42
+			<a href="#"><img src={githubLogo} /></a>
+		</footer>
+		</>
 	);
 }
 
