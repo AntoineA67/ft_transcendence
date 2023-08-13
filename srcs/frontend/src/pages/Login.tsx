@@ -29,8 +29,26 @@ type login = {
 function Login() {
 	const [page, setPage] = useState<string>('landing');
 
+	const rememberMe = (user: newUser | login) => {
+		const checkbox = document.getElementById("remember me") as HTMLInputElement;
+		if (checkbox != null) {
+			if (checkbox.checked) {
+				localStorage.setItem("nickname", user.nickname);
+				localStorage.setItem("password", user.password);
+				localStorage.setItem("rememberme", "true");
+			} else {
+				localStorage.removeItem("nickname");
+				localStorage.removeItem("password");
+				localStorage.setItem("rememberme", 'false');
+			}
+		}
+	}
+
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
 		e.preventDefault();
+		console.log(e);
+		// remember me
+		rememberMe(user);
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -154,8 +172,9 @@ type signinProps = {
 }
 
 function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
-	const [nick, setNick] = useState<string>('');
-	const [pass, setPass] = useState<string>('');
+	const [nick, setNick] = useState<string>(localStorage.getItem('nickname') || '');
+	const [pass, setPass] = useState<string>(localStorage.getItem('password') || '');
+	const [check, setCheck] = useState<string>(localStorage.getItem('rememberme') || 'true');
 	
 	return (
 		<Container>
@@ -194,7 +213,8 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 						</Form.Group>
 
 						<Form.Group className="mb-4" controlId="remember me">
-							<Form.Check type="checkbox" label="Remember me" />
+							<Form.Check type="checkbox" label="Remember me"
+								checked={check == 'true'} onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')}/>
 						</Form.Group>
 
 						<button type="submit" className="btn btn-primary w-100">
