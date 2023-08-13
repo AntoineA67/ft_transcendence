@@ -13,8 +13,38 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+type newUser = {
+	id: string,
+	nickname: string,
+	email: string,
+	password: string
+}
+
+type login = {
+	id: string,
+	nickname: string,
+	password: string
+}
+
 function Login() {
 	const [page, setPage] = useState<string>('landing');
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
+		e.preventDefault();
+		const fetchObj = {
+			method: 'POST',
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(user)
+		}
+		try {
+			const response = await fetch(url, fetchObj)
+			if (!response.ok) throw Error('response not ok');
+		} catch (err: any) {
+			console.log(err);
+		} finally {
+			console.log('do something here...');
+		}
+	}
 
 	const togglePassword = () => {
 		let x = document.getElementById("password") as HTMLInputElement;
@@ -36,10 +66,12 @@ function Login() {
 				handleSignup={() => setPage('signup')} />}
 			{page === 'signin' && <Signin 
 				handleLanding={() => setPage('landing')}
-				togglePassword={togglePassword} />}
+				togglePassword={togglePassword}
+				handleSubmit={handleSubmit} />}
 			{page === 'signup' && <Signup 
 				handleLanding={() => setPage('landing')}
-				togglePassword={togglePassword} />}
+				togglePassword={togglePassword}
+				handleSubmit={handleSubmit} />}
 		</>
 	);
 }
@@ -49,39 +81,13 @@ function Login() {
 type signupProps = {
 	handleLanding: () => void,
 	togglePassword: () => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
 }
 
-function Signup({ handleLanding, togglePassword }: signupProps) {	
+function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {	
 	const [nick, setNick] = useState<string>('');
 	const [email, setEmail] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
-
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		console.log("handle submit");
-		const newUser = {
-			id: nick,
-			nickname: nick,
-			email: email,
-			password: pass
-		}
-
-		const fetchObj = {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(newUser)
-		}
-		try {
-			const response = await fetch('http://localhost:5000/users', fetchObj)
-			if (!response.ok) throw Error('response not ok');
-		} catch (err: any) {
-			console.log(err);
-		} finally {
-			console.log('check new nickname...')
-		}
-	}
 
 	return (
 		<Container>
@@ -90,7 +96,8 @@ function Signup({ handleLanding, togglePassword }: signupProps) {
 					<button 
 						className="leftArrow my-4"
 						onClick={handleLanding} />
-					<Form className="w-100" onSubmit={handleSubmit}>
+					<Form className="w-100" onSubmit={(e) => (
+						handleSubmit(e, {id: nick, nickname: nick, email: email, password: pass}))}>
 						<h3 style={{ color: "white" }}>New Account!</h3>
 						
 						<Form.Group className="my-4" controlId="nickname">
@@ -143,36 +150,12 @@ function Signup({ handleLanding, togglePassword }: signupProps) {
 type signinProps = {
 	handleLanding: () => void,
 	togglePassword: () => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
 }
 
-function Signin({ handleLanding, togglePassword }: signinProps) {
+function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 	const [nick, setNick] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
-
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		console.log("handle submit");
-		const user = {
-			id: nick,
-			nickname: nick,
-			password: pass
-		}
-		const fetchObj = {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(user)
-		}
-		try {
-			const response = await fetch('http://localhost:5000/login', fetchObj)
-			if (!response.ok) throw Error('response not ok');
-		} catch (err: any) {
-			console.log(err);
-		} finally {
-			console.log('check password...')
-		}
-	}
 	
 	return (
 		<Container>
@@ -181,7 +164,8 @@ function Signin({ handleLanding, togglePassword }: signinProps) {
 					<button
 						className="leftArrow my-4"
 						onClick={handleLanding} />
-					<Form className="w-100" onSubmit={handleSubmit}>
+					<Form className="w-100" onSubmit={(e) => (
+						handleSubmit(e, {id: nick, nickname: nick, password: pass}))}>
 						<h3 style={{ color: "white" }}>Welcome back!</h3>
 
 						<Form.Group className="my-4" controlId="nickname">
