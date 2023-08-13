@@ -31,24 +31,22 @@ function Login() {
 
 	const rememberMe = (user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
-		if (checkbox != null) {
-			if (checkbox.checked) {
-				localStorage.setItem("nickname", user.nickname);
-				localStorage.setItem("password", user.password);
-				localStorage.setItem("rememberme", "true");
-			} else {
-				localStorage.removeItem("nickname");
-				localStorage.removeItem("password");
-				localStorage.setItem("rememberme", 'false');
-			}
+		if (checkbox == null) return ;
+		if (checkbox.checked) {
+			localStorage.setItem("nickname", user.nickname);
+			localStorage.setItem("password", user.password);
+			localStorage.setItem("rememberme", "true");
+		} else {
+			localStorage.removeItem("nickname");
+			localStorage.removeItem("password");
+			localStorage.setItem("rememberme", 'false');
 		}
 	}
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
 		e.preventDefault();
-		console.log(e);
-		// remember me
 		rememberMe(user);
+
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -77,7 +75,6 @@ function Login() {
 	}
 	
 	return (
-		// <body> cannot appear as a child of <div>.
 		<>
 			{page == 'landing' && <LandingPage 
 				handleSignin={() => setPage('signin')}
@@ -103,9 +100,9 @@ type signupProps = {
 }
 
 function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {	
-	const [nick, setNick] = useState<string>('');
-	const [email, setEmail] = useState<string>('');
-	const [pass, setPass] = useState<string>('');
+	const [nick, setNick] = useState('');
+	const [email, setEmail] = useState('');
+	const [pass, setPass] = useState('');
 
 	return (
 		<Container>
@@ -214,7 +211,8 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 
 						<Form.Group className="mb-4" controlId="remember me">
 							<Form.Check type="checkbox" label="Remember me"
-								checked={check == 'true'} onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')}/>
+								checked={check == 'true'} 
+								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')}/>
 						</Form.Group>
 
 						<button type="submit" className="btn btn-primary w-100">
