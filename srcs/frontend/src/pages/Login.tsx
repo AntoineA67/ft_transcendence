@@ -30,7 +30,7 @@ function Login() {
 	
 	return (
 		// <body> cannot appear as a child of <div>.
-		<body>
+		<>
 			{page == 'landing' && <LandingPage 
 				handleSignin={() => setPage('signin')}
 				handleSignup={() => setPage('signup')} />}
@@ -40,7 +40,7 @@ function Login() {
 			{page === 'signup' && <Signup 
 				handleLanding={() => setPage('landing')}
 				togglePassword={togglePassword} />}
-		</body>
+		</>
 	);
 }
 
@@ -52,6 +52,37 @@ type signupProps = {
 }
 
 function Signup({ handleLanding, togglePassword }: signupProps) {	
+	const [nick, setNick] = useState<string>('');
+	const [email, setEmail] = useState<string>('');
+	const [pass, setPass] = useState<string>('');
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		console.log("handle submit");
+		const newUser = {
+			id: nick,
+			nickname: nick,
+			email: email,
+			password: pass
+		}
+
+		const fetchObj = {
+			method: 'POST',
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(newUser)
+		}
+		try {
+			const response = await fetch('http://localhost:5000/users', fetchObj)
+			if (!response.ok) throw Error('response not ok');
+		} catch (err: any) {
+			console.log(err);
+		} finally {
+			console.log('check new nickname...')
+		}
+	}
+
 	return (
 		<Container>
 			<Row className="justify-content-center">
@@ -59,22 +90,25 @@ function Signup({ handleLanding, togglePassword }: signupProps) {
 					<button 
 						className="leftArrow my-4"
 						onClick={handleLanding} />
-					<Form className="w-100">
+					<Form className="w-100" onSubmit={handleSubmit}>
 						<h3 style={{ color: "white" }}>New Account!</h3>
 						
 						<Form.Group className="my-4" controlId="nickname">
 							<Form.Label>Nickname</Form.Label>
-							<Form.Control required type="text" placeholder="nickname" />
+							<Form.Control required type="text" placeholder="nickname" 
+								value={nick} onChange={(e) => {setNick(e.target.value)}}/>
 						</Form.Group>
 
 						<Form.Group className="mb-4" controlId="email address">
 							<Form.Label>Email address</Form.Label>
-							<Form.Control required type="email" placeholder="email" />
+							<Form.Control required type="email" placeholder="email"
+								value={email} onChange={(e) => { setEmail(e.target.value) }} />
 						</Form.Group>
 
 						<Form.Group className="mb-4" controlId="password">
 							<Form.Label>Password</Form.Label>
-							<Form.Control required type="password" placeholder="password" />
+							<Form.Control required type="password" placeholder="password"
+								value={pass} onChange={(e) => { setPass(e.target.value) }} />
 							<div className="d-flex justify-content-end">
 								<img
 									id="eye"
@@ -91,10 +125,10 @@ function Signup({ handleLanding, togglePassword }: signupProps) {
 						</Form.Group>
 
 						<Form.Group className="mb-4" controlId="accept terms">
-							<Form.Check type="checkbox" label="I accept terms and conditions" />
+							<Form.Check required type="checkbox" label="I accept terms and conditions"/>
 						</Form.Group>
 						
-						<button type="submit" className="btn btn-secondary w-100">
+						<button type="submit" className="btn btn-secondary w-100" >
 							Sign up
 						</button>
 					</Form>	
@@ -112,6 +146,34 @@ type signinProps = {
 }
 
 function Signin({ handleLanding, togglePassword }: signinProps) {
+	const [nick, setNick] = useState<string>('');
+	const [pass, setPass] = useState<string>('');
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		console.log("handle submit");
+		const user = {
+			id: nick,
+			nickname: nick,
+			password: pass
+		}
+		const fetchObj = {
+			method: 'POST',
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(user)
+		}
+		try {
+			const response = await fetch('http://localhost:5000/login', fetchObj)
+			if (!response.ok) throw Error('response not ok');
+		} catch (err: any) {
+			console.log(err);
+		} finally {
+			console.log('check password...')
+		}
+	}
+	
 	return (
 		<Container>
 			<Row className="justify-content-center">
@@ -119,17 +181,19 @@ function Signin({ handleLanding, togglePassword }: signinProps) {
 					<button
 						className="leftArrow my-4"
 						onClick={handleLanding} />
-					<Form className="w-100">
+					<Form className="w-100" onSubmit={handleSubmit}>
 						<h3 style={{ color: "white" }}>Welcome back!</h3>
 
 						<Form.Group className="my-4" controlId="nickname">
 							<Form.Label>Nickname</Form.Label>
-							<Form.Control required type="text" placeholder="nickname" />
+							<Form.Control required type="text" placeholder="nickname"
+								value={nick} onChange={(e) => setNick(e.target.value)} />
 						</Form.Group>
 
 						<Form.Group className="mb-4" controlId="password">
 							<Form.Label>Password</Form.Label>
-							<Form.Control required type="password" placeholder="password" />
+							<Form.Control required type="password" placeholder="password"
+								value={pass} onChange={(e) => setPass(e.target.value)} />
 							<div className="d-flex justify-content-end">
 								<img
 									id="eye"
