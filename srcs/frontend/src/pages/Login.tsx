@@ -6,7 +6,7 @@ import githubLogo from '../assets/github.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
@@ -27,8 +27,9 @@ type login = {
 }
 
 function Login() {
+	
 	const [page, setPage] = useState<string>('landing');
-
+	
 	const rememberMe = (user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 		if (checkbox == null) return ;
@@ -42,7 +43,7 @@ function Login() {
 			localStorage.setItem("rememberme", 'false');
 		}
 	}
-
+	
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
 		e.preventDefault();
 		rememberMe(user);
@@ -61,7 +62,7 @@ function Login() {
 			console.log('do something here...');
 		}
 	}
-
+	
 	const togglePassword = () => {
 		let x = document.getElementById("password") as HTMLInputElement;
 		let eye = document.getElementById("eye") as HTMLImageElement;
@@ -73,6 +74,16 @@ function Login() {
 			eye.src = eyeopen;
 		}
 	}
+	
+	// browser history
+	useEffect(() => {
+		
+		const popStateHandler = (e: PopStateEvent) => {e.state && setPage(e.state.page)};
+
+		window.history.pushState({page: 'landing'}, '');
+		window.addEventListener('popstate', popStateHandler);
+		return (() => {window.removeEventListener('popstate', popStateHandler)});
+	}, []);
 	
 	return (
 		<>
@@ -110,7 +121,7 @@ function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {
 				<Col sm="6" lg="4" >
 					<button 
 						className="leftArrow my-4"
-						onClick={handleLanding} />
+						onClick={() => { handleLanding(); window.history.pushState({ page: 'landing' }, '') }} />
 					<Form className="w-100" onSubmit={(e) => (
 						handleSubmit(e, {id: nick, nickname: nick, email: email, password: pass}))}>
 						<h3 style={{ color: "white" }}>New Account!</h3>
@@ -179,7 +190,7 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 				<Col sm="6" lg="4" >
 					<button
 						className="leftArrow my-4"
-						onClick={handleLanding} />
+						onClick={() => {handleLanding(); window.history.pushState({page: 'landing'}, '')}} />
 					<Form className="w-100" onSubmit={(e) => (
 						handleSubmit(e, {id: nick, nickname: nick, password: pass}))}>
 						<h3 style={{ color: "white" }}>Welcome back!</h3>
@@ -259,12 +270,12 @@ function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 							justify-content-center align-items-center "
 							style={{position: "relative", top: "30px"}}>
 							<button
-								onClick={handleSignin}
+								onClick={() => { handleSignin(); window.history.pushState({page: 'signin'}, ''); }}
 								className="btn btn-primary w-75">
 								Login
 							</button>
 							<button
-								onClick={handleSignup}
+								onClick={() => { handleSignup(); window.history.pushState({page: 'signup'}, ''); }}
 								className="btn btn-outline-primary w-75">
 								Sign up
 							</button>
