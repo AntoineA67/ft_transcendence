@@ -74,16 +74,12 @@ function Login() {
 			eye.src = eyeopen;
 		}
 	}
-	console.log('history state')
-	console.log(window.history.state);
 	
 	// browser history
 	useEffect(() => {
-		
 		const popStateHandler = (e: PopStateEvent) => {e.state && setPage(e.state.page)};
 		window.history.replaceState({page: 'landing'}, '');
 		window.addEventListener('popstate', popStateHandler);
-		console.log('useeffect');
 		return (() => {window.removeEventListener('popstate', popStateHandler)});
 	}, []);
 	
