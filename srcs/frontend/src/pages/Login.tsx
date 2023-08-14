@@ -84,7 +84,7 @@ function Login() {
 	}, []);
 	
 	return (
-		<>
+		<>  {/*body cannot appear as child of div*/}
 			{page == 'landing' && <LandingPage 
 				handleSignin={() => setPage('signin')}
 				handleSignup={() => setPage('signup')} />}
@@ -145,13 +145,7 @@ function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {
 									id="eye"
 									src={eyeopen}
 									onClick={togglePassword}
-									className="ms-5"
-									style={{
-										cursor: "pointer",
-										position: "relative",
-										bottom: "30px",
-										right: "20px"
-									}} />
+									className="ms-5 togglePassword"/>
 							</div>
 						</Form.Group>
 
@@ -208,13 +202,7 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 									id="eye"
 									src={eyeopen}
 									onClick={togglePassword}
-									className="ms-5"
-									style={{
-										cursor: "pointer",
-										position: "relative",
-										bottom: "30px",
-										right: "20px"
-									}} />
+									className="ms-5 togglePassword"/>
 							</div>
 						</Form.Group>
 
