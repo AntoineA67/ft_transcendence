@@ -6,7 +6,7 @@ import githubLogo from '../assets/github.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useOutletContext, Link } from "react-router-dom";
 
 
@@ -29,15 +29,12 @@ type login = {
 }
 
 type loginContext = {
-	rememberMe: (user: newUser | login) => void,
 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, url?: string) => void,
 	togglePassword: () => void,
 }
 
 export function Login() {
-	
-	// const [page, setPage] = useState<string>('landing');
-	
+		
 	const rememberMe = (user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 		if (checkbox == null) return ;
@@ -83,42 +80,15 @@ export function Login() {
 		}
 	}
 	
-	// // browser history
-	// useEffect(() => {
-	// 	const popStateHandler = (e: PopStateEvent) => {e.state && setPage(e.state.page)};
-	// 	window.history.replaceState({page: 'landing'}, '');
-	// 	window.addEventListener('popstate', popStateHandler);
-	// 	return (() => {window.removeEventListener('popstate', popStateHandler)});
-	// }, []);
-	
 	return (
-		// <>  {/*body cannot appear as child of div*/}
-		// 	{page == 'landing' && <LandingPage 
-		// 		handleSignin={() => setPage('signin')}
-		// 		handleSignup={() => setPage('signup')} />}
-		// 	{page === 'signin' && <Signin 
-		// 		handleLanding={() => setPage('landing')}
-		// 		togglePassword={togglePassword}
-		// 		handleSubmit={handleSubmit} />}
-		// 	{page === 'signup' && <Signup 
-		// 		handleLanding={() => setPage('landing')}
-		// 		togglePassword={togglePassword}
-		// 		handleSubmit={handleSubmit} />}
-		// </>
-		<Outlet context={{rememberMe, togglePassword, handleSubmit}}/>
+		<Outlet context={{togglePassword, handleSubmit}}/>
 	);
 }
 
 /* sign up page */
 
-// type signupProps = {
-// 	handleLanding: () => void,
-// 	togglePassword: () => void,
-// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
-// }
-
 export function Signup() {	
-	const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
+	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 	
 	const [nick, setNick] = useState('');
 	const [email, setEmail] = useState('');
@@ -176,14 +146,8 @@ export function Signup() {
 
 /* sign in page */
 
-// type signinProps = {
-// 	handleLanding: () => void,
-// 	togglePassword: () => void,
-// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
-// }
-
 export function Signin() {
-	const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
+	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
 	const [nick, setNick] = useState<string>(localStorage.getItem('nickname') || '');
 	const [pass, setPass] = useState<string>(localStorage.getItem('password') || '');
@@ -240,13 +204,7 @@ export function Signin() {
 
 /* landing page */
 
-// type landingPageProps = {
-// 	handleSignin: () => void,
-// 	handleSignup: () => void,
-// }
-
 export function LandingPage() {
-	// const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
 	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
 
