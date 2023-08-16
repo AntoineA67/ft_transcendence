@@ -35,23 +35,14 @@ type loginContext = {
 
 export function Login() {
 		
-	const rememberMe = (user: newUser | login) => {
+	const saveToken = (user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
-		if (checkbox == null) return ;
-		if (checkbox.checked) {
-			localStorage.setItem("nickname", user.nickname);
-			localStorage.setItem("password", user.password);
-			localStorage.setItem("rememberme", "true");
+
+		if (checkbox && checkbox.checked) {
+			// localStorage.setItem('token', token);
 		} else {
-			localStorage.removeItem("nickname");
-			localStorage.removeItem("password");
-			localStorage.setItem("rememberme", 'false');
+			//  sessionStorage.setItem('token', token);
 		}
-		// if (checkbox && checkbox.checked) {
-		// 	localStorage.setItem('token', token);
-		// } else {
-		// 	 sessionStorage.setItem('token', token);
-		// }
 	}
 	
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
@@ -69,7 +60,7 @@ export function Login() {
 			console.log(err);
 		} finally {
 			console.log('do something here...');
-			// rememberMe(user);
+			saveToken(user);
 		}
 	}
 	
@@ -154,9 +145,9 @@ export function Signup() {
 export function Signin() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
-	const [nick, setNick] = useState<string>(localStorage.getItem('nickname') || '');
-	const [pass, setPass] = useState<string>(localStorage.getItem('password') || '');
-	const [check, setCheck] = useState<string>(localStorage.getItem('rememberme') || 'true');
+	const [nick, setNick] = useState<string>('');
+	const [pass, setPass] = useState<string>('');
+	const [check, setCheck] = useState<string>('true');
 	
 	return (
 		<Container>
