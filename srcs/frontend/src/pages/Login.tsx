@@ -47,12 +47,16 @@ export function Login() {
 			localStorage.removeItem("password");
 			localStorage.setItem("rememberme", 'false');
 		}
+		// if (checkbox && checkbox.checked) {
+		// 	localStorage.setItem('token', token);
+		// } else {
+		// 	 sessionStorage.setItem('token', token);
+		// }
 	}
 	
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
 		e.preventDefault();
-		rememberMe(user);
-
+		
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -65,6 +69,7 @@ export function Login() {
 			console.log(err);
 		} finally {
 			console.log('do something here...');
+			// rememberMe(user);
 		}
 	}
 	
