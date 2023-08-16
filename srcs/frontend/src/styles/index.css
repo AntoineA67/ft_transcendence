@@ -14,6 +14,12 @@ body {
     monospace;
 } */
 
+.scrollbar {
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+
 .link-text {
 	/* display: flex !important;
 	justify-content: center;

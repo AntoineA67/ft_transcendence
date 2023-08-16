@@ -91,6 +91,7 @@ export function Signup() {
 	const [pass, setPass] = useState('');
 
 	return (
+		<div className='scrollbar'>
 		<Container>
 			<Row className="justify-content-center">
 				<Col sm="6" lg="4" >
@@ -137,6 +138,7 @@ export function Signup() {
 				</Col>
 			</Row>
 		</Container>
+		</div>
 	)
 }
 
@@ -150,7 +152,8 @@ export function Signin() {
 	const [check, setCheck] = useState<string>('true');
 	
 	return (
-		<Container>
+		<div className='scrollbar'>
+		<Container >
 			<Row className="justify-content-center">
 				<Col sm="6" lg="4" >
 					<Link to={'..'} style={{display: "inline-block"}}>
@@ -195,6 +198,7 @@ export function Signin() {
 				</Col>
 			</Row>
 		</Container>
+		</div>
 	);
 }
 
@@ -207,7 +211,7 @@ export function LandingPage() {
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
 	return (
-		<>
+		<div className='scrollbar'>
 		<Container className="text-center" style={{height: "650px"}}>
 			<Row className="justify-content-center h-100 landingBg">
 				<Col sm="6" lg="4">
@@ -246,7 +250,7 @@ export function LandingPage() {
 			Projet de fin de tronc-commun de l’école 42
 			<a href={github}><img src={githubLogo} /></a>
 		</footer>
-		</>
+		</div>
 	);
 }
 
