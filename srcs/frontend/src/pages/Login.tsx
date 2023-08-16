@@ -1,5 +1,5 @@
-import '../styles/index.css'
 import '../styles/Login.css'
+import '../styles/index.css'
 // import '../styles/customButton.css'
 
 import githubLogo from '../assets/github.svg';
@@ -7,6 +7,8 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
 import { useEffect, useState } from 'react';
+import { Outlet, useOutletContext, Link } from "react-router-dom";
+
 
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
@@ -26,9 +28,15 @@ type login = {
 	password: string
 }
 
-function Login() {
+type loginContext = {
+	rememberMe: (user: newUser | login) => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, url?: string) => void,
+	togglePassword: () => void,
+}
+
+export function Login() {
 	
-	const [page, setPage] = useState<string>('landing');
+	// const [page, setPage] = useState<string>('landing');
 	
 	const rememberMe = (user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
@@ -75,40 +83,43 @@ function Login() {
 		}
 	}
 	
-	// browser history
-	useEffect(() => {
-		const popStateHandler = (e: PopStateEvent) => {e.state && setPage(e.state.page)};
-		window.history.replaceState({page: 'landing'}, '');
-		window.addEventListener('popstate', popStateHandler);
-		return (() => {window.removeEventListener('popstate', popStateHandler)});
-	}, []);
+	// // browser history
+	// useEffect(() => {
+	// 	const popStateHandler = (e: PopStateEvent) => {e.state && setPage(e.state.page)};
+	// 	window.history.replaceState({page: 'landing'}, '');
+	// 	window.addEventListener('popstate', popStateHandler);
+	// 	return (() => {window.removeEventListener('popstate', popStateHandler)});
+	// }, []);
 	
 	return (
-		<>  {/*body cannot appear as child of div*/}
-			{page == 'landing' && <LandingPage 
-				handleSignin={() => setPage('signin')}
-				handleSignup={() => setPage('signup')} />}
-			{page === 'signin' && <Signin 
-				handleLanding={() => setPage('landing')}
-				togglePassword={togglePassword}
-				handleSubmit={handleSubmit} />}
-			{page === 'signup' && <Signup 
-				handleLanding={() => setPage('landing')}
-				togglePassword={togglePassword}
-				handleSubmit={handleSubmit} />}
-		</>
+		// <>  {/*body cannot appear as child of div*/}
+		// 	{page == 'landing' && <LandingPage 
+		// 		handleSignin={() => setPage('signin')}
+		// 		handleSignup={() => setPage('signup')} />}
+		// 	{page === 'signin' && <Signin 
+		// 		handleLanding={() => setPage('landing')}
+		// 		togglePassword={togglePassword}
+		// 		handleSubmit={handleSubmit} />}
+		// 	{page === 'signup' && <Signup 
+		// 		handleLanding={() => setPage('landing')}
+		// 		togglePassword={togglePassword}
+		// 		handleSubmit={handleSubmit} />}
+		// </>
+		<Outlet context={{rememberMe, togglePassword, handleSubmit}}/>
 	);
 }
 
 /* sign up page */
 
-type signupProps = {
-	handleLanding: () => void,
-	togglePassword: () => void,
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
-}
+// type signupProps = {
+// 	handleLanding: () => void,
+// 	togglePassword: () => void,
+// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
+// }
 
-function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {	
+export function Signup() {	
+	const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
+	
 	const [nick, setNick] = useState('');
 	const [email, setEmail] = useState('');
 	const [pass, setPass] = useState('');
@@ -117,9 +128,9 @@ function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {
 		<Container>
 			<Row className="justify-content-center">
 				<Col sm="6" lg="4" >
-					<button 
-						className="leftArrow my-4"
-						onClick={() => { handleLanding(); window.history.pushState({ page: 'landing' }, '') }} />
+					<Link to={'..'} style={{display: "inline-block"}}>
+						<button className="leftArrow my-4"></button>
+					</Link>
 					<Form className="w-100" onSubmit={(e) => (
 						handleSubmit(e, {id: nick, nickname: nick, email: email, password: pass}))}>
 						<h3 style={{ color: "white" }}>New Account!</h3>
@@ -165,13 +176,15 @@ function Signup({ handleLanding, togglePassword, handleSubmit }: signupProps) {
 
 /* sign in page */
 
-type signinProps = {
-	handleLanding: () => void,
-	togglePassword: () => void,
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
-}
+// type signinProps = {
+// 	handleLanding: () => void,
+// 	togglePassword: () => void,
+// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login) => Promise<void>
+// }
 
-function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
+export function Signin() {
+	const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
+
 	const [nick, setNick] = useState<string>(localStorage.getItem('nickname') || '');
 	const [pass, setPass] = useState<string>(localStorage.getItem('password') || '');
 	const [check, setCheck] = useState<string>(localStorage.getItem('rememberme') || 'true');
@@ -180,9 +193,9 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 		<Container>
 			<Row className="justify-content-center">
 				<Col sm="6" lg="4" >
-					<button
-						className="leftArrow my-4"
-						onClick={() => {handleLanding(); window.history.pushState({page: 'landing'}, '')}} />
+					<Link to={'..'} style={{display: "inline-block"}}>
+						<button className="leftArrow my-4"></button>
+					</Link>
 					<Form className="w-100" onSubmit={(e) => (
 						handleSubmit(e, {id: nick, nickname: nick, password: pass}))}>
 						<h3 style={{ color: "white" }}>Welcome back!</h3>
@@ -227,13 +240,14 @@ function Signin({ handleLanding, togglePassword, handleSubmit }: signinProps) {
 
 /* landing page */
 
-type landingPageProps = {
-	handleSignin: () => void,
-	handleSignup: () => void,
-}
+// type landingPageProps = {
+// 	handleSignin: () => void,
+// 	handleSignup: () => void,
+// }
 
-function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
-	
+export function LandingPage() {
+	// const { rememberMe, togglePassword, handleSubmit } = useOutletContext<loginContext>();
+
 	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
 
 	const github = "https://github.com/AntoineA67/ft_transcendence";
@@ -255,16 +269,16 @@ function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 						<div className="mt-5 d-flex flex-column gap-3 
 							justify-content-center align-items-center "
 							style={{position: "relative", top: "30px"}}>
-							<button
-								onClick={() => { handleSignin(); window.history.pushState({page: 'signin'}, ''); }}
-								className="btn btn-primary w-75">
-								Login
-							</button>
-							<button
-								onClick={() => { handleSignup(); window.history.pushState({page: 'signup'}, ''); }}
-								className="btn btn-outline-primary w-75">
-								Sign up
-							</button>
+							<Link to={'signin'} className="w-75 link-text">
+								<button className="btn btn-primary w-100">
+										Login
+								</button>
+							</Link>
+							<Link to={'signup'} className="w-75 link-text">
+								<button className="btn btn-outline-primary w-100">
+										Signup
+								</button>
+							</Link>
 							<a href={oauth42} className="btn-invisible w-75">
 								Sign in with 42
 							</a>
@@ -283,4 +297,3 @@ function LandingPage({ handleSignin, handleSignup }: landingPageProps) {
 }
 
 
-export default Login;
