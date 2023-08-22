@@ -1,8 +1,8 @@
-.edit-pen {
+.pale-little-icon {
 	cursor: pointer;
 }
 
-.edit-pen:hover {
+.pale-little-icon:hover {
 	filter: brightness(3);
 	transition: all 0.3s;
 }
