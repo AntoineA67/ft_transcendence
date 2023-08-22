@@ -24,11 +24,11 @@ export default function Sidebar() {
 	}
 	
 	return (
-		<div className="scrollbar">
+		<div className="scrollbar d-flex" >
 			<div className="sidebar">
 				<nav className="navbar navbar-nav">
 					<ul id="sidebar-ul" className="ps-0">
-						<li className='sidebar-item' onClick={handleClick}>
+						<li className='sidebar-item sidebar-item-magenta' onClick={handleClick}>
 							<Link to="."><img src={Home}/></Link>
 						</li>
 						<li className='sidebar-item' onClick={handleClick}>

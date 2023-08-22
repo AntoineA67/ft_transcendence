@@ -3,10 +3,11 @@
 	top: 0;
 	left: 0;
 
+	display: inline;
 	height: 100%;
 	min-height: 500px;
 	width: 50px;
-	background-color: grey;
+	background-color: black;
 	border-right-color: white;
 }
 
