@@ -1,5 +1,6 @@
 import Home from './pages/Home';
 import Game from './pages/Game';
+import Sidebar from './pages/Sidebar';
 import { createBrowserRouter } from "react-router-dom";
 import TestDB from './pages/TestDB';
 import Profile from './pages/Profile';
@@ -50,6 +51,12 @@ const router = createBrowserRouter([
 		loader: () => ({ message: "Hello Data Router!" }),
 		Component() {
 			return Game();
+		},
+	},
+	{
+		path: "/sidebar",
+		Component() {
+			return Sidebar();
 		},
 	},
 ]);
