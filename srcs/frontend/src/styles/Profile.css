@@ -1,0 +1,8 @@
+.edit-pen {
+	cursor: pointer;
+}
+
+.edit-pen:hover {
+	filter: brightness(3);
+	transition: all 0.3s;
+}
