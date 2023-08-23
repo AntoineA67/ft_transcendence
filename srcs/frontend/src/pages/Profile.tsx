@@ -17,7 +17,7 @@ function Profile() {
 	const [editnick, setEditnick] = useState(nickname);
 	const [editbio, setEditbio] = useState(bio);
 
-	const editNick = () => {
+	const edit = (id: string) => {
 
 	}
 	
@@ -30,11 +30,11 @@ function Profile() {
 			<img alt="avatar" src={avatar}
 				style={{height: "100px", width: "100px", borderRadius: "50%", border: "1px solid white"}} />
 			
-			<input className="my-5 mx-1 text-center input-profile" readOnly value={editnick} />
-			<button className="edit-pen" onClick={editNick} />
+			<input id="nickname" className="text-center input-profile" readOnly value={editnick} />
+			<button id="savenick" className="edit-pen" onClick={() => edit('nickname')} />
 
-			<input className="mx-5 text-break" readOnly value={bio} />			
-			<button className="edit-pen" onClick={editNick} />
+			<input id="bio" className="text-center text-break" readOnly value={editbio} />			
+			<button id="savebio" className="edit-pen" onClick={() => edit('bio')} />
 
 		</Container>
 	);
