@@ -1,0 +1,99 @@
+
+button {
+	/* layout */
+	display: block;
+	width: 325px;
+	height: 54px;
+	padding: 10px 24px;
+}
+
+/* customized bs button */
+/* have to use with <button>, <Button> component doesn't work */
+.btn-primary {
+	--bs-btn-color: #fff;
+	--bs-btn-bg: #fa34c3;
+	--bs-btn-border-color: #fa34c3;
+	
+	--bs-btn-hover-color: #fa34c3;
+	--bs-btn-hover-bg: #fff;
+	--bs-btn-hover-border-color: #fa34c3;
+	--bs-btn-focus-shadow-rgb: 49, 132, 253;
+	
+	--bs-btn-active-color: #fff;
+	--bs-btn-active-bg: #be2693;
+	--bs-btn-active-border-color: #fa34c3;
+	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+	
+	--bs-btn-disabled-color: #fff;
+	--bs-btn-disabled-bg: #be2693;
+	--bs-btn-disabled-border-color: #be2693;
+}
+
+.btn-secondary {
+	--bs-btn-color: #000;
+	--bs-btn-bg: #34fafa;
+	--bs-btn-border-color: #34fafa;
+	--bs-btn-hover-color: #000;
+	--bs-btn-hover-bg: #1f8f8f;
+	--bs-btn-hover-border-color: #1f8f8f;
+	--bs-btn-focus-shadow-rgb: 130, 138, 145;
+	--bs-btn-active-color: #fff;
+	--bs-btn-active-bg: #565e64;
+	--bs-btn-active-border-color: #51585e;
+	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+	--bs-btn-disabled-color: #fff;
+	--bs-btn-disabled-bg: #1f8f8f;
+	--bs-btn-disabled-border-color: #1f8f8f;
+}
+
+.btn-outline-primary {
+	--bs-btn-color: #fff;
+	--bs-btn-border-color: #fa34c3;
+
+	--bs-btn-hover-color: #fa34c3;
+	--bs-btn-hover-bg: transparent;
+	--bs-btn-hover-border-color: #fff;
+
+	--bs-btn-focus-shadow-rgb: 13, 110, 253;
+
+	--bs-btn-active-color: #fff;
+	--bs-btn-active-bg: #be2693;
+	--bs-btn-active-border-color: #be2693;
+	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+
+	--bs-btn-disabled-color: #be2693;
+	--bs-btn-disabled-bg: transparent;
+	--bs-btn-disabled-border-color: #be2693;
+	--bs-gradient: none;
+}
+
+.btn-outline-secondary {
+	--bs-btn-color: #6c757d;
+	--bs-btn-border-color: #34fafa;
+	--bs-btn-hover-color: #fff;
+	--bs-btn-hover-bg: #1f8f8f;
+	--bs-btn-hover-border-color: #1f8f8f;
+	--bs-btn-focus-shadow-rgb: 108, 117, 125;
+	--bs-btn-active-color: #fff;
+	--bs-btn-active-bg: #6c757d;
+	--bs-btn-active-border-color: #6c757d;
+	--bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+	--bs-btn-disabled-color: #1f8f8f;
+	--bs-btn-disabled-bg: transparent;
+	--bs-btn-disabled-border-color: #1f8f8f;
+	--bs-gradient: none;
+}
+
+.btn-invisible {
+	color: grey;
+	border-radius: 16px;
+	border: transparent;
+	background: transparent;
+	text-decoration: none;
+}
+
+.btn-invisible:hover {
+	color: #fff;
+	transition: all 0.3s;
+	text-decoration: none;
+}
