@@ -1,5 +1,7 @@
-import '../styles/Sidebar.css'
-import '../styles/index.css'
+import '../styles/Sidebar.css';
+import '../styles/index.css';
+
+import { useState, useEffect } from 'react';
 
 import Game from '../assets/Game.svg';
 import Chat from '../assets/Chat.svg';
@@ -9,7 +11,33 @@ import Friend from '../assets/Friend.svg';
 
 import { Outlet, useOutletContext, Link } from "react-router-dom";
 
+type userContext = {
+	nickname: string,
+	bio: string,
+	avatar: string,
+	setNickname: React.Dispatch<React.SetStateAction<string>>,
+	setBio: React.Dispatch<React.SetStateAction<string>>,
+	setAvatar: React.Dispatch<React.SetStateAction<string>>,
+}
+
 export default function Sidebar() {
+	//fetch user info
+	const [nickname, setNickname] = useState('Intelligent Seagul');
+	const [bio, setBio] = useState('Gaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+	const [avatar, setAvatar] = useState('../assets/Friend.svg');
+
+	const fetchUser = async () => {
+		//fetch nickname
+		//fetch bio
+		//fetch avatar url
+		//set all
+	}
+
+	useEffect(() => {
+    	fetchUser();
+	}, []);
+	
+	
 	const handleClick = (e: React.MouseEvent<HTMLElement>) => {
 		const clicked = e.currentTarget as HTMLElement;
 		const sidebar = document.getElementById('sidebar-ul');
@@ -22,7 +50,7 @@ export default function Sidebar() {
 		}
 		clicked.classList.add("sidebar-item-magenta");
 	}
-	
+
 	return (
 		<div className="scrollbar d-flex" >
 			<div className="sidebar">
@@ -46,7 +74,12 @@ export default function Sidebar() {
 					</ul>
 				</nav>
 			</div>
-			<Outlet />
+			<Outlet context={{ nickname, bio, avatar, setNickname, setBio, setAvatar 
+				} satisfies userContext}/>
 		</div>
 	);
+}
+
+export function useUser() {
+	return useOutletContext<userContext>();
 }

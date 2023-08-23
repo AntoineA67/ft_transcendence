@@ -6,3 +6,13 @@
 	filter: brightness(3);
 	transition: all 0.3s;
 }
+
+.input-profile {
+	background-color: transparent;
+	border: transparent;
+	color: white;
+}
+
+.input-profile:focus {
+	border: none;
+}
