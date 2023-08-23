@@ -31,10 +31,10 @@ function Profile() {
 				style={{height: "100px", width: "100px", borderRadius: "50%", border: "1px solid white"}} />
 			
 			<input id="nickname" className="text-center input-profile" readOnly value={editnick} />
-			<button id="savenick" className="edit-pen" onClick={() => edit('nickname')} />
+			<button id="edit-nick" className="edit-pen" onClick={() => edit('nickname')} />
 
 			<input id="bio" className="text-center text-break" readOnly value={editbio} />			
-			<button id="savebio" className="edit-pen" onClick={() => edit('bio')} />
+			<button id="edit-bio" className="ok" onClick={() => edit('bio')} />
 
 		</Container>
 	);
