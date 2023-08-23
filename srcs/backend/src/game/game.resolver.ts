@@ -6,7 +6,7 @@ import {
 	Context,
 } from '@nestjs/graphql'
 import { Inject } from '@nestjs/common'
-import { PrismaService } from 'src/prisma.service'
+import { PrismaService } from 'src/prisma/prisma.service'
 import { game as Game } from 'src/prisma/@generated/game/game.model'
 
 
