@@ -14,8 +14,38 @@
 	transition: all 0.3s;
 }
 
+.edit-pen {
+	background: url(../assets/EditPen.svg) no-repeat;
+	background-position: center;
+	background-color: transparent;
+	width: 20px;
+	height: 20px;
+	border: none;
+	border-radius: 50%;
+	display: inline;
+}
 
-button {
+.edit-pen:hover {
+	filter: brightness(3);
+	transition: all 0.3s;
+}
+
+.setting {
+	background: url(../assets/setting.svg) no-repeat;
+	background-position: center;
+	background-color: transparent;
+	width: 20px;
+	height: 20px;
+	border: none;
+	border-radius: 50%;
+}
+
+.setting:hover {
+	filter: brightness(3);
+	transition: all 0.3s;
+}
+
+.big-button {
 	/* layout */
 	display: block;
 	width: 325px;
