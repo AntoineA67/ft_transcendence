@@ -33,22 +33,16 @@ type editTextProp = {
 
 function EditText({ type, content, setContent, setEdit }: editTextProp) {
 	const [mod, setMod] = useState(content);
-
-	function auto_row() {
+	
+	useEffect(() => {
 		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
 		el.style.height = (el.scrollHeight) + "px";
-	}
+	}, [mod]);
 	
-	function moveToEnd() {
+	useEffect(() => {
 		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
-		// element.focus();
 		el.setSelectionRange(el.value.length, el.value.length);
-	}
-
-	useEffect(moveToEnd, []);
-	useEffect(auto_row, [mod]);
-
-
+	}, []);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: string, content: string) {
 		e.preventDefault();
@@ -79,7 +73,26 @@ function EditText({ type, content, setContent, setEdit }: editTextProp) {
 			<button type="submit" className="ok" />
 		</form>
 	);
+}
 
+function NewAvatar() {
+
+	function autoUpload() {
+		const form = document.getElementById('form-avatar') as HTMLFormElement;
+		const input = document.getElementById('new-avatar') as HTMLInputElement;
+		if (form) {
+			form.submit();
+			input.value = '';
+		}
+	}
+
+	return (
+		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
+			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "30px" }}>
+				<input className='d-none' id="new-avatar" type="file" name="new-avatar" onChange={autoUpload}/>
+			</label>
+		</form>
+	);
 }
 
 function Profile() {
@@ -91,8 +104,10 @@ function Profile() {
 			<Link to="."><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
 			<img alt="avatar" src={avatar} className="my-3"
-				style={{ height: "100px", width: "100px", borderRadius: "50%", border: "1px solid white" }} />
+				style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} />
 			
+			<NewAvatar />
+
 			{edit == 'nick' ?
 				<EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit} />
 				: <Text type={'nick'} content={nickname} setEdit={setEdit} />}
