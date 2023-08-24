@@ -10,6 +10,7 @@ import Sidebar from './pages/Sidebar'
 import Home from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
+import ProfileSetting from './pages/ProfileSetting';
 
 
 //css
@@ -30,8 +31,9 @@ const root = ReactDOM.createRoot(
 root.render(
 	<BrowserRouter>
 		<Routes>
-			<Route path="/" element={<Sidebar />}>
+			< Route path="/" element={<Sidebar />}>
 				<Route index element={<Profile />} />
+				<Route path="setting" element={<ProfileSetting />}></Route>
 			</Route>
 			
 			<Route path="/login" element={<Login />}>

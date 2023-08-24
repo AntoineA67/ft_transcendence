@@ -101,7 +101,7 @@ function Profile() {
 
 	return (
 		<Container className="my-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white" }}>			
-			<Link to="."><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+			<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
 			<img alt="avatar" src={avatar} className="my-3"
 				style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} />
