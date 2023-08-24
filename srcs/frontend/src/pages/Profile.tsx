@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import { useUser } from './Sidebar';
 
-import Container from 'react-bootstrap/Container'; 
+import Container from 'react-bootstrap/Container';
 
 
 type textProp = {
@@ -15,14 +15,12 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-function Text({type, content, setEdit}: textProp) {
+function Text({ type, content, setEdit }: textProp) {
 	return (
-		<form className="my-3" style={{color: "white"}}>
-			<label htmlFor={`edit-${type}`}></label>
-			<input id={`edit-${type}`} readOnly className="form-control-plaintext" 
-				value={content} style={{color: "white"}}></input>
-			<button className="edit-pen" onClick={() => setEdit(type)}/>
-		</form>
+		<>
+			<p style={{ color: "white"}} className="mt-3 w-50 text-center text-wrap text-break">{content}</p>
+			<button className="edit-pen" onClick={() => setEdit(type)} />
+		</>
 	);
 }
 
@@ -33,9 +31,25 @@ type editTextProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-function EditText({type, content, setContent, setEdit}: editTextProp) {
+function EditText({ type, content, setContent, setEdit }: editTextProp) {
 	const [mod, setMod] = useState(content);
+
+	function auto_row() {
+		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
+		el.style.height = (el.scrollHeight) + "px";
+	}
 	
+	function moveToEnd() {
+		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
+		// element.focus();
+		el.setSelectionRange(el.value.length, el.value.length);
+	}
+
+	useEffect(moveToEnd, []);
+	useEffect(auto_row, [mod]);
+
+
+
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: string, content: string) {
 		e.preventDefault();
 		const fetchObj = {
@@ -50,18 +64,19 @@ function EditText({type, content, setContent, setEdit}: editTextProp) {
 		} catch (err: any) {
 			console.log(err)
 		} finally {
-			//if response ok, update
-			//if not do nothing
+			//check response
 			setContent(mod);
 			setEdit('done');
 		}
 	}
-	
+
 	return (
-		<form className="my-3" onSubmit={(e) => handleSubmit(e, type, content)}>
+		<form className="my-3 w-50 d-flex flex-column align-items-center" 
+			onSubmit={(e) => handleSubmit(e, type, content)}>
 			<label htmlFor={`edit-${type}`}></label>
-			<input id={`edit-${type}`} value={mod} onChange={(e) => setMod(e.target.value)}></input>
-			<button type="submit" className="ok"/>
+			<textarea id={`edit-${type}`} className="w-100 text-center my-1 edit-text-area" 
+				autoFocus value={mod} onChange={(e) => setMod(e.target.value)}></textarea>
+			<button type="submit" className="ok" />
 		</form>
 	);
 
@@ -72,25 +87,19 @@ function Profile() {
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	return (
-		<Container className="my-5 d-flex flex-column align-items-center" style={{color: "white", border: "2px solid white"}}>
-			<div className="position-absolute top-0 end-0">
-				<Link to="."><button className="setting"/></Link>
-			</div>
+		<Container className="my-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white" }}>			
+			<Link to="."><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
-			<img alt="avatar" src={avatar}
-				style={{height: "100px", width: "100px", borderRadius: "50%", border: "1px solid white"}} />
+			<img alt="avatar" src={avatar} className="my-3"
+				style={{ height: "100px", width: "100px", borderRadius: "50%", border: "1px solid white" }} />
 			
-			<div>
-				{edit == 'nick' ?
-					 <EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit}/>
-					: <Text type={'nick'} content={nickname} setEdit={setEdit} />} 
-			</div>
-
-			<div>
-				{edit == 'bio' ?
-					<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit}/>
-					: <Text type={'bio'} content={bio} setEdit={setEdit} /> }
-			</div>
+			{edit == 'nick' ?
+				<EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit} />
+				: <Text type={'nick'} content={nickname} setEdit={setEdit} />}
+			
+			{edit == 'bio' ?
+				<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit} />
+				: <Text type={'bio'} content={bio} setEdit={setEdit} />}
 
 		</Container>
 	);
