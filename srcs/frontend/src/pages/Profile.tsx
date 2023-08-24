@@ -17,12 +17,12 @@ type textProp = {
 
 function Text({type, content, setEdit}: textProp) {
 	return (
-		<div>
-			<p className="text-center text-break my-3" style={{color: "white"}}>
-				{content}
-			</p>
-			<button className="edit-pen" onClick={() => setEdit(type)} />
-		</div>
+		<form className="my-3" style={{color: "white"}}>
+			<label htmlFor={`edit-${type}`}></label>
+			<input id={`edit-${type}`} readOnly className="form-control-plaintext" 
+				value={content} style={{color: "white"}}></input>
+			<button className="edit-pen" onClick={() => setEdit(type)}/>
+		</form>
 	);
 }
 
@@ -58,7 +58,7 @@ function EditText({type, content, setContent, setEdit}: editTextProp) {
 	}
 	
 	return (
-		<form onSubmit={(e) => handleSubmit(e, type, content)}>
+		<form className="my-3" onSubmit={(e) => handleSubmit(e, type, content)}>
 			<label htmlFor={`edit-${type}`}></label>
 			<input id={`edit-${type}`} value={mod} onChange={(e) => setMod(e.target.value)}></input>
 			<button type="submit" className="ok"/>
