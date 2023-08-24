@@ -7,12 +7,11 @@
 	transition: all 0.3s;
 }
 
-.input-profile {
-	background-color: transparent;
-	border: transparent;
-	color: white;
-}
-
-.input-profile:focus {
+.edit-text-area {
+	background: transparent;
+	outline: none;
 	border: none;
+	/* width: 100%; */
+	/* font-size: 20px; */
+	color: #fff;
 }
