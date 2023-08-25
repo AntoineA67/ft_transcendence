@@ -1,0 +1,19 @@
+.tab-main-color {
+	background: linear-gradient(transparent, #fa34c3);
+	border-bottom: 3px solid #34fafa;
+	color: white;
+	text-align: center;
+	padding: 10px;
+	overflow: hidden;
+}
+
+.tab-greyout {
+	background: linear-gradient(transparent, #fa34c3);
+	border-bottom: 2px solid #34fafa;
+	color: white;
+	text-align: center;
+	padding: 10px;
+	filter: brightness(0.4);
+	overflow: hidden;
+	cursor: pointer;
+}
