@@ -11,6 +11,7 @@ export class UsersController {
 	@UseGuards(FortyTwoAuthGuard)
 	@Get()
 	async getAllGames(): Promise<User[]> {
+		console.log("/users")
 		const users = await this.usersService.findAll();
 		return await users;
 	}

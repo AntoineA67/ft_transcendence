@@ -19,12 +19,13 @@ export class AuthService {
 	// 	return null;
 	// }
 
-	async login(user) {
+	async login(user: any) {
 		if (!user) {
 			throw new BadRequestException('Unauthenticated');
 		}
 
 		const userExists = await this.findUserByLogin(user.login);
+		console.log('userExists', userExists);
 
 		if (!userExists) {
 			return this.registerUser(user);
