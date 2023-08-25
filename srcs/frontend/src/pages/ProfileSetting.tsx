@@ -22,35 +22,45 @@ export function ChangePassword() {
 
 export default function ProfileSetting() {
 	return (
+		<>
+			<Title title="Setting" />
+			<Stack className="col-sm-4 mx-auto" style={{color: "white" }}>
+				<Link to="." className='link-text link fs-5 m-3'>Change password </Link>
+				<Link to="." className='link-text link fs-5 m-3'>Double Authenticate </Link>
+				<Link to="." className='link-text link fs-5 m-3'>Change sth else </Link>
+				<Link to="." className='link-text link fs-5 m-3'>Log out</Link>
+			</Stack>
+		</>
+
 		// <div style={{height: "100%", width: "100%"}}>
 		// 	<div style={{backgroundColor: "black", color: "white"}}>hello</div>
 		// 	<Container style={{border: "1px solid white"}}>
 		// 		<Row className="justify-content-center h-100">
 		// 			{/* <Title title="Setting"></Title> */}
 		// 			<Col sm="6" lg="4" className="d-flex flex-column">
-		// 				<Link to="." className='link-text link fs-5 mt-4'>Change password </Link>	
-		// 				<Link to="." className='link-text link fs-5 mt-4'>Double Authenticate </Link>
-		// 				<Link to="." className='link-text link fs-5 mt-4'>Change password </Link>
-		// 				<button className="btn btn-outline-secondary mt-auto w-100" >
-		// 					Log out
-		// 				</button>
+						// <Link to="." className='link-text link fs-5 mt-4'>Change password </Link>	
+						// <Link to="." className='link-text link fs-5 mt-4'>Double Authenticate </Link>
+						// <Link to="." className='link-text link fs-5 mt-4'>Change password </Link>
+						// <button className="btn btn-outline-secondary mt-auto w-100" >
+						// 	Log out
+						// </button>
 		// 			</Col>
 		// 		</Row>
 		// 	</Container>
 		// </div>
 			// <Stack gap={2} className="col-md-7 mx-auto" style={{ color: "white", border: "2px solid white" }}>
-		<>
-			<Stack className="mb-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white" }}>
+		// <>
+		// 	<Stack className="d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white" }}>
 				
-				<Title title="Setting"></Title>
-				<Link to="." className='link-text link fs-5 mt-4 d-inline'>Change password </Link>
+		// 		<Title title="Setting"></Title>
+		// 		<Link to="." className='link-text link fs-5 mt-4 d-inline'>Change password </Link>
 			
-				<Link to="." className='link-text link fs-5 mt-4'>Double Authenticate </Link>
-				<Link to="." className='link-text link fs-5 mt-4'>Change password </Link>
-				<button className="btn btn-outline-secondary mt-auto w-50" >
-					Log out
-				</button>
-			</Stack>
-		</>
+		// 		<Link to="." className='link-text link fs-5 mt-4'>Double Authenticate </Link>
+		// 		<Link to="." className='link-text link fs-5 mt-4'>Change password </Link>
+		// 		<button className="btn btn-outline-secondary mt-auto w-50" >
+		// 			Log out
+		// 		</button>
+		// 	</Stack>
+		// </>
 	);
 }
