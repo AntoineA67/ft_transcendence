@@ -7,6 +7,9 @@ import { Link } from "react-router-dom";
 import { useUser } from './Sidebar';
 
 import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Stack from 'react-bootstrap/Stack';
 
 
 type textProp = {
@@ -104,41 +107,35 @@ function Profile() {
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	return (
-		<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white"}}>			
-			<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+		<>
+			<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white"}}>			
+				<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
-			<img alt="avatar" src={avatar} className="my-3"
-				style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} />
-			
-			<NewAvatar />
+				<img alt="avatar" src={avatar} className="my-3"
+					style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} />
+				
+				<NewAvatar />
 
-			{edit == 'nick' ?
-				<EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit} />
-				: <Text type={'nick'} content={nickname} setEdit={setEdit} />}
-			
-			{edit == 'bio' ?
-				<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit} />
-				: <Text type={'bio'} content={bio} setEdit={setEdit} />}
+				{edit == 'nick' ?
+					<EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit} />
+					: <Text type={'nick'} content={nickname} setEdit={setEdit} />}
+				
+				{edit == 'bio' ?
+					<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit} />
+					: <Text type={'bio'} content={bio} setEdit={setEdit} />}
 
-			
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>hello</h2>
-			<h2>last hello</h2>
-			
-
-		</Container>
+			</Container>
+			<Container className="mb-5 pb-5" style={{color: "white", border: "1px solid white"}}>
+				<div className="row align-items-start">
+					<div className="col-sm">
+						History
+					</div>
+					<div className="col-sm">
+						Achievement
+					</div>
+				</div>
+			</Container>
+		</>
 	);
 }
 
