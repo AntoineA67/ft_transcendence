@@ -64,7 +64,7 @@ re:
 	@make clean
 	@make
 
-clean: down
+clean: down-volume
 	@echo "${GREEN}> Cleaning and deleting all images 🧹${END}"
 	@ { docker volume ls -q ; echo null; }
 
