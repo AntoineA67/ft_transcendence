@@ -10,3 +10,19 @@
 .tab-greyout {
 	filter: brightness(0.4);
 }
+
+.tab-ul {
+	padding-left: 0;
+	margin-left: 0;
+	margin: auto;
+}
+
+.tab-item {
+	background-color: #5a5a5a;
+	color: white;
+	list-style-type: none;
+	text-align: center;
+	margin-bottom: 5px;
+	padding: 15px;
+	border-radius: 10px;
+}

@@ -7,17 +7,30 @@ import { useState, useEffect } from 'react';
 import '../styles/Stat.css';
 
 function HistoryContent() {
+	const data = ['', '', '', '']
+	
+	
 	return (
 		<>
 		</>
 	);
 }
 
-function AchieveContent() {
-	
+function AchieveContent({achieve}: {achieve: string[]}) {
 	
 	return (
-		<></>
+		<ul className="tab-ul px-sm-5 py-5">
+			{achieve.map((value: string, index : number) => {
+				return(
+					index % 2 ? (
+						<li className='tab-item' style={{ backgroundColor: "transparent" }}> {value} </li>
+					) : (
+						<li className='tab-item'> {value} </li>
+					)
+				)
+			})}
+			<p style={{color: "red", textAlign: "center"}}>more</p>
+		</ul>
 	);
 }
 
@@ -27,6 +40,7 @@ function PieChart() {
 
 export default function Stat() {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
+	const achieve = ['Never missed a match', 'Win 10 rounds!', 'Win 50 rounds!', 'Logged in everyday this week']
 	
 	useEffect(() => {
 		let history = document.getElementById('history');
@@ -56,7 +70,8 @@ export default function Stat() {
 						</h5>
 					</div>
 				</div>
-				<div>content</div>
+				{show == 'achieve' && <AchieveContent achieve={achieve} />}
+				{show == 'history' && <div>history content</div>}
 			</Container>
 
 			{/* big screan */}
@@ -68,7 +83,7 @@ export default function Stat() {
 							History
 						</h5>
 						<div>
-							content
+							history content
 						</div>
 					</div>
 
@@ -77,7 +92,7 @@ export default function Stat() {
 							Achievement
 						</h5>
 						<div>
-							content
+							{<AchieveContent achieve={achieve} />}
 						</div>
 					</div>
 				</div>
