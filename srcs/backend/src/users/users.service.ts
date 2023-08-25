@@ -50,15 +50,16 @@ export class UsersService {
 	}
 
 	async getUserByUsername(username: string) {
+		console.log('getUserByUsername', username);
 		const user = await this.prisma.user.findFirst({
 			where: {
 				username,
 			},
 		});
 
-		if (!user) {
-			throw new NotFoundException(`User with username ${username} not found`);
-		}
+		// if (!user) {
+		// 	throw new NotFoundException(`User with username ${username} not found`);
+		// }
 
 		return user;
 	}
