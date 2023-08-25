@@ -9,7 +9,7 @@ export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) { }
 
 	@UseGuards(FortyTwoAuthGuard)
-	@Post('/login')
+	@Get('/login')
 	async login(@Req() req) {
 		return this.authService.login(req.user);
 	}
@@ -24,8 +24,10 @@ export class AuthController {
 		console.log(req.query.code)
 
 		// return '42 Callback';
+		// return await req.user;
+		res.status(HttpStatus.OK).json(req.user);
 
-		res.redirect('/');
+		// res.redirect('/');
 
 		// const token = await this.authService.login(req.user);
 
