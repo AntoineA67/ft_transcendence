@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import entities from '../../typeorm';
+import entities from '../../entities';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
