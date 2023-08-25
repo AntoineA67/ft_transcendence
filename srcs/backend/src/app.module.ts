@@ -36,7 +36,7 @@ import { FortyTwoAuthGuard } from './auth/forty-two-auth.guard';
   providers: [AppService,
     // {
     //   provide: APP_GUARD,
-    //   useClass: FortyTwoAuthGuard,
+    //   useClass: JwtAuthGuard,
     // },
     AppResolver,
   ],

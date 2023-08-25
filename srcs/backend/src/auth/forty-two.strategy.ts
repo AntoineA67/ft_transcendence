@@ -6,6 +6,7 @@ import { jwtConstants } from './constants';
 import { Strategy } from 'passport-42';
 import passport from 'passport';
 import { User, UsersService } from '../users/users.service';
+import { AuthService } from './auth.service';
 
 
 // var FortyTwoStrategy = require('passport-42').Strategy;
@@ -37,7 +38,7 @@ import { User, UsersService } from '../users/users.service';
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
-	constructor(private readonly usersService: UsersService) {
+	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) {
 		super({
 			clientID: process.env.FORTYTWO_APP_ID,
 			clientSecret: process.env.FORTYTWO_APP_SECRET,
@@ -62,7 +63,12 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 	async validate(accessToken: string, refreshToken: string, profile: any, cb: any): Promise<any> {
 		// You can implement your own logic to find or create the user here
 		console.log('accessToken', accessToken, refreshToken, profile);
-		const user = await this.usersService.findOrCreate(profile.id).then((user) => { console.log('user', user); });
+		// const user: any = await this.usersService.findOrCreate(profile.username).then(
+		const user: any = await this.authService.login(profile).then(
+			(user) => {
+				console.log('user', user);
+				return cb(null, user);
+			});
 
 		// Return the user or throw an error if something goes wrong
 		// if (!user) {
@@ -70,6 +76,10 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 		// }
 
 		// Returning the user object will be accessible in the request via `req.user`
-		cb(null, user);
+		// return await { login: user.login }
+		// console.log('awaiting user, will return')
+		// cb(null, user);
+		// return await user;
+		// return cb(null, user);
 	}
 }

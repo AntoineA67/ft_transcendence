@@ -9,15 +9,25 @@ export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) { }
 
 	@UseGuards(FortyTwoAuthGuard)
+	@Post('/login')
+	async login(@Req() req) {
+		return this.authService.login(req.user);
+	}
+
 	// @Public()
+	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
-	async fortyTwoCallback(@Req() req, @Res() res: Response): Promise<any> {
+	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		// return { message: '42 callback' };
-		// console.log('42 callback', req.user, res.headers);
+		console.log('42 callback', req.user);
 		// const users = await this.usersService.findAll();
+		console.log(req.query.code)
 
+		// return '42 Callback';
 
-		const token = await this.authService.login(req.user);
+		res.redirect('/');
+
+		// const token = await this.authService.login(req.user);
 
 		// res.cookie('access_token', token, {
 		// 	maxAge: 2592000000,
@@ -25,7 +35,7 @@ export class AuthController {
 		// 	secure: false,
 		// });
 
-		return { token };
+		// return { token };
 
 		// return users;
 	}
