@@ -3,7 +3,7 @@ import { GamesService } from './game.service';
 // import { Game } from 'src/entities/game.entity';
 import { game } from '@prisma/client';
 import { Public } from 'src/auth/public.decorator';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('games')
 export class GameController {
