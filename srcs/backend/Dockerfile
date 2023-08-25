@@ -13,7 +13,7 @@ WORKDIR /app
 RUN apk --no-cache add curl
 
 FROM base as DEV
-ENTRYPOINT ["sh", "-c", "npm i && npx prisma generate --schema=./src/prisma/schema.prisma && npx prisma migrate dev && npm run start:dev"]
+ENTRYPOINT ["sh", "-c", "npm i && cd ./src && npx prisma generate && npx prisma migrate dev && npm run start:dev"]
 
 FROM base as PROD
 ENTRYPOINT ["sh", "-c", "npm ci && npm build"]
