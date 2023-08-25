@@ -27,14 +27,12 @@ function PieChart() {
 
 export default function Stat() {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
-
+	
 	useEffect(() => {
 		let history = document.getElementById('history');
 		let achieve = document.getElementById('achieve');
 		if (!history || !achieve) return ;
-		history.classList.toggle("tab-main-color");
 		history.classList.toggle("tab-greyout");
-		achieve.classList.toggle("tab-main-color");
 		achieve.classList.toggle("tab-greyout");
 	}, [show]);
 
@@ -45,15 +43,15 @@ export default function Stat() {
 				style={{color: "white", border: "1px solid white"}}>
 				<div className="row">
 					<div className="col-6">
-						<h5 className="tab-main-color" id="history" 
-							onClick={() => setShow('achieve')}> 
+						<h5 className="tab-main-color tab-greyout" id="history" 
+							onClick={(e) => (setShow('history') )}> 
 							History
 						</h5>
 					</div>
 
 					<div className="col-6">
-						<h5 className="tab-greyout" id="achieve"
-							onClick={() => setShow('history')}>
+						<h5 className="tab-main-color" id="achieve"
+							onClick={() => setShow('achieve')}>
 							Achieve.
 						</h5>
 					</div>
