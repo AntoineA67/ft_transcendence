@@ -46,6 +46,10 @@ function EditText({ type, content, setContent, setEdit }: editTextProp) {
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: string, content: string) {
 		e.preventDefault();
+		if (mod == content) {
+			setEdit('done');
+			return ;
+		}
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
