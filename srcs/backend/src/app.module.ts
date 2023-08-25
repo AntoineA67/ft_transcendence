@@ -19,9 +19,7 @@ import { AppResolver } from './app.resolver';
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     GameModule,
-    // PrismaModule,
-    // PostgresProviderModule,
-    // UsersModule,
+    UsersModule, // Inclus ici
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
@@ -30,14 +28,13 @@ import { AppResolver } from './app.resolver';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService,
-    // PrismaService,
-
+  providers: [
+    AppService,
+    AppResolver,
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
     // },
-    AppResolver,
   ],
 })
 export class AppModule { }
