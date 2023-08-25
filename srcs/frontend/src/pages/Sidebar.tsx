@@ -50,7 +50,7 @@ export default function Sidebar() {
 		<div className="container-fluid">
 			<div className="row">
 				
-				<div className="col-sm min-vh-100"> 
+				<div className="col-sm min-vh-100" style={{padding: "0", overflow: "auto"}}> 
 					<Outlet context={{
 						nickname, bio, avatar, setNickname, setBio, setAvatar
 					} satisfies userContext} />
