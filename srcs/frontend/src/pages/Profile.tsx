@@ -126,19 +126,6 @@ function Profile() {
 					: <Text type={'bio'} content={bio} setEdit={setEdit} />}
 
 			</Container>
-			{/* <Container className="mb-5 pb-5" style={{color: "white", border: "1px solid white"}}>
-				<div className="row align-items-start">
-					
-					<div className="col-sm">
-						
-					</div>
-					
-					<div className="col-sm">
-						Achievement
-					</div>
-
-				</div>
-			</Container> */}
 			<Stat></Stat>
 		</>
 	);
