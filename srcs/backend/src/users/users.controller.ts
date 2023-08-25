@@ -10,18 +10,26 @@ export class UsersController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get()
-	async getAllGames(): Promise<User[]> {
+	async getAllGames(): Promise<string> {
 		console.log("/users")
-		const users = await this.usersService.findAll();
-		return await users;
+		const users = await this.usersService.getAllUsers();
+		const toObject = (oui) => {
+			return JSON.parse(JSON.stringify(oui, (key, value) =>
+				typeof value === 'bigint'
+					? value.toString()
+					: value // return everything else unchanged
+			));
+		}
+		console.log(users);
+		return toObject(users);
 	}
 
-	@UseGuards(LocalAuthGuard)
-	@Post('/test')
-	async getGameById(@Param('username') username: string): Promise<User> {
-		const user = await this.usersService.findOne(String(username));
-		return user;
-	}
+	// @UseGuards(LocalAuthGuard)
+	// @Post('/test')
+	// async getGameById(@Param('username') username: string): Promise<User> {
+	// 	const user = await this.usersService.getUserByUsername(String(username));
+	// 	return user;
+	// }
 
 	//   @Post()
 	//   async createGame(@Body('name') name: string) {
