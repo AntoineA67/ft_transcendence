@@ -12,6 +12,7 @@ services:
       - POSTGRES_PASSWORD
       - POSTGRES_NAME
       - JWT_SECRET
+      - DATABASE_URL
     restart: always
     container_name: backend
     ports:

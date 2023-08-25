@@ -1,14 +1,18 @@
 import { Module } from '@nestjs/common';
 import { GameController as GameController } from './game.controller';
 import { GamesService } from './game.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+// import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameGateway } from './game.gateway';
+// import { PrismaService } from 'src/prisma.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
+// import { PrismaService } from './prisma/prisma.service';
 import { GameResolver } from './game.resolver';
-import { Game } from 'src/typeorm/game.entity';
+// import { GameResolver } from './game.resolver';
+// import { Game } from 'src/entities/game.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Game])],
   controllers: [GameController],
-  providers: [GameResolver, GamesService, GameGateway],
+  providers: [GamesService, GameGateway, GameResolver],
+  imports: [PrismaModule],
 })
 export class GameModule { }
