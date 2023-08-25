@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
 import { useUser } from './Sidebar';
+import Stat from './Stat';
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -125,16 +126,20 @@ function Profile() {
 					: <Text type={'bio'} content={bio} setEdit={setEdit} />}
 
 			</Container>
-			<Container className="mb-5 pb-5" style={{color: "white", border: "1px solid white"}}>
+			{/* <Container className="mb-5 pb-5" style={{color: "white", border: "1px solid white"}}>
 				<div className="row align-items-start">
+					
 					<div className="col-sm">
-						History
+						
 					</div>
+					
 					<div className="col-sm">
 						Achievement
 					</div>
+
 				</div>
-			</Container>
+			</Container> */}
+			<Stat></Stat>
 		</>
 	);
 }

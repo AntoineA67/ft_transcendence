@@ -40,10 +40,10 @@ export default function Sidebar() {
 		let item: HTMLElement | null = sidebar.firstChild as HTMLElement;
 
 		while (item) {
-			item.classList.remove("active");
+			item.classList.remove("magenta");
 			item = item.nextSibling as HTMLElement;
 		}
-		clicked.classList.add("active");
+		clicked.classList.add("magenta");
 	}
 
 	return (
