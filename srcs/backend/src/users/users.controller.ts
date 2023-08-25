@@ -8,7 +8,7 @@ import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
-	@UseGuards(FortyTwoAuthGuard)
+	@UseGuards(JwtAuthGuard)
 	@Get()
 	async getAllGames(): Promise<User[]> {
 		console.log("/users")
