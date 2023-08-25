@@ -8,12 +8,5 @@
 }
 
 .tab-greyout {
-	/* background: linear-gradient(transparent, #fa34c3);
-	border-bottom: 2px solid #34fafa;
-	color: white;
-	text-align: center;
-	padding: 10px;
-	overflow: hidden;
-	cursor: pointer; */
 	filter: brightness(0.4);
 }
