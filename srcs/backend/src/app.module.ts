@@ -31,10 +31,10 @@ import { AppResolver } from './app.resolver';
   providers: [
     AppService,
     AppResolver,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard,
+    // },
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -24,7 +24,7 @@ export class AuthService {
 			throw new BadRequestException('Unauthenticated');
 		}
 
-		const userExists = await this.findUserByLogin(user.login);
+		const userExists = await this.findUserByLogin(user.username);
 		console.log('userExists', userExists);
 
 		if (!userExists) {
@@ -33,28 +33,38 @@ export class AuthService {
 
 		// generate and return JWT
 		return this.jwtService.sign({
-			sub: userExists.id,
-			email: userExists.email,
-			login: userExists.login,
+			sub: userExists.username,
+			email: userExists.email_address,
+			login: userExists.username,
 		});
 	}
 
+	// select * from "user";
+	// DELETE FROM "user" WHERE user_id = 1;
 	async registerUser(user: any) {
 		try {
-			const newUser = await this.usersService.findOrCreate(user.login);
+			console.log('registering user', user);
+			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			// .then((res) => {
+			// return this.jwtService.sign({
+			// 	sub: res.username,
+			// 	email: res.email_address,
+			// 	login: res.username,
+			// });
+			// });
 
 			return this.jwtService.sign({
-				sub: newUser.id,
-				email: newUser.email,
-				login: newUser.login,
+				sub: newUser.username,
+				email: newUser.email_address,
+				login: newUser.username,
 			});
 		} catch {
 			throw new InternalServerErrorException();
 		}
 	}
 
-	async findUserByLogin(login) {
-		const user = await this.usersService.findOne(login);
+	async findUserByLogin(username: string) {
+		const user = await this.usersService.getUserByUsername(username);
 
 		if (!user) {
 			return null;
