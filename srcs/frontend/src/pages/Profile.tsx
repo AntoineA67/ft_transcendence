@@ -104,7 +104,7 @@ function Profile() {
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	return (
-		<Container className="my-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white" }}>			
+		<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" style={{ color: "white", border: "2px solid white"}}>			
 			<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
 			<img alt="avatar" src={avatar} className="my-3"
@@ -119,6 +119,24 @@ function Profile() {
 			{edit == 'bio' ?
 				<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit} />
 				: <Text type={'bio'} content={bio} setEdit={setEdit} />}
+
+			
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>hello</h2>
+			<h2>last hello</h2>
+			
 
 		</Container>
 	);
