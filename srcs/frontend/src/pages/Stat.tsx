@@ -3,32 +3,66 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
+import Winner from '../assets/winner.svg';
 
 import '../styles/Stat.css';
 
-function HistoryContent() {
-	const data = ['', '', '', '']
-	
-	
-	return (
-		<>
-		</>
-	);
+type match = {
+	date: string,
+	who: string, 
+	result: string,
+	win: boolean,
 }
 
-function AchieveContent({achieve}: {achieve: string[]}) {
+// 'more' fetch more data on click, data will be put in a useState
+function HistoryContent() {
+
+	const data : match[] = [
+		{date: '4 days ago', who: 'Birb', result: '3:2', win: true}
+		, { date: '2 weeks ago', who: 'LooooooooongCat', result: '2:3', win: false}
+		, { date: '2/4', who: 'LooooooooongCat', result: '5:3', win: true}
+		, { date: '2/5', who: 'someone', result: '2:113', win: false}];
+
+	const listItem = ({date, who, result, win}: match, index: number) => {
+		// const extraInfo = date + ' ' + who + ' ' + (win ? 'win' : 'lose');
+		const classname = index % 2 ? 'history-item':'history-item-transparent';
+		const color = win ? 'text-magenta' : 'text-cyan';
+
+		return (
+			<li key={index}
+				// title={extraInfo} 
+				className={`${classname} d-flex flex-wrap`}>
+				<div>{date}</div>
+				<div className='ms-auto me-3'> {who} </div>
+				<div className={color}> {result} </div>
+			</li>
+		);
+	}
 	
 	return (
 		<ul className="tab-ul px-sm-5 py-5">
-			{achieve.map((value: string, index : number) => {
-				return(
-					index % 2 ? (
-						<li className='tab-item' style={{ backgroundColor: "transparent" }}> {value} </li>
-					) : (
-						<li className='tab-item'> {value} </li>
-					)
-				)
-			})}
+			{data.map(listItem)}
+			<p style={{ color: "red", textAlign: "center" }}>more</p>
+		</ul>
+	);
+}
+
+function AchieveContent() {
+	const achieve = ['Never missed a match', 'Win 10 rounds!', 'Win 50 rounds!', 'Logged in everyday this week'];
+
+	const listItem = (value: string, index: number) => {
+		const classname = index % 2 ?'achieve-item':'achieve-item-transparent';
+		return (
+			<li key={index}
+				className={classname}>
+				{value}
+			</li>
+		);
+	};
+
+	return (
+		<ul className="tab-ul px-sm-5 py-5">
+			{achieve.map(listItem)}
 			<p style={{color: "red", textAlign: "center"}}>more</p>
 		</ul>
 	);
@@ -40,7 +74,6 @@ function PieChart() {
 
 export default function Stat() {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
-	const achieve = ['Never missed a match', 'Win 10 rounds!', 'Win 50 rounds!', 'Logged in everyday this week']
 	
 	useEffect(() => {
 		let history = document.getElementById('history');
@@ -70,8 +103,8 @@ export default function Stat() {
 						</h5>
 					</div>
 				</div>
-				{show == 'achieve' && <AchieveContent achieve={achieve} />}
-				{show == 'history' && <div>history content</div>}
+				{show == 'achieve' && <AchieveContent />}
+				{show == 'history' && <HistoryContent></HistoryContent>}
 			</Container>
 
 			{/* big screan */}
@@ -83,7 +116,7 @@ export default function Stat() {
 							History
 						</h5>
 						<div>
-							history content
+							<HistoryContent></HistoryContent>
 						</div>
 					</div>
 
@@ -92,7 +125,7 @@ export default function Stat() {
 							Achievement
 						</h5>
 						<div>
-							{<AchieveContent achieve={achieve} />}
+							{<AchieveContent />}
 						</div>
 					</div>
 				</div>

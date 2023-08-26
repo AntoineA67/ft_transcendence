@@ -17,7 +17,7 @@
 	margin: auto;
 }
 
-.tab-item {
+.achieve-item {
 	background-color: #5a5a5a;
 	color: white;
 	list-style-type: none;
@@ -26,3 +26,42 @@
 	padding: 15px;
 	border-radius: 10px;
 }
+.achieve-item-transparent {
+	background-color: transparent;
+	color: white;
+	list-style-type: none;
+	text-align: center;
+	margin-bottom: 5px;
+	padding: 15px;
+	border-radius: 10px;
+}
+
+.history-item {
+	background-color: #5a5a5a;
+	color: white;
+	list-style-type: none;
+	text-align: left;
+	margin-bottom: 5px;
+	padding: 15px;
+	border-radius: 10px;
+}
+
+.history-item-transparent {
+	background-color: transparent;
+	color: white;
+	list-style-type: none;
+	text-align: left;
+	margin-bottom: 5px;
+	padding: 15px;
+	border-radius: 10px;
+}
+
+.text-magenta {
+	color: #fa34c3;
+}
+
+.text-cyan {
+	color: #34fafa;
+
+}
+
