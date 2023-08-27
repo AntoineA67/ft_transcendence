@@ -125,12 +125,12 @@ function PieChart() {
 	
 	return (
 		<Container className='my-5'>
-			<div className='row'>
-				<div className='col-sm-6 d-flex justify-content-center align-items-center'>
+			<div className='row justify-content-center'>
+				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
 				</div>
-				<div className='col-sm-6 d-flex justify-content-center align-items-center p-5'>
-					<h5> Win: {win}<br />Lose: {lose} </h5>
+				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
+					<h5 style={{color: 'white'}}> Win: {win}<br />Lose: {lose} </h5>
 				</div>
 			</div>
 		</Container>
@@ -153,7 +153,7 @@ export default function Stat() {
 			<PieChart></PieChart>
 			{/* small screen  */}
 			<Container className="d-sm-none" 
-				style={{color: "white", border: "1px solid white"}}>
+				style={{color: "white"}}>
 				<div className="row">
 					<div className="col-6">
 						<h5 className="tab-main-color tab-greyout" id="history" 
@@ -175,7 +175,7 @@ export default function Stat() {
 
 			{/* big screan */}
 			<Container className="d-none d-sm-block"
-				style={{ color: "white", border: "1px solid white" }}>
+				style={{ color: "white" }}>
 				<div className="row">
 					<div className="col-6">
 						<h5 className="tab-main-color"> 
