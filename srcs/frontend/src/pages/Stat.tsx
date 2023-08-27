@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
 
 import '../styles/Stat.css';
+import { lookupService } from 'dns';
 
 type match = {
 	date: string,
@@ -71,8 +72,8 @@ function AchieveContent() {
 function PieChart() {
 	
 	// fetch data
-	const win = 300;
-	const lose = 100;
+	const win = 400;
+	const lose = 300;
 	const total = win + lose;
 	
 	function gradientDoghnut(xc:number, yc:number, r:number) {
@@ -82,39 +83,41 @@ function PieChart() {
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		if (!ctx) return ;
 		
-		const colors = ['#fa34c3', '#34fafa']; //magenta cyan
-		const data = [win, lose];
-		let start = (2 * Math.PI) * (-1 / 4);
-		let gradient = null;
-		let startColor = null;
-		let	endColor = null;
+		const magenta = '#fa34c3';
+		const cyan = '#34fafa';
+		const color = [cyan, cyan, magenta, magenta];
 		
-		for (let i = 0; i < 2; i++) {
-			let degree = (2 * Math.PI) * (data[i] / total);
-			console.log(`${2 * Math.PI} ${data[i]}  ${total} ${degree}`);
+		const winDegree = (2 * Math.PI) * (win / total);
+		const loseDegree = (2 * Math.PI) * (lose / total);
+		const tran = winDegree < loseDegree ? winDegree / 2 : loseDegree / 2;
+		const degree = [loseDegree - tran, tran, winDegree - tran, tran];
+		
+		let start = (2 * Math.PI) * (-1 / 4);
+		
+		for (let i = 0; i < degree.length; i++) {
+			let deg = degree[i];
 			
 			// x start / end of the next arc to draw
 			let xStart = xc + Math.cos(start) * r;
-			let xEnd = xc + Math.cos(start + degree) * r;
+			let xEnd = xc + Math.cos(start + deg) * r;
 			// y start / end of the next arc to draw
 			let yStart = yc + Math.sin(start) * r;
-			let yEnd = yc + Math.sin(start + degree) * r;
+			let yEnd = yc + Math.sin(start + deg) * r;
 			
-			startColor = colors[i];
-			endColor = colors[(i + 1) % colors.length];
-			gradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
-			gradient.addColorStop(0, endColor);
-			gradient.addColorStop(0.5, startColor);
+			let startColor = color[i];
+			let endColor = color[(i + 1) % color.length];
+			let gradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
+			gradient.addColorStop(0, startColor);
 			gradient.addColorStop(1.0, endColor);
-			
+
 			ctx.beginPath();
 			ctx.strokeStyle = gradient;
-			ctx.arc(xc, yc, r, start, start + degree, true);
+			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
-			ctx.closePath();
+			console.log(start, start + deg);
 
-			start += degree;
+			start += deg;
 		}
 	}
 
