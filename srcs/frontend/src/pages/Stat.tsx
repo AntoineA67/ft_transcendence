@@ -124,14 +124,13 @@ function PieChart() {
 	useEffect(() => gradientDoghnut(100, 100, 60), []);
 	
 	return (
-		<Container className='my-5' 
-			style={{border: '1px solid red', color: 'white'}}>
+		<Container className='my-5'>
 			<div className='row'>
-				<div className='col'>
-					<canvas id="canvas" width='200' height='200' style={{border: '1px solid white'}}></canvas>
+				<div className='col-sm-6 d-flex justify-content-center align-items-center'>
+					<canvas id="canvas" width='200' height='200'/>
 				</div>
-				<div className='col'>
-					stat
+				<div className='col-sm-6 d-flex justify-content-center align-items-center p-5'>
+					<h5> Win: {win}<br />Lose: {lose} </h5>
 				</div>
 			</div>
 		</Container>
