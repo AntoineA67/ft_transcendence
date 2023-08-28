@@ -3,6 +3,7 @@ import Game from './pages/Game';
 import { createBrowserRouter } from "react-router-dom";
 import TestDB from './pages/TestDB';
 import Profile from './pages/Profile';
+import {Login, Signin, Signup, LandingPage} from './pages/Login';
 
 const router = createBrowserRouter([
 	{
@@ -25,6 +26,24 @@ const router = createBrowserRouter([
 		Component() {
 			return Profile();
 		},
+	},
+	{
+		path: "/login",
+		element: <Login />,
+		children: [
+			{
+				path: "signin",
+				element: <Signin />,
+			},
+			{
+				path: "signup",
+				element: <Signup />,
+			},
+			{
+				index: true,
+				element: <LandingPage />,
+			},
+		],
 	},
 	{
 		path: "/game",

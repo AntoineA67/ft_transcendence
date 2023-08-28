@@ -5,7 +5,6 @@ import { GamesService } from './game.service';
 import { GameGateway } from './game.gateway';
 // import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { GameResolver } from './game.resolver';
 // import { GameResolver } from './game.resolver';
 // import { Game } from 'src/entities/game.entity';
