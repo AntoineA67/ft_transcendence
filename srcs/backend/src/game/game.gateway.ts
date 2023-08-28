@@ -19,12 +19,10 @@ export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly gamesService: GamesService) { }
 
-  private logger: Logger = new Logger('MessageGateway');
+  private logger: Logger = new Logger('Game Gateway');
   // private clients: { [id: string]: Player } = {};
   private clients: Map<string, string> = new Map(); // <socketId, gameId>
-  // private ball: Ball | null = null;
-  // private interval: NodeJS.Timeout | null = null;
-  private clientQueue: Socket[] = [];
+  private matchmakingQueue: Socket[] = [];
   private rooms: { [id: string]: Room } = {};
 
 
@@ -47,34 +45,12 @@ export class GameGateway
   // }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Player Disconnected: ${client.id}`);
-    // if (this.clients[client.id]) {
-    //   const roomId = this.clients[client.id];
-    //   this.wss.emit('removePlayer', client.id);
-    //   this.clients.delete(client.id);
-    //   this.rooms[roomId].removePlayer(client.id);
-    // }
-    // if (this.clients && this.clients[client.id]) {
-    //   console.log('deleting ' + client.id)
-    //   delete this.clients[client.id]
-    //   this.wss.emit('removePlayer', client.id)
-    // }
-    // if (Object.keys(this.clients).length < 2) {
-    // this.ball = null
-    // this.clients[Object.keys(this.clients)[0]].invertedSide = false
-    // }
+    this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
+    const room = this.rooms[this.clients[client.id]];
+    room.leave(client.id);
+    this.clients[client.id] = null
   }
 
-  // handleConnection(client: Socket, ...args: any[]) {
-  //   this.logger.log(`Player Connected: ${client.id}`);
-  //   if (Object.keys(this.clients).length === 1) {
-  //     this.clients[client.id] = new Player(client.id, true)
-  //     this.ball = new Ball()
-  //   } else {
-  //     this.clients[client.id] = new Player(client.id, false)
-  //   }
-  //   client.emit('id', client.id)
-  // }
   handleConnection(client: Socket, ...args: any[]) {
     console.log('client connected', client.id)
     client.emit('id', client.id)
@@ -83,15 +59,15 @@ export class GameGateway
   @SubscribeMessage('match')
   async handleMatch(client: Socket, payload: string): Promise<void> {
     // Add the client ID to the client queue
-    this.clientQueue.push(client);
-    console.log('clientQueue', this.clientQueue.map((client) => client.id))
+    this.matchmakingQueue.push(client);
+    console.log('matchmakingQueue', this.matchmakingQueue.map((client) => client.id))
     // Check if there are two clients in the client queue
-    while (this.clientQueue.length >= 2) {
+    while (this.matchmakingQueue.length >= 2) {
       // Create a new room for the clients
       const roomId = uuidv4();
       console.log('roomId', roomId)
-      const player1 = this.clientQueue.pop();
-      const player2 = this.clientQueue.pop();
+      const player1 = this.matchmakingQueue.pop();
+      const player2 = this.matchmakingQueue.pop();
 
       player1.join(roomId);
       player2.join(roomId);
