@@ -20,6 +20,20 @@ export default class Room {
 		this.startGame();
 	}
 
+	public leave(id: string) {
+		if (this.players[id]) {
+			delete this.players[id];
+			this.wss.to(this.roomId).emit('removePlayer', id);
+			if (Object.keys(this.players).length < 2) {
+				this.ball = null;
+			}
+		}
+	}
+
+	public isEmpty(): boolean {
+		return Object.keys(this.players).length === 0;
+	}
+
 	public startGame() {
 		this.ball = new Ball();
 		this.interval = setInterval(() => {
