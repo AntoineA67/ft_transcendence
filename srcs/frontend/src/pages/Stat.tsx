@@ -146,22 +146,28 @@ export default function Stat() {
 		if (!history || !achieve) return ;
 		history.classList.toggle("tab-greyout");
 		achieve.classList.toggle("tab-greyout");
+		
+		let historyContent = document.getElementById('history-content');
+		let achieveContent = document.getElementById('achieve-content');
+		if (!historyContent || !achieveContent) return ;
+		historyContent.classList.toggle("d-none");
+		achieveContent.classList.toggle("d-none");
+		historyContent.classList.toggle("d-sm-flex");
+		achieveContent.classList.toggle("d-sm-flex");
 	}, [show]);
 
 	return (
 		<>
-			<PieChart></PieChart>
-			{/* small screen  */}
-			<Container className="d-sm-none" 
-				style={{color: "white"}}>
-				<div className="row">
+			<PieChart />
+			<Container>
+				{/* title: small screan */}
+				<div className="row d-sm-none">
 					<div className="col-6">
-						<h5 className="tab-main-color tab-greyout" id="history" 
-							onClick={(e) => (setShow('history') )}> 
+						<h5 className="tab-main-color tab-greyout" id="history"
+							onClick={(e) => (setShow('history'))}>
 							History
 						</h5>
 					</div>
-
 					<div className="col-6">
 						<h5 className="tab-main-color" id="achieve"
 							onClick={() => setShow('achieve')}>
@@ -169,34 +175,79 @@ export default function Stat() {
 						</h5>
 					</div>
 				</div>
-				{show == 'achieve' && <AchieveContent />}
-				{show == 'history' && <HistoryContent></HistoryContent>}
-			</Container>
-
-			{/* big screan */}
-			<Container className="d-none d-sm-block"
-				style={{ color: "white" }}>
-				<div className="row">
+				{/* title: big screen */}
+				<div className=" d-none d-sm-flex row">
 					<div className="col-6">
-						<h5 className="tab-main-color"> 
+						<h5 className="tab-main-color" id="history">
 							History
 						</h5>
-						<div>
-							<HistoryContent></HistoryContent>
-						</div>
 					</div>
-
 					<div className="col-6">
-						<h5 className="tab-main-color">
-							Achievement
+						<h5 className="tab-main-color" id="achieve">
+							Achieve.
 						</h5>
-						<div>
-							{<AchieveContent />}
-						</div>
+					</div>
+				</div>
+				{/* content */}
+				<div className="row">
+					<div className="col-12 col-sm-6 d-none d-sm-flex" id='history-content'>
+						<HistoryContent></HistoryContent>
+					</div>
+					<div className="col-12 col-sm-6" id='achieve-content'>
+						<AchieveContent />	
 					</div>
 				</div>
 			</Container>
 		</>
+
+		// <>
+		// 	<PieChart />
+		// 	{/* small screen  */}
+		// 	<Container className="d-sm-none" 
+		// 		style={{color: "white"}}>
+				// <div className="row">
+				// 	<div className="col-6">
+				// 		<h5 className="tab-main-color tab-greyout" id="history" 
+				// 			onClick={(e) => (setShow('history') )}> 
+				// 			History
+				// 		</h5>
+				// 	</div>
+
+				// 	<div className="col-6">
+				// 		<h5 className="tab-main-color" id="achieve"
+				// 			onClick={() => setShow('achieve')}>
+				// 			Achieve.
+				// 		</h5>
+				// 	</div>
+				// </div>
+		// 		{show == 'achieve' && <AchieveContent />}
+		// 		{show == 'history' && <HistoryContent></HistoryContent>}
+		// 	</Container>
+
+		// 	{/* big screan */}
+		// 	<Container className="d-none d-sm-block"
+		// 		style={{ color: "white" }}>
+				// <div className="row">
+				// 	<div className="col-6">
+				// 		<h5 className="tab-main-color"> 
+				// 			History
+				// 		</h5>
+				// 		<div>
+				// 			<HistoryContent></HistoryContent>
+				// 		</div>
+				// 	</div>
+
+				// 	<div className="col-6">
+				// 		<h5 className="tab-main-color">
+				// 			Achievement
+				// 		</h5>
+				// 		<div>
+				// 			{<AchieveContent />}
+				// 		</div>
+				// 	</div>
+				// </div>
+		// 	</Container>
+		// </>
 	);
 	
 }
