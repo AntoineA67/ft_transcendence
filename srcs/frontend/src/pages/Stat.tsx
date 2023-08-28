@@ -72,9 +72,10 @@ function AchieveContent() {
 function PieChart() {
 	
 	// fetch data
-	const win = 400;
+	const win = 100;
 	const lose = 300;
 	const total = win + lose;
+	const winRate = ((win / total) * 100).toFixed(1);
 	
 	function gradientDoghnut(xc:number, yc:number, r:number) {
 		
@@ -119,6 +120,9 @@ function PieChart() {
 
 			start += deg;
 		}
+		ctx.font = "20px normal";
+		ctx.fillStyle = '#fff';
+		ctx.fillText(winRate.toString() + '%', xc - 23, yc + 5);
 	}
 
 	useEffect(() => gradientDoghnut(100, 100, 60), []);
