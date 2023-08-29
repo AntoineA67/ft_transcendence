@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { ClientUpdate } from './message.dto';
-import { Message } from '../entities/message.entity';
+// import { Message } from '../entities/message.entity';
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
@@ -43,11 +43,11 @@ export class MessageGateway
     this.wss.emit('id', client.id);
   }
 
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload: Message): Promise<void> {
-    const newMessage = await this.messagesService.createMessage(payload);
-    this.wss.emit('receiveMessage', newMessage);
-  }
+  // @SubscribeMessage('sendMessage')
+  // async handleSendMessage(client: Socket, payload: Message): Promise<void> {
+  //   const newMessage = await this.messagesService.createMessage(payload);
+  //   this.wss.emit('receiveMessage', newMessage);
+  // }
 
   @SubscribeMessage('update')
   async handleUpdate(client: Socket, payload: ClientUpdate): Promise<void> {
