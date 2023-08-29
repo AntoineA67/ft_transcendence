@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
+import { Search } from './pages/Search';
 
 
 //css
@@ -33,6 +34,10 @@ root.render(
 		<Routes>
 			< Route path="/" element={<Sidebar />}>
 				<Route index element={<Profile />} />
+
+				<Route path="search" element={<Search />}>
+				</Route>
+
 				<Route path="setting" element={<Setting />}>
 					<Route index element={<SettingMenu /> }></Route>
 					<Route path='changepassword' element={<ChangePassword />}></Route>

@@ -63,7 +63,7 @@ export default function Sidebar() {
 							<Link to="."><img src={Home} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
-							<Link to="."><img src={Search} /></Link>
+							<Link to="/search/"><img src={Search} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
 							<Link to="."><img src={Friend} /></Link>
@@ -72,7 +72,7 @@ export default function Sidebar() {
 							<Link to="."><img src={Chat} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
-							<Link to="."><img src={Game} /></Link>
+							<Link to="/game/"><img src={Game} /></Link>
 						</li>
 					</ul>
 				</div>
