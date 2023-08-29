@@ -6,7 +6,7 @@
 	background-image: url(../assets/landingBg.png);
 }
 
-.leftArrow {
+/* .leftArrow {
 	background: url(../assets/leftArrow.svg) no-repeat;
 	background-position: center;
 	background-color: rgb(83, 83, 83);
@@ -19,7 +19,7 @@
 .leftArrow:hover {
 	background-color: grey;
 	transition: all 0.3s;
-}
+} */
 
 .togglePassword {
 	cursor: pointer;
