@@ -10,6 +10,7 @@ import Search from '../assets/Search.svg';
 import Friend from '../assets/Friend.svg';
 
 import { Outlet, useOutletContext, Link } from "react-router-dom";
+import Profile from './Profile';
 
 type userContext = {
 	nickname: string,
@@ -55,21 +56,20 @@ export default function Sidebar() {
 						nickname, bio, avatar, setNickname, setBio, setAvatar
 					} satisfies userContext} />
 				</div>
-
 				<div className="col-sm-auto sticky-bottom order-sm-first" style={{backgroundColor: "black"}}>
 					<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4" 
 						id="sidebar-ul" role="navigation" >
 						<li className='nav-item' onClick={handleClick}>
-							<Link to="."><img src={Home} /></Link>
+							<Link to="/"><img src={Home} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
 							<Link to="/search/"><img src={Search} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
-							<Link to="."><img src={Friend} /></Link>
+							<Link to="/profile/"><img src={Friend} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
-							<Link to="."><img src={Chat} /></Link>
+							<Link to="/chat/"><img src={Chat} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
 							<Link to="/game/"><img src={Game} /></Link>
