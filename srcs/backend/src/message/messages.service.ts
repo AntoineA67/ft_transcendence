@@ -1,16 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-// import { Message } from '../entities/message.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MessagesService {
-  constructor(
+  constructor(private readonly prisma: PrismaService
   ) { }
 
-  // async getAllMessages(): Promise<Message[]> {
-  //   return await this.messagesRepository.find();
-  // }
+  async getAllMessages(): Promise<any> {
+    return await this.prisma.message.findMany();
+  }
 
   // async getMessageById(id: number) {
   //   const message = await this.messagesRepository.findOne({
@@ -24,7 +22,13 @@ export class MessagesService {
   //   throw new NotFoundException('Could not find the message');
   // }
 
-  // async createMessage(messageData: Message): Promise<Message> {
-  //   return await this.messagesRepository.save(messageData);
-  // }
+  async createMessage(message: string): Promise<any> {
+    return await this.prisma.message.create({
+      data:
+      {
+        message: message,
+        send_date: new Date(),
+      }
+    });
+  }
 }
