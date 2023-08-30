@@ -8,13 +8,12 @@ export function Home() {
 	return (
 		<div className="d-flex align-items-center justify-content-center vh-100">
 			<Card border="secondary" bg="dark" text="white" className="w-75 p-3">
-				<Card.Body>
-					<Card.Title>Card Title</Card.Title>
+				<Card.Body className="text-center">
+					<Card.Title>Player vs player</Card.Title>
 					<Card.Text>
-						Some quick example text to build on the card title and make up the
-						bulk of the card's content.
+					You are about to play a game against another player. Get ready to compete and have fun!
 					</Card.Text>
-					<Link to="." className="w-75 link-text">
+					<Link to="/game" className="w-75 link-text">
 						<button className="btn btn-primary"><b>Play</b></button>
 					</Link>
 				</Card.Body>
