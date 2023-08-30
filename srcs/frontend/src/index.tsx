@@ -11,6 +11,8 @@ import Home from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
+import { Search } from './pages/Search';
+import { Chat } from './pages/Chat';
 
 
 //css
@@ -31,24 +33,22 @@ const root = ReactDOM.createRoot(
 root.render(
 	<BrowserRouter>
 		<Routes>
-			< Route path="/" element={<Sidebar />}>
-				<Route index element={<Profile />} />
+			<Route path="/" element={<Sidebar />}>
+				<Route path="profile" element={<Profile />}/>
+				<Route path="search" element={<Search />}></Route>
+				<Route path="chat" element={<Chat />}></Route>
 				<Route path="setting" element={<Setting />}>
-					<Route index element={<SettingMenu /> }></Route>
+					<Route index element={<SettingMenu />}></Route>
 					<Route path='changepassword' element={<ChangePassword />}></Route>
 				</Route>
+				<Route path="/game" element={<Game />}></Route>
 			</Route>
-			
 			<Route path="/login" element={<Login />}>
 				<Route index element={<LandingPage />}></Route>
 				<Route path="signin" element={<Signin />}></Route>
 				<Route path="signup" element={<Signup />}></Route>
 			</Route>
-			
-			<Route path="/game" element={<Game />}></Route>
-			
 			<Route path="/test-db" element={<TestDB />} />
-
 		</Routes>
 	</BrowserRouter>
 //   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
