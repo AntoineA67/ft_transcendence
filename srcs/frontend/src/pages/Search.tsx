@@ -10,7 +10,7 @@ export function SearchBar() {
 	return (
 		<div className='d-flex w-100 align-items-center' style={{ backgroundColor: "black" }}>
 			<Link to=".."><button className='goBack'></button></Link>
-			<Form.Control type="text" placeholder="Search anything" />
+			<Form.Control type="text" placeholder="Search anything"/>
 		</div>
 	);
 }
