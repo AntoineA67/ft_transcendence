@@ -10,11 +10,74 @@ import { Link, Outlet } from "react-router-dom";
 
 
 import Form from 'react-bootstrap/Form';
+import { socket } from '../utils/socket';
+import { useEffect, useRef, useState } from 'react';
+import { proxy } from 'valtio';
+import { Socket } from 'socket.io-client';
+import { ListGroup } from 'react-bootstrap';
 
-export function Chat() {
+const state = proxy({
+	socketClient: null as Socket | null,
+})
+
+interface Props {
+	socket: Socket;
+}
+
+function ChatView(props: Props) {
+	const [messages, setMessages] = useState<any[]>([]);
+
+	useEffect(() => {
+		// Update the messages state whenever new messages are received
+		props.socket.on('receiveMessage', (newMessages: any) => {
+			console.log('RECEIVE MESSAGE', newMessages)
+			setMessages(newMessages);
+		});
+	}, [props.socket]);
+
 	return (
 		<>
-			<Form.Control type="text" placeholder="Chat anything" />
+			<ListGroup>
+				{messages.map((message) =>
+					<ListGroup.Item key={message.id}>{message.message}</ListGroup.Item>)}
+			</ListGroup>
+		</>
+	);
+}
+
+export function Chat() {
+	const message = useRef('');
+	useEffect(() => {
+		state.socketClient = socket
+		return () => {
+			if (state.socketClient) state.socketClient.disconnect()
+		}
+	}, [])
+
+	const handleKeyDown = (event: any) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			socket.emit('sendMessage', message.current);
+			message.current = '';
+		}
+	};
+
+	useEffect(() => {
+		if (state.socketClient) {
+			socket.on('connect', function () {
+				console.log('connected to messages')
+			})
+			socket.on('disconnect', function (message: any) {
+				console.log('disconnect ' + message)
+			})
+		}
+	}, [state.socketClient])
+	return (
+		<>
+			<Form.Control type="text" placeholder="Chat anything"
+				onChange={msg => message.current = msg.target.value}
+				onKeyDown={handleKeyDown} />
+			<ChatView socket={socket} />
 			<Outlet />
 		</>
 	)
