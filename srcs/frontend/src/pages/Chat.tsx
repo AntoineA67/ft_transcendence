@@ -12,7 +12,7 @@ import { socket } from '../utils/socket';
 import { useEffect, useRef, useState } from 'react';
 import { proxy } from 'valtio';
 import { Socket } from 'socket.io-client';
-import { ListGroup } from 'react-bootstrap';
+import { ListGroup, Image } from 'react-bootstrap';
 
 const state = proxy({
 	socketClient: null as Socket | null,
