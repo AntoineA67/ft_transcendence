@@ -9,8 +9,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
-import { ClientUpdate } from './message.dto';
-// import { Message } from '../entities/message.entity';
 
 @WebSocketGateway({ cors: true })
 export class MessageGateway
@@ -23,10 +21,10 @@ export class MessageGateway
   @WebSocketServer() wss: Server;
 
   afterInit(server: Server) {
-    this.logger.log('Initialized');
-    setInterval(() => {
-      this.wss.emit('clients', this.clients);
-    }, 50);
+    this.logger.log('Messages Initializedd');
+    // setInterval(() => {
+    // this.wss.emit('clients', this.clients);
+    // }, 50);
   }
 
   handleDisconnect(client: Socket) {
@@ -43,18 +41,10 @@ export class MessageGateway
     this.wss.emit('id', client.id);
   }
 
-  // @SubscribeMessage('sendMessage')
-  // async handleSendMessage(client: Socket, payload: Message): Promise<void> {
-  //   const newMessage = await this.messagesService.createMessage(payload);
-  //   this.wss.emit('receiveMessage', newMessage);
-  // }
-
-  @SubscribeMessage('update')
-  async handleUpdate(client: Socket, payload: ClientUpdate): Promise<void> {
-    if (this.clients[client.id]) {
-      this.clients[client.id].p = payload.p;
-      this.clients[client.id].r = payload.r;
-      this.clients[client.id].t = payload.t;
-    }
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(client: Socket, payload: any): Promise<void> {
+    const newMessage = await this.messagesService.createMessage(payload);
+    const allMessages = await this.messagesService.getAllMessages();
+    this.wss.emit('receiveMessage', allMessages);
   }
 }
