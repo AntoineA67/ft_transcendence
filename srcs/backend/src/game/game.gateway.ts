@@ -20,10 +20,6 @@ export class GameGateway
   constructor(private readonly gamesService: GamesService) { }
 
   private logger: Logger = new Logger('Game Gateway');
-  private clients: Map<string, string> = new Map(); // <socketId, gameId>
-  private matchmakingQueue: Socket[] = [];
-  private rooms: { [id: string]: Room } = {};
-
 
   @WebSocketServer() wss: Server;
 
@@ -33,11 +29,7 @@ export class GameGateway
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
-    const room = this.rooms[this.clients[client.id]];
-    if (room) {
-      room.leave(client.id);
-    }
-    this.clients[client.id] = null
+    this.gamesService.disconnect(client);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
@@ -47,71 +39,37 @@ export class GameGateway
 
   @SubscribeMessage('match')
   async handleMatch(client: Socket, payload: string): Promise<void> {
-    // Add the client ID to the client queue
-    this.matchmakingQueue.push(client);
-    console.log('matchmakingQueue', this.matchmakingQueue.map((client) => client.id))
-    // Check if there are two clients in the client queue
-    while (this.matchmakingQueue.length >= 2) {
-      // Create a new room for the clients
-      const roomId = uuidv4();
-      console.log('roomId', roomId)
-      const player1 = this.matchmakingQueue.pop();
-      const player2 = this.matchmakingQueue.pop();
-
-      player1.join(roomId);
-      player2.join(roomId);
-
-      this.clients[player1.id] = roomId;
-      this.clients[player2.id] = roomId;
-
-      console.log('player1', player1.id)
-      console.log('player2', player2.id)
-      this.rooms[roomId] = new Room(roomId, this.wss, player1.id, player2.id);
-    }
+    this.gamesService.addToQueue(client, this.wss);
   }
 
   @SubscribeMessage('leave')
   async handleLeave(client: Socket, payload: string): Promise<void> {
-    console.log('leave', payload)
-    const roomId = this.clients[client.id];
-    if (roomId) {
-      const room = this.rooms[roomId];
-      if (room) {
-        room.leave(client.id);
-        delete this.clients[client.id];
-        if (room.isEmpty()) {
-          delete this.rooms[roomId];
-        }
-      }
-    }
+    this.gamesService.disconnect(client);
   }
-
-  // @SubscribeMessage('sendMessage')
-  // async handleSendMessage(client: Socket, payload: string): Promise<void> {
-  //   this.logger.log('payload', payload);
-  //   const newMessage = await this.messagesService.createMessage(payload);
-  //   this.wss.emit('receiveMessage', newMessage);
-  // }
 
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)
-    this.rooms[this.clients[client.id]].handleKey(client.id, 1)
+    this.gamesService.keyPressed(client.id, 1);
+    // this.rooms[this.clients[client.id]].handleKey(client.id, 1)
   }
   @SubscribeMessage('UpKeyReleased')
   async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
-    this.rooms[this.clients[client.id]].handleKey(client.id, 0)
+    this.gamesService.keyPressed(client.id, 0);
+    // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
     console.log('UpKeyReleased', payload)
   }
   @SubscribeMessage('DownKeyPressed')
   async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
+    this.gamesService.keyPressed(client.id, -1);
     console.log('DownKeyPressed', payload)
-    this.rooms[this.clients[client.id]].handleKey(client.id, -1)
+    // this.rooms[this.clients[client.id]].handleKey(client.id, -1)
   }
   @SubscribeMessage('DownKeyReleased')
   async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyReleased', payload)
-    this.rooms[this.clients[client.id]].handleKey(client.id, 0)
+    this.gamesService.keyPressed(client.id, 0);
+    // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
   }
 
 }
