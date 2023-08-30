@@ -10,8 +10,8 @@ import { GameResolver } from './game.resolver';
 // import { Game } from 'src/entities/game.entity';
 
 @Module({
-  controllers: [GameController],
-  providers: [GamesService, GameGateway, GameResolver],
   imports: [PrismaModule],
+  providers: [GamesService, GameGateway, GameResolver],
+  controllers: [GameController],
 })
 export class GameModule { }

@@ -20,7 +20,6 @@ export class GameGateway
   constructor(private readonly gamesService: GamesService) { }
 
   private logger: Logger = new Logger('Game Gateway');
-  // private clients: { [id: string]: Player } = {};
   private clients: Map<string, string> = new Map(); // <socketId, gameId>
   private matchmakingQueue: Socket[] = [];
   private rooms: { [id: string]: Room } = {};
@@ -30,19 +29,7 @@ export class GameGateway
 
   afterInit(server: Server) {
     this.logger.log('Initialized');
-    // this.interval = setInterval(() => {
-    //   this.updateGameTick();
-    //   this.wss.emit('clients', { clients: this.clients, ball: this.ball });
-    // }, 50);
   }
-
-  // private updateGameTick() {
-  //   if (!this.ball) return;
-  //   for (const client of Object.values(this.clients)) {
-  //     client.update();
-  //   }
-  //   this.ball.update(this.clients);
-  // }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
@@ -103,29 +90,27 @@ export class GameGateway
   //   const newMessage = await this.messagesService.createMessage(payload);
   //   this.wss.emit('receiveMessage', newMessage);
   // }
+
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)
     this.rooms[this.clients[client.id]].handleKey(client.id, 1)
-    // this.clients[client.id].direction = 1
   }
   @SubscribeMessage('UpKeyReleased')
   async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
     this.rooms[this.clients[client.id]].handleKey(client.id, 0)
     console.log('UpKeyReleased', payload)
-    // this.clients[client.id].direction = 0
   }
   @SubscribeMessage('DownKeyPressed')
   async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyPressed', payload)
     this.rooms[this.clients[client.id]].handleKey(client.id, -1)
-    // this.clients[client.id].direction = -1
   }
   @SubscribeMessage('DownKeyReleased')
   async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyReleased', payload)
     this.rooms[this.clients[client.id]].handleKey(client.id, 0)
-    // this.clients[client.id].direction = 0
   }
+
 }
 
