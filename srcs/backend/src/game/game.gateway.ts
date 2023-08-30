@@ -34,7 +34,9 @@ export class GameGateway
   handleDisconnect(client: Socket) {
     this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
     const room = this.rooms[this.clients[client.id]];
-    room.leave(client.id);
+    if (room) {
+      room.leave(client.id);
+    }
     this.clients[client.id] = null
   }
 
