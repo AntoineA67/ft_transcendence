@@ -1,9 +1,7 @@
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import Player from './Player.class';
 import Ball from './Ball.class';
-import { WebSocketGateway, SubscribeMessage } from '@nestjs/websockets';
 
-@WebSocketGateway({ cors: true })
 export default class Room {
 	private players: { [id: string]: Player } = {};
 	private ball: Ball | null = null;
@@ -19,6 +17,7 @@ export default class Room {
 
 		this.startGame();
 	}
+
 
 	public leave(id: string) {
 		if (this.players[id]) {

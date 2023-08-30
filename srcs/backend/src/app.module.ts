@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppResolver } from './app.resolver';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
 
 @Module({
   imports: [
@@ -26,6 +27,10 @@ import { AppResolver } from './app.resolver';
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
     }),
     AuthModule,
+    DevtoolsModule.register({
+      port: 3001,
+      http: process.env.NODE_ENV !== 'production',
+    }),
   ],
   controllers: [AppController],
   providers: [
