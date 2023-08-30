@@ -4,7 +4,7 @@ import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { Public } from './auth/public.decorator';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { AppService } from './app.service';
 
 @Controller()
