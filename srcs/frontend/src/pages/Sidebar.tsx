@@ -66,7 +66,7 @@ export default function Sidebar() {
 							<Link to="/search/"><img src={Search} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
-							<Link to="/profile/"><img src={Friend} /></Link>
+							<Link to="/friends/"><img src={Friend} /></Link>
 						</li>
 						<li className="nav-item" onClick={handleClick}>
 							<Link to="/chat/"><img src={Chat} /></Link>
