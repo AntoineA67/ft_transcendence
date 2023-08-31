@@ -1,0 +1,27 @@
+.messageBlue {
+	border: 1px solid blue;
+	margin-left: auto;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.messagePink {
+	border: 1px solid pink;
+	margin-right: auto;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.chatList {
+	list-style-type: none;
+	text-decoration: none;
+	padding: 0;
+	margin: 0;
+}
+
+.chatListItem {
+	margin: 0;
+	background-color: grey;
+	margin-bottom: 3px;
+	padding: 20px;
+}

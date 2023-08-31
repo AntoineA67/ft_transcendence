@@ -33,7 +33,7 @@ root.render(
 	<BrowserRouter>
 		<Routes>
 			<Route path="/" element={<Sidebar />}>
-				<Route path="profile" element={<Profile />}/>
+				<Route index element={<Profile />}/>
 				<Route path="search" element={<Search />}></Route>
 				<Route path="friends" element={<Friends />}></Route>
 				<Route path="chat" element={<Chat />}>
