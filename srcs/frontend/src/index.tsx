@@ -13,8 +13,7 @@ import Profile from './pages/Profile';
 import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
-import { Chat } from './pages/Chat';
-
+import { Chat, ChatBox } from './pages/Chat';
 
 //css
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -24,7 +23,6 @@ import './styles/index.css';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 
@@ -38,7 +36,9 @@ root.render(
 				<Route path="profile" element={<Profile />}/>
 				<Route path="search" element={<Search />}></Route>
 				<Route path="friends" element={<Friends />}></Route>
-				<Route path="chat" element={<Chat />}></Route>
+				<Route path="chat" element={<Chat />}>
+					<Route path=':chatId' element={<ChatBox />}></Route>
+				</Route>
 				<Route path="setting" element={<Setting />}>
 					<Route index element={<SettingMenu />}></Route>
 					<Route path='changepassword' element={<ChangePassword />}></Route>
