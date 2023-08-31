@@ -12,6 +12,7 @@ import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
+import { Friends } from './pages/Friends';
 import { Chat } from './pages/Chat';
 
 
@@ -36,6 +37,7 @@ root.render(
 			<Route path="/" element={<Sidebar />}>
 				<Route path="profile" element={<Profile />}/>
 				<Route path="search" element={<Search />}></Route>
+				<Route path="friends" element={<Friends />}></Route>
 				<Route path="chat" element={<Chat />}></Route>
 				<Route path="setting" element={<Setting />}>
 					<Route index element={<SettingMenu />}></Route>
