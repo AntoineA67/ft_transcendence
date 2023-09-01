@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -9,12 +9,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
-import { v4 as uuidv4 } from 'uuid';
-import Player from './Player.class';
-import Ball from './Ball.class';
-import Room from './Room.class';
+import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
+import { WsJwtGuard } from 'src/auth/ws-auth.guard';
 
+@UseGuards(WsJwtGuard)
 @WebSocketGateway({ cors: true })
+// @UseGuards(FortyTwoAuthGuard)
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly gamesService: GamesService) { }
@@ -37,34 +37,40 @@ export class GameGateway
     client.emit('id', client.id)
   }
 
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('match')
   async handleMatch(client: Socket, payload: string): Promise<void> {
     this.gamesService.addToQueue(client, this.wss);
   }
 
+  // @UseGuards(FortyTwoAuthGuard)
   @SubscribeMessage('leave')
   async handleLeave(client: Socket, payload: string): Promise<void> {
     this.gamesService.disconnect(client);
   }
 
+  @UseGuards(FortyTwoAuthGuard)
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)
     this.gamesService.keyPressed(client.id, 1);
     // this.rooms[this.clients[client.id]].handleKey(client.id, 1)
   }
+  @UseGuards(FortyTwoAuthGuard)
   @SubscribeMessage('UpKeyReleased')
   async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
     this.gamesService.keyPressed(client.id, 0);
     // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
     console.log('UpKeyReleased', payload)
   }
+  @UseGuards(FortyTwoAuthGuard)
   @SubscribeMessage('DownKeyPressed')
   async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
     this.gamesService.keyPressed(client.id, -1);
     console.log('DownKeyPressed', payload)
     // this.rooms[this.clients[client.id]].handleKey(client.id, -1)
   }
+  @UseGuards(FortyTwoAuthGuard)
   @SubscribeMessage('DownKeyReleased')
   async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyReleased', payload)
