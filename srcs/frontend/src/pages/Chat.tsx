@@ -64,7 +64,7 @@ export function ChatBox() {
 				<h4 style={{ color: "white", margin: "auto 0" }}>{chatId}</h4>
 			</div>
 			
-			<div className='p-5' style={{overflowY: 'auto', height: '85%', border: '1px solid green'}}>
+			<div className='p-5 flex-grow' style={{overflowY: 'auto'}}>
 				<ul className='nostyleList' style={{color: 'white'}}>
 					{messages.map(myMap)}
 					{messages.map(myMap)}
@@ -73,9 +73,11 @@ export function ChatBox() {
 				</ul>
 			</div>
 			
-			<div className='mt-auto pb-5 pb-sm-0'>
-				<input value={mess} onChange={(e) => setMess(e.target.value)} />
-				<button onClick={handleClick}></button>
+			<div className='mb-5 mb-sm-0 p-3  d-flex align-items-center'>
+				<input className='p-2 flex-grow-1' style={{borderRadius: '10px'}}
+					value={mess} 
+					onChange={(e) => setMess(e.target.value)} />
+				<button className='send-message' onClick={handleClick}></button>
 			</div>
 		</div>
 	);
@@ -105,10 +107,16 @@ function ChatList() {
 				<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
 				<button className='new-chat ms-auto' onClick={newChat}/>
 			</div>
-
-			<ul className='nostyleList'>
-				{chatList.map(myMap)}
-			</ul>
+			<div style={{ overflowY: 'auto', height: '90%'}}>
+				<ul className='nostyleList py-0 py-sm-5' >
+					{chatList.map(myMap)}
+					{chatList.map(myMap)}
+					{chatList.map(myMap)}
+					{chatList.map(myMap)}
+					{chatList.map(myMap)}
+					{chatList.map(myMap)}
+				</ul>
+			</div>
 		</>
 	
 	);
@@ -120,12 +128,12 @@ export function Chat() {
 	
 	
 	return (
-		<div className='container-fluid h-100'>
+		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className='col-3 p-0' >
+				<div className='col-3 p-0 m-0 h-100' >
 					<ChatList></ChatList>
 				</div>
-				<div className='col-9 p-0'>
+				<div className='col-9 p-0 m-0 h-100'>
 					<Outlet></Outlet>
 				</div>
 			</div>

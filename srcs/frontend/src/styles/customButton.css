@@ -65,6 +65,22 @@
 	transition: all 0.3s;
 }
 
+.send-message {
+	background: url(../assets/sendMessage.svg) no-repeat;
+	background-position: center;
+	background-color: transparent;
+	width: 30px;
+	height: 30px;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+.send-message:hover {
+	filter: brightness(3);
+	transition: all 0.3s;
+}
+
 .new-chat {
 	background: url(../assets/newChat.svg) no-repeat;
 	background-position: center;
