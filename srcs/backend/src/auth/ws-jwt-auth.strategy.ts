@@ -8,11 +8,18 @@ import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class WsJwtStrategy extends PassportStrategy(Strategy, 'ws-jwt') {
 	constructor(private readonly userService: UsersService) {
+		// super({
+		// 	jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+		// 	ignoreExpiration: false,
+		// 	secretOrKey: jwtConstants.secret,
+		// });
 		super({
-			jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-			ignoreExpiration: false,
 			secretOrKey: jwtConstants.secret,
-		});
+			jwtFromRequest: (req) => {
+				console.log('jwtFromRequest', req);
+				return req.handshake.headers.authorization?.split(' ')[1]
+			}
+		})
 	}
 
 	async validate(payload: any) {
