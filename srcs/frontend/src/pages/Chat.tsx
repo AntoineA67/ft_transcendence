@@ -90,42 +90,93 @@ export function ChatBox() {
 	);
 }
 
+type formProp = {
+	label: string,
+	button: 'Send' | 'Join' | 'Create',
+	value: string,
+	setValue: React.Dispatch<React.SetStateAction<string>>,
+}
+
+const MyForm = ({ label, button, value, setValue }: formProp) => {
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
+		type: 'Send' | 'Join' | 'Create', value: string, setValue: React.Dispatch<React.SetStateAction<string>>) {
+		e.preventDefault();
+		setValue('');
+	}
+	
+	return (
+		<form className='d-flex flex-column align-items-center p-2 gap-2'
+			onSubmit={(e) => handleSubmit(e, button, value, setValue)}>
+			<label
+				className='w-75'
+				htmlFor='private-message'>
+				{label}
+			</label>
+			<input
+				id='private-message'
+				value={value}
+				onChange={(e) => setValue(e.target.value)}
+				className='w-75' />
+			<button type='submit' className='btn btn-outline-secondary w-75'>
+				{button}
+			</button>
+		</form>
+	);
+}
+
+function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">>}) {
+
+	const [nick, setNick] = useState('');
+	const [join, setJoin] = useState('');
+	const [create, setCreate] = useState('');
+
+	return (
+		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{color: 'white', overflowY: 'auto'}}>
+			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
+			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick}/>
+			<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin}/>
+			<MyForm label='Create a group' button='Create' value={create} setValue={setCreate}/>
+		</div>
+	)
+}
+
 function ChatList() {
+	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
 	//get all chat
 	const chatList = ['fox', 'crow', 'crowGroup'];
 
 	const myMap = (name: string) => {
 		return (
-			<li key={name} className='chatListItem'>
-				<Link to={name} className='link-text'>
-					{name}
+			<li key={name}>
+				<Link to={name} className='link-text' style={{color: 'white'}}>
+					<div className='chatListItem'>{name}</div>
 				</Link>
 			</li>
 		)
 	}
 
-	const newChat = () => {
-		//new chat
-	}
-
 	return (
 		<div className='w-100 h-100 d-flex flex-column'>
-			<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-2' style={{ backgroundColor: "black" }}>
-				<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
-				<button className='new-chat ms-auto' onClick={newChat}/>
-			</div>
-			<div className='flex-grow-1 pb-5 pb-sm-0' style={{ overflowY: 'auto'}}>
-				<ul className='nostyleList py-0' >
-					{chatList.map(myMap)}
-					{chatList.map(myMap)}
-					{chatList.map(myMap)}
-					{chatList.map(myMap)}
-					{chatList.map(myMap)}
-					{chatList.map(myMap)}
-				</ul>
-			</div>
+			{page == 'newChat' && <NewChat setPage={setPage}/>}
+			{page == 'chatList' && 
+				<>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-2' style={{ backgroundColor: "black" }}>
+						<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
+						<button className='new-chat ms-auto' onClick={() => setPage('newChat')}/>
+					</div>
+					
+					<div className='flex-grow-1 pb-5 pb-sm-0' style={{ overflowY: 'auto'}}>
+						<ul className='nostyleList py-0' >
+							{chatList.map(myMap)}
+							{chatList.map(myMap)}
+							{chatList.map(myMap)}
+							{chatList.map(myMap)}
+							{chatList.map(myMap)}
+							{chatList.map(myMap)}
+						</ul>
+					</div>
+				</>}
 		</div>
-	
 	);
 }
 
