@@ -33,7 +33,7 @@ export class GameGateway
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    console.log('client connected', client.id)
+    console.log('client connectedf', client.id, client.handshake.headers.authorization)
     client.emit('id', client.id)
   }
 
