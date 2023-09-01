@@ -64,7 +64,7 @@ export function ChatBox() {
 
 	return (
 		<div className='h-100 d-flex flex-column'>
-			<div className='d-flex w-100 align-items-center p-2 ps-sm-5' style={{ backgroundColor: "black" }}>
+			<div className='d-flex w-100 align-items-center p-1 ps-sm-5' style={{ backgroundColor: "black" }}>
 				<span className='d-sm-none'>
 					<Link to=".."><button className='goBack'></button></Link>
 				</span>
@@ -109,13 +109,13 @@ function ChatList() {
 	}
 
 	return (
-		<div className='w-100 h-100'>
-			<div className='d-flex w-100 align-items-center p-2' style={{ backgroundColor: "black" }}>
+		<div className='w-100 h-100 d-flex flex-column'>
+			<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-2' style={{ backgroundColor: "black" }}>
 				<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
 				<button className='new-chat ms-auto' onClick={newChat}/>
 			</div>
-			<div style={{ overflowY: 'auto', height: '90%'}}>
-				<ul className='nostyleList py-0 py-sm-5' >
+			<div className='flex-grow-1 pb-5 pb-sm-0' style={{ overflowY: 'auto'}}>
+				<ul className='nostyleList py-0' >
 					{chatList.map(myMap)}
 					{chatList.map(myMap)}
 					{chatList.map(myMap)}
@@ -134,6 +134,7 @@ export function Chat() {
 	
 	const location = useLocation();
 	const classname1 = location.pathname == '/chat' ? '' : 'd-none d-sm-flex';	
+	const classname2 = location.pathname == '/chat' ? 'd-none d-sm-flex' : '';	
 
 	return (
 		<div className='container-fluid h-100' >
@@ -141,7 +142,7 @@ export function Chat() {
 				<div className={`col-12 col-sm-3 p-0 m-0 h-100 ${classname1}`} >
 					<ChatList />
 				</div>
-				<div className={`col-12 col-sm-9 p-0 m-0 h-100`}>
+				<div className={`col-12 col-sm-9 p-0 m-0 h-100 ${classname2}`}>
 					<Outlet />
 				</div>
 			</div>
