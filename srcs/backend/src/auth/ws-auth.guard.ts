@@ -12,7 +12,7 @@ export class WsJwtGuard extends AuthGuard('ws-jwt') {
 	}
 
 	canActivate(context: ExecutionContext) {
-		const auth = context.switchToWs().getClient()
+		const auth = context.getArgs()
 		console.log("auth: ", auth)
 		const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
 			context.getHandler(),
