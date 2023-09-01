@@ -1,15 +1,19 @@
 .messageBlue {
 	border: 1px solid blue;
+	border-radius: 10px;
 	margin-left: auto;
-	padding: 10px;
+	padding: 15px;
 	margin-bottom: 10px;
+	max-width: 75%;
 }
 
 .messagePink {
 	border: 1px solid pink;
+	border-radius: 10px;
 	margin-right: auto;
-	padding: 10px;
+	padding: 15px;
 	margin-bottom: 10px;
+	max-width: 75%;
 }
 
 .nostyleList {
