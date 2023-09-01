@@ -20,6 +20,9 @@ import { Socket } from 'socket.io-client';
 import { ListGroup } from 'react-bootstrap';
 import { io } from "socket.io-client";
 
+import { useLocation } from 'react-router-dom';
+
+
 type message = {
 	id: string,
 	date: Date,
@@ -39,7 +42,8 @@ export function ChatBox() {
 		{id: '1', date: new Date(), from: 'pigeon', to: 'me', content: 'coucou'}, 
 		{id: '2', date: new Date(), from: 'pigeon', to: 'me', content: 'Got any peanuts?'}, 
 		{id: '3', date: new Date(), from: 'me', to: 'pigeon', content: 'Hi'}, 
-		{id: '4', date: new Date(), from: 'me', to: 'pigeon', content: 'I got something better' } 
+		{ id: '4', date: new Date(), from: 'me', to: 'pigeon', content: 'I got something better long textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong text' },
+		{ id: '4', date: new Date(), from: 'pigeon', to: 'me', content: 'I got something better long textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong textlong text' }  
 	];
 
 	const myMap = (message: message) => {
@@ -60,12 +64,15 @@ export function ChatBox() {
 
 	return (
 		<div className='h-100 d-flex flex-column'>
-			<div className='d-flex w-100 align-items-center p-2 ps-5' style={{ backgroundColor: "black" }}>
+			<div className='d-flex w-100 align-items-center p-2 ps-sm-5' style={{ backgroundColor: "black" }}>
+				<span className='d-sm-none'>
+					<Link to=".."><button className='goBack'></button></Link>
+				</span>
 				<h4 style={{ color: "white", margin: "auto 0" }}>{chatId}</h4>
 			</div>
 			
 			<div className='p-5 flex-grow' style={{overflowY: 'auto'}}>
-				<ul className='nostyleList' style={{color: 'white'}}>
+				<ul className='nostyleList d-flex flex-column' style={{color: 'white'}}>
 					{messages.map(myMap)}
 					{messages.map(myMap)}
 					{messages.map(myMap)}
@@ -102,7 +109,7 @@ function ChatList() {
 	}
 
 	return (
-		<>
+		<div className='w-100 h-100'>
 			<div className='d-flex w-100 align-items-center p-2' style={{ backgroundColor: "black" }}>
 				<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
 				<button className='new-chat ms-auto' onClick={newChat}/>
@@ -117,7 +124,7 @@ function ChatList() {
 					{chatList.map(myMap)}
 				</ul>
 			</div>
-		</>
+		</div>
 	
 	);
 }
@@ -125,16 +132,17 @@ function ChatList() {
 
 export function Chat() {
 	
-	
-	
+	const location = useLocation();
+	const classname1 = location.pathname == '/chat' ? '' : 'd-none d-sm-flex';	
+
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className='col-3 p-0 m-0 h-100' >
-					<ChatList></ChatList>
+				<div className={`col-12 col-sm-3 p-0 m-0 h-100 ${classname1}`} >
+					<ChatList />
 				</div>
-				<div className='col-9 p-0 m-0 h-100'>
-					<Outlet></Outlet>
+				<div className={`col-12 col-sm-9 p-0 m-0 h-100`}>
+					<Outlet />
 				</div>
 			</div>
 		</div>
