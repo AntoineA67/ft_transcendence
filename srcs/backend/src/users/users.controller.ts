@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, Patch } from '@nestjs/common';
 import { User, UsersService } from './users.service';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -23,6 +23,12 @@ export class UsersController {
 		console.log(users);
 		return toObject(users);
 	}
+	
+	@Patch(':userId')
+	async updateUser(@Param('userId') userId: string, @Body() body): Promise<any> {
+		return (this.usersService.updateUser(Number(userId), body.data));
+	}
+	
 
 	// @UseGuards(LocalAuthGuard)
 	// @Post('/test')
