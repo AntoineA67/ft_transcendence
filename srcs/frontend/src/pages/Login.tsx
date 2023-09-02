@@ -17,51 +17,62 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 type newUser = {
-	id: string,
-	nickname: string,
+	// id: string,
+	username: string,
 	email: string,
 	password: string
 }
 
 type login = {
-	id: string,
-	nickname: string,
+	// id: string,
+	username: string,
 	password: string
 }
 
 type loginContext = {
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, url?: string) => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
 	togglePassword: () => void,
 }
 
 export function Login() {
 
-	const saveToken = (user: newUser | login) => {
+	const saveToken = (data: any) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 
 		if (checkbox && checkbox.checked) {
-			// localStorage.setItem('token', token);
+			localStorage.setItem('token', data.token);
 		} else {
-			//  sessionStorage.setItem('token', token);
+			 sessionStorage.setItem('token', data.token);
 		}
 	}
+	
+	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
+		const errMess = document.getElementById("error-message") as HTMLInputElement;
+		setErr(data.error);		
+	}
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, 
+		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
-
+		let data;
+		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
+			) : ('http://localhost:3000/auth/login');	
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(user)
+			body: JSON.stringify({'user': user})
 		}
+		
 		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
+			let response = await fetch(url, fetchObj)
+			if (!response.ok) { throw Error('response not ok');}
+			data = await response.json();
+			console.log(data);
 		} catch (err: any) {
 			console.log(err);
 		} finally {
-			console.log('do something here...');
-			saveToken(user);
+			('error' in data) && dealError(data, setErr);
+			('token' in data) && saveToken(data);
 		}
 	}
 
@@ -90,6 +101,7 @@ export function Signup() {
 	const [nick, setNick] = useState('');
 	const [email, setEmail] = useState('');
 	const [pass, setPass] = useState('');
+	const [err, setErr] = useState('');
 
 	return (
 		<div className='scrollbar'>
@@ -100,7 +112,7 @@ export function Signup() {
 							<button className="leftArrow my-4"></button>
 						</Link>
 						<Form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, { id: nick, nickname: nick, email: email, password: pass }))}>
+							handleSubmit(e, {username: nick, email: email, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>New Account!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -127,7 +139,9 @@ export function Signup() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
-
+							<div id='error-message' style={{color: 'white'}}>
+								{err}
+							</div>
 							<Form.Group className="mb-4" controlId="accept terms">
 								<Form.Check required type="checkbox" label="I accept terms and conditions" />
 							</Form.Group>
@@ -151,6 +165,7 @@ export function Signin() {
 	const [nick, setNick] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
 	const [check, setCheck] = useState<string>('true');
+	const [err, setErr] = useState('');
 
 	return (
 		<div className='scrollbar'>
@@ -160,8 +175,7 @@ export function Signin() {
 						<Link to={'..'} style={{ display: "inline-block" }}>
 							<button className="leftArrow my-4"></button>
 						</Link>
-						<Form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, { id: nick, nickname: nick, password: pass }))}>
+						<Form className="w-100" onSubmit={(e) => (handleSubmit(e, {username: nick, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>Welcome back!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -182,13 +196,16 @@ export function Signin() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
+							<div id='error-message' style={{color: 'white'}}>
+								{err}
+							</div>
 
 							<Form.Group className="mb-4" controlId="remember me">
 								<Form.Check type="checkbox" label="Remember me"
 									checked={check == 'true'}
 									onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
 							</Form.Group>
-
+							
 							<button type="submit" className="btn btn-primary w-100">
 								Login
 							</button>

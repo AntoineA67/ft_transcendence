@@ -1,5 +1,5 @@
 
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -28,7 +28,11 @@ export class AuthService {
 		console.log('userExists', userExists);
 
 		if (!userExists) {
-			return this.registerUser(user);
+			return ({'error': 'user not exists'});
+		}
+		
+		if (user.password != userExists.password) {
+			return ({'error': 'password incorrect'});
 		}
 
 		// generate and return JWT
@@ -44,7 +48,11 @@ export class AuthService {
 	async registerUser(user: any) {
 		try {
 			console.log('registering user', user);
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			const userExists = await this.findUserByLogin(user.username);
+			if (userExists) {
+				return ({'error': 'username in use'});
+			}
+			const newUser = await this.usersService.createUser(user.username, user.email, user.password)
 			// .then((res) => {
 			// return this.jwtService.sign({
 			// 	sub: res.username,
@@ -52,14 +60,16 @@ export class AuthService {
 			// 	login: res.username,
 			// });
 			// });
-
-			return this.jwtService.sign({
+			const token = this.jwtService.sign({
 				sub: newUser.username,
 				email: newUser.email_address,
 				login: newUser.username,
 			});
+			return ({'token': token});
+			
 		} catch {
-			throw new InternalServerErrorException();
+			// TODO avoid use 500 error code
+			throw new InternalServerErrorException(); 
 		}
 	}
 
