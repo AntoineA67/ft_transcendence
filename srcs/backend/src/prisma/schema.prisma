@@ -38,6 +38,7 @@ model user {
   username                                                  String                 @default("") @db.VarChar
   email_address                                             String                 @default("") @db.VarChar
   password                                                  String                 @default("") @db.VarChar
+  bio                                                       String                 @default("") @db.VarChar
   custom                                                    custom[]
   game                                                      game[]
   game_user_link                                            game_user_link[]
