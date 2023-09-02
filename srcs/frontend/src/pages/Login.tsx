@@ -9,6 +9,7 @@ import eyeclose from '../assets/eyeclose.svg';
 
 import { useState } from 'react';
 import { Outlet, useOutletContext, Link } from "react-router-dom";
+import { redirect } from "react-router-dom";
 
 
 import Form from 'react-bootstrap/Form';
@@ -36,13 +37,16 @@ type loginContext = {
 
 export function Login() {
 
-	const saveToken = (data: any) => {
+	const saveToken = (data: any, user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 
 		if (checkbox && checkbox.checked) {
 			localStorage.setItem('token', data.token);
+			localStorage.setItem('nick', user.username);
+
 		} else {
-			 sessionStorage.setItem('token', data.token);
+			sessionStorage.setItem('token', data.token);
+			sessionStorage.setItem('nick', user.username);
 		}
 	}
 	
@@ -72,7 +76,7 @@ export function Login() {
 			console.log(err);
 		} finally {
 			('error' in data) && dealError(data, setErr);
-			('token' in data) && saveToken(data);
+			('token' in data) && saveToken(data, user);
 		}
 	}
 

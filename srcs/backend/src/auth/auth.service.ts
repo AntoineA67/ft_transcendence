@@ -35,12 +35,14 @@ export class AuthService {
 			return ({'error': 'password incorrect'});
 		}
 
-		// generate and return JWT
-		return this.jwtService.sign({
+		const token = this.jwtService.sign({
 			sub: userExists.username,
 			email: userExists.email_address,
 			login: userExists.username,
 		});
+		
+		// generate and return JWT
+		return ({'token': token});
 	}
 
 	// select * from "user";
