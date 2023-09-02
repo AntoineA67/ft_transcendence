@@ -8,10 +8,16 @@ import { AuthService } from './auth.service';
 export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) { }
 
-	@UseGuards(FortyTwoAuthGuard)
-	@Get('/login')
-	async login(@Req() req) {
-		return this.authService.login(req.user);
+	// @UseGuards(FortyTwoAuthGuard)
+	@Post('login')
+	async login(@Body() body) {
+		return this.authService.login(body.user);
+	}
+	
+	// @UseGuards(FortyTwoAuthGuard)
+	@Post('signup')
+	async signup(@Body() body) {
+		return this.authService.registerUser(body.user);
 	}
 
 	// @Public()
