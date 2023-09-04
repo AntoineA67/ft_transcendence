@@ -11,13 +11,15 @@ import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { WsJwtGuard } from 'src/auth/ws-auth.guard';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @UseGuards(WsJwtGuard)
 @WebSocketGateway({ cors: true })
 // @UseGuards(FortyTwoAuthGuard)
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly gamesService: GamesService) { }
+  constructor(private readonly gamesService: GamesService, private jwtService: JwtService) { }
 
   private logger: Logger = new Logger('Game Gateway');
 
@@ -33,6 +35,13 @@ export class GameGateway
   }
 
   handleConnection(client: Socket, ...args: any[]) {
+    const token = client.handshake.auth.token;
+    console.log('token', token)
+    if (!token || !this.jwtService.verify(token)) {
+      client.disconnect();
+      return;
+    }
+
     console.log('client connectedf', client.id, client.handshake.headers)
     client.emit('id', client.id)
   }
