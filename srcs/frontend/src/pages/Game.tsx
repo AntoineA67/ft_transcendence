@@ -219,6 +219,7 @@ export default function Game() {
 	const [id, setId] = useState('' as any)
 	// const [renderBall, setRenderBall] = useState(false as boolean)
 	const [ball, setBall] = useState({} as any)
+	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const jsp = useRef('non' as any)
 
 	useEffect(() => {
@@ -273,27 +274,21 @@ export default function Game() {
 			})
 		}
 	}, [state.socketClient])
+	const sendPressed = (key: string, pressed: boolean) => {
+		keysPressed.current[key] = pressed
+		keysPressed.current.time = Date.now()
+		socket.emit("keyPresses", keysPressed.current);
+		console.log("sendPressed", keysPressed.current)
+	}
 	useEffect(() => {
 		window.addEventListener('keydown', (event: KeyboardEvent) => {
 			if (event.repeat) return
-			if (event.key === "ArrowUp" || event.key === "w") {
-				// console.log(jsp)
-				socket.emit("UpKeyPressed", Date.now());
-			}
-			if (event.key === "ArrowDown" || event.key === "s") {
-				// console.log(jsp)
-				socket.emit("DownKeyPressed", Date.now());
-			}
+			if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", true) }
+			if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", true) }
 		});
 		window.addEventListener('keyup', (event: KeyboardEvent) => {
-			if (event.key === "ArrowUp" || event.key === "w") {
-				// console.log(jsp)
-				socket.emit("UpKeyReleased", Date.now());
-			}
-			if (event.key === "ArrowDown" || event.key === "s") {
-				// console.log(jsp)
-				socket.emit("DownKeyReleased", Date.now());
-			}
+			if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", false) }
+			if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", false) }
 		});
 		return () => {
 			// unregister eventListener once

@@ -23,5 +23,6 @@ export const socket = connectToSocketWithToken(token);
 
 // Vous pouvez maintenant utiliser le socket pour communiquer avec le serveur
 socket.on('connect', () => {
+  console.log(token)
   console.log('Connecté au serveur WebSocket');
 });

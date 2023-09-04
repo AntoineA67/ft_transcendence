@@ -44,9 +44,13 @@ export class GamesService {
   //     this.matchmakingQueue.splice(index, 1);
   //   }
   // }
-  keyPressed(clientId: string, dir: number) {
-    this.rooms[this.clients[clientId]].handleKey(clientId, dir)
+  handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
+    this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
+
+  // keyPressed(clientId: string, dir: number) {
+  //   this.rooms[this.clients[clientId]].handleKey(clientId, dir)
+  // }
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {

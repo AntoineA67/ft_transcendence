@@ -48,8 +48,8 @@ export default class Room {
 		}
 		this.ball.update(this.players);
 	}
-	public handleKey(client: string, dir: number) {
-		this.players[client].direction = dir;
+	public handleKey(client: string, data: { up: boolean, down: boolean, time: number }) {
+		this.players[client].handleKeysPresses(data);
 	}
 
 	// public addPlayer(player: Player) {
