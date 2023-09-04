@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, RouterProvider } from 'react-router-dom';
 
 //import component
 import TestDB from './pages/TestDB';
-import { Login, Signin, Signup, LandingPage } from './pages/Login'; 
+import { Login, Signin, Signup, LandingPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
 import Home from './pages/Home';
 import Game from './pages/Game';
@@ -27,9 +27,10 @@ import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
+axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
+	document.getElementById('root') as HTMLElement
 );
 root.render(
 	<BrowserRouter>
@@ -40,12 +41,12 @@ root.render(
 					<Route path="signin" element={<Signin />}></Route>
 					<Route path="signup" element={<Signup />}></Route>
 				</Route>
-			
+
 				<Route path='/42/callback' element={<CallBack42 />} />
-			
+
 				<Route element={<Protected />}>
 					<Route path="/" element={<Sidebar />}>
-						<Route index element={<Profile />}/>
+						<Route index element={<Profile />} />
 						<Route path="search" element={<Search />}></Route>
 						<Route path="friends" element={<Friends />}></Route>
 						<Route path="chat" element={<Chat />}>
@@ -62,8 +63,8 @@ root.render(
 			</Routes>
 		</AuthProvider>
 	</BrowserRouter>
-	
-//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
+
+	//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 );
 
 // If you want to start measuring performance in your app, pass a function
