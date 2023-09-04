@@ -1,5 +1,5 @@
 import { createContext, ReactComponentElement, useContext, useState, useEffect } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
@@ -41,6 +41,7 @@ export function CallBack42() {
 	// const {code, state} =  useParams();
 	let [searchParams, setSearchParams] = useSearchParams();
 	const l = useLocation();
+	const navigate = useNavigate();
 	console.log('location', l);
 	const code = searchParams.get('code');
 	const state = searchParams.get('state');
@@ -73,7 +74,8 @@ export function CallBack42() {
 				setAuth({ ...auth, token: data, id: '1' });
 				//create websocket
 				localStorage.setItem('token', data); // add this line to set the token in localStorage
-				return res;
+				navigate("/");
+				// return;
 			}
 			);
 		} catch (error: any) {
