@@ -7,25 +7,24 @@ import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Outlet, useOutletContext, Link } from "react-router-dom";
 import { redirect } from "react-router-dom";
-
 
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
+import { AuthContext } from '../utils/AuthProvider';
+
 type newUser = {
-	// id: string,
 	username: string,
 	email: string,
 	password: string
 }
 
 type login = {
-	// id: string,
 	username: string,
 	password: string
 }
@@ -228,10 +227,25 @@ export function Signin() {
 
 export function LandingPage() {
 
+	const [random, setRandom] = useState('');
 	
-	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
+	const api42 = 'https://api.intra.42.fr/oauth/authorize';
+	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
+	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
+	const type = 'response_type=code';
+	const scope = 'scope=public';
+	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
+	
+	const { auth, setAuth } = useContext(AuthContext);
+	
+	useEffect(() => {
+		const rand = Math.random().toString(36).slice(2, 12);
+		setRandom(rand);
+		setAuth({...auth, state: rand});
+	}, []);
 
+	console.log(oauth42)
 	return (
 		<div className='scrollbar'>
 			<Container className="text-center" style={{ height: "650px" }}>
