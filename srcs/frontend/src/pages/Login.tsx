@@ -228,8 +228,9 @@ export function Signin() {
 
 export function LandingPage() {
 
+	
 	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
-
+	/42/callback'
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
 	return (
