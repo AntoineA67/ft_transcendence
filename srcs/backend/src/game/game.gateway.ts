@@ -38,12 +38,14 @@ export class GameGateway
     const token = client.handshake.auth.token;
     console.log('token', token)
     if (!token || !this.jwtService.verify(token)) {
+      console.log('Invalid token')
+      client.emit('error', 'Invalid token');
       client.disconnect();
       return;
+    } else {
+      console.log('client connected', client.id, client.handshake.headers)
+      client.emit('id', client.id)
     }
-
-    console.log('client connectedf', client.id, client.handshake.headers)
-    client.emit('id', client.id)
   }
 
   @UseGuards(WsJwtGuard)
