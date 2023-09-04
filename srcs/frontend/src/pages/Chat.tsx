@@ -168,11 +168,11 @@ function ChatList() {
 					<div className='flex-grow-1 pb-5 pb-sm-0' style={{ overflowY: 'auto'}}>
 						<ul className='nostyleList py-0' >
 							{chatList.map(myMap)}
+							{/* {chatList.map(myMap)}
 							{chatList.map(myMap)}
 							{chatList.map(myMap)}
 							{chatList.map(myMap)}
-							{chatList.map(myMap)}
-							{chatList.map(myMap)}
+							{chatList.map(myMap)} */}
 						</ul>
 					</div>
 				</>}
