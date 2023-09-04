@@ -35,6 +35,8 @@ export class GameGateway
   }
 
   handleConnection(client: Socket, ...args: any[]) {
+    client.emit('id', client.id)
+    return;
     const token = client.handshake.auth.token;
     console.log('token', token)
     if (!token || !this.jwtService.verify(token)) {
@@ -61,33 +63,38 @@ export class GameGateway
   }
 
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage('UpKeyPressed')
-  async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
-    console.log('UpKeyPressed', payload)
-    this.gamesService.keyPressed(client.id, 1);
-    // this.rooms[this.clients[client.id]].handleKey(client.id, 1)
+  @SubscribeMessage('keyPresses')
+  async handleKeyPresses(client: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
+    this.gamesService.handleKeysPresses(client.id, payload);
   }
-  @UseGuards(WsJwtGuard)
-  @SubscribeMessage('UpKeyReleased')
-  async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
-    this.gamesService.keyPressed(client.id, 0);
-    // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
-    console.log('UpKeyReleased', payload)
-  }
-  @UseGuards(WsJwtGuard)
-  @SubscribeMessage('DownKeyPressed')
-  async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
-    this.gamesService.keyPressed(client.id, -1);
-    console.log('DownKeyPressed', payload)
-    // this.rooms[this.clients[client.id]].handleKey(client.id, -1)
-  }
-  @UseGuards(WsJwtGuard)
-  @SubscribeMessage('DownKeyReleased')
-  async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
-    console.log('DownKeyReleased', payload)
-    this.gamesService.keyPressed(client.id, 0);
-    // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
-  }
+  // @UseGuards(WsJwtGuard)
+  // @SubscribeMessage('UpKeyPressed')
+  // async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
+  //   console.log('UpKeyPressed', payload)
+  //   this.gamesService.keyPressed(client.id, 1);
+  //   // this.rooms[this.clients[client.id]].handleKey(client.id, 1)
+  // }
+  // @UseGuards(WsJwtGuard)
+  // @SubscribeMessage('UpKeyReleased')
+  // async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
+  //   this.gamesService.keyPressed(client.id, 0);
+  //   // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
+  //   console.log('UpKeyReleased', payload)
+  // }
+  // @UseGuards(WsJwtGuard)
+  // @SubscribeMessage('DownKeyPressed')
+  // async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
+  //   this.gamesService.keyPressed(client.id, -1);
+  //   console.log('DownKeyPressed', payload)
+  //   // this.rooms[this.clients[client.id]].handleKey(client.id, -1)
+  // }
+  // @UseGuards(WsJwtGuard)
+  // @SubscribeMessage('DownKeyReleased')
+  // async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
+  //   console.log('DownKeyReleased', payload)
+  //   this.gamesService.keyPressed(client.id, 0);
+  //   // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
+  // }
 
 }
 
