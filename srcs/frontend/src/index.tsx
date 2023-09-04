@@ -21,7 +21,7 @@ import './styles/customButton.css';
 import './styles/customForm.css';
 import './styles/index.css';
 
-import { AuthProvider, Protected } from './utils/AuthProvider';
+import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
@@ -40,9 +40,8 @@ root.render(
 					<Route path="signin" element={<Signin />}></Route>
 					<Route path="signup" element={<Signup />}></Route>
 				</Route>
-			</Routes>	
+				<Route path='/42/callback' element={<CallBack42 />} />
 			
-			<Routes>	
 				<Route element={<Protected />}>
 					<Route path="/" element={<Sidebar />}>
 						<Route index element={<Profile />}/>
@@ -60,7 +59,6 @@ root.render(
 					<Route path="/test-db" element={<TestDB />} />
 				</Route>
 			</Routes>
-
 		</AuthProvider>
 	</BrowserRouter>
 	
