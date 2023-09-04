@@ -49,28 +49,28 @@ export class GameGateway
     this.gamesService.disconnect(client);
   }
 
-  @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('UpKeyPressed')
   async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
     console.log('UpKeyPressed', payload)
     this.gamesService.keyPressed(client.id, 1);
     // this.rooms[this.clients[client.id]].handleKey(client.id, 1)
   }
-  @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('UpKeyReleased')
   async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
     this.gamesService.keyPressed(client.id, 0);
     // this.rooms[this.clients[client.id]].handleKey(client.id, 0)
     console.log('UpKeyReleased', payload)
   }
-  @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('DownKeyPressed')
   async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
     this.gamesService.keyPressed(client.id, -1);
     console.log('DownKeyPressed', payload)
     // this.rooms[this.clients[client.id]].handleKey(client.id, -1)
   }
-  @UseGuards(FortyTwoAuthGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('DownKeyReleased')
   async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
     console.log('DownKeyReleased', payload)
