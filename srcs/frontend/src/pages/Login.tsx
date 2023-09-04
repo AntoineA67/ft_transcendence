@@ -15,8 +15,9 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { AuthContext } from '../utils/AuthProvider';
 
-import { useAuth } from '../utils/AuthProvider';
+// import { useAuth } from '../utils/AuthProvider';
 
 type newUser = {
 	username: string,
@@ -48,27 +49,27 @@ export function Login() {
 			sessionStorage.setItem('nick', user.username);
 		}
 	}
-	
+
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
 		const errMess = document.getElementById("error-message") as HTMLInputElement;
-		setErr(data.error);		
+		setErr(data.error);
 	}
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, 
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
 		let data;
 		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
-			) : ('http://localhost:3000/auth/login');	
+		) : ('http://localhost:3000/auth/login');
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({'user': user})
+			body: JSON.stringify({ 'user': user })
 		}
-		
+
 		try {
 			let response = await fetch(url, fetchObj)
-			if (!response.ok) { throw Error('response not ok');}
+			if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
 			console.log(data);
 		} catch (err: any) {
@@ -115,7 +116,7 @@ export function Signup() {
 							<button className="leftArrow my-4"></button>
 						</Link>
 						<Form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, {username: nick, email: email, password: pass }, setErr))}>
+							handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>New Account!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -142,7 +143,7 @@ export function Signup() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
-							<div id='error-message' style={{color: 'white'}}>
+							<div id='error-message' style={{ color: 'white' }}>
 								{err}
 							</div>
 							<Form.Group className="mb-4" controlId="accept terms">
@@ -178,7 +179,7 @@ export function Signin() {
 						<Link to={'..'} style={{ display: "inline-block" }}>
 							<button className="leftArrow my-4"></button>
 						</Link>
-						<Form className="w-100" onSubmit={(e) => (handleSubmit(e, {username: nick, password: pass }, setErr))}>
+						<Form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>Welcome back!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -199,7 +200,7 @@ export function Signin() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
-							<div id='error-message' style={{color: 'white'}}>
+							<div id='error-message' style={{ color: 'white' }}>
 								{err}
 							</div>
 
@@ -208,7 +209,7 @@ export function Signin() {
 									checked={check == 'true'}
 									onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
 							</Form.Group>
-							
+
 							<button type="submit" className="btn btn-primary w-100">
 								Login
 							</button>
@@ -228,7 +229,7 @@ export function Signin() {
 export function LandingPage() {
 
 	const [random, setRandom] = useState('');
-	
+
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
 	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
 	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
@@ -236,13 +237,13 @@ export function LandingPage() {
 	const scope = 'scope=public';
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
-	
-	const { auth, setAuth } = useAuth();
-	
+
+	const { auth, setAuth } = useContext(AuthContext);
+
 	useEffect(() => {
 		const rand = Math.random().toString(36).slice(2, 12);
 		setRandom(rand);
-		setAuth({...auth, state: 'random text'});
+		setAuth({ ...auth, state: 'random text' });
 		console.log('login', auth, 'rand ', rand);
 	}, []);
 
@@ -268,11 +269,11 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								{auth.state &&  
-								<a href={oauth42} className="btn-invisible w-75">
-									<span>Sign in with </span>
-									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
-								</a>
+								{auth.state &&
+									<a href={oauth42} className="btn-invisible w-75">
+										<span>Sign in with </span>
+										<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
+									</a>
 								}
 							</div>
 						</div>

@@ -2,10 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator nestgraphql {
-    provider = "node ../node_modules/prisma-nestjs-graphql"
-    output = "./@generated"
-}
+// generator nestgraphql {
+//   provider = "node ../node_modules/prisma-nestjs-graphql"
+//   output   = "./@generated"
+// }
 
 datasource db {
   provider = "postgresql"
@@ -92,30 +92,8 @@ model user_friendship_link {
   id                                        Int     @id(map: "PK_a331d7dca75fc3d7fc1ced56c8d") @default(autoincrement())
   friendStatus                              Boolean @default(false)
   blockedStatus                             Boolean @default(false)
-  pending
   user_id                                   BigInt?
   friend_id                                 BigInt?
   user_user_friendship_link_friend_idTouser user?   @relation("user_friendship_link_friend_idTouser", fields: [friend_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7af4fef2416f97e3984d8cefd59")
   user_user_friendship_link_user_idTouser   user?   @relation("user_friendship_link_user_idTouser", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_9897101c71227987bc6b68aa32d")
-}
-
-
-//alter
-model friend_request {
-	id 
-	user 
-	possible_friend
-	resolu : boolean
-}
-
-model friend {
-	id 
-	user1 
-	user2 
-}
-
-model block {
-	id 
-	user 
-	blocked 
 }
