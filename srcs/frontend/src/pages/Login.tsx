@@ -8,8 +8,7 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
 import { useState, useEffect, useContext } from 'react';
-import { Outlet, useOutletContext, Link } from "react-router-dom";
-import { redirect } from "react-router-dom";
+import { Outlet, useOutletContext, Link, Navigate } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
@@ -93,7 +92,8 @@ export function Login() {
 	}
 
 	return (
-		<Outlet context={{ togglePassword, handleSubmit }} />
+		localStorage.getItem('token') ? <Navigate replace to="/" /> :
+			<Outlet context={{ togglePassword, handleSubmit }} />
 	);
 }
 
