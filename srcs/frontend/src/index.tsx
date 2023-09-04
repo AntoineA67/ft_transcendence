@@ -40,6 +40,7 @@ root.render(
 					<Route path="signin" element={<Signin />}></Route>
 					<Route path="signup" element={<Signup />}></Route>
 				</Route>
+			
 				<Route path='/42/callback' element={<CallBack42 />} />
 			
 				<Route element={<Protected />}>

@@ -16,7 +16,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { AuthContext } from '../utils/AuthProvider';
+import { useAuth } from '../utils/AuthProvider';
 
 type newUser = {
 	username: string,
@@ -237,12 +237,13 @@ export function LandingPage() {
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 	
-	const { auth, setAuth } = useContext(AuthContext);
+	const { auth, setAuth } = useAuth();
 	
 	useEffect(() => {
 		const rand = Math.random().toString(36).slice(2, 12);
 		setRandom(rand);
-		setAuth({...auth, state: rand});
+		setAuth({...auth, state: 'random text'});
+		console.log('login', auth, 'rand ', rand);
 	}, []);
 
 	console.log(oauth42)
@@ -267,10 +268,12 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
+								{auth.state &&  
 								<a href={oauth42} className="btn-invisible w-75">
-									<span>Sign in with</span>
+									<span>Sign in with </span>
 									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
 								</a>
+								}
 							</div>
 						</div>
 					</Col>
