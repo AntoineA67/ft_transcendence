@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, RouterProvider } from 'react-router-dom';
 import TestDB from './pages/TestDB';
 import { Login, Signin, Signup, LandingPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
-import Home from './pages/Home';
+import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
