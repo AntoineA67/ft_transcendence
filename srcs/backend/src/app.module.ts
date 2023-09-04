@@ -14,12 +14,14 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { AppResolver } from './app.resolver';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { MessagesModule } from './message/message.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     GameModule,
+    MessagesModule,
     UsersModule, // Inclus ici
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
