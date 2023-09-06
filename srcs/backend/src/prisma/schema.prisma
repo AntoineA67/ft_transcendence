@@ -1,95 +1,123 @@
 generator client {
-  provider = "prisma-client-js"
-  output = "@generated"
+    provider = "prisma-client-js"
+    output   = "@generated"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
-model game {
-  id             Int              @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
-  status         Boolean          @default(false)
-  start_date     DateTime         @db.Timestamp(6)
-  end_date       DateTime?        @db.Timestamp(6)
-  score          String?          @db.VarChar
-  winnerId       BigInt?
-  user           user?            @relation(fields: [winnerId], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_cd57acb58d1147c23da5cd09cae")
-  game_user_link game_user_link[]
+model Game {
+    id         Int       @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
+    finish     Boolean   @default(false)
+    start_date DateTime  @db.Timestamp(6)
+    end_date   DateTime? @db.Timestamp(6)
+    score      String?   @db.VarChar
+    players    Player[]
 }
 
-model message {
-  id        Int      @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
-  message   String   @db.VarChar
-  send_date DateTime @db.Timestamp(6)
-  roomId    Int?
-  userId    BigInt?
-  user      user?    @relation(fields: [userId], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_446251f8ceb2132af01b68eb593")
-  room      room?    @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fdfe54a21d1542c564384b74d5c")
+model Player {
+    id     Int     @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
+    win    Boolean
+    game   Game    @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
+    gameId Int
+    user   User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
+    userId BigInt
 }
 
-model user {
-  user_id                                                   BigInt                 @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
-  username                                                  String                 @default("") @db.VarChar
-  email_address                                             String                 @default("") @db.VarChar
-  password                                                  String                 @default("") @db.VarChar
-  custom                                                    custom[]
-  game                                                      game[]
-  game_user_link                                            game_user_link[]
-  message                                                   message[]
-  room                                                      room[]
-  room_user_link                                            room_user_link[]
-  user_friendship_link_user_friendship_link_friend_idTouser user_friendship_link[] @relation("user_friendship_link_friend_idTouser")
-  user_friendship_link_user_friendship_link_user_idTouser   user_friendship_link[] @relation("user_friendship_link_user_idTouser")
+model Custom {
+    id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+    ball   Int    @default(0)
+    padel  Int    @default(0)
+    user   User   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
+    userId BigInt @unique
 }
 
-model custom {
-  id     Int     @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
-  ball   Int?
-  puck   Int?
-  userId BigInt?
-  user   user?   @relation(fields: [userId], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
+// add avatarpath and hash key for auth
+
+model User {
+    id               BigInt          @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
+    username         String          @default("") @db.VarChar
+    email            String          @default("") @db.VarChar
+    password         String          @default("") @db.VarChar
+    bio              String
+    custom           Custom?
+    achieve          Achievement?
+    gameHistory      Player[]
+    membership       Member[]
+    ownership        Room[]
+    messages         Message[]
+    friends          Friendship[]
+    sendFriendReq    FriendRequest[] @relation("sendFriendReq")
+    recieveFriendReq FriendRequest[] @relation("recieveFriendReq")
+    blocks           Block[]         @relation("block")
+    blocked          Block[]         @relation("blocked")
 }
 
-model game_user_link {
-  id     Int     @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
-  status Boolean @default(true)
-  gameId Int?
-  userId BigInt?
-  user   user?   @relation(fields: [userId], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
-  game   game?   @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
+model Achievement {
+    id            BigInt  @id @default(autoincrement())
+    user          User    @relation(fields: [userId], references: [id])
+    userId        BigInt  @unique
+    firstWin      Boolean @default(false)
+    winTenGames   Boolean @default(false)
+    loggedAWeek   Boolean @default(false)
+    play100Games  Boolean @default(false)
+    play1000Games Boolean @default(false)
 }
 
-model room {
-  id             Int              @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
-  title          String           @db.VarChar(255)
-  private        Boolean
-  password       String?          @db.VarChar(100)
-  ownerId        BigInt?
-  message        message[]
-  user           user?            @relation(fields: [ownerId], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_65283be59094a73fed31ffeee4e")
-  room_user_link room_user_link[]
+model Message {
+    id        BigInt   @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
+    message   String   @db.VarChar
+    send_date DateTime @db.Timestamp(6)
+    user      User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_446251f8ceb2132af01b68eb593")
+    userId    BigInt?
+    room      Room?    @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fdfe54a21d1542c564384b74d5c")
+    roomId    Int?
 }
 
-model room_user_link {
-  id          Int     @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
-  ownerStatus Boolean @default(false)
-  adminStatus Boolean @default(false)
-  banStatus   Boolean @default(false)
-  muteStatus  Boolean @default(false)
-  roomId      Int?
-  userId      BigInt?
-  user        user?   @relation(fields: [userId], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
-  room        room?   @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
+model Room {
+    id        Int       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
+    isChannel Boolean
+    owner     User?     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_65283be59094a73fed31ffeee4e")
+    ownerId   BigInt?
+    title     String?   @db.VarChar(255)
+    private   Boolean?
+    password  String?   @db.VarChar(100)
+    message   Message[]
+    members   Member[]
 }
 
-model user_friendship_link {
-  id                                        Int     @id(map: "PK_a331d7dca75fc3d7fc1ced56c8d") @default(autoincrement())
-  friendStatus                              Boolean @default(false)
-  blockedStatus                             Boolean @default(false)
-  user_id                                   BigInt?
-  friend_id                                 BigInt?
-  user_user_friendship_link_friend_idTouser user?   @relation("user_friendship_link_friend_idTouser", fields: [friend_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7af4fef2416f97e3984d8cefd59")
-  user_user_friendship_link_user_idTouser   user?   @relation("user_friendship_link_user_idTouser", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_9897101c71227987bc6b68aa32d")
+model Member {
+    id     BigInt    @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
+    user   User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
+    userId BigInt?
+    room   Room?     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
+    roomId Int?
+    owner  Boolean   @default(false)
+    admin  Boolean   @default(false)
+    ban    Boolean   @default(false)
+    mute   DateTime?
+}
+
+model Friendship {
+    id      BigInt @id @default(autoincrement())
+    friends User[]
+}
+
+model FriendRequest {
+    id               BigInt @id @default(autoincrement())
+    user             User   @relation("sendFriendReq", fields: [userId], references: [id], onDelete: Cascade)
+    userId           BigInt
+    possibleFriend   User   @relation("recieveFriendReq", fields: [possibleFriendId], references: [id], onDelete: Cascade)
+    possibleFriendId BigInt
+    status           String @default("pending")
+}
+
+model Block {
+    id        BigInt @id @default(autoincrement())
+    user      User   @relation("block", fields: [userId], references: [id], onDelete: Cascade)
+    userId    BigInt
+    blocked   User   @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+    blockedId BigInt
 }
