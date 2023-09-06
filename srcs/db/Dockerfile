@@ -10,7 +10,7 @@ ARG POSTGRES_NAME
 # # Installer le client PostgreSQL pour utiliser pg_isready
 # RUN apt-get update && apt-get install -y postgresql-client
 # RUN echo "DROP DATABASE IF EXISTS ${POSTGRES_NAME};" >> /docker-entrypoint-initdb.d/structure.sql
-RUN echo "CREATE DATABASE ${POSTGRES_NAME};" >> /docker-entrypoint-initdb.d/structure.sql
+# RUN echo "CREATE DATABASE ${POSTGRES_NAME};" >> /docker-entrypoint-initdb.d/structure.sql
 
 # COPY structure.sql .
 # RUN cat structure.sql >> /docker-entrypoint-initdb.d/structure.sql
