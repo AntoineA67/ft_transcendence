@@ -115,21 +115,20 @@ export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
 	const [id, setId] = useState('' as any)
-	// const [renderBall, setRenderBall] = useState(false as boolean)
 	const [ball, setBall] = useState({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
-	const jsp = useRef('non' as any)
-	const socket = useSocket()
+	const socket = useSocket();
 
 	useEffect(() => {
-		socket.emit('match')
-		console.log('match')
+		// socket.emit('match')
+		// console.log('match')
 		return () => {
 			if (socket) socket.disconnect()
 		}
 	}, [])
 
 	useEffect(() => {
+		console.log('socket', socket)
 		if (socket) {
 			socket.on('connect', function () {
 				console.log('connect')
@@ -147,7 +146,6 @@ export default function Game() {
 				setClients(newClients.clients)
 				if (newClients.ball) {
 					setBall(newClients.ball)
-					// console.log(newClients.ball)
 				}
 			})
 		}
@@ -155,7 +153,7 @@ export default function Game() {
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
-		socket.emit("keyPresses", keysPressed.current);
+		socket?.emit("keyPresses", keysPressed.current);
 		console.log("sendPressed", keysPressed.current)
 	}
 	useEffect(() => {
@@ -173,20 +171,9 @@ export default function Game() {
 			// window.removeEventListener('keydown', () => { console.log('remove keydown') });
 			// window.removeEventListener('keyup', () => { console.log('remove keyup') });
 		};
-	}, [jsp])
-	useEffect(() => {
-		socket.on('start', (roomId) => {
-			jsp.current = roomId
-			console.log("start", roomId)
-		})
-		// setTimeout(() => {
-		// 	jsp.current = "oui"
-		// 	console.log("ouioui")
-		// }, 5000)
 	}, [])
 
 	return (
-
 		<Canvas shadows camera={{ position: [0, 5, 12], fov: 50 }}>
 			{/* {Object.keys(clients)
 				.map((client) => {
@@ -220,5 +207,6 @@ export default function Game() {
 			<pointLight position={[-10, -10, -10]} />
 			<spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
 		</Canvas>
+
 	)
 }

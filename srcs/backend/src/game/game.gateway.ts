@@ -13,8 +13,9 @@ import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { WsJwtGuard } from 'src/auth/ws-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { jwtConstants } from 'src/auth/constants';
 
-@UseGuards(WsJwtGuard)
+// @UseGuards(WsJwtGuard)
 @WebSocketGateway({ cors: true, namespace: 'game' })
 // @UseGuards(FortyTwoAuthGuard)
 export class GameGateway
@@ -38,11 +39,16 @@ export class GameGateway
   handleConnection(client: Socket, ...args: any[]) {
     client.emit('id', client.id)
     // return;
-    const token = client.handshake.auth.token;
-    console.log('token', token)
-    if (!token || !this.jwtService.verify(token)) {
-      console.log('Invalid token')
-      client.emit('error', 'Invalid token');
+    const token = client.handshake.auth.Authorization?.split(' ')[1];
+    console.log('token', token, client.handshake.auth)
+    if (!token || !this.jwtService.verify(token, { secret: jwtConstants.secret })) {
+      if (token) {
+        client.emit('error', 'Invalid token');
+        console.log('Invalid token')
+      } else {
+        client.emit('error', 'No token');
+        console.log('No token')
+      }
       client.disconnect();
       return;
     } else {
