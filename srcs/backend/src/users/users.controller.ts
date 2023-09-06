@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { User, UsersService } from './users.service';
+// import { User, UsersService } from './users.service';
+import { UsersService } from '../users/users.service';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
@@ -12,7 +13,7 @@ export class UsersController {
 	@Get()
 	async getAllGames(): Promise<string> {
 		console.log("/users")
-		const users = await this.usersService.getAllUsers();
+		const users = await this.usersService.getAllGames();
 		const toObject = (oui) => {
 			return JSON.parse(JSON.stringify(oui, (key, value) =>
 				typeof value === 'bigint'

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
-import { GameModule } from './game/game.module';
-import { GameController } from './game/game.controller';
+// import { GameModule } from './game/game.module';
+// import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
@@ -20,7 +20,7 @@ import { MessagesModule } from './message/message.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
-    GameModule,
+    // GameModule,
     MessagesModule,
     UsersModule, // Inclus ici
     GraphQLModule.forRoot<ApolloDriverConfig>({

@@ -5,7 +5,8 @@ import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { jwtConstants } from './constants';
 import { Strategy } from 'passport-42';
 import passport from 'passport';
-import { User, UsersService } from '../users/users.service';
+// import { User, UsersService } from '../users/users.service';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
 

@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+	"paths": {
+		"@prisma/*": ["./dist/prisma/*"]
+	  },
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
