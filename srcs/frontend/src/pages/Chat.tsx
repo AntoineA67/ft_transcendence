@@ -13,7 +13,6 @@ import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
-import { socket } from '../utils/socket';
 import { useEffect, useRef, useState } from 'react';
 import { proxy } from 'valtio';
 import { Socket } from 'socket.io-client';
