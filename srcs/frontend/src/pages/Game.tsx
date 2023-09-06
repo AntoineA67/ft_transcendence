@@ -1,70 +1,10 @@
 import * as THREE from "three"
-import { useContext, useEffect, useMemo, useRef, useState } from "react"
-import { Canvas, useFrame } from "@react-three/fiber"
-import { Box, KeyboardControls, OrbitControls, Text, useGLTF, useKeyboardControls, useTexture } from "@react-three/drei"
-import { Physics, useSphere, useBox, usePlane } from "@react-three/cannon"
-import { proxy, useSnapshot } from "valtio"
-import clamp from "lodash-es/clamp"
-// import pingSound from "./resources/ping.mp3"
-// import earthImg from "./resources/cross.jpg"
-// import { socket } from "../utils/socket"
-// import { Socket } from "socket.io-client"
-import { stat } from "fs"
-import { SocketProvider, useSocket } from "../utils/socket"
-import { Socket } from "socket.io-client"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Canvas } from "@react-three/fiber"
+import { Box, Text } from "@react-three/drei"
+import { useSocket } from "../utils/socket"
 
-// const ping = new Audio(pingSound)
-const state = proxy({
-	count: 0,
-	ball: { 'position': null, 'rotation': null } as any,
-})
-
-const ControlsWrapper = () => {
-	const socket: any = useSocket();
-	const controlsRef = useRef(null!) as any
-	const [updateCallback, setUpdateCallback] = useState(null)
-
-	// Register the update event and clean up
-	useEffect(() => {
-		const onControlsChange = (val: any) => {
-			const { position, rotation } = val.target.object
-			const { id } = socket
-
-			const posArray: any[] = []
-			const rotArray: any[] = []
-
-			position.toArray(posArray)
-			rotation.toArray(rotArray)
-
-			socket.emit('move', {
-				id,
-				rotation: rotArray,
-				position: posArray,
-			})
-		}
-
-		if (controlsRef.current) {
-			setUpdateCallback(
-				controlsRef.current.addEventListener('change', onControlsChange)
-			)
-		}
-
-		// Dispose
-		return () => {
-			if (updateCallback && controlsRef.current)
-				controlsRef.current.removeEventListener(
-					'change',
-					onControlsChange
-				)
-		}
-	}, [controlsRef, socket])
-
-	return <OrbitControls ref={controlsRef} />
-}
 const BallWrapper = ({ ball, client }: any) => {
-	// useFrame(() => {
-	// 	console.log("position", position)
-	// })
 	const ballClientPosition: THREE.Vector3 = useMemo(() => {
 		const invertedX = client.invertedSide ? 1 - ball.x : ball.x
 		// console.log("client", client)
@@ -85,9 +25,6 @@ const BallWrapper = ({ ball, client }: any) => {
 }
 
 const UserWrapper = ({ position, rotation, id }: any) => {
-	// useFrame(() => {
-	// 	console.log("position", position)
-	// })
 	return (
 		<>
 			<Box position={position} />
@@ -120,14 +57,6 @@ export default function Game() {
 	const socket = useSocket();
 
 	useEffect(() => {
-		// socket.emit('match')
-		// console.log('match')
-		return () => {
-			if (socket) socket.disconnect()
-		}
-	}, [])
-
-	useEffect(() => {
 		console.log('socket', socket)
 		if (socket) {
 			socket.on('connect', function () {
@@ -148,6 +77,9 @@ export default function Game() {
 					setBall(newClients.ball)
 				}
 			})
+			return () => {
+				socket.disconnect();
+			}
 		}
 	}, [socket])
 	const sendPressed = (key: string, pressed: boolean) => {
@@ -156,32 +88,26 @@ export default function Game() {
 		socket?.emit("keyPresses", keysPressed.current);
 		console.log("sendPressed", keysPressed.current)
 	}
+	const onkeydown = (event: KeyboardEvent) => {
+		if (event.repeat) return
+		if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", true) }
+		if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", true) }
+	}
+	const onkeyup = (event: KeyboardEvent) => {
+		if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", false) }
+		if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", false) }
+	}
 	useEffect(() => {
-		window.addEventListener('keydown', (event: KeyboardEvent) => {
-			if (event.repeat) return
-			if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", true) }
-			if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", true) }
-		});
-		window.addEventListener('keyup', (event: KeyboardEvent) => {
-			if (event.key === "ArrowUp" || event.key === "w") { sendPressed("up", false) }
-			if (event.key === "ArrowDown" || event.key === "s") { sendPressed("down", false) }
-		});
+		window.addEventListener('keydown', onkeydown);
+		window.addEventListener('keyup', onkeyup);
 		return () => {
-			// unregister eventListener once
-			// window.removeEventListener('keydown', () => { console.log('remove keydown') });
-			// window.removeEventListener('keyup', () => { console.log('remove keyup') });
+			window.removeEventListener('keydown', onkeydown);
+			window.removeEventListener('keyup', onkeyup);
 		};
 	}, [])
 
 	return (
 		<Canvas shadows camera={{ position: [0, 5, 12], fov: 50 }}>
-			{/* {Object.keys(clients)
-				.map((client) => {
-					return (
-						<Text key={client} fontSize={.5}
-						>{client}</Text>
-					)
-				})} */}
 			{Object.keys(clients)
 				.map((client) => {
 					const { y, dir } = clients[client]
@@ -196,12 +122,6 @@ export default function Game() {
 					)
 				})}
 			{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
-			{/* {ball.position !== null && !renderBall && <UserWrapper
-				key={ball.position}
-				id={ball.position}
-				position={ball.position}
-				rotation={ball.rotation}
-			/>} */}
 			< color attach="background" args={["#171720"]} />
 			<ambientLight intensity={0.5} />
 			<pointLight position={[-10, -10, -10]} />
