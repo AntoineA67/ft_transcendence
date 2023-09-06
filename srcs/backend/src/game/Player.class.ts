@@ -3,6 +3,7 @@ export default class Player {
 	static distanceFromWall: number = .02;
 	static halfPaddleHeight: number = .05;
 	public xDistance: number;
+	public score: number = 0;
 
 	constructor(public id: string, public invertedSide: boolean = false, public y: number = .5, private direction: number = 0) {
 		this.xDistance = invertedSide ? 1 - Player.distanceFromWall : Player.distanceFromWall;
@@ -19,5 +20,10 @@ export default class Player {
 		if (newY >= 0 && newY <= 1 && newY !== this.y) {
 			this.y = newY;
 		}
+	}
+	earnPoint() {
+		this.score++;
+		console.log('score', this.score);
+		return this.score >= 5;
 	}
 }
