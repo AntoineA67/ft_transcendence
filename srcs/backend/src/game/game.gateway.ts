@@ -15,7 +15,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 
 @UseGuards(WsJwtGuard)
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'game' })
 // @UseGuards(FortyTwoAuthGuard)
 export class GameGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -34,9 +34,10 @@ export class GameGateway
     this.gamesService.disconnect(client);
   }
 
+  // @UseGuards(WsJwtGuard)
   handleConnection(client: Socket, ...args: any[]) {
     client.emit('id', client.id)
-    return;
+    // return;
     const token = client.handshake.auth.token;
     console.log('token', token)
     if (!token || !this.jwtService.verify(token)) {

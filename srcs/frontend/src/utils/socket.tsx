@@ -11,7 +11,7 @@ function connectToSocketWithToken(token: any) {
   };
 
   // Utilisez les options pour établir la connexion WebSocket
-  const socket = io('localhost:3000', options);
+  const socket = io('localhost:3000/game', options);
 
   return socket;
 }
@@ -26,3 +26,7 @@ socket.on('connect', () => {
   console.log(token)
   console.log('Connecté au serveur WebSocket');
 });
+
+socket.on('disconnect', () => {
+  console.log('Déconnecté du serveur WebSocket');
+})
