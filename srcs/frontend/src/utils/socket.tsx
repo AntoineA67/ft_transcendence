@@ -3,8 +3,9 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 function connectToSocketWithToken(token: any) {
   const options = {
-    extraHeaders: {
-      Authorization: `Bearer ${token}`,
+    transports: ['websocket'],
+    auth: {
+      'Authorization': `Bearer ${token}`,
     },
   };
   const socket = io('localhost:3000/game', options);
@@ -20,6 +21,7 @@ function connectToSocketWithToken(token: any) {
 export const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children, store }: any) => {
+  console.log("SocketProvider")
 
   const [isConnected, setConnected] = useState(false)
 
@@ -33,8 +35,11 @@ export const SocketProvider = ({ children, store }: any) => {
   }
 
   useEffect(() => {
+    console.log("SocketProvider useEffect")
     if (!isConnected) {
-      socket.current = connectToSocketWithToken(localStorage.getItem('token'))
+      const token = localStorage.getItem('token')
+      console.log("SocketProvider useEffect !isConnected", token)
+      socket.current = connectToSocketWithToken(token)
 
       socket.current.on('connect', () => {
         console.info(`Successfully connected to socket at ${socketUrl}`)

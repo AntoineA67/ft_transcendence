@@ -36,34 +36,36 @@ const root = ReactDOM.createRoot(
 root.render(
 	<BrowserRouter>
 		<AuthProvider>
-			<SocketProvider>
-				<Routes>
-					<Route path="/login" element={<Login />}>
-						<Route index element={<LandingPage />}></Route>
-						<Route path="signin" element={<Signin />}></Route>
-						<Route path="signup" element={<Signup />}></Route>
-					</Route>
+			<Routes>
+				<Route path="/login" element={<Login />}>
+					<Route index element={<LandingPage />}></Route>
+					<Route path="signin" element={<Signin />}></Route>
+					<Route path="signup" element={<Signup />}></Route>
+				</Route>
 
-					<Route path='/42/callback' element={<CallBack42 />} />
+				<Route path='/42/callback' element={<CallBack42 />} />
 
-					<Route element={<Protected />}>
-						<Route path="/" element={<Sidebar />}>
-							<Route index element={<Profile />} />
-							<Route path="search" element={<Search />}></Route>
-							<Route path="friends" element={<Friends />}></Route>
-							<Route path="chat" element={<Chat />}>
-								<Route path=':chatId' element={<ChatBox />}></Route>
-							</Route>
-							<Route path="setting" element={<Setting />}>
-								<Route index element={<SettingMenu />}></Route>
-								<Route path='changepassword' element={<ChangePassword />}></Route>
-							</Route>
-							<Route path="/game" element={<Game />}></Route>
+				<Route element={<Protected />}>
+					<Route path="/" element={<Sidebar />}>
+						<Route index element={<Profile />} />
+						<Route path="search" element={<Search />}></Route>
+						<Route path="friends" element={<Friends />}></Route>
+						<Route path="chat" element={<Chat />}>
+							<Route path=':chatId' element={<ChatBox />}></Route>
 						</Route>
-						<Route path="/test-db" element={<TestDB />} />
+						<Route path="setting" element={<Setting />}>
+							<Route index element={<SettingMenu />}></Route>
+							<Route path='changepassword' element={<ChangePassword />}></Route>
+						</Route>
+						<Route path="/game" element={<>
+							<SocketProvider>
+								<Game />
+							</SocketProvider>
+						</>}></Route>
 					</Route>
-				</Routes>
-			</SocketProvider>
+					<Route path="/test-db" element={<TestDB />} />
+				</Route>
+			</Routes>
 		</AuthProvider>
 	</BrowserRouter>
 
