@@ -24,6 +24,9 @@ export class GamesService {
     this.tryMatchPlayers(wss);
   }
 
+  isInQueue(client: Socket) {
+    return this.matchmakingQueue.includes(client);
+  }
   disconnect(client: Socket) {
     const roomId = this.clients[client.id];
     if (roomId) {
@@ -34,6 +37,11 @@ export class GamesService {
         if (room.isEmpty()) {
           delete this.rooms[roomId];
         }
+      }
+    } else {
+      const index = this.matchmakingQueue.indexOf(client);
+      if (index !== -1) {
+        this.matchmakingQueue.splice(index, 1);
       }
     }
   }
