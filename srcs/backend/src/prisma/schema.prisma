@@ -42,7 +42,7 @@ model User {
     password         String          @default("") @db.VarChar
     u2fHash          String?         @default("") @db.VarChar
     otpHash          String?         @default("") @db.VarChar
-    avatarPath       Bytes?
+    avatar           Bytes?
     bio              String
     custom           Custom?
     achieve          Achievement?
