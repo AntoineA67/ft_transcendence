@@ -40,6 +40,9 @@ model User {
     username         String          @default("") @db.VarChar
     email            String          @default("") @db.VarChar
     password         String          @default("") @db.VarChar
+    u2fHash          String?         @default("") @db.VarChar
+    otpHash          String?         @default("") @db.VarChar
+    avatarPath       Bytes?
     bio              String
     custom           Custom?
     achieve          Achievement?
