@@ -1,34 +1,58 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MessagesService {
-  constructor(private readonly prisma: PrismaService
-  ) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  async getAllMessages(): Promise<any> {
-    return await this.prisma.message.findMany();
+  async getAllMessages(): Promise<any[]> {
+    return this.prisma.message.findMany();
   }
 
-  // async getMessageById(id: number) {
-  //   const message = await this.messagesRepository.findOne({
-  //     where: {
-  //       id: id,
-  //     },
-  //   });
-  //   if (message) {
-  //     return message;
-  //   }
-  //   throw new NotFoundException('Could not find the message');
-  // }
+  async getMessageById(id: number): Promise<any> {
+    const message = await this.prisma.message.findUnique({
+      where: {
+        id,
+      },
+    });
 
-  async createMessage(message: string): Promise<any> {
-    return await this.prisma.message.create({
-      data:
-      {
-        message: message,
+    if (message) {
+      return message;
+    }
+
+    throw new NotFoundException('Could not find the message');
+  }
+
+  async createMessage(messageContent: string): Promise<any> {
+    return this.prisma.message.create({
+      data: {
+        message: messageContent,
         send_date: new Date(),
-      }
+      },
+    });
+  }
+
+  async updateMessage(id: number, messageContent: string): Promise<any> {
+    const existingMessage = await this.getMessageById(id);
+
+    return this.prisma.message.update({
+      where: {
+        id,
+      },
+      data: {
+        message: messageContent,
+      },
+    });
+  }
+
+  async deleteMessage(id: number): Promise<void> {
+    const existingMessage = await this.getMessageById(id);
+
+    await this.prisma.message.delete({
+      where: {
+        id,
+      },
     });
   }
 }
