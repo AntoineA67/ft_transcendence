@@ -1,7 +1,7 @@
 import io, { Socket } from "socket.io-client";
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
-const hostAdress = '192.168.137.1:3000'
+const hostAdress = 'localhost:3000'
 
 function connectToSocketWithToken(token: any) {
   const options = {
