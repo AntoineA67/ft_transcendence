@@ -96,7 +96,7 @@ export function Protected({ children }: any) {
 
 	return (
 		token ? (
-		// 1 ? (
+			// 1 ? (
 			<Outlet />
 		) : (
 			<Navigate to="/login" replace={true} />

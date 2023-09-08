@@ -1,6 +1,8 @@
 import io, { Socket } from "socket.io-client";
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+const hostAdress = '192.168.137.1:3000'
+
 function connectToSocketWithToken(token: any) {
   const options = {
     transports: ['websocket'],
@@ -8,15 +10,10 @@ function connectToSocketWithToken(token: any) {
       'Authorization': `Bearer ${token}`,
     },
   };
-  const socket = io('localhost:3000/game', options);
+  const socket = io(`${hostAdress}/game`, options);
 
   return socket;
 }
-
-// Utilisez la fonction pour établir la connexion WebSocket avec le token
-// const token = localStorage.getItem('token');
-// const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYWxvbnNvIiwiZW1haWwiOiJmYWxvbnNvQHN0dWRlbnQuNDJseW9uLmZyIiwibG9naW4iOiJmYWxvbnNvIiwiaWF0IjoxNjkzNTkyNzI3LCJleHAiOjE2OTM1OTYzMjd9.0e2xV6dqvr0wJdA-QUrr3ekoCBxFwqKnVzjk8AdBcEA"
-// export const socket = connectToSocketWithToken(token);
 
 export const SocketContext = createContext(null);
 
@@ -25,7 +22,7 @@ export const SocketProvider = ({ children, store }: any) => {
 
   const [isConnected, setConnected] = useState(false)
 
-  const socketUrl = `localhost:3000/game`
+  const socketUrl = `${hostAdress}/game`
 
   const socket: any = useRef(null)
 
@@ -51,8 +48,12 @@ export const SocketProvider = ({ children, store }: any) => {
         setConnected(false)
       })
 
-      socket.current.on('error', (err: { message: any; }) => {
+      socket.current.on('error', (err: { message: string }) => {
         console.log('Socket Error:', err.message)
+        if (err.message === 'Invalid token') {
+          localStorage.removeItem('token')
+          window.location.href = '/login'
+        }
       })
 
       socket.current.on('message', handleOnMessage)
@@ -73,13 +74,3 @@ export const SocketProvider = ({ children, store }: any) => {
 }
 
 export const useSocket = () => useContext(SocketContext) as unknown as Socket;
-
-// // Vous pouvez maintenant utiliser le socket pour communiquer avec le serveur
-// socket.on('connect', () => {
-//   console.log(token)
-//   console.log('Connecté au serveur WebSocket');
-// });
-
-// socket.on('disconnect', () => {
-//   console.log('Déconnecté du serveur WebSocket');
-// })

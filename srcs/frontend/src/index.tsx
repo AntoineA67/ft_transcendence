@@ -25,7 +25,7 @@ import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { SocketProvider } from './utils/socket';
+import { SocketProvider } from './utils/SocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');

@@ -39,7 +39,7 @@ export default class Room {
 		this.interval = setInterval(() => {
 			this.updateGameTick();
 			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
-		}, 1000 / 30);
+		}, 1000 / 60);
 	}
 
 	private updateGameTick() {
