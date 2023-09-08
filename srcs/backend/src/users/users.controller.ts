@@ -13,22 +13,22 @@ export class UsersController {
 	async getAllGames(): Promise<string> {
 		console.log("/users")
 		const users = await this.usersService.getAllUsers();
-		const toObject = (oui) => {
-			return JSON.parse(JSON.stringify(oui, (key, value) =>
-				typeof value === 'bigint'
-					? value.toString()
-					: value // return everything else unchanged
-			));
-		}
+		// const toObject = (oui) => {
+		// 	return JSON.parse(JSON.stringify(oui, (key, value) =>
+		// 		typeof value === 'bigint'
+		// 			? value.toString()
+		// 			: value // return everything else unchanged
+		// 	));
+		// }
 		console.log(users);
-		return toObject(users);
+		return JSON.stringify(users);
 	}
-	
+
 	@Patch(':userId')
 	async updateUser(@Param('userId') userId: string, @Body() body): Promise<any> {
 		return (this.usersService.updateUser(Number(userId), body.data));
 	}
-	
+
 
 	// @UseGuards(LocalAuthGuard)
 	// @Post('/test')
