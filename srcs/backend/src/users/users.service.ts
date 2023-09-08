@@ -4,130 +4,102 @@ export type User = any;
 
 @Injectable()
 export class UsersService {
-	constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-	async createUser(username: string, email: string, password: string) {
-		return this.prisma.user.create({
-			data: {
-				username,
-				email: email,
-				password,
-				bio: "",
-			},
-		});
-	}
+  async createUser(username: string, email: string, password: string) {
+    return this.prisma.user.create({
+      data: {
+        username,
+		email: email,
+        password,
+		bio: "",
+      },
+    });
+  }
 
-	async getUserById(userId: number) {
-		const user = await this.findUserById(userId);
-		return user;
-	}
+  async getUserById(userId: number): Promise<User> {
+    return this.findUserById(userId);
+  }
 
 	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
-		const user = await this.findUserById(userId);
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data,
-		});
+    const user = await this.findUserById(userId);
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data,
+    });
 
-		return updatedUser;
-	}
+    return updatedUser;
+  }
 
-	async deleteUser(userId: number) {
-		const user = await this.findUserById(userId);
-		const deletedUser = await this.prisma.user.delete({
-			where: {
-				id: userId,
-			},
-		});
+  async deleteUser(userId: number): Promise<User> {
+    const user = await this.findUserById(userId);
+    const deletedUser = await this.prisma.user.delete({
+      where: {
+        id: userId,
+      },
+    });
 
-		return deletedUser;
-	}
+    return deletedUser;
+  }
 
-	async getAllUsers() {
-		const users = await this.prisma.user.findMany();
-		return users;
-	}
+  async getAllUsers(): Promise<User[]> {
+    return this.prisma.user.findMany();
+  }
 
-	async getUserByUsername(username: string) {
-		console.log('getUserByUsername', username);
-		const user = await this.prisma.user.findFirst({
-			where: {
-				username,
-			},
-		});
+  async getUserByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findFirst({
+      where: {
+        username,
+      },
+    });
+  }
 
-		// if (!user) {
-		// 	throw new NotFoundException(`User with username ${username} not found`);
-		// }
+  async getUsersByEmail(email: string): Promise<User[]> {
+    const users = await this.prisma.user.findMany({
+      where: {
+        email,
+      },
+    });
 
-		return user;
-	}
+    this.handleUsersNotFound(users, `No users found with email ${email}`);
+    return users;
+  }
 
+  async updateUserPassword(userId: number, newPassword: string): Promise<User> {
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: newPassword,
+      },
+    });
 
-	async getUsersByEmail(email: string) {
-		const users = await this.prisma.user.findMany({
-			where: {
-				email: email,
-			},
-		});
-
-		this.handleUsersNotFound(users, `No users found with email ${email}`);
-		return users;
-	}
-
-	async updateUserPassword(userId: number, newPassword: string) {
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				password: newPassword,
-			},
-		});
-
-		return updatedUser;
-	}
+    return updatedUser;
+  }
 
 	private async findUserById(userId: number) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: userId,
-			},
-		});
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
-		this.handleUserNotFound(user, `User with ID ${userId} not found`);
-		return user;
-	}
+    this.handleUserNotFound(user, `User with ID ${userId} not found`);
+    return user;
+  }
 
 	private handleUserNotFound(user: any, errorMessage: string) {
-		if (!user) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
+    if (!user) {
+      throw new NotFoundException(errorMessage);
+    }
+  }
 
-	private handleUsersNotFound(users: any[], errorMessage: string) {
-		if (users.length === 0) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
-
-	// private readonly users = [
-	// 	{
-	// 		userId: 1,
-	// 		username: 'john',
-	// 		password: 'changeme',
-	// 	},
-	// 	{
-	// 		userId: 2,
-	// 		username: 'maria',
-	// 		password: 'guess',
-	// 	},
-	// ];
-
-	// async findOne(username: string): Promise<User | undefined> {
-	// 	return this.users.find(user => user.username === username);
-	// }
+  private handleUsersNotFound(users: User[], errorMessage: string) {
+    if (users.length === 0) {
+      throw new NotFoundException(errorMessage);
+    }
+  }
 }
-
