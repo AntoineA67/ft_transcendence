@@ -59,11 +59,11 @@ enum GameStatus {
 
 export default function Game() {
 
-	// const [clients, setClients] = useState({} as any)
-	const clients = useRef({} as any)
+	const [clients, setClients] = useState({} as any)
+	// const clients = useRef({} as any)
 	const [id, setId] = useState('' as any)
-	// const [ball, setBall] = useState({} as any)
-	const ball = useRef({} as any)
+	const [ball, setBall] = useState({} as any)
+	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
 	const socket = useSocket();
@@ -85,11 +85,11 @@ export default function Game() {
 			console.log('Game Started!')
 		})
 		socket?.on('clients', (newClients: any) => {
-			// setClients(newClients.clients)
-			clients.current = newClients.clients
+			setClients(newClients.clients)
+			// clients.current = newClients.clients
 			if (newClients.ball) {
-				// setBall(newClients.ball)
-				ball.current = newClients.ball
+				setBall(newClients.ball)
+				// ball.current = newClients.ball
 			}
 		})
 		socket?.on('gameOver', (winner: any) => {
@@ -153,59 +153,59 @@ export default function Game() {
 				visible={true}
 			/>}
 			{gameStatus === GameStatus.Started &&
-				<Canvas gl={{ logarithmicDepthBuffer: true }} shadows camera={{ position: [0, 0, 50], fov: 25 }}>
-					<fog attach="fog" args={['black', 15, 21.5]} />
-					<Stage intensity={0.5} environment="city" shadows={{ type: 'accumulative', bias: -0.001 }} adjustCamera={false}>
-						{Object.keys(clients.current)
-							.map((client) => {
-								// const { y, dir, score } = clients[client]
-								const { y, dir, score } = clients.current[client]
-								const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
-								return (
-									<UserWrapper
-										key={client}
-										id={client}
-										score={score}
-										position={pos}
-										rotation={[0, dir, 0]}
-									/>
-								)
-							})}
-						{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
-						{clients.current[id] !== undefined && < BallWrapper ball={ball.current} client={clients.current[id]} />}
-					</Stage>
-					{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
-					{/* <OrbitControls autoRotate autoRotateSpeed={0.05} enableZoom={false} makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} /> */}
-					<EffectComposer disableNormalPass>
-						<Bloom luminanceThreshold={1} mipmapBlur />
-					</EffectComposer>
-					<Environment background preset="sunset" blur={0.8} />
-				</Canvas>
-
-
-
-
-				// <Canvas shadows camera={{ position: [0, 0, 50], fov: 30 }}>
-				// 	{Object.keys(clients)
-				// 		.map((client) => {
-				// 			const { y, dir, score } = clients[client]
-				// 			const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
-				// 			return (
-				// 				<UserWrapper
-				// 					key={client}
-				// 					id={client}
-				// 					score={score}
-				// 					position={pos}
-				// 					rotation={[0, dir, 0]}
-				// 				/>
-				// 			)
-				// 		})}
-				// 	{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
-				// 	< color attach="background" args={["#171720"]} />
-				// 	<ambientLight intensity={0.5} />
-				// 	<pointLight position={[-10, -10, -10]} />
-				// 	<spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
+				// <Canvas gl={{ logarithmicDepthBuffer: true }} shadows camera={{ position: [0, 0, 50], fov: 25 }}>
+				// 	<fog attach="fog" args={['black', 15, 21.5]} />
+				// 	<Stage intensity={0.5} environment="city" shadows={{ type: 'accumulative', bias: -0.001 }} adjustCamera={false}>
+				// 		{Object.keys(clients.current)
+				// 			.map((client) => {
+				// 				// const { y, dir, score } = clients[client]
+				// 				const { y, dir, score } = clients.current[client]
+				// 				const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
+				// 				return (
+				// 					<UserWrapper
+				// 						key={client}
+				// 						id={client}
+				// 						score={score}
+				// 						position={pos}
+				// 						rotation={[0, dir, 0]}
+				// 					/>
+				// 				)
+				// 			})}
+				// 		{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
+				// 		{clients.current[id] !== undefined && < BallWrapper ball={ball.current} client={clients.current[id]} />}
+				// 	</Stage>
+				// 	{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
+				// 	{/* <OrbitControls autoRotate autoRotateSpeed={0.05} enableZoom={false} makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} /> */}
+				// 	<EffectComposer disableNormalPass>
+				// 		<Bloom luminanceThreshold={1} mipmapBlur />
+				// 	</EffectComposer>
+				// 	<Environment background preset="sunset" blur={0.8} />
 				// </Canvas>
+
+
+
+
+				<Canvas shadows camera={{ position: [0, 0, 50], fov: 30 }}>
+					{Object.keys(clients)
+						.map((client) => {
+							const { y, dir, score } = clients[client]
+							const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
+							return (
+								<UserWrapper
+									key={client}
+									id={client}
+									score={score}
+									position={pos}
+									rotation={[0, dir, 0]}
+								/>
+							)
+						})}
+					{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
+					< color attach="background" args={["#171720"]} />
+					<ambientLight intensity={0.5} />
+					<pointLight position={[-10, -10, -10]} />
+					<spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
+				</Canvas>
 			}
 		</>
 	)
