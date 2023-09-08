@@ -125,24 +125,32 @@ export default function Game() {
 			};
 		}
 	}, [gameStatus])
-	const handleMatchClick = () => {
-		setGameStatus(GameStatus.Matching);
+	const startMatchmaking = () => {
+		if (gameStatus !== GameStatus.Idle) return
 		socket?.emit('match');
+		setGameStatus(GameStatus.Matching);
+	};
+	const cancelMatchmaking = () => {
+		if (gameStatus !== GameStatus.Matching) return
+		socket?.emit('cancel');
+		setGameStatus(GameStatus.Idle);
 	};
 
 	return (
 		<>
-			{gameStatus === GameStatus.Idle && <button onClick={handleMatchClick} disabled={!socket?.connected}>Match</button>}
-			{gameStatus === GameStatus.Matching && <FidgetSpinner
-				visible={socket?.connected}
-				height="80"
-				width="80"
-				ariaLabel="dna-loading"
-				wrapperStyle={{}}
-				wrapperClass="dna-wrapper"
-				ballColors={['#ff0000', '#00ff00', '#0000ff']}
-				backgroundColor="#F4442E"
-			/>}
+			{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected}>Match</button>}
+			{gameStatus === GameStatus.Matching && <>
+				<FidgetSpinner
+					visible={socket?.connected}
+					height="80"
+					width="80"
+					ariaLabel="dna-loading"
+					wrapperStyle={{}}
+					wrapperClass="dna-wrapper"
+					ballColors={['#ff0000', '#00ff00', '#0000ff']}
+					backgroundColor="#F4442E"
+				/> <button onClick={cancelMatchmaking}>Cancel</button></>
+			}
 			{gameStatus === GameStatus.Finished && <Circles
 				height="80"
 				width="80"
