@@ -5,7 +5,6 @@ import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
 import { AuthModule } from './auth/auth.module';
@@ -21,12 +20,7 @@ import { MessagesModule } from './message/message.module';
     PrismaModule,
     GameModule,
     MessagesModule,
-    UsersModule, // Inclus ici
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      buildSchemaOptions: { dateScalarMode: 'timestamp' },
-    }),
+    UsersModule,
     AuthModule,
     DevtoolsModule.register({
       port: 3001,

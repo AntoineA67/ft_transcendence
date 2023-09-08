@@ -2,6 +2,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
 			throw new BadRequestException('Unauthenticated');
 		}
 
-		let userExists = await this.findUserByLogin(user.username);
+		let userExists: any = await this.findUserByLogin(user.username);
 		console.log('userExists', userExists);
 
 		if (!userExists) {
@@ -41,13 +42,8 @@ export class AuthService {
 	}
 
 	// select * from "user";
-	// DELETE FROM "user" WHERE user_id = 1;
-	async registerUser(user: any): Promise<{
-		user_id: bigint;
-		username: string;
-		email: string;
-		password: string;
-	}> {
+	// DELETE FROM "user" WHERE id = 1;
+	async registerUser(user: any): Promise<User> {
 		try {
 			console.log('registering user', user);
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
