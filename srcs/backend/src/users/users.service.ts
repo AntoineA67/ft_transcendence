@@ -12,6 +12,7 @@ export class UsersService {
 				username,
 				email: email,
 				password,
+				bio: "",
 			},
 		});
 	}
@@ -25,7 +26,7 @@ export class UsersService {
 		const user = await this.findUserById(userId);
 		const updatedUser = await this.prisma.user.update({
 			where: {
-				user_id: userId,
+				id: userId,
 			},
 			data,
 		});
@@ -37,7 +38,7 @@ export class UsersService {
 		const user = await this.findUserById(userId);
 		const deletedUser = await this.prisma.user.delete({
 			where: {
-				user_id: userId,
+				id: userId,
 			},
 		});
 
@@ -79,7 +80,7 @@ export class UsersService {
 	async updateUserPassword(userId: number, newPassword: string) {
 		const updatedUser = await this.prisma.user.update({
 			where: {
-				user_id: userId,
+				id: userId,
 			},
 			data: {
 				password: newPassword,
@@ -92,7 +93,7 @@ export class UsersService {
 	private async findUserById(userId: number) {
 		const user = await this.prisma.user.findUnique({
 			where: {
-				user_id: userId,
+				id: userId,
 			},
 		});
 

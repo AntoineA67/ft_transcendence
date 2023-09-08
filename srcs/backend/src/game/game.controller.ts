@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { GamesService } from './game.service';
-import { game } from '@prisma/client';
+import { Game } from '@prisma/client';
 import { Public } from 'src/auth/public.decorator';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -24,7 +24,7 @@ export class GameController {
   @Post()
   async createGame(
     @Body() gameData: any,
-  ): Promise<game> {
+  ): Promise<Game> {
     return await this.gamesService.create(gameData);
   }
 

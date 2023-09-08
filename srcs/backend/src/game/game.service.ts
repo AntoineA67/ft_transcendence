@@ -93,7 +93,7 @@ export class GamesService {
 
   async findAll(): Promise<any> {
     // const prisma = new PrismaClient()
-    const games = await this.prisma.Game.findMany()
+    const games = await this.prisma.game.findMany()
     console.log("oui", games)
     return games;
     // return await this.prisma.game.findMany();
@@ -107,7 +107,7 @@ export class GamesService {
   //   });
   // }
 
-  async create(data: Prisma.gameCreateInput): Promise<game> {
+  async create(data: Prisma.GameCreateInput): Promise<Game> {
     // console.log("oui", this.prisma)
     return await this.prisma.game.create({
       data: {
