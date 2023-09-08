@@ -42,6 +42,7 @@ model User {
   password         String          @default("") @db.VarChar
   u2fHash          String?         @default("") @db.VarChar
   otpHash          String?         @default("") @db.VarChar
+  activated2FA     Boolean         @default(false)
   avatar           Bytes?
   bio              String
   custom           Custom?
