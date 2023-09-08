@@ -5,14 +5,12 @@ import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
 import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
-import { AppResolver } from './app.resolver';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
 
@@ -22,12 +20,7 @@ import { MessagesModule } from './message/message.module';
     PrismaModule,
     GameModule,
     MessagesModule,
-    UsersModule, // Inclus ici
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: 'schema.gql',
-      buildSchemaOptions: { dateScalarMode: 'timestamp' },
-    }),
+    UsersModule,
     AuthModule,
     DevtoolsModule.register({
       port: 3001,
@@ -37,7 +30,6 @@ import { MessagesModule } from './message/message.module';
   controllers: [AppController],
   providers: [
     AppService,
-    AppResolver,
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
