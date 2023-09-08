@@ -35,7 +35,7 @@ export class AuthService {
 		// generate and return JWT, expiresIn is in seconds
 		return this.jwtService.sign({
 			sub: userExists.username,
-			email: userExists.email_address,
+			email: userExists.email,
 			login: userExists.username,
 		}, { expiresIn: 3600 });
 	}
@@ -45,7 +45,7 @@ export class AuthService {
 	async registerUser(user: any): Promise<{
 		user_id: bigint;
 		username: string;
-		email_address: string;
+		email: string;
 		password: string;
 	}> {
 		try {
@@ -55,14 +55,14 @@ export class AuthService {
 			// .then((res) => {
 			// return this.jwtService.sign({
 			// 	sub: res.username,
-			// 	email: res.email_address,
+			// 	email: res.email,
 			// 	login: res.username,
 			// });
 			// });
 
 			// return this.jwtService.sign({
 			// 	sub: newUser.username,
-			// 	email: newUser.email_address,
+			// 	email: newUser.email,
 			// 	login: newUser.username,
 			// });
 		} catch {

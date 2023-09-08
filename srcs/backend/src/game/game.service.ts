@@ -2,7 +2,7 @@
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Game } from 'src/entities/game.entity';
 // import { Repository } from 'typeorm';
-import { game, Prisma } from '@prisma/client';
+import { Game, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Server, Socket } from 'socket.io';
@@ -93,7 +93,7 @@ export class GamesService {
 
   async findAll(): Promise<any> {
     // const prisma = new PrismaClient()
-    const games = await this.prisma.game.findMany()
+    const games = await this.prisma.Game.findMany()
     console.log("oui", games)
     return games;
     // return await this.prisma.game.findMany();

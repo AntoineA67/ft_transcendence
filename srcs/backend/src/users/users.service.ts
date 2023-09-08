@@ -10,7 +10,7 @@ export class UsersService {
 		return this.prisma.user.create({
 			data: {
 				username,
-				email_address: email,
+				email: email,
 				password,
 			},
 		});
@@ -68,7 +68,7 @@ export class UsersService {
 	async getUsersByEmail(email: string) {
 		const users = await this.prisma.user.findMany({
 			where: {
-				email_address: email,
+				email: email,
 			},
 		});
 
