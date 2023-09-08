@@ -25,7 +25,7 @@ export class AuthService {
 			throw new BadRequestException('Unauthenticated');
 		}
 
-		var userExists = await this.findUserByLogin(user.username);
+		let userExists = await this.findUserByLogin(user.username);
 		console.log('userExists', userExists);
 
 		if (!userExists) {
