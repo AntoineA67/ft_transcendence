@@ -1,8 +1,8 @@
 import logo from '../assets/logo.svg';
 import '../styles/App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { socket } from '../utils/socket';
+import { useSocket } from '../utils/SocketProvider';
 
 interface Message {
 	id: number;
@@ -14,6 +14,7 @@ function Home() {
 
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [msg, setMsg] = useState('');
+	const socket = useSocket();
 
 	useEffect(() => {
 		axios.get('/messages')

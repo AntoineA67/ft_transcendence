@@ -25,27 +25,33 @@ export class AuthService {
 			throw new BadRequestException('Unauthenticated');
 		}
 
-		const userExists = await this.findUserByLogin(user.username);
+		let userExists = await this.findUserByLogin(user.username);
 		console.log('userExists', userExists);
 
 		if (!userExists) {
-			return this.registerUser(user);
+			userExists = await this.registerUser(user);
 		}
 
-		// generate and return JWT
+		// generate and return JWT, expiresIn is in seconds
 		return this.jwtService.sign({
 			sub: userExists.username,
 			email: userExists.email_address,
 			login: userExists.username,
-		});
+		}, { expiresIn: 3600 });
 	}
 
 	// select * from "user";
 	// DELETE FROM "user" WHERE user_id = 1;
-	async registerUser(user: any) {
+	async registerUser(user: any): Promise<{
+		user_id: bigint;
+		username: string;
+		email_address: string;
+		password: string;
+	}> {
 		try {
 			console.log('registering user', user);
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			return newUser;
 			// .then((res) => {
 			// return this.jwtService.sign({
 			// 	sub: res.username,
@@ -54,11 +60,11 @@ export class AuthService {
 			// });
 			// });
 
-			return this.jwtService.sign({
-				sub: newUser.username,
-				email: newUser.email_address,
-				login: newUser.username,
-			});
+			// return this.jwtService.sign({
+			// 	sub: newUser.username,
+			// 	email: newUser.email_address,
+			// 	login: newUser.username,
+			// });
 		} catch {
 			throw new InternalServerErrorException();
 		}

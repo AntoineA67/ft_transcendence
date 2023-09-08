@@ -24,6 +24,9 @@ export class GamesService {
     this.tryMatchPlayers(wss);
   }
 
+  isInQueue(client: Socket) {
+    return this.matchmakingQueue.includes(client);
+  }
   disconnect(client: Socket) {
     const roomId = this.clients[client.id];
     if (roomId) {
@@ -35,6 +38,11 @@ export class GamesService {
           delete this.rooms[roomId];
         }
       }
+    } else {
+      const index = this.matchmakingQueue.indexOf(client);
+      if (index !== -1) {
+        this.matchmakingQueue.splice(index, 1);
+      }
     }
   }
 
@@ -44,9 +52,13 @@ export class GamesService {
   //     this.matchmakingQueue.splice(index, 1);
   //   }
   // }
-  keyPressed(clientId: string, dir: number) {
-    this.rooms[this.clients[clientId]].handleKey(clientId, dir)
+  handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
+    this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
+
+  // keyPressed(clientId: string, dir: number) {
+  //   this.rooms[this.clients[clientId]].handleKey(clientId, dir)
+  // }
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {

@@ -35,10 +35,11 @@ export default class Room {
 
 	public startGame() {
 		this.ball = new Ball();
+		this.wss.to(this.roomId).emit('startGame');
 		this.interval = setInterval(() => {
 			this.updateGameTick();
 			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
-		}, 50);
+		}, 1000 / 60);
 	}
 
 	private updateGameTick() {
@@ -46,10 +47,16 @@ export default class Room {
 		for (const client of Object.values(this.players)) {
 			client.update();
 		}
-		this.ball.update(this.players);
+		const winner = this.ball.update(this.players);
+		if (winner) {
+			this.ball = null;
+			clearInterval(this.interval!);
+			this.interval = null;
+			this.wss.to(this.roomId).emit('gameOver', { winner: winner });
+		}
 	}
-	public handleKey(client: string, dir: number) {
-		this.players[client].direction = dir;
+	public handleKey(client: string, data: { up: boolean, down: boolean, time: number }) {
+		this.players[client].handleKeysPresses(data);
 	}
 
 	// public addPlayer(player: Player) {

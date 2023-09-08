@@ -7,61 +7,75 @@ import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
-import { useState } from 'react';
-import { Outlet, useOutletContext, Link } from "react-router-dom";
-
+import { useState, useEffect, useContext } from 'react';
+import { Outlet, useOutletContext, Link, Navigate } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { AuthContext } from '../utils/AuthProvider';
+
+// import { useAuth } from '../utils/AuthProvider';
 
 type newUser = {
-	id: string,
-	nickname: string,
+	username: string,
 	email: string,
 	password: string
 }
 
 type login = {
-	id: string,
-	nickname: string,
+	username: string,
 	password: string
 }
 
 type loginContext = {
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, url?: string) => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
 	togglePassword: () => void,
 }
 
 export function Login() {
 
-	const saveToken = (user: newUser | login) => {
+	const saveToken = (data: any, user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 
 		if (checkbox && checkbox.checked) {
-			// localStorage.setItem('token', token);
+			localStorage.setItem('token', data.token);
+			localStorage.setItem('nick', user.username);
+
 		} else {
-			//  sessionStorage.setItem('token', token);
+			sessionStorage.setItem('token', data.token);
+			sessionStorage.setItem('nick', user.username);
 		}
 	}
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, user: newUser | login, url = '') {
-		e.preventDefault();
+	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
+		const errMess = document.getElementById("error-message") as HTMLInputElement;
+		setErr(data.error);
+	}
 
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
+		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
+		e.preventDefault();
+		let data;
+		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
+		) : ('http://localhost:3000/auth/login');
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(user)
+			body: JSON.stringify({ 'user': user })
 		}
+
 		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
+			let response = await fetch(url, fetchObj)
+			if (!response.ok) { throw Error('response not ok'); }
+			data = await response.json();
+			console.log(data);
 		} catch (err: any) {
 			console.log(err);
 		} finally {
-			console.log('do something here...');
-			saveToken(user);
+			('error' in data) && dealError(data, setErr);
+			('token' in data) && saveToken(data, user);
 		}
 	}
 
@@ -78,7 +92,8 @@ export function Login() {
 	}
 
 	return (
-		<Outlet context={{ togglePassword, handleSubmit }} />
+		localStorage.getItem('token') ? <Navigate replace to="/" /> :
+			<Outlet context={{ togglePassword, handleSubmit }} />
 	);
 }
 
@@ -90,6 +105,7 @@ export function Signup() {
 	const [nick, setNick] = useState('');
 	const [email, setEmail] = useState('');
 	const [pass, setPass] = useState('');
+	const [err, setErr] = useState('');
 
 	return (
 		<div className='scrollbar'>
@@ -100,7 +116,7 @@ export function Signup() {
 							<button className="leftArrow my-4"></button>
 						</Link>
 						<Form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, { id: nick, nickname: nick, email: email, password: pass }))}>
+							handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>New Account!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -127,7 +143,9 @@ export function Signup() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
-
+							<div id='error-message' style={{ color: 'white' }}>
+								{err}
+							</div>
 							<Form.Group className="mb-4" controlId="accept terms">
 								<Form.Check required type="checkbox" label="I accept terms and conditions" />
 							</Form.Group>
@@ -151,6 +169,7 @@ export function Signin() {
 	const [nick, setNick] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
 	const [check, setCheck] = useState<string>('true');
+	const [err, setErr] = useState('');
 
 	return (
 		<div className='scrollbar'>
@@ -160,8 +179,7 @@ export function Signin() {
 						<Link to={'..'} style={{ display: "inline-block" }}>
 							<button className="leftArrow my-4"></button>
 						</Link>
-						<Form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, { id: nick, nickname: nick, password: pass }))}>
+						<Form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
 							<h3 style={{ color: "white" }}>Welcome back!</h3>
 
 							<Form.Group className="my-4" controlId="nickname">
@@ -182,6 +200,9 @@ export function Signin() {
 										className="ms-5 togglePassword" />
 								</div>
 							</Form.Group>
+							<div id='error-message' style={{ color: 'white' }}>
+								{err}
+							</div>
 
 							<Form.Group className="mb-4" controlId="remember me">
 								<Form.Check type="checkbox" label="Remember me"
@@ -207,10 +228,26 @@ export function Signin() {
 
 export function LandingPage() {
 
-	const oauth42 = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-0603e43ba720c50d6f926cd41d47911dd939318f04cdb009af4c8ff655c662cd&redirect_uri=http%3A%2F%2Flocalhost%2Fauth%2F42%2Fcallback2&response_type=code";
+	const [random, setRandom] = useState('');
 
+	const api42 = 'https://api.intra.42.fr/oauth/authorize';
+	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
+	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
+	const type = 'response_type=code';
+	const scope = 'scope=public';
+	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
+	const { auth, setAuth } = useContext(AuthContext);
+
+	useEffect(() => {
+		const rand = Math.random().toString(36).slice(2, 12);
+		setRandom(rand);
+		setAuth({ ...auth, state: 'random text' });
+		console.log('login', auth, 'rand ', rand);
+	}, []);
+
+	console.log(oauth42)
 	return (
 		<div className='scrollbar'>
 			<Container className="text-center" style={{ height: "650px" }}>
@@ -232,10 +269,12 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								<a href={oauth42} className="btn-invisible w-75">
-									<span>Sign in with</span>
-									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
-								</a>
+								{auth.state &&
+									<a href={oauth42} className="btn-invisible w-75">
+										<span>Sign in with </span>
+										<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
+									</a>
+								}
 							</div>
 						</div>
 					</Col>

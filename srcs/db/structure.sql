@@ -10,6 +10,9 @@ create table users
         constraint user_un
             unique,
     avatar_path varchar(255),
+	gamewins	integer,
+	gameloses	integer,
+	gameplayed	integer,
     u2f_hash    varchar(255),
     otp_hash    varchar(255),
     online      boolean      not null,
@@ -49,6 +52,9 @@ create table game
     status     boolean  not null,
     start_date date     not null,
     end_date   date,
+	loser_id	integer,
+		constraint game_user_user_id_fk
+            references users,
     winner_id  integer
         constraint game_user_user_id_fk
             references users,

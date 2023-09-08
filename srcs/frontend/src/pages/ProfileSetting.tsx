@@ -11,7 +11,7 @@ import { Link, Outlet } from "react-router-dom";
 export function Title({title}: {title: string}) {
 	return (
 		<div className='d-flex w-100 align-items-center' style={{ backgroundColor: "black"}}>
-			<Link to="/profile"><button className='goBack'></button></Link>
+			<Link to=".."><button className='goBack'></button></Link>
 			<h4 style={{color: "white", margin: "auto 0"}}>{title}</h4>
 		</div>
 	);
