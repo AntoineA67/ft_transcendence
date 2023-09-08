@@ -2,7 +2,7 @@
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Game } from 'src/entities/game.entity';
 // import { Repository } from 'typeorm';
-import { game, Prisma } from '@prisma/client';
+import { Game, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Server, Socket } from 'socket.io';
@@ -107,7 +107,7 @@ export class GamesService {
   //   });
   // }
 
-  async create(data: Prisma.gameCreateInput): Promise<game> {
+  async create(data: Prisma.GameCreateInput): Promise<Game> {
     // console.log("oui", this.prisma)
     return await this.prisma.game.create({
       data: {
