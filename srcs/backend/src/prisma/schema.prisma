@@ -22,21 +22,21 @@ model Player {
   game   Game    @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
   gameId Int
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
-  userId BigInt
+  userId Int
 }
 
 model Custom {
-  id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
-  ball   Int    @default(0)
-  padel  Int    @default(0)
-  user   User   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
-  userId BigInt @unique
+  id     Int  @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+  ball   Int  @default(0)
+  padel  Int  @default(0)
+  user   User @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
+  userId Int  @unique
 }
 
 // add avatarpath and hash key for auth
 
 model User {
-  id               BigInt          @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
+  id               Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
   username         String          @default("") @db.VarChar
   email            String          @default("") @db.VarChar
   password         String          @default("") @db.VarChar
@@ -59,9 +59,9 @@ model User {
 }
 
 model Achievement {
-  id            BigInt  @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   user          User    @relation(fields: [userId], references: [id])
-  userId        BigInt  @unique
+  userId        Int     @unique
   firstWin      Boolean @default(false)
   winTenGames   Boolean @default(false)
   loggedAWeek   Boolean @default(false)
@@ -70,11 +70,11 @@ model Achievement {
 }
 
 model Message {
-  id        BigInt   @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
+  id        Int      @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
   message   String   @db.VarChar
   send_date DateTime @db.Timestamp(6)
   user      User?    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_446251f8ceb2132af01b68eb593")
-  userId    BigInt?
+  userId    Int?
   room      Room?    @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fdfe54a21d1542c564384b74d5c")
   roomId    Int?
 }
@@ -83,7 +83,7 @@ model Room {
   id        Int       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
   isChannel Boolean
   owner     User?     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_65283be59094a73fed31ffeee4e")
-  ownerId   BigInt?
+  ownerId   Int?
   title     String?   @db.VarChar(255)
   private   Boolean?
   password  String?   @db.VarChar(100)
@@ -92,9 +92,9 @@ model Room {
 }
 
 model Member {
-  id     BigInt    @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
+  id     Int       @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
   user   User?     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
-  userId BigInt?
+  userId Int?
   room   Room?     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
   roomId Int?
   owner  Boolean   @default(false)
@@ -104,23 +104,23 @@ model Member {
 }
 
 model Friendship {
-  id      BigInt @id @default(autoincrement())
+  id      Int    @id @default(autoincrement())
   friends User[]
 }
 
 model FriendRequest {
-  id               BigInt @id @default(autoincrement())
+  id               Int    @id @default(autoincrement())
   user             User   @relation("sendFriendReq", fields: [userId], references: [id], onDelete: Cascade)
-  userId           BigInt
+  userId           Int
   possibleFriend   User   @relation("recieveFriendReq", fields: [possibleFriendId], references: [id], onDelete: Cascade)
-  possibleFriendId BigInt
+  possibleFriendId Int
   status           String @default("pending")
 }
 
 model Block {
-  id        BigInt @id @default(autoincrement())
-  user      User   @relation("block", fields: [userId], references: [id], onDelete: Cascade)
-  userId    BigInt
-  blocked   User   @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
-  blockedId BigInt
+  id        Int  @id @default(autoincrement())
+  user      User @relation("block", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  blocked   User @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  blockedId Int
 }
