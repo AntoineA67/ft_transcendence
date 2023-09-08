@@ -174,7 +174,7 @@ export default function Game() {
 						{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
 						{clients.current[id] !== undefined && < BallWrapper ball={ball.current} client={clients.current[id]} />}
 					</Stage>
-					<Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} />
+					{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
 					{/* <OrbitControls autoRotate autoRotateSpeed={0.05} enableZoom={false} makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} /> */}
 					<EffectComposer disableNormalPass>
 						<Bloom luminanceThreshold={1} mipmapBlur />
