@@ -19,6 +19,7 @@ async function seeding() {
 	await seedMembers();
 	await seedMessages();
 	await seedGames();
+	await seedPlayers();
 }
 
 async function seedUsers() {
