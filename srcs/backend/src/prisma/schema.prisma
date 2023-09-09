@@ -83,9 +83,7 @@ model Message {
 model Room {
   id        Int       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
   isChannel Boolean
-//   owner     User?     @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_65283be59094a73fed31ffeee4e")
-//   ownerId   BigInt?
-  title     String?   @db.VarChar(255)
+  title     String?   @db.VarChar(255) @unique()
   private   Boolean?
   password  String?   @db.VarChar(100)
   message   Message[]
@@ -96,11 +94,11 @@ model Member {
   id     BigInt    @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
   user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
   userId BigInt
-  room   Room?     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
-  roomId Int?
-  owner  Boolean?   @default(false)
-  admin  Boolean?   @default(false)
-  ban    Boolean?   @default(false)
+  room   Room      @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
+  roomId Int
+  owner  Boolean   @default(false)
+  admin  Boolean   @default(false)
+  ban    Boolean   @default(false)
   mute   DateTime?
 }
 

@@ -4,6 +4,8 @@ import { friendships } from './seeds/friendship'
 import { friendReqs } from './seeds/friendReq'
 import { achieves } from './seeds/achieve'
 import { rooms } from './seeds/rooms'
+import { members } from './seeds/members'
+import { messages } from './seeds/messages'
 const prisma = new PrismaClient()
 
 async function seeding() {
@@ -11,6 +13,9 @@ async function seeding() {
 	await seedFriendship();
 	await seedFriendReq();
 	await seedAchieves();
+	await seedRooms();
+	await seedMembers();
+	await seedMessages();
 }
 
 async function seedUsers() {
@@ -63,103 +68,26 @@ async function seedRooms() {
 	}
 }
 
+async function seedMembers() {
+	for (let member of members ){
+		await prisma.member.upsert({
+			where: {id: member.id},
+			update: {},
+			create: member
+		});
+	}
+}
 
+async function seedMessages() {
+	for (let mess of messages ){
+		await prisma.message.upsert({
+			where: {id: mess.id},
+			update: {},
+			create: mess
+		});
+	}
+}
 
-
-// async function main() {
-   
-// 	const room1 = await prisma.room.create({
-// 		data: {
-// 			id: 1,
-// 			isChannel: true,
-// 			// owner: {connect: {id: 3}},
-// 			message: {
-// 				create: [
-// 					{
-// 						id: 1,
-// 						message: 'Hello!',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 2}},    
-// 					},
-// 					{
-// 						id: 2,
-// 						message: 'Hi what are you doing!',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 3}},  
-// 					},
-// 					{
-// 						id: 3,
-// 						message: 'eating',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 2}},  
-// 					}
-// 				]
-// 			},
-// 			members: {
-// 				create: [
-// 					{
-// 						id: 1, 
-// 						user: {connect: {id: 1}}
-// 					},
-// 					{
-// 						id: 2, 
-// 						user: {connect: {id: 2}}
-// 					},
-// 					{
-// 						id: 3, 
-// 						user: {connect: {id: 3}}
-// 					},
-// 					{
-// 						id: 4, 
-// 						user: {connect: {id: 4}}
-// 					}
-// 				]
-// 			}
-// 		}
-// 	})
-  
-  
-// 	const room2 = await prisma.room.create({
-// 		data: {
-// 			id: 2,
-// 			isChannel: false,
-// 			message: {
-// 				create: [
-// 					{
-// 						id: 4,
-// 						message: 'Hello!',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 1}},    
-// 					},
-// 					{
-// 						id: 5,
-// 						message: 'Hi what are you doing!',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 5}},  
-// 					},
-// 					{
-// 						id: 6,
-// 						message: 'eating',
-// 						send_date: new Date(),
-// 						user: {connect: {id: 1}},  
-// 					}
-// 				]
-// 			},
-// 			members: {
-// 				create: [
-// 					{
-// 						id: 5, 
-// 						user: {connect: {id: 1}}
-// 					},
-// 					{
-// 						id: 6, 
-// 						user: {connect: {id: 5}}
-// 					}
-// 				]
-// 			}
-// 		}
-// 	})
-  
   
 //  // create two games with players  
 //   const game1 = await prisma.game.create({

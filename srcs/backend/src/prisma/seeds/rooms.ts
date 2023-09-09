@@ -3,7 +3,7 @@ export const rooms = [
 	{
 		id: 1,
 		isChannel: true,
-		title: 'ft_transcendance',
+		title: 'transcendance',
 		private: false
 	},
 	{
