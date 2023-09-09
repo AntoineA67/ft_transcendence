@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Game {
-  id         Int       @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
+  id         BigInt       @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
   finish     Boolean   @default(false)
   start_date DateTime  @db.Timestamp(6)
   end_date   DateTime? @db.Timestamp(6)
@@ -17,16 +17,16 @@ model Game {
 }
 
 model Player {
-  id     Int     @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
+  id     BigInt     @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
   win    Boolean
   game   Game    @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
-  gameId Int
+  gameId BigInt
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
   userId BigInt
 }
 
 model Custom {
-  id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+  id     BigInt    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
   ball   Int    @default(0)
   padel  Int    @default(0)
   user   User   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
@@ -50,7 +50,6 @@ model User {
   achieve          Achievement?
   gameHistory      Player[]
   membership       Member[]
-//   ownership        Room[]
   messages         Message[]
   friends          Friendship[]
   sendFriendReq    FriendRequest[] @relation("sendFriendReq")
@@ -77,11 +76,11 @@ model Message {
   user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_446251f8ceb2132af01b68eb593")
   userId    BigInt 
   room      Room     @relation(fields: [roomId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fdfe54a21d1542c564384b74d5c")
-  roomId    Int 
+  roomId    BigInt 
 }
 
 model Room {
-  id        Int       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
+  id        BigInt       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
   isChannel Boolean
   title     String?   @db.VarChar(255) @unique()
   private   Boolean?
@@ -95,7 +94,7 @@ model Member {
   user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
   userId BigInt
   room   Room      @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
-  roomId Int
+  roomId BigInt
   owner  Boolean   @default(false)
   admin  Boolean   @default(false)
   ban    Boolean   @default(false)

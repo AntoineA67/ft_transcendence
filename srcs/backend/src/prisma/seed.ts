@@ -6,6 +6,8 @@ import { achieves } from './seeds/achieve'
 import { rooms } from './seeds/rooms'
 import { members } from './seeds/members'
 import { messages } from './seeds/messages'
+import { games } from './seeds/games'
+import { players } from './seeds/players' 
 const prisma = new PrismaClient()
 
 async function seeding() {
@@ -16,6 +18,7 @@ async function seeding() {
 	await seedRooms();
 	await seedMembers();
 	await seedMessages();
+	await seedGames();
 }
 
 async function seedUsers() {
@@ -88,56 +91,25 @@ async function seedMessages() {
 	}
 }
 
-  
-//  // create two games with players  
-//   const game1 = await prisma.game.create({
-// 	data: {
-// 		id: 1, 
-// 		finish: true, 
-// 		start_date: new Date(),
-// 		end_date: new Date(),
-// 		score: '4:3',
-// 		players: {
-// 			create: [
-// 				{
-// 					id: 1, 
-// 					win: true, 
-// 					userId: 1
-// 				},
-// 				{
-// 					id: 2, 
-// 					win: false,
-// 					userId: 2
-// 				}
-// 			]
-// 		}
-// 	}
-//   })
-  
-//   const game2 = await prisma.game.create({
-// 	data: {
-// 		id: 2, 
-// 		finish: true, 
-// 		start_date: new Date(),
-// 		end_date: new Date(),
-// 		score: '2:3',
-// 		players: {
-// 			create: [
-// 				{
-// 					id: 3, 
-// 					win: false, 
-// 					userId: 1
-// 				},
-// 				{
-// 					id: 4, 
-// 					win: true,
-// 					userId: 2
-// 				}
-// 			]
-// 		}
-// 	}
-//   })
-// }
+async function seedGames() {
+	for (let game of games ){
+		await prisma.game.upsert({
+			where: {id: game.id},
+			update: {},
+			create: game
+		});
+	}
+}
+
+async function seedPlayers() {
+	for (let player of players ){
+		await prisma.player.upsert({
+			where: {id: player.id},
+			update: {},
+			create: player
+		});
+	}
+}
 
 
 seeding()
