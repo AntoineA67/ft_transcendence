@@ -33,8 +33,6 @@ model Custom {
   userId BigInt @unique
 }
 
-// add avatarpath and hash key for auth
-
 model User {
   id               BigInt          @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
   status           String          @default("online")
