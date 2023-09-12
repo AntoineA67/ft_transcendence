@@ -1,14 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client'
-import { DefaultArgs } from '@prisma/client/runtime/library';
+import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
 
+const game = Prisma.validator<Prisma.GameDefaultArgs>()({})
+export type Game = Prisma.GameGetPayload<typeof game>
+
+const player = Prisma.validator<Prisma.PlayerDefaultArgs>()({})
+export type Player = Prisma.PlayerGetPayload<typeof player>
+
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService) {}
 
 	//dont touch
 	async createUser(username: string, email: string, password: string) {
@@ -21,26 +26,24 @@ export class UsersService {
 		});
 	}
 
-	// get a single user
-	async getUserById(userId: number) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: userId
-			},
-			include: {
-				gameHistory: true,
-				friend: true,
-				sendFriendReq: true,
-				recvFriendReq: true,
-				block: true, 
-			}
+	// get info on another user (frontend)
+	async getUserByNick(nick: string): Promise<any> {
+		let user = await this.prisma.user.findUnique({
+				where: {
+					username: nick
+				},
+				include: {
+					friend: true,
+					sendFriendReq: true,
+					recvFriendReq: true,
+					block: true, 
+				}
 		});
 		if (!user) return ({error: 'user not found'})
-		// user.sendFriendReq.filter((x) => x.status != PENDING)
-		// user.recvFriendReq.filter((x) => x.status != PENDING)
 		delete user.email;
 		delete user.password;
 		delete user.u2fHash;
+		delete user.otpHash;
 		delete user.activated2FA;
 		return user;
 	}
@@ -48,6 +51,7 @@ export class UsersService {
 	async getAllUsers() {
 		const users = await this.prisma.user.findMany({
 			select: {
+				id: true,
 				username: true,
 				avatar: true, 
 				status: true,
@@ -55,12 +59,13 @@ export class UsersService {
 		});
 		return users;
 	}
-	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
+
+	async updateUser(nick: string, data: { username?: string; email?: string; password?: string; bio?: string }) {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
 				where: {
-					id: userId,
+					username: nick
 				},
 				data,
 			});
@@ -83,7 +88,6 @@ export class UsersService {
 		}
 		return ({nickname: user.username});
 	}
-
 
 	//dont touch
 	async getUserByUsername(username: string) {
