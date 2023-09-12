@@ -116,5 +116,18 @@ export class UsersService {
 		if (!user) return (null);
 		return (user.username);
 	}
+
+	async getUserBasic(id: number) {
+		return (
+			await this.prisma.user.findUnique({
+				where: {id},
+				select: {
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
+	}
 }
 
