@@ -8,26 +8,37 @@ import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
-	@UseGuards(JwtAuthGuard)
 	@Get()
-	async getAllGames(): Promise<string> {
-		console.log("/users")
-		const users = await this.usersService.getAllUsers();
-		// const toObject = (oui) => {
-		// 	return JSON.parse(JSON.stringify(oui, (key, value) =>
-		// 		typeof value === 'bigint'
-		// 			? value.toString()
-		// 			: value // return everything else unchanged
-		// 	));
-		// }
-		console.log(users);
-		return JSON.stringify(users);
+	async getUsers() {
+		return (this.usersService.getAllUsers());
+	}
+	
+	@Get(':nick')
+	async getUser(@Param('nick') nick: string) {
+		return (this.usersService.getUserByNick(nick));
+	}
+	
+	@Patch(':nick')
+	async updateUser(@Param('nick') nick: string, @Body() body) {
+		return (this.usersService.updateUser(nick, body.data));
 	}
 
-	@Patch(':userId')
-	async updateUser(@Param('userId') userId: string, @Body() body): Promise<any> {
-		return (this.usersService.updateUser(Number(userId), body.data));
-	}
+	// @UseGuards(JwtAuthGuard)
+	// @Get()
+	// async getAllGames(): Promise<string> {
+	// 	console.log("/users")
+	// 	const users = await this.usersService.getAllUsers();
+	// 	const toObject = (oui) => {
+	// 		return JSON.parse(JSON.stringify(oui, (key, value) =>
+	// 			typeof value === 'bigint'
+	// 				? value.toString()
+	// 				: value // return everything else unchanged
+	// 		));
+	// 	}
+	// 	console.log(users);
+	// 	return JSON.stringify(users);
+	// }
+
 
 
 	// @UseGuards(LocalAuthGuard)
