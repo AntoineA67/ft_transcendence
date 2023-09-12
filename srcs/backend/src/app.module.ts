@@ -13,6 +13,9 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
+import { FriendsController } from './friends/friends.controller';
+import { FriendsService } from './friends/friends.service';
+import { FriendsModule } from './friends/friends.module';
 
 @Module({
   imports: [
@@ -26,10 +29,12 @@ import { MessagesModule } from './message/message.module';
       port: 3001,
       http: process.env.NODE_ENV !== 'production',
     }),
+    FriendsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, FriendsController],
   providers: [
     AppService,
+    FriendsService,
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,

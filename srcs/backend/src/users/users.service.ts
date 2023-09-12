@@ -99,5 +99,22 @@ export class UsersService {
 		});
 		return user;
 	}
+
+	//helper
+	async getIdByNick(nick: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { username: nick	}
+		});
+		if (!user) return (null);
+		return (user.id);
+	}
+
+	async getNickById(id: number) {
+		const user = await this.prisma.user.findUnique({
+			where: { id }
+		});
+		if (!user) return (null);
+		return (user.username);
+	}
 }
 
