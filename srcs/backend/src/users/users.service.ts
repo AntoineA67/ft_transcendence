@@ -1,14 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client'
-import { DefaultArgs } from '@prisma/client/runtime/library';
+import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
 
 @Injectable()
 export class UsersService {
-	constructor(private prisma: PrismaService) { }
+	constructor(private prisma: PrismaService) {}
 
 	//dont touch
 	async createUser(username: string, email: string, password: string) {
@@ -21,11 +20,11 @@ export class UsersService {
 		});
 	}
 
-	// get a single user
-	async getUserById(userId: number) {
+	// get a single user (frontend)
+	async getUserByNick(nick: string) {
 		const user = await this.prisma.user.findUnique({
 			where: {
-				id: userId
+				username: nick
 			},
 			include: {
 				gameHistory: true,
@@ -36,11 +35,13 @@ export class UsersService {
 			}
 		});
 		if (!user) return ({error: 'user not found'})
-		// user.sendFriendReq.filter((x) => x.status != PENDING)
-		// user.recvFriendReq.filter((x) => x.status != PENDING)
+		user.sendFriendReq.filter((x) => x.status == ReqState.PENDING)
+		user.recvFriendReq.filter((x) => x.status == ReqState.PENDING)
+		delete user.id;
 		delete user.email;
 		delete user.password;
 		delete user.u2fHash;
+		delete user.otpHash;
 		delete user.activated2FA;
 		return user;
 	}
@@ -55,12 +56,13 @@ export class UsersService {
 		});
 		return users;
 	}
-	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
+
+	async updateUser(nick: string, data: { username?: string; email?: string; password?: string; bio?: string }) {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
 				where: {
-					id: userId,
+					username: nick
 				},
 				data,
 			});
