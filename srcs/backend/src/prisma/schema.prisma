@@ -128,9 +128,9 @@ enum ReqState {
 }
 
 model Block {
-  id        BigInt  @id @default(autoincrement())
-  user      User @relation("block", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int     @id @default(autoincrement())
+  user      User    @relation("block", fields: [userId], references: [id], onDelete: Cascade)
   userId    BigInt
-  blocked   User @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  blocked   User    @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
   blockedId BigInt
 }
