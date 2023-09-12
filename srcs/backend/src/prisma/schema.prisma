@@ -38,7 +38,7 @@ model User {
   status           OnlineStatus    @default(ONLINE)
   username         String          @db.VarChar @unique(sort: Asc)
   email            String          @db.VarChar  // @default("") 
-  password         String          @db.VarChar
+  password         String?         @db.VarChar
   u2fHash          String?         @db.VarChar
   otpHash          String?         @db.VarChar
   activated2FA     Boolean         @default(false)
