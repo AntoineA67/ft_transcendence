@@ -2,13 +2,13 @@
 export const achieves = [
 	{
 		id: 1,
-		user: {connect: {username: 'Sasha'}}, 
+		userId: 1, 
 		firstWin: true, 
 		win10Games: true,
 	},
 	{
 		id: 2,
-		user: {connect: {username: 'Kay'}}, 
+		userId: 5,
 		firstWin: true, 
 		win10Games: true,
 		win100Games: true,
