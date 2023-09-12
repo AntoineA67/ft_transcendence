@@ -2,7 +2,7 @@
 export const friendReqs = [
 	{
 		id: 1,
-		user: {connect: {username: 'Sasha'}},
-		possibleFriend: {connect: {username: 'Ting'}},
+		userId: 1,
+		possibleFriendId: 7,
 	}
 ]
