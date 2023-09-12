@@ -10,17 +10,24 @@ export class UsersController {
 
 	@Get()
 	async getUsers() {
-		return (this.usersService.getAllUsers());
+		return await (this.usersService.getAllUsers());
 	}
 	
 	@Get(':nick')
-	async getUser(@Param('nick') nick: string) {
-		return (this.usersService.getUserByNick(nick));
+	async getUser(@Param('nick') nick: string): Promise<any> {
+		// return ('wtf')
+		let res: any;
+		try {
+			res =  await (this.usersService.getUserByNick(nick));
+		} catch (err: any) {
+			return ('wtf');
+		}
+		return (res);
 	}
 	
 	@Patch(':nick')
 	async updateUser(@Param('nick') nick: string, @Body() body) {
-		return (this.usersService.updateUser(nick, body.data));
+		return await (this.usersService.updateUser(nick, body.data));
 	}
 
 	// @UseGuards(JwtAuthGuard)

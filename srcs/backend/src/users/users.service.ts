@@ -21,34 +21,37 @@ export class UsersService {
 	}
 
 	// get a single user (frontend)
-	async getUserByNick(nick: string) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				username: nick
-			},
-			include: {
-				gameHistory: true,
-				friend: true,
-				sendFriendReq: true,
-				recvFriendReq: true,
-				block: true, 
-			}
+	async getUserByNick(nick: string): Promise<any> {
+		let user = await this.prisma.user.findUnique({
+				where: {
+					username: nick
+				},
+				include: {
+					gameHistory: true,
+					friend: true,
+					sendFriendReq: true,
+					recvFriendReq: true,
+					block: true, 
+				}
 		});
+		
 		if (!user) return ({error: 'user not found'})
 		user.sendFriendReq.filter((x) => x.status == ReqState.PENDING)
 		user.recvFriendReq.filter((x) => x.status == ReqState.PENDING)
-		delete user.id;
 		delete user.email;
 		delete user.password;
 		delete user.u2fHash;
 		delete user.otpHash;
 		delete user.activated2FA;
+		console.log(user);
+
 		return user;
 	}
 
 	async getAllUsers() {
 		const users = await this.prisma.user.findMany({
 			select: {
+				id: true,
 				username: true,
 				avatar: true, 
 				status: true,
