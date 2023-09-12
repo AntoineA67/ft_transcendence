@@ -37,24 +37,25 @@ model Custom {
 
 model User {
   id               Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
-  username         String          @default("") @db.VarChar
+  username         String          @default("") @db.VarChar @unique()
   email            String          @default("") @db.VarChar
   password         String          @default("") @db.VarChar
   u2fHash          String?         @default("") @db.VarChar
   otpHash          String?         @default("") @db.VarChar
   activated2FA     Boolean         @default(false)
+  status           String          @default("online")
   avatar           Bytes?
-  bio              String
+  bio              String          @default("Nothing written yet ...")
   custom           Custom?
   achieve          Achievement?
   gameHistory      Player[]
   membership       Member[]
   ownership        Room[]
-  messages         Message[]
-  friends          Friendship[]
+  message          Message[]
+  friend           Friendship[]
   sendFriendReq    FriendRequest[] @relation("sendFriendReq")
-  recieveFriendReq FriendRequest[] @relation("recieveFriendReq")
-  blocks           Block[]         @relation("block")
+  recvFriendReq FriendRequest[] @relation("recieveFriendReq")
+  block            Block[]         @relation("block")
   blocked          Block[]         @relation("blocked")
 }
 
