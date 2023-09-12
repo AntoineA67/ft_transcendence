@@ -1,133 +1,99 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-export type User = any;
+import { Prisma } from '@prisma/client'
+import { DefaultArgs } from '@prisma/client/runtime/library';
+
+const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
+export type User = Prisma.UserGetPayload<typeof user>
 
 @Injectable()
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
+	//dont touch
 	async createUser(username: string, email: string, password: string) {
 		return this.prisma.user.create({
 			data: {
 				username,
-				email: email,
-				password,
-				bio: "",
+				email,
+				password
 			},
 		});
 	}
 
+	// get a single user
 	async getUserById(userId: number) {
-		const user = await this.findUserById(userId);
+		const user = await this.prisma.user.findUnique({
+			where: {
+				id: userId
+			},
+			include: {
+				gameHistory: true,
+				friend: true,
+				sendFriendReq: true,
+				recvFriendReq: true,
+				block: true, 
+			}
+		});
+		if (!user) return ({error: 'user not found'})
+		// user.sendFriendReq.filter((x) => x.status != PENDING)
+		// user.recvFriendReq.filter((x) => x.status != PENDING)
+		delete user.email;
+		delete user.password;
+		delete user.u2fHash;
+		delete user.activated2FA;
 		return user;
 	}
 
-	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
-		const user = await this.findUserById(userId);
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data,
+	async getAllUsers() {
+		const users = await this.prisma.user.findMany({
+			select: {
+				username: true,
+				avatar: true, 
+				status: true,
+			}
 		});
-
-		return updatedUser;
+		return users;
+	}
+	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
+		let user: User;
+		try {
+			user = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data,
+			});
+		} catch (err: any) {
+			return ({error: 'user not found'});
+		}
+		return user;
 	}
 
 	async deleteUser(userId: number) {
-		const user = await this.findUserById(userId);
-		const deletedUser = await this.prisma.user.delete({
-			where: {
-				id: userId,
-			},
-		});
-
-		return deletedUser;
+		let user: User;
+		try {
+			user = await this.prisma.user.delete({
+				where: {
+					id: userId,
+				}
+			})
+		} catch (err: any) {
+			return ({error: 'user not found'})
+		}
+		return ({nickname: user.username});
 	}
 
-	async getAllUsers() {
-		const users = await this.prisma.user.findMany();
-		return users;
-	}
 
+	//dont touch
 	async getUserByUsername(username: string) {
 		console.log('getUserByUsername', username);
-		const user = await this.prisma.user.findFirst({
+		const user = await this.prisma.user.findUnique({
 			where: {
 				username,
 			},
 		});
-
-		// if (!user) {
-		// 	throw new NotFoundException(`User with username ${username} not found`);
-		// }
-
 		return user;
 	}
-
-
-	async getUsersByEmail(email: string) {
-		const users = await this.prisma.user.findMany({
-			where: {
-				email: email,
-			},
-		});
-
-		this.handleUsersNotFound(users, `No users found with email ${email}`);
-		return users;
-	}
-
-	async updateUserPassword(userId: number, newPassword: string) {
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				password: newPassword,
-			},
-		});
-
-		return updatedUser;
-	}
-
-	private async findUserById(userId: number) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: userId,
-			},
-		});
-
-		this.handleUserNotFound(user, `User with ID ${userId} not found`);
-		return user;
-	}
-
-	private handleUserNotFound(user: any, errorMessage: string) {
-		if (!user) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
-
-	private handleUsersNotFound(users: any[], errorMessage: string) {
-		if (users.length === 0) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
-
-	// private readonly users = [
-	// 	{
-	// 		userId: 1,
-	// 		username: 'john',
-	// 		password: 'changeme',
-	// 	},
-	// 	{
-	// 		userId: 2,
-	// 		username: 'maria',
-	// 		password: 'guess',
-	// 	},
-	// ];
-
-	// async findOne(username: string): Promise<User | undefined> {
-	// 	return this.users.find(user => user.username === username);
-	// }
 }
 
