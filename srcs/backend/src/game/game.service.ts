@@ -9,7 +9,6 @@ import { Server, Socket } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
 import Room from './Room.class';
 
-
 @Injectable()
 export class GamesService {
   constructor(private readonly prisma: PrismaService) { }

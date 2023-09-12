@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { Message } from '@prisma/client'; // Assurez-vous que le chemin d'importation est correct
+import { Message } from '@prisma/client';
 import { MessagesService } from './messages.service';
 
 @Controller('messages')
@@ -19,10 +19,10 @@ export default class MessagesController {
 
   @Post()
   async createMessage(@Body() messageData: Message) {
-    if (!messageData.message || !messageData.send_date) {
-      throw new Error('Message and send_date are required');
+    if (!messageData.message || !messageData.roomId) {
+      throw new Error('Message and roomId are required');
     }
-    const newMessage = await this.messagesService.createMessage(messageData.message);
+    const newMessage = await this.messagesService.createMessage(messageData.message, messageData.roomId);
     return newMessage;
   }
 }

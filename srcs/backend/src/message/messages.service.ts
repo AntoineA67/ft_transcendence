@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class MessagesService {
@@ -24,11 +23,12 @@ export class MessagesService {
     throw new NotFoundException('Could not find the message');
   }
 
-  async createMessage(messageContent: string): Promise<any> {
+  async createMessage(messageContent: string, roomId: bigint): Promise<any> {
     return this.prisma.message.create({
       data: {
         message: messageContent,
         send_date: new Date(),
+        room: { connect: { id: roomId } }
       },
     });
   }
