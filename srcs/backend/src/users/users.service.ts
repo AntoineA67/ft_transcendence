@@ -27,7 +27,7 @@ export class UsersService {
 	}
 
 	// get info on another user (frontend)
-	async getUserByNick(myId: number, nick: string): Promise<any> {
+	async getUserByNick(nick: string): Promise<any> {
 		let user = await this.prisma.user.findUnique({
 				where: {
 					username: nick
