@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendReplyDto } from './dto/FriendReplyDto';
 import { FriendReqDto } from './dto/FriendReqDto';
+import { FriendDto } from './dto/FriendDto';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 
 const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
@@ -16,8 +17,23 @@ export class FriendsService {
 		private prisma: PrismaService
 	) {}
 
-	//returns all friends of a user
-
+	//return all friends of a user, id, nick, avatar, status
+	async findAll(nick: string) {
+		const myId = await this.usersService.getIdByNick(nick);
+		const friendships = await this.prisma.friendship.findMany({
+			where: { friends: { some: { id: myId } } },
+			include: { friends: {select: {
+				id: true, 
+				username: true, 
+				avatar: true, 
+				status: true
+			}}}
+		})
+		let myFriends = friendships.map((x) => (
+			x.friends[0].username != nick ? x.friends[0] : x.friends[1]
+		))
+		return (myFriends)
+	}
 
 	
 	async replyFriendReq(reply: FriendReplyDto) {
@@ -39,7 +55,11 @@ export class FriendsService {
 			}
 		})
 		if (status == ReqState.ACCEPT) {
-			//create friendship
+			await this.prisma.friendship.create({
+				data:{
+					friends: { connect: [{id: sendId}, {id: recvId}] }
+				}
+			})
 		}
 	}
 	
@@ -48,6 +68,8 @@ export class FriendsService {
 		const recvId = await this.usersService.getIdByNick(req.recvNick);
 		if (!sendId) return ({result: 'user not found'});
 		if (!recvId) return ({result: 'user not found'});
+		// check block or not
+		// check if they are already friends
 		const exist = await this.prisma.friendRequest.findMany({
 			where: {
 				AND: [
@@ -67,5 +89,8 @@ export class FriendsService {
 		}
 		return ({result: 'success'});
 	}
+
+
+	
 
 }

@@ -1,10 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { FriendsService } from './friends.service';
 
 @Controller('friends')
 export class FriendsController {
+	constructor(private readonly friendsService: FriendsService) { }
 
-	@Get()
-	findAll() {
-		return ('every friends')
+
+	@Get(':nick')
+	findAll(@Param('nick') nick: string) {
+		return (this.friendsService.findAll(nick))
 	}
 }
