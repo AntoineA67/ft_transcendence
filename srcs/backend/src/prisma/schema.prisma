@@ -7,12 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// to be discussed: I think fields 'finish' and 'start_date' can be deleted
 model Game {
   id         BigInt       @default(autoincrement()) @id(map: "PK_352a30652cd352f552fef73dec5")
   finish     Boolean      @default(false)
-  start_date DateTime     @db.Timestamp(6)
-  end_date   DateTime?    @default(now()) @db.Timestamp(6)
+  start_date DateTime     @default(now())  @db.Timestamp(6)
+  end_date   DateTime?    @db.Timestamp(6)
   score      String?      @db.VarChar
   players    Player[]
 }
