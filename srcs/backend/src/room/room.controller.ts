@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { RoomService } from './rooms.service';
+import { RoomService } from './room.service';
 
 @Controller('rooms')
 export class RoomController {
