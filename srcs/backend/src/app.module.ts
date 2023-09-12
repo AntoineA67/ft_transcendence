@@ -13,6 +13,14 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
+import { AchievementModule } from './achievement/achievement.module';
+import { BlockModule } from './block/block.module';
+import { CustomModule } from './custom/custom.module';
+import { FriendRequestModule } from './friendrequest/friendrequest.module';
+import { FriendshipModule } from './friendship/friendship.module';
+import { MemberModule } from './member/member.module';
+import { PlayerModule } from './player/player.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -22,6 +30,14 @@ import { MessagesModule } from './message/message.module';
     MessagesModule,
     UsersModule,
     AuthModule,
+    AchievementModule,
+    BlockModule,
+    CustomModule,
+    FriendRequestModule,
+    FriendshipModule,
+    MemberModule,
+    PlayerModule,
+    RoomModule,
     DevtoolsModule.register({
       port: 3001,
       http: process.env.NODE_ENV !== 'production',

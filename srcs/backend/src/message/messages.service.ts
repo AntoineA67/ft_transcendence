@@ -1,29 +1,28 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Message } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllMessages(): Promise<any[]> {
+  async getAllMessages(): Promise<Message[]> {
     return this.prisma.message.findMany();
   }
 
-  async getMessageById(id: number): Promise<any> {
+  async getMessageById(id: number): Promise<Message> {
     const message = await this.prisma.message.findUnique({
       where: {
         id,
       },
     });
-
     if (message) {
       return message;
     }
-
     throw new NotFoundException('Could not find the message');
   }
 
-  async createMessage(messageContent: string, roomId: bigint): Promise<any> {
+  async createMessage(messageContent: string, roomId: number): Promise<Message> {
     return this.prisma.message.create({
       data: {
         message: messageContent,
@@ -33,7 +32,7 @@ export class MessagesService {
     });
   }
 
-  async updateMessage(id: number, messageContent: string): Promise<any> {
+  async updateMessage(id: number, messageContent: string): Promise<Message> {
     const existingMessage = await this.getMessageById(id);
 
     return this.prisma.message.update({
