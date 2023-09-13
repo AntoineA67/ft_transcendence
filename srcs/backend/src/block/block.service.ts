@@ -1,47 +1,78 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Block, Prisma } from '@prisma/client';
 
 @Injectable()
 export class BlockService {
-  constructor(private prisma: PrismaService) {}
+	
+	constructor(
+		private readonly usersService: UsersService,
+		private prisma: PrismaService
+	) {}
 
-  async createBlock(data: Prisma.BlockCreateInput): Promise<Block> {
-    return this.prisma.block.create({ data });
-  }
+	async getAllBlocked(myNick: string): Promise<string[]> {
+		const myId = await this.usersService.getIdByNick(myNick);
+		if (!myId) return ([]);
+		const blocked = await this.prisma.block.findMany({
+			where: { userId: {equals: myId} }, 
+			include: {
+				blocked: { select: {username: true} }
+			}
+		})
+		return (blocked.map((x) => (x.blocked.username)));
+	}
 
-  async getBlockById(id: number): Promise<Block> {
-    const block = await this.prisma.block.findUnique({
-      where: {
-        id,
-      },
-    });
-    if (!block) {
-      throw new NotFoundException('Block not found');
-    }
-    return block;
-  }
+	async createBlock(myNick: string, nick: string): Promise<Boolean> {
+		const myId = await this.usersService.getIdByNick(myNick);
+		const id = await this.usersService.getIdByNick(nick);
+		if (!myId || !id) return (false);
+		const alreadyBlock = await this.isBlocked(myNick, nick);
+		if (alreadyBlock) return (true);
+		try {
+			await this.prisma.block.create({
+				data: {
+					userId: myId,
+					blockedId: id,
+				}
+			})
+		} catch (err: any) {
+			console.log('err: createBlock')
+			return (false);
+		}
+		return (true);
+	}
 
-  async getAllBlocks(): Promise<Block[]> {
-    return this.prisma.block.findMany();
-  }
+	async unBlock(myNick: string, nick: string) {
+		const myId = await this.usersService.getIdByNick(myNick);
+		const id = await this.usersService.getIdByNick(nick);
+		if (!myId || !id) return (false);
+		const alreadyBlock = await this.isBlocked(myNick, nick);
+		if (!alreadyBlock) return (true);
+		try {
+			await this.prisma.block.deleteMany({
+				where: {
+					AND: [
+						{userId: myId}, 
+						{blockedId: id}
+					]
+				}
+			})
+		} catch (err: any) {
+			console.log('err: unBlock')
+			return (false);
+		}
+		return (true);
+	}
 
-  async updateBlock(id: number, data: Prisma.BlockUpdateInput): Promise<Block | null> {
-    const existingBlock = await this.prisma.block.findUnique({ where: { id } });
-    if (!existingBlock) {
-      throw new NotFoundException(`Block with ID ${id} not found`);
-    }
-    return this.prisma.block.update({
-      where: { id },
-      data,
-    });
-  }
-
-  async deleteBlock(id: number): Promise<Block | null> {
-    const existingBlock = await this.prisma.block.findUnique({ where: { id } });
-    if (!existingBlock) {
-      throw new NotFoundException(`Block with ID ${id} not found`);
-    }
-    return this.prisma.block.delete({ where: { id } });
-  }
+	// whether first person block second person
+	async isBlocked(myNick: string, blocked: string): Promise<Boolean> {
+		const myId = await this.usersService.getIdByNick(myNick);
+		const blockId = await this.usersService.getIdByNick(blocked);
+		if (!myId || ! blockId) return (false)
+		let blocks = await this.getAllBlocked(myNick);
+		blocks = blocks.filter((nick) => (nick == blocked))
+		if (blocks.length == 0) return (false) 
+		return (true);
+	}
 }
