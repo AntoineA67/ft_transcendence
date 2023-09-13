@@ -12,8 +12,10 @@ export class FriendshipController {
   }
 
   @Get(':id')
-  async getFriendshipById(@Param('id') id: number): Promise<Friendship | null> {
-    return this.friendshipService.getFriendshipById(id);
+  async getFriendshipById(@Param('id') id: string): Promise<Friendship> {
+    const friendshipId = parseInt(id, 10);
+    const friendship = await this.friendshipService.getFriendshipById(friendshipId);
+    return friendship;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class FriendshipController {
   }
 
   @Put(':id')
-  async updateFriendship(@Param('id') id: number, @Body() data: Prisma.FriendshipUpdateInput): Promise<Friendship | null> {
-    return this.friendshipService.updateFriendship(id, data);
+  async updateFriendship(@Param('id') id: string, @Body() data: Prisma.FriendshipUpdateInput): Promise<Friendship | null> {
+    const friendshipId = parseInt(id, 10);
+    return this.friendshipService.updateFriendship(friendshipId, data);
   }
 
   @Delete(':id')
-  async deleteFriendship(@Param('id') id: number): Promise<Friendship | null> {
-    return this.friendshipService.deleteFriendship(id);
+  async deleteFriendship(@Param('id') id: string): Promise<Friendship | null> {
+    const friendshipId = parseInt(id, 10);
+    return this.friendshipService.deleteFriendship(friendshipId);
   }
 }

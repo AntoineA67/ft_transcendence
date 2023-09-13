@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common'
 import { CustomService } from './custom.service';
 import { Custom, Prisma } from '@prisma/client';
 
-@Controller('custom')
+@Controller('customs')
 export class CustomController {
   constructor(private readonly customService: CustomService) {}
 
@@ -12,8 +12,10 @@ export class CustomController {
   }
 
   @Get(':id')
-  async getCustomById(@Param('id') id: number): Promise<Custom | null> {
-    return this.customService.getCustomById(id);
+  async getCustomById(@Param('id') id: string): Promise<Custom> {
+    const customId = parseInt(id, 10);
+    const custom = await this.customService.getCustomById(customId);
+    return custom;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class CustomController {
   }
 
   @Put(':id')
-  async updateCustom(@Param('id') id: number, @Body() data: Prisma.CustomUpdateInput): Promise<Custom | null> {
-    return this.customService.updateCustom(id, data);
+  async updateCustom(@Param('id') id: string, @Body() data: Prisma.CustomUpdateInput): Promise<Custom | null> {
+    const customId = parseInt(id, 10);
+    return this.customService.updateCustom(customId, data);
   }
 
   @Delete(':id')
-  async deleteCustom(@Param('id') id: number): Promise<Custom | null> {
-    return this.customService.deleteCustom(id);
+  async deleteCustom(@Param('id') id: string): Promise<Custom | null> {
+    const customId = parseInt(id, 10);
+    return this.customService.deleteCustom(customId);
   }
 }

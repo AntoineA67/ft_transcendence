@@ -12,8 +12,10 @@ export class PlayerController {
   }
 
   @Get(':id')
-  async getPlayerById(@Param('id') id: number): Promise<Player | null> {
-    return this.playerService.getPlayerById(id);
+  async getPlayerById(@Param('id') id: string): Promise<Player> {
+    const playerId = parseInt(id, 10);
+    const player = await this.playerService.getPlayerById(playerId);
+    return player;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class PlayerController {
   }
 
   @Put(':id')
-  async updatePlayer(@Param('id') id: number, @Body() data: Prisma.PlayerUpdateInput): Promise<Player | null> {
-    return this.playerService.updatePlayer(id, data);
+  async updatePlayer(@Param('id') id: string, @Body() data: Prisma.PlayerUpdateInput): Promise<Player | null> {
+    const playerId = parseInt(id, 10);
+    return this.playerService.updatePlayer(playerId, data);
   }
 
   @Delete(':id')
-  async deletePlayer(@Param('id') id: number): Promise<Player | null> {
-    return this.playerService.deletePlayer(id);
+  async deletePlayer(@Param('id') id: string): Promise<Player | null> {
+    const playerId = parseInt(id, 10);
+    return this.playerService.deletePlayer(playerId);
   }
 }

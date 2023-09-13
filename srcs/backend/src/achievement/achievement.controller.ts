@@ -12,8 +12,10 @@ export class AchievementController {
   }
 
   @Get(':id')
-  async getAchievementById(@Param('id') id: number): Promise<Achievement | null> {
-    return this.achievementService.getAchievementById(id);
+  async getAchievementById(@Param('id') id: string): Promise<Achievement> {
+    const achievementId = parseInt(id, 10);
+    const achievement = await this.achievementService.getAchievementById(achievementId);
+    return achievement;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class AchievementController {
   }
 
   @Put(':id')
-  async updateAchievement(@Param('id') id: number, @Body() data: Prisma.AchievementUpdateInput): Promise<Achievement | null> {
-    return this.achievementService.updateAchievement(id, data);
+  async updateAchievement(@Param('id') id: string, @Body() data: Prisma.AchievementUpdateInput): Promise<Achievement | null> {
+    const achievementId = parseInt(id, 10);
+    return this.achievementService.updateAchievement(achievementId, data);
   }
 
   @Delete(':id')
-  async deleteAchievement(@Param('id') id: number): Promise<Achievement | null> {
-    return this.achievementService.deleteAchievement(id);
+  async deleteAchievement(@Param('id') id: string): Promise<Achievement | null> {
+    const achievementId = parseInt(id, 10);
+    return this.achievementService.deleteAchievement(achievementId);
   }
 }
