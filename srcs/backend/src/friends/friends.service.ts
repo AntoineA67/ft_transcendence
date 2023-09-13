@@ -3,6 +3,7 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendReplyDto } from './dto/FriendReplyDto';
 import { FriendReqDto } from './dto/FriendReqDto';
+// import { FriendDto } from './dto/FriendDto';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 
 const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
@@ -16,6 +17,7 @@ export class FriendsService {
 		private prisma: PrismaService
 	) {}
 
+	
 	//return all friends of a user, id, nick, avatar, status
 	async findAllFriends(nick: string) {
 		const myId = await this.usersService.getIdByNick(nick);
