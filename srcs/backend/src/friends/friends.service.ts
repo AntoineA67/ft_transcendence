@@ -17,7 +17,7 @@ export class FriendsService {
 	) {}
 
 	//return all friends of a user, id, nick, avatar, status
-	async findAll(nick: string) {
+	async findAllFriends(nick: string) {
 		const myId = await this.usersService.getIdByNick(nick);
 		const friendships = await this.prisma.friendship.findMany({
 			where: { friends: { some: { id: myId } } },
@@ -34,7 +34,41 @@ export class FriendsService {
 		return (myFriends)
 	}
 
-	
+	async isFriend(myNick: string, nick: string) {
+		const id = await this.usersService.getIdByNick(nick);
+		
+		let myFriends = await this.findAllFriends(myNick);
+		myFriends = myFriends.filter((friend) => (friend.username == nick))
+		return (myFriends.length != 0 ? true : false);
+	}
+
+	async unFriend(myNick: string, nick: string) {
+		const myId = await this.usersService.getIdByNick(nick);
+		let friendship = await this.prisma.friendship.findMany({
+			where: { friends: { some: { id: myId } } },
+			include: {
+				friends: {
+					select: {
+						id: true,
+						username: true,
+						avatar: true,
+						status: true
+					}
+				}
+			}
+		})
+		friendship = friendship.filter((x) => (
+			x.friends[0].username == nick || x.friends[1].username == nick
+		))
+		if (friendship.length == 0) return ({result: 'not friends'});
+		for (let x of friendship) {
+			try {
+				await this.prisma.friendship.delete({ where: {id: x.id} })
+			} catch (err: any) {console.log('err: unFriend func')};
+		}
+		return ({result: 'success'});
+	}
+
 	async replyFriendReq(reply: FriendReplyDto) {
 		const sendId = await this.usersService.getIdByNick(reply.sendNick);
 		const recvId = await this.usersService.getIdByNick(reply.recvNick);
@@ -88,8 +122,4 @@ export class FriendsService {
 		}
 		return ({result: 'success'});
 	}
-
-
-	
-
 }
