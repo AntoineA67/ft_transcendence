@@ -7,7 +7,7 @@ export class FriendsController {
 
 
 	@Get(':nick')
-	findAll(@Param('nick') nick: string) {
-		return (this.friendsService.findAll(nick))
+	findAllFriends(@Param('nick') nick: string) {
+		return (this.friendsService.findAllFriends(nick))
 	}
 }
