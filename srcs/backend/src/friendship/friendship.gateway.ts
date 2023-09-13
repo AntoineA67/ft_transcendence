@@ -2,19 +2,31 @@
 
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { FriendshipService } from './friendship.service';
+import { SubscribeMessage, MessageBody } from '@nestjs/websockets';
 
-@WebSocketGateway()
-export class FriendshipGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
+@WebSocketGateway({ cors: true, namespace: 'friends' })
+export class FriendshipGateway {
+	
+	constructor(private readonly friendshipService: FriendshipService) {}
 
-  handleConnection(client: Socket) {
-    // Gestion de la connexion du client
-  }
+	@WebSocketServer()
+	server: Server;
 
-  handleDisconnect(client: Socket) {
-    // Gestion de la déconnexion du client
-  }
+	@SubscribeMessage('findAll')
+	async handleFindAll(@MessageBody() data: any) {
+		return (data)
+		return await (this.friendshipService.findAllFriends('Sasha'));
+		
+	}
+	
+	@SubscribeMessage('hey')
+	async handleHey(@MessageBody() data: any) {
+		
+		return (data);
+	}
 
-  // Vous pouvez ajouter des méthodes pour gérer les événements liés aux amitiés ici
+
+
+
 }

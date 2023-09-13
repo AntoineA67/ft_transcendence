@@ -26,25 +26,21 @@ export class UsersService {
 		});
 	}
 
-	// get info on another user (frontend)
+	// get info on user
 	async getUserByNick(nick: string): Promise<any> {
 		let user = await this.prisma.user.findUnique({
 				where: {
 					username: nick
 				},
-				include: {
-					friend: true,
-					sendFriendReq: true,
-					recvFriendReq: true,
-					block: true, 
+				select: {
+					id: true, 
+					username: true,
+					avatar: true, 
+					status: true,
+					bio: true,
 				}
 		});
 		if (!user) return ({error: 'user not found'})
-		delete user.email;
-		delete user.password;
-		delete user.u2fHash;
-		delete user.otpHash;
-		delete user.activated2FA;
 		return user;
 	}
 
