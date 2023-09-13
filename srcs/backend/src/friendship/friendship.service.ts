@@ -1,47 +1,73 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Friendship, Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service'; 
+import { Friendship, Prisma, ReqState } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
+
+const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
+export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
 
 @Injectable()
 export class FriendshipService {
-  constructor(private prisma: PrismaService) {}
+	
+	constructor(
+		private usersService: UsersService,
+		private prisma: PrismaService
+	) { }
 
-  async createFriendship(data: Prisma.FriendshipCreateInput): Promise<Friendship> {
-    return this.prisma.friendship.create({ data });
-  }
+	//return all friends of a user, id, nick, avatar, status
+	async findAllFriends(nick: string) {
+		const myId = await this.usersService.getIdByNick(nick);
+		const friendships = await this.prisma.friendship.findMany({
+			where: { friends: { some: { id: myId } } },
+			include: {
+				friends: {
+					select: {
+						id: true,
+						username: true,
+						avatar: true,
+						status: true
+					}
+				}
+			}
+		})
+		let myFriends = friendships.map((x) => (
+			x.friends[0].username != nick ? x.friends[0] : x.friends[1]
+		))
+		return (myFriends)
+	}
 
-  async getFriendshipById(id: number): Promise<Friendship> {
-    const friendship = await this.prisma.friendship.findUnique({
-      where: {
-        id,
-      },
-    });
-    if (!friendship) {
-      throw new NotFoundException('Friendship not found');
-    }
-    return friendship;
-  }
+	async isFriend(myNick: string, nick: string) {
+		const id = await this.usersService.getIdByNick(nick);
 
-  async getAllFriendships(): Promise<Friendship[]> {
-    return this.prisma.friendship.findMany();
-  }
+		let myFriends = await this.findAllFriends(myNick);
+		myFriends = myFriends.filter((friend) => (friend.username == nick))
+		return (myFriends.length != 0 ? true : false);
+	}
 
-  async updateFriendship(id: number, data: Prisma.FriendshipUpdateInput): Promise<Friendship | null> {
-    const existingFriendship = await this.prisma.friendship.findUnique({ where: { id } });
-    if (!existingFriendship) {
-      throw new NotFoundException(`Friendship with ID ${id} not found`);
-    }
-    return this.prisma.friendship.update({
-      where: { id },
-      data,
-    });
-  }
-
-  async deleteFriendship(id: number): Promise<Friendship | null> {
-    const existingFriendship = await this.prisma.friendship.findUnique({ where: { id } });
-    if (!existingFriendship) {
-      throw new NotFoundException(`Friendship with ID ${id} not found`);
-    }
-    return this.prisma.friendship.delete({ where: { id } });
-  }
+	async unFriend(myNick: string, nick: string) {
+		const myId = await this.usersService.getIdByNick(nick);
+		let friendship = await this.prisma.friendship.findMany({
+			where: { friends: { some: { id: myId } } },
+			include: {
+				friends: {
+					select: {
+						id: true,
+						username: true,
+						avatar: true,
+						status: true
+					}
+				}
+			}
+		})
+		friendship = friendship.filter((x) => (
+			x.friends[0].username == nick || x.friends[1].username == nick
+		))
+		if (friendship.length == 0) return ({ result: 'not friends' });
+		for (let x of friendship) {
+			try {
+				await this.prisma.friendship.delete({ where: { id: x.id } })
+			} catch (err: any) { console.log('err: unFriend func') };
+		}
+		return ({ result: 'success' });
+	}
 }

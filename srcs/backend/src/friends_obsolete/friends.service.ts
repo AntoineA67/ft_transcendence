@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FriendReplyDto } from './dto/FriendReplyDto';
-import { FriendReqDto } from './dto/FriendReqDto';
+import { FriendReplyDto } from '../friendrequest/dto/FriendReplyDto';
+import { FriendReqDto } from '../friendrequest/dto/FriendReqDto';
 // import { FriendDto } from './dto/FriendDto';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 

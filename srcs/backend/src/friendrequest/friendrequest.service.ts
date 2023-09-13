@@ -1,47 +1,68 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { FriendRequest, Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ReqState } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
+import { FriendReplyDto } from './dto/FriendReplyDto';
+import { FriendReqDto } from './dto/FriendReqDto';
 
 @Injectable()
 export class FriendRequestService {
-  constructor(private prisma: PrismaService) {}
+	constructor(
+		private usersService: UsersService,
+		private prisma: PrismaService
+	) { }
 
-  async createFriendRequest(data: Prisma.FriendRequestCreateInput): Promise<FriendRequest> {
-    return this.prisma.friendRequest.create({ data });
-  }
+	async replyFriendReq(reply: FriendReplyDto) {
+		const sendId = await this.usersService.getIdByNick(reply.sendNick);
+		const recvId = await this.usersService.getIdByNick(reply.recvNick);
+		const status = reply.reply == 'accept' ? ReqState.ACCEPT : ReqState.DECLINE;
+		if (!sendId) return ({ result: 'user not found' });
+		if (!recvId) return ({ result: 'user not found' });
+		const exist = await this.prisma.friendRequest.updateMany({
+			where: {
+				AND: [
+					{ userId: { equals: sendId } },
+					{ possibleFriendId: { equals: recvId } },
+					{ status: { equals: 'PENDING' } }
+				],
+			},
+			data: {
+				status: status
+			}
+		})
+		if (status == ReqState.ACCEPT) {
+			await this.prisma.friendship.create({
+				data: {
+					friends: { connect: [{ id: sendId }, { id: recvId }] }
+				}
+			})
+		}
+	}
 
-  async getFriendRequestById(id: number): Promise<FriendRequest> {
-    const request = await this.prisma.friendRequest.findUnique({
-      where: {
-        id,
-      },
-    });
-    if (!request) {
-      throw new NotFoundException('Friend request not found');
-    }
-    return request;
-  }
-
-  async getAllFriendRequests(): Promise<FriendRequest[]> {
-    return this.prisma.friendRequest.findMany();
-  }
-
-  async updateFriendRequest(id: number, data: Prisma.FriendRequestUpdateInput): Promise<FriendRequest | null> {
-    const existingRequest = await this.prisma.friendRequest.findUnique({ where: { id } });
-    if (!existingRequest) {
-      throw new NotFoundException(`Friend request with ID ${id} not found`);
-    }
-    return this.prisma.friendRequest.update({
-      where: { id },
-      data,
-    });
-  }
-
-  async deleteFriendRequest(id: number): Promise<FriendRequest | null> {
-    const existingRequest = await this.prisma.friendRequest.findUnique({ where: { id } });
-    if (!existingRequest) {
-      throw new NotFoundException(`Friend request with ID ${id} not found`);
-    }
-    return this.prisma.friendRequest.delete({ where: { id } });
-  }
+	async createFriendReq(req: FriendReqDto) {
+		const sendId = await this.usersService.getIdByNick(req.sendNick);
+		const recvId = await this.usersService.getIdByNick(req.recvNick);
+		if (!sendId) return ({ result: 'user not found' });
+		if (!recvId) return ({ result: 'user not found' });
+		// check block or not
+		// check if they are already friends
+		const exist = await this.prisma.friendRequest.findMany({
+			where: {
+				AND: [
+					{ userId: { equals: sendId } },
+					{ possibleFriendId: { equals: recvId } },
+					{ status: { equals: 'PENDING' } }
+				],
+			},
+		})
+		if (exist.length == 0) {
+			this.prisma.friendRequest.create({
+				data: {
+					userId: sendId,
+					possibleFriendId: recvId
+				}
+			})
+		}
+		return ({ result: 'success' });
+}
 }
