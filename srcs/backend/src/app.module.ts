@@ -13,9 +13,14 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
-import { FriendsController } from './friends/friends.controller';
-import { FriendsService } from './friends/friends.service';
-import { FriendsModule } from './friends/friends.module';
+import { AchievementModule } from './achievement/achievement.module';
+import { BlockModule } from './block/block.module';
+import { CustomModule } from './custom/custom.module';
+import { FriendRequestModule } from './friendrequest/friendrequest.module';
+import { FriendshipModule } from './friendship/friendship.module';
+import { MemberModule } from './member/member.module';
+import { PlayerModule } from './player/player.module';
+import { RoomModule } from './room/room.module';
 
 @Module({
   imports: [
@@ -25,16 +30,22 @@ import { FriendsModule } from './friends/friends.module';
     MessagesModule,
     UsersModule,
     AuthModule,
+    AchievementModule,
+    BlockModule,
+    CustomModule,
+    FriendRequestModule,
+    FriendshipModule,
+    MemberModule,
+    PlayerModule,
+    RoomModule,
     DevtoolsModule.register({
       port: 3001,
       http: process.env.NODE_ENV !== 'production',
     }),
-    FriendsModule,
   ],
-  controllers: [AppController, FriendsController],
+  controllers: [AppController],
   providers: [
     AppService,
-    FriendsService,
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,

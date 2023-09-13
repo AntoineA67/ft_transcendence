@@ -14,9 +14,9 @@ RUN apk --no-cache add curl
 
 FROM base as DEV
 
-ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma generate && npx prisma db push && npx prisma db seed && npm run start:dev"]
+ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma db push && npx prisma db seed && npx prisma generate && npm run start:dev"]
 # ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma generate && npx prisma migrate reset --force && npx prisma migrate dev --name initdb && npm run start:dev"]
-# npx prisma studio 
+# npx prisma studio
 FROM base as PROD
 ENTRYPOINT ["sh", "-c", "npm ci && npm build"]
 CMD [ "node", "dist/main.js" ]

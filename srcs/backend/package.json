@@ -90,6 +90,6 @@
     "testEnvironment": "node"
   },
   "prisma": {
-    "seed": "ts-node ./seed.ts"
+    "seed": "ts-node seed.ts"
   }
 }
