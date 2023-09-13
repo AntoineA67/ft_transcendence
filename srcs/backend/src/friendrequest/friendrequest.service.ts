@@ -5,6 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { FriendReplyDto } from './dto/FriendReplyDto';
 import { FriendReqDto } from './dto/FriendReqDto';
+import { BlockService } from 'src/block/block.service';
 
 const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
 export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
@@ -15,15 +16,24 @@ export class FriendRequestService {
 	
 	constructor(
 		private readonly usersService: UsersService,
+		private readonly blockService: BlockService,
 		private readonly friendshipService: FriendshipService,
 		private prisma: PrismaService
-		) {}
+	) {}
 
+	// get nickname, avatar, online status, id
+	// minus those that are blocked
+	async findAllPendings() {
+
+	}
+	
 	async sendFriendReq(req: FriendReqDto): Promise<Boolean> {
 		const sendId = await this.usersService.getIdByNick(req.sendNick);
 		const recvId = await this.usersService.getIdByNick(req.recvNick);
 		if (!sendId || !recvId) return (false);
-		// check block or not
+		// check if the user had blocked you
+		const blocked = await this.blockService.isBlocked(req.recvNick, req.sendNick);
+		if (blocked) return (false);
 		// check if they are already friends
 		const isFriend = await this.friendshipService.isFriend(req.sendNick, req.recvNick);
 		if (isFriend) return (true);
