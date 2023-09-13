@@ -23,8 +23,28 @@ export class FriendRequestService {
 
 	// get nickname, avatar, online status, id
 	// minus those that are blocked
-	async findAllPendings() {
-
+	async findAllPendings(myNick: string) {
+		const myId = await this.usersService.getIdByNick(myNick);
+		if (!myId) return ([]);
+		let pendings = await this.prisma.friendRequest.findMany({
+			where: {
+				possibleFriendId: {equals: myId}
+			},
+			include: {
+				user: {
+					select: {
+						id: true,
+						username: true,
+						avatar: true,
+						status: true,
+					}
+				}
+			}
+		})
+		pendings = pendings.filter(async (x) => (
+			await this.blockService.isBlocked(myNick, x.user.username) == false
+		));
+		return (pendings);
 	}
 	
 	async sendFriendReq(req: FriendReqDto): Promise<Boolean> {
