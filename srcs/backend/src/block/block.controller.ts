@@ -12,8 +12,10 @@ export class BlockController {
   }
 
   @Get(':id')
-  async getBlockById(@Param('id') id: number): Promise<Block | null> {
-    return this.blockService.getBlockById(id);
+  async getBlockById(@Param('id') id: string): Promise<Block> {
+    const blockId = parseInt(id, 10);
+    const block = await this.blockService.getBlockById(blockId);
+    return block;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class BlockController {
   }
 
   @Put(':id')
-  async updateBlock(@Param('id') id: number, @Body() data: Prisma.BlockUpdateInput): Promise<Block | null> {
-    return this.blockService.updateBlock(id, data);
+  async updateBlock(@Param('id') id: string, @Body() data: Prisma.BlockUpdateInput): Promise<Block | null> {
+    const blockId = parseInt(id, 10);
+    return this.blockService.updateBlock(blockId, data);
   }
 
   @Delete(':id')
-  async deleteBlock(@Param('id') id: number): Promise<Block | null> {
-    return this.blockService.deleteBlock(id);
+  async deleteBlock(@Param('id') id: string): Promise<Block | null> {
+    const blockId = parseInt(id, 10);
+    return this.blockService.deleteBlock(blockId);
   }
 }

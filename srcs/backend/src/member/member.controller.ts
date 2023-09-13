@@ -12,8 +12,10 @@ export class MemberController {
   }
 
   @Get(':id')
-  async getMemberById(@Param('id') id: number): Promise<Member | null> {
-    return this.memberService.getMemberById(id);
+  async getMessageById(@Param('id') id: string): Promise<Member> {
+    const messageId = parseInt(id, 10);
+    const message = await this.memberService.getMemberById(messageId);
+    return message;
   }
 
   @Get()
@@ -22,12 +24,14 @@ export class MemberController {
   }
 
   @Put(':id')
-  async updateMember(@Param('id') id: number, @Body() data: Prisma.MemberUpdateInput): Promise<Member | null> {
-    return this.memberService.updateMember(id, data);
+  async updateMember(@Param('id') id: string, @Body() data: Prisma.MemberUpdateInput): Promise<Member | null> {
+    const memberId = parseInt(id, 10);
+    return this.memberService.updateMember(memberId, data);
   }
 
   @Delete(':id')
-  async deleteMember(@Param('id') id: number): Promise<Member | null> {
-    return this.memberService.deleteMember(id);
+  async deleteMember(@Param('id') id: string): Promise<Member | null> {
+    const memberId = parseInt(id, 10);
+    return this.memberService.deleteMember(memberId);
   }
 }

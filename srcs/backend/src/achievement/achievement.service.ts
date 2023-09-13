@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Achievement, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -10,8 +10,16 @@ export class AchievementService {
     return this.prisma.achievement.create({ data });
   }
 
-  async getAchievementById(id: number): Promise<Achievement | null> {
-    return this.prisma.achievement.findUnique({ where: { id } });
+  async getAchievementById(id: number): Promise<Achievement> {
+    const achievement = await this.prisma.achievement.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!achievement) {
+      throw new NotFoundException('Achievement not found');
+    }
+    return achievement;
   }
 
   async getAllAchievements(): Promise<Achievement[]> {
@@ -19,6 +27,10 @@ export class AchievementService {
   }
 
   async updateAchievement(id: number, data: Prisma.AchievementUpdateInput): Promise<Achievement | null> {
+    const existingAchievement = await this.prisma.achievement.findUnique({ where: { id } });
+    if (!existingAchievement) {
+      throw new NotFoundException(`Achievement with ID ${id} not found`);
+    }
     return this.prisma.achievement.update({
       where: { id },
       data,
@@ -26,6 +38,10 @@ export class AchievementService {
   }
 
   async deleteAchievement(id: number): Promise<Achievement | null> {
+    const existingAchievement = await this.prisma.achievement.findUnique({ where: { id } });
+    if (!existingAchievement) {
+      throw new NotFoundException(`Achievement with ID ${id} not found`);
+    }
     return this.prisma.achievement.delete({ where: { id } });
   }
 }
