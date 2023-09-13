@@ -3,7 +3,6 @@ import { UsersService } from '../users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { FriendReplyDto } from './dto/FriendReplyDto';
 import { FriendReqDto } from './dto/FriendReqDto';
-import { FriendDto } from './dto/FriendDto';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 
 const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
