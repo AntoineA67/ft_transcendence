@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendDto } from './dto/FriendDto';
+import { BlockService } from 'src/block/block.service';
 
 const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
 export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
@@ -12,10 +13,12 @@ export class FriendshipService {
 	
 	constructor(
 		private usersService: UsersService,
+		private blockService: BlockService,
 		private prisma: PrismaService
 	) { }
 
 	//return all friends of a user, id, nick, avatar, status
+	// minus those that block you or those that you block
 	async findAllFriends(nick: string): Promise<FriendDto[]> {
 		const myId = await this.usersService.getIdByNick(nick);
 		if (!myId) return ([]);
@@ -34,6 +37,10 @@ export class FriendshipService {
 		})
 		let myFriends = friendships.map((x) => (
 			x.friends[0].username != nick ? x.friends[0] : x.friends[1]
+		))
+		myFriends = myFriends.filter(async (x) => (
+			await this.blockService.isBlocked(nick, x.username) == false
+			&& await this.blockService.isBlocked(x.username, nick) == false
 		))
 		return (myFriends)
 	}

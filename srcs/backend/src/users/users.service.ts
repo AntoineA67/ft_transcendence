@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
+import { UpdateUserDto } from './dto/UpdateUserDto';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -26,24 +27,6 @@ export class UsersService {
 		});
 	}
 
-	// get info on user
-	async getUserByNick(nick: string): Promise<any> {
-		let user = await this.prisma.user.findUnique({
-				where: {
-					username: nick
-				},
-				select: {
-					id: true, 
-					username: true,
-					avatar: true, 
-					status: true,
-					bio: true,
-				}
-		});
-		if (!user) return ({error: 'user not found'})
-		return user;
-	}
-
 	async getAllUsers() {
 		const users = await this.prisma.user.findMany({
 			select: {
@@ -56,14 +39,12 @@ export class UsersService {
 		return users;
 	}
 
-	async updateUser(nick: string, data: { username?: string; email?: string; password?: string; bio?: string }) {
+	async updateUser(nick: string, data: UpdateUserDto) {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
-				where: {
-					username: nick
-				},
-				data,
+				where: { username: nick },
+				data
 			});
 		} catch (err: any) {
 			return ({error: 'user not found'});
@@ -96,7 +77,6 @@ export class UsersService {
 		return user;
 	}
 
-	//helper
 	async getIdByNick(nick: string) {
 		const user = await this.prisma.user.findUnique({
 			where: { username: nick	}
@@ -118,9 +98,12 @@ export class UsersService {
 			await this.prisma.user.findUnique({
 				where: {id},
 				select: {
+					id: true,
 					username: true,
 					avatar: true,
 					status: true,
+					bio: true, 
+
 				}
 			})
 		)
