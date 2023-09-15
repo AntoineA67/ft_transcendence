@@ -1,32 +1,24 @@
-import { createContext, ReactComponentElement, useContext, useState, useEffect } from 'react';
+import React, { createContext, ReactComponentElement, useContext, useState, useEffect } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+import { socket } from './socket';
 
 type auth = {
-	id: string,
-	nickname: string,
-	avatar: string,
-	token: string,
-	refreshToken: string,
-	state: string,
-	// socket
+	id: string | null,
+	nickname: string | null,
+	socket: Socket | null,
 }
 
 export const AuthContext = createContext<any>(null);
 
-// export const useAuth = () => useContext(AuthContext);
-
-export function AuthProvider({ children }: { children: any }) {
-	const [auth, setAuth] = useState<any>({
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+	const [auth, setAuth] = useState<auth>({
 		id: null,
 		nickname: null,
-		avatar: null,
-		token: null,
-		refreshToken: null,
-		state: null,
+		socket: null,
 	});
 
 	return (
@@ -38,46 +30,20 @@ export function AuthProvider({ children }: { children: any }) {
 
 export function CallBack42() {
 	const { auth, setAuth } = useContext(AuthContext);
-	// const {code, state} =  useParams();
-	let [searchParams, setSearchParams] = useSearchParams();
-	const l = useLocation();
-	const navigate = useNavigate();
-	console.log('location', l);
-	const code = searchParams.get('code');
-	const state = searchParams.get('state');
-
-	console.log(searchParams.get('code'));
-	console.log(searchParams.get('state'));
-
+	let [searchParams] = useSearchParams();
+	const code = searchParams.get('code') || null;
+	const state = searchParams.get('state') || null;
+	const random = localStorage.getItem('random') || null;
+	
 	const api42_continue = async () => {
-		// console.log('kugwelifuwbef');
-		// console.log('state', state,'code', code);
-		// if user is connected, do nothing
-		if (auth?.id) return;
-		// user is not connected, and didn't come from redirection, or state doesn't match
-		if (!code || !state) return;
-		// if (state != auth?.state) {
-		// 	console.log(state);
-		// 	console.log(auth)
-		// 	console.log('state not match');
-		// 	return;
-		// }
-		// send code to back
+		localStorage.removeItem('random');
+		if (!code || !state || !random || state != random) return;
 		try {
-			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`).then(async (res) => {
-
-
-				// console.log('kugwelifuwbef try try try');
-				if (!res.ok) throw new Error('response not ok');
-				const data = await res.json();
-				console.log('data', data);
-				setAuth({ ...auth, token: data, id: '1' });
-				//create websocket
-				localStorage.setItem('token', data); // add this line to set the token in localStorage
-				navigate("/");
-				// return;
-			}
-			);
+			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+			if (!response.ok) throw new Error('response not ok');
+			const data: string = await response.json();
+			// console.log('data', data);
+			localStorage.setItem('token', data); // add this line to set the token in localStorage
 		} catch (error: any) {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
@@ -90,31 +56,29 @@ export function CallBack42() {
 	);
 }
 
-export function Protected({ children }: any) {
-	const { auth } = useContext(AuthContext);
-	const token = localStorage.getItem('token');
-	const socket = io('ws://localhost:3000', {
-		auth: { token: token },
-		transports: ['websocket']
-	});
-
+export function Protected() {
+	const { auth, setAuth } = useContext(AuthContext);
+	
 	useEffect(() => {
+		socket.auth = { token: localStorage.getItem('token') };
+		socket.connect();
 		
-		function onConnect() {
-			console.log('connect')
-		}
 		
+		//socket io regitsre event
+		function onConnect() {console.log('connect')}
 		function onDisconnect() {
-			console.log('disconnect')
+			console.log('reconnecting ...')
+			socket.connect()
 		}
-
 		function onError(err: any) {
 			console.log('err', err)
+			if (err.messsage == 'token invalid') {
+				localStorage.removeItem('token');
+			}
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
 		socket.on('connect_error', onError);
-		
 		return () => {
 			socket.off('connect', onConnect);
 			socket.off('disconnect',onDisconnect);
@@ -123,7 +87,7 @@ export function Protected({ children }: any) {
 	}, []);
 
 	return (
-		token ? (
+		localStorage.getItem('token') ? (
 			<Outlet />
 		) : (
 			<Navigate to="/login" replace={true} />

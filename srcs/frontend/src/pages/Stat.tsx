@@ -116,7 +116,7 @@ function PieChart() {
 			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
-			console.log(start, start + deg);
+			// console.log(start, start + deg);
 
 			start += deg;
 		}
