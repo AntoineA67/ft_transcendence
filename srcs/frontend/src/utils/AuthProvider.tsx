@@ -10,6 +10,7 @@ type auth = {
 	id: string | null,
 	nickname: string | null,
 	socket: Socket | null,
+	token: string | null,
 }
 
 export const AuthContext = createContext<any>(null);
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		id: null,
 		nickname: null,
 		socket: null,
+		token: null,
 	});
 
 	return (
@@ -42,8 +44,11 @@ export function CallBack42() {
 			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			if (!response.ok) throw new Error('response not ok');
 			const data: string = await response.json();
-			// console.log('data', data);
+			console.log('token: ', data);
 			localStorage.setItem('token', data); // add this line to set the token in localStorage
+			socket.auth = {token: data}
+			socket.connect();
+			setAuth({... auth, token: data})
 		} catch (error: any) {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
@@ -52,29 +57,34 @@ export function CallBack42() {
 	useEffect(() => { api42_continue() }, []);
 
 	return (
-		<Navigate to='/' replace={true} />
+		<Navigate to='/' replace />
 	);
 }
 
 export function Protected() {
 	const { auth, setAuth } = useContext(AuthContext);
+	const [ status, setStatus ] = useState<'connect' | 'error' | 'loading'>('loading');
 	
 	useEffect(() => {
 		socket.auth = { token: localStorage.getItem('token') };
+		console.log('socket.connect');
 		socket.connect();
-		
-		
+
 		//socket io regitsre event
-		function onConnect() {console.log('connect')}
+		function onConnect() {
+			setStatus('connect')
+			console.log('connect')
+		}
 		function onDisconnect() {
 			console.log('reconnecting ...')
 			socket.connect()
 		}
 		function onError(err: any) {
+			setStatus('error')
 			console.log('err', err)
-			if (err.messsage == 'token invalid') {
-				localStorage.removeItem('token');
-			}
+			// socket.connect()
+			// localStorage.removeItem('token');
+			// console.log('token removed')
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
@@ -87,10 +97,11 @@ export function Protected() {
 	}, []);
 
 	return (
-		localStorage.getItem('token') ? (
-			<Outlet />
-		) : (
-			<Navigate to="/login" replace={true} />
-		)
+		<>
+			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == 'connect' && <Outlet />}
+			{status == 'error' && <p style={{color: 'white'}}> fail </p>}
+			{/* {connect == 'fail' && <Navigate to="/login" replace />} */}
+		</>
 	);
 }
