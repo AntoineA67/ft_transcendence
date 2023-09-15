@@ -5,7 +5,7 @@ import { jwtConstants } from './auth/constants';
 import { AuthService } from './auth/auth.service';
 import { INestApplicationContext } from '@nestjs/common';
 
-@Injectable()
+// @Injectable()
 export class AuthIoAdapter extends IoAdapter {
 	private authService: AuthService;
 	
