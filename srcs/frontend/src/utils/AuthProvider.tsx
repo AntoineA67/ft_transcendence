@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function CallBack42() {
 	const { auth, setAuth } = useContext(AuthContext);
+	const [status, setStatus] = useState<'loading' | 'done'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
@@ -53,11 +54,15 @@ export function CallBack42() {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
 		}
+		setStatus('done');
 	}
 	useEffect(() => { api42_continue() }, []);
 
 	return (
-		<Navigate to='/' replace />
+		<>
+			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == 'done' && <Navigate to='/' replace />}
+		</>
 	);
 }
 
@@ -101,7 +106,7 @@ export function Protected() {
 			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
 			{status == 'connect' && <Outlet />}
 			{status == 'error' && <p style={{color: 'white'}}> fail </p>}
-			{/* {connect == 'fail' && <Navigate to="/login" replace />} */}
+			{/* {connect == 'error' && <Navigate to="/login" replace />} */}
 		</>
 	);
 }
