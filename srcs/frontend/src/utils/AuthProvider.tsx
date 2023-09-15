@@ -3,7 +3,7 @@ import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-
+import { io } from 'socket.io-client';
 
 type auth = {
 	id: string,
@@ -93,10 +93,37 @@ export function CallBack42() {
 export function Protected({ children }: any) {
 	const { auth } = useContext(AuthContext);
 	const token = localStorage.getItem('token');
+	const socket = io('ws://localhost:3000', {
+		auth: { token: token },
+		transports: ['websocket']
+	});
+
+	useEffect(() => {
+		
+		function onConnect() {
+			console.log('connect')
+		}
+		
+		function onDisconnect() {
+			console.log('disconnect')
+		}
+
+		function onError(err: any) {
+			console.log('err', err)
+		}
+		socket.on('connect', onConnect);
+		socket.on('disconnect', onDisconnect);
+		socket.on('connect_error', onError);
+		
+		return () => {
+			socket.off('connect', onConnect);
+			socket.off('disconnect',onDisconnect);
+			socket.off('connect_error', onError);
+		};
+	}, []);
 
 	return (
 		token ? (
-			// 1 ? (
 			<Outlet />
 		) : (
 			<Navigate to="/login" replace={true} />
