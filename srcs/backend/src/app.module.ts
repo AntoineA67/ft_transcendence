@@ -13,7 +13,6 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
-import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -31,7 +30,6 @@ import { AppGateway } from './app.gateway';
   controllers: [AppController],
   providers: [
     AppService,
-    AppGateway,
     // {
     //   provide: APP_GUARD,
     //   useClass: JwtAuthGuard,
