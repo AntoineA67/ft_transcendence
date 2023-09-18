@@ -1,45 +1,59 @@
 
 export const friendships = [
 	{
-		id: 1,
 		friends: {
-			connect: [{username: 'Sasha'}, {username: 'Florian'}]
+			connect: [
+				{username: 'Sasha'}, 
+				{username: 'Florian'}
+			]
 		}
 	},
 	{
-		id: 2,
 		friends: {
-			connect: [{username: 'Sasha'}, {username: 'Antoine'}]
+			connect: [
+				{username: 'Sasha'}, 
+				{username: 'Antoine'}
+			]
 		}
 	},
 	{
-		id: 3,
 		friends: {
-			connect: [{username: 'Sasha'}, {username: 'Alric'}]
+			connect: [
+				{username: 'Sasha'}, 
+				{username: 'Alric'}
+			]
 		}
 	},
 	{
-		id: 4,
 		friends: {
-			connect: [{username: 'Florian'}, {username: 'Antoine'}]
+			connect: [
+				{username: 'Florian'}, 
+				{username: 'Antoine'}
+			]
 		}
 	},
 	{
-		id: 5,
 		friends: {
-			connect: [{username: 'Florian'}, {username: 'Alric'}]
+			connect: [
+				{username: 'Florian'}, 
+				{username: 'Alric'}
+			]
 		}
 	},
 	{
-		id: 6,
 		friends: {
-			connect: [{username: 'Antoine'}, {username: 'Alric'}]
+			connect: [
+				{username: 'Antoine'}, 
+				{username: 'Alric'}
+			]
 		}
 	},
 	{
-		id: 7,
 		friends: {
-			connect: [{username: 'Sasha'}, {username: 'Kay'}]
+			connect: [
+				{username: 'Sasha'}, 
+				{username: 'Kay'}
+			]
 		}
 	}
 ]
