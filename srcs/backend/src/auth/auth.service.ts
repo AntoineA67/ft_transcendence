@@ -8,7 +8,7 @@ import { User } from '@prisma/client';
 export class AuthService {
 	constructor(
 		private usersService: UsersService,
-		private jwtService: JwtService
+		public jwtService: JwtService
 	) { }
 
 	// async validateUser(username: string, pass: string): Promise<any> {
