@@ -35,6 +35,7 @@ export class AuthService {
 
 		// generate and return JWT, expiresIn is in seconds
 		return this.jwtService.sign({
+			id: userExists.id,
 			sub: userExists.username,
 			email: userExists.email,
 			login: userExists.username,

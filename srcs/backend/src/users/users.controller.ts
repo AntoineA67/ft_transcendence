@@ -13,17 +13,17 @@ export class UsersController {
 		return await (this.usersService.getAllUsers());
 	}
 	
-	@Get(':nick')
-	async getUser(@Param('nick') nick: string): Promise<any> {
-		// return ('wtf')
-		let res: any;
-		try {
-			res =  await (this.usersService.getUserByNick(nick));
-		} catch (err: any) {
-			return ('wtf');
-		}
-		return (res);
-	}
+	// @Get(':nick')
+	// async getUser(@Param('nick') nick: string): Promise<any> {
+	// 	// return ('wtf')
+	// 	let res: any;
+	// 	try {
+	// 		res =  await (this.usersService.getUserByNick(nick));
+	// 	} catch (err: any) {
+	// 		return ('wtf');
+	// 	}
+	// 	return (res);
+	// }
 	
 	@Patch(':nick')
 	async updateUser(@Param('nick') nick: string, @Body() body) {
