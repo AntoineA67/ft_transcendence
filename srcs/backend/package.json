@@ -31,7 +31,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-socket.io": "^10.0.5",
     "@nestjs/websockets": "^10.0.5",
-    "@prisma/client": "^5.2.0",
+    "@prisma/client": "^5.1.1",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -88,5 +88,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "prisma": {
+    "seed": "ts-node seed.ts"
   }
 }
