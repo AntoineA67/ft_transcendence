@@ -22,6 +22,7 @@ import './styles/customForm.css';
 import './styles/index.css';
 
 import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
+import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
@@ -37,10 +38,12 @@ root.render(
 	<BrowserRouter>
 		<AuthProvider>
 			<Routes>
-				<Route path="/login" element={<Login />}>
-					<Route index element={<LandingPage />}></Route>
-					<Route path="signin" element={<Signin />}></Route>
-					<Route path="signup" element={<Signup />}></Route>
+				<Route element={<Guest />}>
+					<Route path="/login" element={<Login />}>
+						<Route index element={<LandingPage />}></Route>
+						<Route path="signin" element={<Signin />}></Route>
+						<Route path="signup" element={<Signup />}></Route>
+					</Route>
 				</Route>
 
 				<Route path='/42/callback' element={<CallBack42 />} />
