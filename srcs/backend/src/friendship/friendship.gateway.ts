@@ -25,4 +25,8 @@ export class FriendshipGateway {
 		
 		return (data);
 	}
+
+
+
+
 }
