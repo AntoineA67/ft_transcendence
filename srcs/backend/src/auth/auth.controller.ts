@@ -19,7 +19,7 @@ export class AuthController {
 	@Get('/42/callback')
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		// return { message: '42 callback' };
-		console.log('42 callback', req.user);
+		//console.log('42 callback', req.user);
 		// const users = await this.usersService.findAll();
 		console.log(req.query.code)
 

@@ -1,6 +1,7 @@
 export const users = [
 	{
 		id: 1,
+		login42: 'test1',
 		username: 'Sasha',
 		email: 'sasha@prisma.io',
 		password: 'sashapass',
@@ -8,6 +9,7 @@ export const users = [
 	},
 	{
 		id: 2,
+		login42: 'test2',
 		username: 'Florian',
 		email: 'florian@prisma.io',
 		password: 'flopass',
@@ -15,6 +17,7 @@ export const users = [
 	},
 	{
 		id: 3,
+		login42: 'test3',
 		username: 'Antoine',
 		email: 'antoine@prisma.io',
 		password: 'antoinepass',
@@ -22,6 +25,7 @@ export const users = [
 	},
 	{
 		id: 4,
+		login42: 'test4',
 		username: 'Alric',
 		email: 'alric@prisma.io',
 		password: 'alricpass',
@@ -29,6 +33,7 @@ export const users = [
 	},
 	{
 		id: 5,
+		login42: 'test5',
 		username: 'Kay',
 		email: 'kay@prisma.io',
 		password: 'kaypass',
@@ -36,6 +41,7 @@ export const users = [
 	},
 	{
 		id: 6,
+		login42: 'test6',
 		username: 'Jin',
 		email: 'jin@prisma.io',
 		password: 'jinpass',
@@ -43,6 +49,7 @@ export const users = [
 	},
 	{
 		id: 7,
+		login42: 'test7',
 		username: 'Ting',
 		email: 'ting@prisma.io',
 		password: 'tingpass',
