@@ -17,10 +17,9 @@ export class UsersService {
 	constructor(private prisma: PrismaService) {}
 
 	//dont touch
-	async createUser(login42: string, username: string, email: string, password: string) {
+	async createUser(username: string, email: string, password: string) {
 		return this.prisma.user.create({
 			data: {
-				login42,
 				username,
 				email,
 				password
@@ -40,11 +39,11 @@ export class UsersService {
 		return users;
 	}
 
-	async updateUser(nick: string, data: UpdateUserDto) {
+	async updateUser(email: string, data: UpdateUserDto) {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
-				where: { username: nick },
+				where: { email: email },
 				data
 			});
 		} catch (err: any) {
@@ -68,19 +67,19 @@ export class UsersService {
 	}
 
 	//dont touch
-	async getUserByLogin42(login42: string) {
-		console.log('getUserByLogin42', login42);
+	async getUserByEmail(email: string) {
+		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
-				login42,
+				email,
 			},
 		});
 		return user;
 	}
 
-	async getIdByNick(nick: string) {
+	async getIdByNick(email: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { username: nick	}
+			where: { email: email	}
 		});
 		if (!user) return (null);
 		return (user.id);
