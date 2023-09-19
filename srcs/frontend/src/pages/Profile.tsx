@@ -84,19 +84,44 @@ function EditText({ type, content, setContent, setEdit }: editTextProp) {
 
 function NewAvatar() {
 
-	function autoUpload() {
-		const form = document.getElementById('form-avatar') as HTMLFormElement;
+	async function autoUpload() {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
-		if (form) {
-			form.submit();
-			input.value = '';
+		const file = input.files ? input.files[0] : null;
+		if (!file) return ;
+		if (file.size >= 1073741824) {
+			console.log('file size limit: 1GB');
+			return ;
 		}
+		let data = new FormData();
+		data.append('avatar', file);
+		try {
+			const response = await fetch('http://localhost:3000/users/avatar', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'multipart/form-data',
+					'Accept': 'application/json'
+				},
+				body: data
+			});
+			if (!response.ok) { throw new Error('response not ok') }
+		} catch (err: any) {
+			console.log('err autoUpload: ', err);
+		}
+		//rerender the page to refetch avatar
 	}
 
 	return (
 		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
 			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "30px" }}>
-				<input className='d-none' id="new-avatar" type="file" name="new-avatar" onChange={autoUpload}/>
+				<input 
+					className='d-none' 
+					id="new-avatar" 
+					type="file" 
+					name="new-avatar" 
+					// accept="image/*"
+					accept=".png, .jpg, .jpeg"
+					onChange={autoUpload}
+				/>
 			</label>
 		</form>
 	);
@@ -113,6 +138,7 @@ type Profile = {
 function Profile() {
 	const [nickname, setNickname] = useState('');
 	const [bio, setBio] = useState('');
+	const [avatar, setAvatar] = useState('') //base 64 string
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	useEffect(() => {
@@ -120,6 +146,7 @@ function Profile() {
 			setNickname(response.username);
 			setBio(response.bio);
 		})
+		//fetch avatar
 	}, []);
 
 	return (
@@ -128,10 +155,11 @@ function Profile() {
 				style={{ color: "white"}}>			
 				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
-				{/* src={avatar} */}
-				<img alt="avatar"  className="my-3"
-					style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} />
-				
+				<img 
+					src={`data:image/jpeg;base64,${avatar}`} 
+					className="my-3"
+					style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} 
+				/>
 				<NewAvatar />
 
 				{edit == 'nick' ?
