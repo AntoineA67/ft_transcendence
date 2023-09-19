@@ -20,7 +20,7 @@ export class WsJwtStrategy extends PassportStrategy(Strategy, 'ws-jwt') {
 		console.log('jwt validate', payload);
 		return payload;
 		return this.jwtService.verify(payload);
-		const user = await this.userService.getUserByUsername(payload.sub);
+		const user = await this.userService.getUserByLogin42(payload.sub);
 
 		if (!user) throw new UnauthorizedException('Please log in to continue');
 

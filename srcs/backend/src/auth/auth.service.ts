@@ -26,19 +26,17 @@ export class AuthService {
 			throw new BadRequestException('Unauthenticated');
 		}
 
-		let userExists: any = await this.findUserByLogin(user.username);
-		console.log('userExists', userExists);
+		let userExists: any = await this.findUserByLogin42(user.username);
+		//console.log('userExists', userExists);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
+			console.log('>> id', userExists.id);
 		}
 
 		// generate and return JWT, expiresIn is in seconds
 		return this.jwtService.sign({
 			id: userExists.id,
-			sub: userExists.username,
-			email: userExists.email,
-			login: userExists.username,
 		}, { expiresIn: 3600 });
 	}
 
@@ -46,8 +44,7 @@ export class AuthService {
 	// DELETE FROM "user" WHERE id = 1;
 	async registerUser(user: any): Promise<User> {
 		try {
-			console.log('registering user', user);
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			const newUser = await this.usersService.createUser(user.username, user.username, user.emails[0].value, "changeme")
 			return newUser;
 			// .then((res) => {
 			// return this.jwtService.sign({
@@ -67,8 +64,8 @@ export class AuthService {
 		}
 	}
 
-	async findUserByLogin(username: string) {
-		const user = await this.usersService.getUserByUsername(username);
+	async findUserByLogin42(login42: string) {
+		const user = await this.usersService.getUserByLogin42(login42);
 
 		if (!user) {
 			return null;
