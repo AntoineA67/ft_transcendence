@@ -39,17 +39,17 @@ export class UsersService {
 		return users;
 	}
 
-	async updateUser(nick: string, data: UpdateUserDto) {
+	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
-				where: { username: nick },
+				where: { id },
 				data
 			});
 		} catch (err: any) {
-			return ({error: 'user not found'});
+			return (false);
 		}
-		return user;
+		return (true);
 	}
 
 	async deleteUser(userId: number) {
@@ -93,7 +93,7 @@ export class UsersService {
 		return (user.username);
 	}
 
-	async getUserBasic(id: number) {
+	async getUserProfile(id: number) {
 		return (
 			await this.prisma.user.findUnique({
 				where: {id},
@@ -103,7 +103,6 @@ export class UsersService {
 					avatar: true,
 					status: true,
 					bio: true, 
-
 				}
 			})
 		)

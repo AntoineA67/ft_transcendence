@@ -25,10 +25,10 @@ export class UsersController {
 	// 	return (res);
 	// }
 	
-	@Patch(':nick')
-	async updateUser(@Param('nick') nick: string, @Body() body) {
-		return await (this.usersService.updateUser(nick, body.data));
-	}
+	// @Patch(':nick')
+	// async updateUser(@Param('nick') nick: string, @Body() body) {
+	// 	return await (this.usersService.updateUser(nick, body.data));
+	// }
 
 	// @UseGuards(JwtAuthGuard)
 	// @Get()
