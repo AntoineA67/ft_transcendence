@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UserDto } from 'src/dto/UserDto';
+import { ProfileDto } from 'src/dto/ProfileDto';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -15,7 +16,7 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 
 @Injectable()
 export class UsersService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService) { }
 
 	//dont touch
 	async createUser(username: string, email: string, password: string) {
@@ -33,7 +34,7 @@ export class UsersService {
 			select: {
 				id: true,
 				username: true,
-				avatar: true, 
+				avatar: true,
 				status: true,
 			}
 		});
@@ -100,10 +101,10 @@ export class UsersService {
 	// 	return (user.username);
 	// }
 
-	async getUserProfile(id: number): Promise<UserDto> {
+	async getUserById(id: number): Promise<UserDto> {
 		return (
 			await this.prisma.user.findUnique({
-				where: {id},
+				where: { id },
 				select: {
 					id: true,
 					username: true,
@@ -114,5 +115,32 @@ export class UsersService {
 		)
 	}
 
+	async getUserProfileById(id: number)
+		: Promise<ProfileDto | null> {
+		return (await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true, 
+				username: true, 
+				avatar: true, 
+				bio: true, 
+				status: true,
+			}
+		}))
+	}
+
+	async getUserProfileByNick(nick: string)
+		: Promise<ProfileDto | null> {
+		return (await this.prisma.user.findUnique({
+			where: { username: nick },
+			select: {
+				id: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+			}
+		}))
+	}
 
 }
