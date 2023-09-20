@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { UserDto } from 'src/dto/UserDto';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -27,7 +28,7 @@ export class UsersService {
 		});
 	}
 
-	async getAllUsers() {
+	async getAllUsers(): Promise<UserDto[]> {
 		const users = await this.prisma.user.findMany({
 			select: {
 				id: true,
@@ -52,7 +53,7 @@ export class UsersService {
 		return (true);
 	}
 
-	async deleteUser(userId: number) {
+	async deleteUser(userId: number): Promise<boolean> {
 		let user: User;
 		try {
 			user = await this.prisma.user.delete({
@@ -61,9 +62,9 @@ export class UsersService {
 				}
 			})
 		} catch (err: any) {
-			return ({error: 'user not found'})
+			return (false)
 		}
-		return ({nickname: user.username});
+		return (true);
 	}
 
 	//dont touch
@@ -77,7 +78,7 @@ export class UsersService {
 		return user;
 	}
 
-	async getUserByNick(nick: string) {
+	async getUserByNick(nick: string): Promise<UserDto> {
 		return (
 			await this.prisma.user.findUnique({
 				where: { username: nick },
@@ -86,21 +87,20 @@ export class UsersService {
 					username: true,
 					avatar: true,
 					status: true,
-					bio: true,
 				}
 			})
 		)
 	}
 
-	async getNickById(id: number) {
-		const user = await this.prisma.user.findUnique({
-			where: { id }
-		});
-		if (!user) return (null);
-		return (user.username);
-	}
+	// async getNickById(id: number) {
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: { id }
+	// 	});
+	// 	if (!user) return (null);
+	// 	return (user.username);
+	// }
 
-	async getUserProfile(id: number) {
+	async getUserProfile(id: number): Promise<UserDto> {
 		return (
 			await this.prisma.user.findUnique({
 				where: {id},
@@ -109,7 +109,6 @@ export class UsersService {
 					username: true,
 					avatar: true,
 					status: true,
-					bio: true, 
 				}
 			})
 		)
