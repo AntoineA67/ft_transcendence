@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { FriendRequestService } from './friendrequest.service';
+import { UserDto } from 'src/dto/UserDto';
 
 @WebSocketGateway({ cors: true })
 export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -21,7 +22,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	constructor(private readonly friendReqService: FriendRequestService) { }
 
 	@SubscribeMessage('findAllPendings')
-	async handleFindAllPendings(@ConnectedSocket() client: Socket) {
+	async handleFindAllPendings(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
 		const id: number = client.data.user.id;
 		return (await this.friendReqService.findAllPendings(id));
 	}
@@ -29,7 +30,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('sendReq')
 	async handleSendReq(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
+		@MessageBody() nick: string): Promise<boolean> {
 		const id: number = client.data.user.id;
 		return (await this.friendReqService.sendFriendReq(id, nick))
 	}
@@ -38,7 +39,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	async handleReplyReq(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody('nick') nick: string, 
-		@MessageBody('result') result: boolean) {
+		@MessageBody('result') result: boolean): Promise<boolean> {
 		const id: number = client.data.user.id;
 		this.logger.log(nick, result);
 		return (await this.friendReqService.replyFriendReq(id, nick, result))
@@ -47,7 +48,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('reqSent')
 	async handleReqSent(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() nick: string,) {
+		@MessageBody() nick: string,): Promise<boolean> {
 		const id: number = client.data.user.id;
 		const pendings = await this.friendReqService.getPendingReq(id, nick);
 		if (pendings.length == 0) return (false)

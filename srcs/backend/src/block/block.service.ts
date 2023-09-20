@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Block, Prisma } from '@prisma/client';
+import { UserDto } from 'src/dto/UserDto';
 
 @Injectable()
 export class BlockService {
@@ -11,16 +12,23 @@ export class BlockService {
 		private prisma: PrismaService
 	) {}
 
-	async getAllBlocked(id: number): Promise<string[]> {
+	async getAllBlocked(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserProfile(id);
 		if (!user) return ([]);
 		const blocked = await this.prisma.block.findMany({
 			where: { userId: {equals: id} }, 
 			include: {
-				blocked: { select: {username: true} }
+				blocked: { 
+					select: {
+						id: true,
+						username: true, 
+						avatar: true,
+						status: true, 
+					}
+				}
 			}
 		})
-		return (blocked.map((x) => (x.blocked.username)));
+		return (blocked.map((x) => (x.blocked)));
 	}
 
 	async createBlock(id: number, nick: string): Promise<Boolean> {
@@ -43,7 +51,7 @@ export class BlockService {
 		return (true);
 	}
 
-	async unBlock(id: number, nick: string) {
+	async unBlock(id: number, nick: string): Promise<boolean> {
 		const user = await this.usersService.getUserProfile(id);
 		const block = await this.usersService.getUserByNick(nick);
 		if (!user || !block) return (false);
@@ -71,7 +79,7 @@ export class BlockService {
 		const block = await this.usersService.getUserByNick(nick);
 		if (!user || !block) return (false);
 		let blocks = await this.getAllBlocked(id);
-		blocks = blocks.filter((nick) => (nick == block.username))
+		blocks = blocks.filter((x) => (x.username == block.username))
 		if (blocks.length == 0) return (false) 
 		return (true);
 	}

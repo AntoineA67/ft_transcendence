@@ -2,11 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; 
 import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
-import { FriendDto } from './dto/FriendDto';
 import { BlockService } from 'src/block/block.service';
+import { UserDto } from 'src/dto/UserDto';
 
-const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
-export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
+// const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
+// export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
 
 @Injectable()
 export class FriendshipService {
@@ -21,7 +21,7 @@ export class FriendshipService {
 
 	//return all friends of a user, id, nick, avatar, status
 	// minus those that block you or those that you block
-	async findAllFriends(id: number): Promise<FriendDto[]> {
+	async findAllFriends(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserProfile(id);
 		if (!user) return ([]);
 		const friendships = await this.prisma.friendship.findMany({
@@ -47,13 +47,13 @@ export class FriendshipService {
 		return (myFriends)
 	}
 
-	async makeFriend(id: number, nick: string): Promise<Boolean> {
+	async makeFriend(id: number, nick: string): Promise<boolean> {
 		const user = await this.usersService.getUserProfile(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!user || !friend) return (false);
 		const areFriends = await this.isFriend(id, nick);
 		if (areFriends) return (true);
-		this.logger.log('before create')
+		// this.logger.log('before create')
 		try {
 			await this.prisma.friendship.create({
 				data: {
@@ -64,11 +64,11 @@ export class FriendshipService {
 			console.log('err: makeFriend func');
 			return (false)
 		}
-		this.logger.log('adter create')
+		// this.logger.log('adter create')
 		return (true);
 	}
 
-	async unFriend(id: number, nick: string): Promise<Boolean> {
+	async unFriend(id: number, nick: string): Promise<boolean> {
 		const user = await this.usersService.getUserProfile(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!user || !friend) return (false);
@@ -97,7 +97,7 @@ export class FriendshipService {
 		return (true);
 	}
 
-	async isFriend(myId: number, nick: string): Promise<Boolean> {
+	async isFriend(myId: number, nick: string): Promise<boolean> {
 		const user = await this.usersService.getUserProfile(myId);
 		if (!user) return (false);
 		let myFriends = await this.findAllFriends(myId);

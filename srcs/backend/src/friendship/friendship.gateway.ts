@@ -4,6 +4,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 import { FriendshipService } from './friendship.service';
 import { SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { UserDto } from 'src/dto/UserDto';
 
 @WebSocketGateway({ cors: true })
 export class FriendshipGateway {
@@ -12,7 +13,7 @@ export class FriendshipGateway {
 
 	@SubscribeMessage('findAllFriends')
 	async handlefindAllFriends(
-		@ConnectedSocket() client: Socket) {
+		@ConnectedSocket() client: Socket): Promise<UserDto[]> {
 		const id: number = client.data.user.id;
 		return (await this.friendshipService.findAllFriends(id));
 	}
@@ -20,7 +21,7 @@ export class FriendshipGateway {
 	@SubscribeMessage('isFriend')
 	async handleIsFriend(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() data: string) {
+		@MessageBody() data: string): Promise<boolean> {
 		const id: number = client.data.user.id;
 		return (await this.friendshipService.isFriend(id, data))
 	}
@@ -28,7 +29,7 @@ export class FriendshipGateway {
 	@SubscribeMessage('Unfriend')
 	async handleUnfriend(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() data: string) {
+		@MessageBody() data: string): Promise<boolean> {
 		const id: number = client.data.user.id;
 		return (await this.friendshipService.unFriend(id, data))	
 	}

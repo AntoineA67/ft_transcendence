@@ -4,9 +4,10 @@ import { Prisma, ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
+import { UserDto } from 'src/dto/UserDto';
 
-const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
-export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
+// const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
+// export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
 
 @Injectable()
 export class FriendRequestService {
@@ -22,10 +23,10 @@ export class FriendRequestService {
 
 	// get nickname, avatar, online status, id
 	// minus those that are blocked
-	async findAllPendings(id: number) {
+	async findAllPendings(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserProfile(id);
 		if (!user) return ([]);
-		let pendings = await this.prisma.friendRequest.findMany({
+		let reqs = await this.prisma.friendRequest.findMany({
 			where: {
 				possibleFriendId: {equals: id}
 			},
@@ -40,13 +41,13 @@ export class FriendRequestService {
 				}
 			}
 		})
-		pendings = pendings.filter(async (x) => (
-			await this.blockService.isBlocked(user.id, x.user.username) == false
+		const pendings = reqs.map((x) => (x.user)).filter(async (x) => (
+			await this.blockService.isBlocked(user.id, x.username) == false
 		));
 		return (pendings);
 	}
 	
-	async sendFriendReq(id: number, nick: string): Promise<Boolean> {
+	async sendFriendReq(id: number, nick: string): Promise<boolean> {
 		const me = await this.usersService.getUserProfile(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!me || !friend) return (false);
@@ -76,7 +77,7 @@ export class FriendRequestService {
 		return (true);
 	}
 
-	async replyFriendReq(id: number, nick: string, accept: boolean): Promise<Boolean> {
+	async replyFriendReq(id: number, nick: string, accept: boolean): Promise<boolean> {
 		const me = await this.usersService.getUserProfile(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
