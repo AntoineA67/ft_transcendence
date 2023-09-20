@@ -108,6 +108,41 @@ function SendRequest() {
 	)
 }
 
+function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
+	
+	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, nick: string) => {
+		e.preventDefault();
+		// socket.emit('unblock', nick, (success: boolean) => {
+		// 	success && setBlocks(blocks.map(() => (
+
+		// 		)))
+		// 	}
+		// });
+	}
+	
+	const myMap = (user: UserDto) => {
+		return (
+			<li key={user.id}>
+				{user.username}
+				<button onClick={(e) => handleClick(e, user.username)}>
+					unBlock
+				</button>
+			</li>
+		)
+	}
+	
+	return (
+		<ul style={{color: 'white'}}>
+			<p>Block list</p>
+			{blocks.length == 0 ? (
+				<p>Nothing</p>
+			) : (
+				blocks.map(myMap)
+			)}
+		</ul>
+	)
+}
+
 export function Friends() {
 	const [friends, setFriends] = useState<UserDto[]>([]);
 	const [reqs, setReqs] = useState<UserDto[]>([]);
@@ -136,6 +171,7 @@ export function Friends() {
 			<SendRequest></SendRequest>
 			<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
 			<FriendList friends={friends}></FriendList>
+			<BlockList blocks={blocks} setBlocks={setBlocks}></BlockList>
 		</div>
 	);
 }
