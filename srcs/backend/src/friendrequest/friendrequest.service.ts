@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
@@ -10,6 +10,8 @@ export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
 
 @Injectable()
 export class FriendRequestService {
+	
+	private logger = new Logger('FriendReq');
 	
 	constructor(
 		private readonly usersService: UsersService,
@@ -57,12 +59,20 @@ export class FriendRequestService {
 		//check if there are pending requests
 		const pendings = await this.getPendingReq(id, friend.username);
 		if (pendings.length != 0) return (true);
-		this.prisma.friendRequest.create({
+		this.logger.log('before prisma create')
+		this.logger.log(me.username)
+		this.logger.log(friend.username)
+		await this.prisma.friendRequest.create({
 			data: {
-				userId: id,
-				possibleFriendId: friend.id
+				user: {
+					connect: {username: me.username}
+				},
+				possibleFriend: {
+					connect: {username: friend.username}
+				} 
 			}
 		})
+		this.logger.log('after prisma create')
 		return (true);
 	}
 
@@ -71,7 +81,24 @@ export class FriendRequestService {
 		const friend = await this.usersService.getUserByNick(nick);
 		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
 		if (!me || !friend) return (false);
+		// if error these two actions must rollback together
+		if (status == ReqState.ACCEPT) {
+			await this.friendshipService.makeFriend(id, nick);
+		}
+		this.logger.log('adter MakeFriend');
 		try {
+			await this.prisma.friendRequest.updateMany({
+				where: {
+					AND: [
+						{ userId: { equals: friend.id } },
+						{ possibleFriendId: { equals: id } },
+						{ status: { equals: 'PENDING' } }
+					],
+				},
+				data: {
+					status: status
+				}
+			})
 			await this.prisma.friendRequest.updateMany({
 				where: {
 					AND: [
@@ -85,9 +112,7 @@ export class FriendRequestService {
 				}
 			})
 		} catch (err: any) {console.log('err: replyFriendReq')};
-		if (status == ReqState.ACCEPT) {
-			await this.friendshipService.makeFriend(id, nick);
-		}
+		return (true);
 	}
 
 	async getPendingReq(id: number, nick: string) {
