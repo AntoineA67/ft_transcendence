@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; 
 import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
@@ -10,6 +10,8 @@ export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
 
 @Injectable()
 export class FriendshipService {
+	
+	private logger = new Logger('FriendService');
 	
 	constructor(
 		private usersService: UsersService,
@@ -51,6 +53,7 @@ export class FriendshipService {
 		if (!user || !friend) return (false);
 		const areFriends = await this.isFriend(id, nick);
 		if (areFriends) return (true);
+		this.logger.log('before create')
 		try {
 			await this.prisma.friendship.create({
 				data: {
@@ -61,6 +64,7 @@ export class FriendshipService {
 			console.log('err: makeFriend func');
 			return (false)
 		}
+		this.logger.log('adter create')
 		return (true);
 	}
 

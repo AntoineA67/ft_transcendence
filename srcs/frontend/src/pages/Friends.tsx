@@ -1,11 +1,19 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import { socket } from '../utils/socket';
 
-function FriendList({friends} : {friends: string[]}) {
+type Other = {
+	id: number,
+	username: string,
+	avatar: null,
+	onlineStatus: 'ONLINE' | 'OFFLINE' | 'INGAME',
+}
+
+function FriendList({friends} : {friends: Other[]}) {
 	
-	const myMap = (item: string) => {
+	const myMap = (item: Other) => {
 		return (
-			<li key={item}>
-				{item}
+			<li key={item.id}>
+				{item.username}
 			</li>
 		)
 	}
@@ -13,38 +21,51 @@ function FriendList({friends} : {friends: string[]}) {
 	return (
 		<ul>
 			<p style={{color: 'white'}}>FriendList</p>
-			{friends.map(myMap)}
+			{(friends.length == 0) ? (
+				<p style={{ color: 'white' }}>
+					Nothing
+				</p>
+			) : (
+				friends.map(myMap))}
 		</ul>
 	);
 }
 
-function FriendReqList({ friendReq }: { friendReq: string[] }) {
+function FriendReqList({ reqs, setReqs }: { reqs: any[], setReqs: React.Dispatch<React.SetStateAction<Other[]>> }) {
 
-	async function handleClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, friendReqItem: string, result: boolean) {
+	async function handleClick(
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>, 
+		possibleFriend: string, 
+		result: boolean
+	) {
 		e.preventDefault();
-		const url = '';
-
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({nickname: 'user', friendReqItem: friendReqItem, result: result})
-		}
-		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
-			friendReq = friendReq.filter((x) => (x != friendReqItem))
-		} catch (err: any) {
-			console.log(err);
-		}
+		socket.emit('replyReq', {nick: possibleFriend, result}, (success: boolean) => {
+			if (success) {
+				const update = reqs.filter((x) => (x.user.username != possibleFriend))
+				setReqs(update);
+			}
+		})
 		
 	}
 	
-	const myMap = (item: string) => {
+	const myMap = (item: any) => {
 		return (
-			<li key={item}>
-				{item}
-				<button className='btn btn-primary' onClick={(e) => handleClick(e, item, true)}>Accept</button>
-				<button className='btn btn-secondary' onClick={(e) => handleClick(e, item, false)}>Decline</button>
+			<li key={item.id}>
+				<div>
+					<p style={{color: 'white'}}>
+						{item.user.username}
+					</p>
+					<button 
+						className='btn btn-primary' 
+						onClick={(e) => handleClick(e, item.user.username, true)}>
+						Accept
+					</button>
+					<button 
+						className='btn btn-secondary' 
+						onClick={(e) => handleClick(e, item.user.username, false)}>
+						Decline
+					</button>
+				</div>
 			</li>
 		)
 	}
@@ -52,7 +73,12 @@ function FriendReqList({ friendReq }: { friendReq: string[] }) {
 	return (
 		<ul>
 			<p style={{color: 'white'}}>Friend request</p>
-			{friendReq.map(myMap)}
+			{(reqs.length == 0) ? (
+				<p style={{color: 'white'}}>
+					Nothing
+				</p> 
+			): (
+				reqs.map(myMap))}
 		</ul>
 	);
 }
@@ -65,22 +91,10 @@ function SendRequest() {
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 
-		const url = '';
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ from: 'user', to: nick })
-		}
-		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
-			setMess('Success');
-		} catch (err: any) {
-			console.log(err);
-			setMess('Fails');
-		} finally {
+		socket.emit('sendReq', nick, (success: boolean) => {
+			success ? setMess('Success') : setMess('Fails')
 			setNick('');
-		}
+		})
 	}
 	
 	return (
@@ -97,15 +111,29 @@ function SendRequest() {
 }
 
 export function Friends() {
-	//get frined list(avatar, nickname, status)
-	//get pending friend request 
-	const friends = ['Bird', 'Pigeon', 'Eagle', 'Woodpecker']
-	const friendRequest = ['Cat', 'Bear']
+	const [friends, setFriends] = useState<Other[]>([]);
+	const [reqs, setReqs] = useState<Other[]>([]);
+	const [blocks, setBlocks] = useState<any[]>([]);
 	
+	useEffect(() => {
+		socket.emit('findAllFriends', (res: Other[]) => {
+			setFriends(res)
+			console.log('friends: ', res)
+		})
+		socket.emit('findAllPendings', (res: Other[]) => {
+			setReqs(res)
+			console.log('reqs: ', res)
+		})
+		socket.emit('findAllBlocks', (res: string[]) => {
+			setBlocks(res)
+			console.log('blocks: ', res)
+		})
+	}, [])
+
 	return (
 		<div style={{color: 'white'}}>
 			<SendRequest></SendRequest>
-			<FriendReqList friendReq={friendRequest}></FriendReqList>
+			<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
 			<FriendList friends={friends}></FriendList>
 		</div>
 	);
