@@ -28,7 +28,8 @@ export class FriendRequestService {
 		if (!user) return ([]);
 		let reqs = await this.prisma.friendRequest.findMany({
 			where: {
-				possibleFriendId: {equals: id}
+				possibleFriendId: {equals: id}, 
+				status: ReqState.PENDING
 			},
 			include: {
 				user: {

@@ -21,8 +21,8 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 
 	constructor(private readonly friendReqService: FriendRequestService) { }
 
-	@SubscribeMessage('findAllPendings')
-	async handleFindAllPendings(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
+	@SubscribeMessage('findAllReqs')
+	async handleFindAllReqs(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
 		const id: number = client.data.user.id;
 		return (await this.friendReqService.findAllPendings(id));
 	}
