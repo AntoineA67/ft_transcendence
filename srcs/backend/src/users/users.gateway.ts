@@ -33,14 +33,14 @@ export class UsersGateway
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (this.usersService.getUserProfile(id));
+		return (await this.usersService.getUserProfile(id));
 	}
 	
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
 		const id: number = client.data.user.id;
 		this.logger.log(data);
-		return (this.usersService.updateUser(id, data))
+		return (await this.usersService.updateUser(id, data))
 	}
 	
 

@@ -11,11 +11,25 @@ export class FriendshipGateway {
 	constructor(private readonly friendshipService: FriendshipService) {}
 
 	@SubscribeMessage('findAllFriends')
-	async handlefindAllFriends(@ConnectedSocket() client: Socket) {
+	async handlefindAllFriends(
+		@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (this.friendshipService.findAllFriends(id));
+		return (await this.friendshipService.findAllFriends(id));
 	}
 	
+	@SubscribeMessage('isFriend')
+	async handleIsFriend(
+		@ConnectedSocket() client: Socket, 
+		@MessageBody() data: string) {
+		const id: number = client.data.user.id;
+		return (await this.friendshipService.isFriend(id, data))
+	}
 	
-
+	@SubscribeMessage('Unfriend')
+	async handleUnfriend(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: string) {
+		const id: number = client.data.user.id;
+		return (await this.friendshipService.unFriend(id, data))	
+	}
 }
