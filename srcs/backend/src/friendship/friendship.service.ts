@@ -37,12 +37,15 @@ export class FriendshipService {
 				}
 			}
 		})
-		let myFriends = friendships.map((x) => (
+		let myFriends: UserDto[] = friendships.map((x) => (
 			x.friends[0].username != user.username ? x.friends[0] : x.friends[1]
 		))
-		
 		// filter does not work with async
-		
+		const promises = await Promise.all(myFriends.map(async (x) => (
+			await this.blockService.isBlocked(id, x.username) == false
+			&& await this.blockService.isBlocked(x.id, user.username) == false
+		)))
+		myFriends = myFriends.filter((x, index) => (promises[index]))
 		return (myFriends)
 	}
 
