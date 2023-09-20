@@ -20,16 +20,33 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('findAllPendings')
 	async handleFindAllPendings(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (this.friendReqService.findAllPendings(id));
+		return (await this.friendReqService.findAllPendings(id));
 	}
-
+	
 	@SubscribeMessage('sendReq')
-	async handleSendReq(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
-
+	async handleSendReq(
+		@ConnectedSocket() client: Socket, 
+		@MessageBody() nick: string) {
+		const id: number = client.data.user.id;
+		return (await this.friendReqService.sendFriendReq(id, nick))
 	}
 	
 	@SubscribeMessage('replyReq')
-	async handleReplyReq(@ConnectedSocket() client: Socket, @MessageBody() data: string) {
+	async handleReplyReq(
+		@ConnectedSocket() client: Socket, 
+		@MessageBody('nick') nick: string, 
+		@MessageBody('result') result: boolean) {
+		const id: number = client.data.user.id;
+		return (await this.friendReqService.replyFriendReq(id, nick, result))
+	}
 
+	@SubscribeMessage('reqSent')
+	async handleReqSent(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() nick: string,) {
+		const id: number = client.data.user.id;
+		const pendings = await this.friendReqService.getPendingReq(id, nick);
+		if (pendings.length == 0) return (false)
+		return (true);
 	}
 }
