@@ -112,12 +112,12 @@ function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.
 	
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, nick: string) => {
 		e.preventDefault();
-		// socket.emit('unblock', nick, (success: boolean) => {
-		// 	success && setBlocks(blocks.map(() => (
-
-		// 		)))
-		// 	}
-		// });
+		socket.emit('unblock', nick, (success: boolean) => {
+			if (success) {
+				const update = blocks.filter((x) => (x.username != nick));
+				setBlocks(update);
+			}
+		})
 	}
 	
 	const myMap = (user: UserDto) => {
