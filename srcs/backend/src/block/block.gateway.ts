@@ -21,7 +21,7 @@ export class BlockGateway {
 		return (await this.blockService.createBlock(id, nick));
 		}
 		
-	@SubscribeMessage('Unblock')
+	@SubscribeMessage('unblock')
 	async handleUnblock(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() nick: string) {
