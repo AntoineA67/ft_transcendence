@@ -40,10 +40,9 @@ export class FriendshipService {
 		let myFriends = friendships.map((x) => (
 			x.friends[0].username != user.username ? x.friends[0] : x.friends[1]
 		))
-		myFriends = myFriends.filter(async (x) => (
-			await this.blockService.isBlocked(user.id, x.username) == false
-			&& await this.blockService.isBlocked(x.id, user.username) == false
-		))
+		
+		// filter does not work with async
+		
 		return (myFriends)
 	}
 
