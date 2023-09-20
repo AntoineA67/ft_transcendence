@@ -17,6 +17,7 @@ export class AuthIoAdapter extends IoAdapter {
 	createIOServer(port: number, options?: any): any {
 		const server = super.createIOServer(port, options)
 		server.use((socket: Socket, next) => {
+			console.log("AUTH ->>", socket.handshake);
 			const token = socket.handshake?.auth?.token;
 			if (!token) { next(new Error('no token')); }
 			try {
