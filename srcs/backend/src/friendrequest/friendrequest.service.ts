@@ -3,13 +3,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
-import { FriendReplyDto } from './dto/FriendReplyDto';
-import { FriendReqDto } from './dto/FriendReqDto';
 import { BlockService } from 'src/block/block.service';
 
 const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
 export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
-
 
 @Injectable()
 export class FriendRequestService {
@@ -23,12 +20,12 @@ export class FriendRequestService {
 
 	// get nickname, avatar, online status, id
 	// minus those that are blocked
-	async findAllPendings(myNick: string) {
-		const myId = await this.usersService.getIdByNick(myNick);
-		if (!myId) return ([]);
+	async findAllPendings(id: number) {
+		const user = await this.usersService.getUserProfile(id);
+		if (!user) return ([]);
 		let pendings = await this.prisma.friendRequest.findMany({
 			where: {
-				possibleFriendId: {equals: myId}
+				possibleFriendId: {equals: id}
 			},
 			include: {
 				user: {
@@ -42,44 +39,44 @@ export class FriendRequestService {
 			}
 		})
 		pendings = pendings.filter(async (x) => (
-			await this.blockService.isBlocked(myNick, x.user.username) == false
+			await this.blockService.isBlocked(user.id, x.user.username) == false
 		));
 		return (pendings);
 	}
 	
-	async sendFriendReq(req: FriendReqDto): Promise<Boolean> {
-		const sendId = await this.usersService.getIdByNick(req.sendNick);
-		const recvId = await this.usersService.getIdByNick(req.recvNick);
-		if (!sendId || !recvId) return (false);
+	async sendFriendReq(id: number, nick: string): Promise<Boolean> {
+		const me = await this.usersService.getUserProfile(id);
+		const friend = await this.usersService.getUserByNick(nick);
+		if (!me || !friend) return (false);
 		// check if the user had blocked you
-		const blocked = await this.blockService.isBlocked(req.recvNick, req.sendNick);
+		const blocked = await this.blockService.isBlocked(friend.id, me.username);
 		if (blocked) return (false);
 		// check if they are already friends
-		const isFriend = await this.friendshipService.isFriend(req.sendNick, req.recvNick);
+		const isFriend = await this.friendshipService.isFriend(id, friend.username);
 		if (isFriend) return (true);
 		//check if there are pending requests
-		const pendings = await this.getPendingReq(req.sendNick, req.recvNick);
+		const pendings = await this.getPendingReq(id, friend.username);
 		if (pendings.length != 0) return (true);
 		this.prisma.friendRequest.create({
 			data: {
-				userId: sendId,
-				possibleFriendId: recvId
+				userId: id,
+				possibleFriendId: friend.id
 			}
 		})
 		return (true);
 	}
 
-	async replyFriendReq(reply: FriendReplyDto): Promise<Boolean> {
-		const sendId = await this.usersService.getIdByNick(reply.sendNick);
-		const recvId = await this.usersService.getIdByNick(reply.recvNick);
-		const status = reply.reply == 'accept' ? ReqState.ACCEPT : ReqState.DECLINE;
-		if (!sendId || !recvId) return (false);
+	async replyFriendReq(id: number, nick: string, accept: boolean): Promise<Boolean> {
+		const me = await this.usersService.getUserProfile(id);
+		const friend = await this.usersService.getUserByNick(nick);
+		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
+		if (!me || !friend) return (false);
 		try {
 			await this.prisma.friendRequest.updateMany({
 				where: {
 					AND: [
-						{ userId: { equals: sendId } },
-						{ possibleFriendId: { equals: recvId } },
+						{ userId: { equals: id } },
+						{ possibleFriendId: { equals: friend.id } },
 						{ status: { equals: 'PENDING' } }
 					],
 				},
@@ -89,19 +86,19 @@ export class FriendRequestService {
 			})
 		} catch (err: any) {console.log('err: replyFriendReq')};
 		if (status == ReqState.ACCEPT) {
-			await this.friendshipService.makeFriend(reply.sendNick, reply.recvNick);
+			await this.friendshipService.makeFriend(id, nick);
 		}
 	}
 
-	async getPendingReq(myNick: string, nick: string) {
-		const myId = await this.usersService.getIdByNick(myNick);
-		const id = await this.usersService.getIdByNick(nick);
-		if (!myId || !id) return ([]);
+	async getPendingReq(id: number, nick: string) {
+		const user = await this.usersService.getUserProfile(id);
+		const friend = await this.usersService.getUserByNick(nick);
+		if (!user || !friend) return ([]);
 		const pendings = await this.prisma.friendRequest.findMany({
 			where: {
 				AND: [
-					{ userId: { equals: myId } },
-					{ possibleFriendId: { equals: id } },
+					{ userId: { equals: id } },
+					{ possibleFriendId: { equals: friend.id } },
 					{ status: { equals: 'PENDING' } }
 				],
 			},

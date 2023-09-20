@@ -77,12 +77,19 @@ export class UsersService {
 		return user;
 	}
 
-	async getIdByNick(nick: string) {
-		const user = await this.prisma.user.findUnique({
-			where: { username: nick	}
-		});
-		if (!user) return (null);
-		return (user.id);
+	async getUserByNick(nick: string) {
+		return (
+			await this.prisma.user.findUnique({
+				where: { username: nick },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+					bio: true,
+				}
+			})
+		)
 	}
 
 	async getNickById(id: number) {
@@ -107,4 +114,6 @@ export class UsersService {
 			})
 		)
 	}
+
+
 }
