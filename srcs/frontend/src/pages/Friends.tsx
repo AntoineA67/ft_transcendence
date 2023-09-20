@@ -1,19 +1,19 @@
 import {useEffect, useState} from 'react';
 import { socket } from '../utils/socket';
 
-type Other = {
+type UserDto = {
 	id: number,
 	username: string,
-	avatar: null,
+	avatar: any,
 	onlineStatus: 'ONLINE' | 'OFFLINE' | 'INGAME',
 }
 
-function FriendList({friends} : {friends: Other[]}) {
+function FriendList({ friends }: { friends: UserDto[]}) {
 	
-	const myMap = (item: Other) => {
+	const myMap = (user: UserDto) => {
 		return (
-			<li key={item.id}>
-				{item.username}
+			<li key={user.id}>
+				{user.username}
 			</li>
 		)
 	}
@@ -31,7 +31,7 @@ function FriendList({friends} : {friends: Other[]}) {
 	);
 }
 
-function FriendReqList({ reqs, setReqs }: { reqs: any[], setReqs: React.Dispatch<React.SetStateAction<Other[]>> }) {
+function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
 
 	async function handleClick(
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>, 
@@ -41,28 +41,27 @@ function FriendReqList({ reqs, setReqs }: { reqs: any[], setReqs: React.Dispatch
 		e.preventDefault();
 		socket.emit('replyReq', {nick: possibleFriend, result}, (success: boolean) => {
 			if (success) {
-				const update = reqs.filter((x) => (x.user.username != possibleFriend))
+				const update = reqs.filter((x) => (x.username != possibleFriend))
 				setReqs(update);
 			}
-		})
-		
+		})	
 	}
 	
-	const myMap = (item: any) => {
+	const myMap = (user: UserDto) => {
 		return (
-			<li key={item.id}>
+			<li key={user.id}>
 				<div>
 					<p style={{color: 'white'}}>
-						{item.user.username}
+						{user.username}
 					</p>
 					<button 
 						className='btn btn-primary' 
-						onClick={(e) => handleClick(e, item.user.username, true)}>
+						onClick={(e) => handleClick(e, user.username, true)}>
 						Accept
 					</button>
 					<button 
 						className='btn btn-secondary' 
-						onClick={(e) => handleClick(e, item.user.username, false)}>
+						onClick={(e) => handleClick(e, user.username, false)}>
 						Decline
 					</button>
 				</div>
@@ -86,11 +85,10 @@ function FriendReqList({ reqs, setReqs }: { reqs: any[], setReqs: React.Dispatch
 function SendRequest() {
 	
 	const [nick, setNick] = useState('');
-	const [mess, setMess] = useState('mess');
+	const [mess, setMess] = useState('');
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-
 		socket.emit('sendReq', nick, (success: boolean) => {
 			success ? setMess('Success') : setMess('Fails')
 			setNick('');
@@ -111,24 +109,27 @@ function SendRequest() {
 }
 
 export function Friends() {
-	const [friends, setFriends] = useState<Other[]>([]);
-	const [reqs, setReqs] = useState<Other[]>([]);
-	const [blocks, setBlocks] = useState<any[]>([]);
+	const [friends, setFriends] = useState<UserDto[]>([]);
+	const [reqs, setReqs] = useState<UserDto[]>([]);
+	const [blocks, setBlocks] = useState<UserDto[]>([]);
 	
 	useEffect(() => {
-		socket.emit('findAllFriends', (res: Other[]) => {
-			setFriends(res)
-			console.log('friends: ', res)
-		})
-		socket.emit('findAllPendings', (res: Other[]) => {
+		socket.emit('findAllReqs', (res: UserDto[]) => {
 			setReqs(res)
 			console.log('reqs: ', res)
 		})
-		socket.emit('findAllBlocks', (res: string[]) => {
+		socket.emit('findAllBlocks', (res: UserDto[]) => {
 			setBlocks(res)
 			console.log('blocks: ', res)
 		})
 	}, [])
+
+	useEffect(() => {
+		socket.emit('findAllFriends', (res: UserDto[]) => {
+			setFriends(res)
+			console.log('friends: ', res)
+		})
+	}, [reqs])
 
 	return (
 		<div style={{color: 'white'}}>
