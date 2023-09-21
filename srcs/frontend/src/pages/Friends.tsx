@@ -108,16 +108,44 @@ function SendRequest() {
 	)
 }
 
+function AddBlock({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
+	const [nick, setNick] = useState('');
+	const [mess, setMess] = useState('');
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		socket.emit('block', nick, (success: boolean) => {
+			success ? setMess('Success') : setMess('Fails')
+			setNick('');
+			socket.emit('findAllBlocks', (res: UserDto[]) => {
+				setBlocks(res);
+			})
+		})
+	}
+
+	return (
+		<form onSubmit={(e) => handleSubmit(e)}>
+			<label htmlFor='block-someone'>Block someone</label>
+			<input type='text'
+				value={nick}
+				onChange={(e) => setNick(e.target.value)}
+			></input>
+			<button type="submit" className=""> block </button>
+			<div id='form-message' style={{ color: 'white' }}>{mess}</div>
+		</form>
+	)
+}
+
 function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
 	
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, nick: string) => {
 		e.preventDefault();
-		// socket.emit('unblock', nick, (success: boolean) => {
-		// 	success && setBlocks(blocks.map(() => (
-
-		// 		)))
-		// 	}
-		// });
+		socket.emit('unblock', nick, (success: boolean) => {
+			if (success) {
+				const update = blocks.filter((x) => (x.username != nick));
+				setBlocks(update);
+			}
+		})
 	}
 	
 	const myMap = (user: UserDto) => {
@@ -164,7 +192,7 @@ export function Friends() {
 			setFriends(res)
 			console.log('friends: ', res)
 		})
-	}, [reqs])
+	}, [reqs, blocks])
 
 	return (
 		<div style={{color: 'white'}}>
@@ -172,6 +200,7 @@ export function Friends() {
 			<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
 			<FriendList friends={friends}></FriendList>
 			<BlockList blocks={blocks} setBlocks={setBlocks}></BlockList>
+			<AddBlock blocks={blocks} setBlocks={setBlocks}></AddBlock>
 		</div>
 	);
 }

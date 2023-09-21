@@ -1,4 +1,4 @@
-export class UserDto {
+export class ProfileDto {
 	id: number;
 	username: string;
 	bio: string;
