@@ -6,24 +6,24 @@ import { UserDto } from 'src/dto/UserDto';
 
 @Injectable()
 export class BlockService {
-	
+
 	constructor(
 		private readonly usersService: UsersService,
 		private prisma: PrismaService
-	) {}
+	) { }
 
 	async getAllBlocked(id: number): Promise<UserDto[]> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
 		const blocked = await this.prisma.block.findMany({
-			where: { userId: {equals: id} }, 
+			where: { userId: { equals: id } },
 			include: {
-				blocked: { 
+				blocked: {
 					select: {
 						id: true,
-						username: true, 
+						username: true,
 						avatar: true,
-						status: true, 
+						status: true,
 					}
 				}
 			}
@@ -32,7 +32,7 @@ export class BlockService {
 	}
 
 	async createBlock(id: number, nick: string): Promise<Boolean> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const block = await this.usersService.getUserByNick(nick);
 		if (!user || !block) return (false);
 		const alreadyBlock = await this.isBlocked(user.id, nick);
@@ -52,7 +52,7 @@ export class BlockService {
 	}
 
 	async unBlock(id: number, nick: string): Promise<boolean> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const block = await this.usersService.getUserByNick(nick);
 		if (!user || !block) return (false);
 		const alreadyBlock = await this.isBlocked(user.id, nick);
@@ -61,8 +61,8 @@ export class BlockService {
 			await this.prisma.block.deleteMany({
 				where: {
 					AND: [
-						{userId: id}, 
-						{blockedId: block.id}
+						{ userId: id },
+						{ blockedId: block.id }
 					]
 				}
 			})
@@ -75,12 +75,12 @@ export class BlockService {
 
 	// whether first person block second person
 	async isBlocked(id: number, nick: string): Promise<Boolean> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const block = await this.usersService.getUserByNick(nick);
 		if (!user || !block) return (false);
 		let blocks = await this.getAllBlocked(id);
 		blocks = blocks.filter((x) => (x.username == block.username))
-		if (blocks.length == 0) return (false) 
+		if (blocks.length == 0) return (false)
 		return (true);
 	}
 }
