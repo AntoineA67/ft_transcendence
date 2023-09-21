@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; 
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
@@ -10,9 +10,9 @@ import { UserDto } from 'src/dto/UserDto';
 
 @Injectable()
 export class FriendshipService {
-	
+
 	private logger = new Logger('FriendService');
-	
+
 	constructor(
 		private usersService: UsersService,
 		private blockService: BlockService,
@@ -22,7 +22,7 @@ export class FriendshipService {
 	//return all friends of a user, id, nick, avatar, status
 	// minus those that block you or those that you block
 	async findAllFriends(id: number): Promise<UserDto[]> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
 		const friendships = await this.prisma.friendship.findMany({
 			where: { friends: { some: { id } } },
@@ -37,18 +37,20 @@ export class FriendshipService {
 				}
 			}
 		})
-		let myFriends = friendships.map((x) => (
+		let myFriends: UserDto[] = friendships.map((x) => (
 			x.friends[0].username != user.username ? x.friends[0] : x.friends[1]
 		))
-		myFriends = myFriends.filter(async (x) => (
-			await this.blockService.isBlocked(user.id, x.username) == false
+		// filter does not work with async
+		const promises = await Promise.all(myFriends.map(async (x) => (
+			await this.blockService.isBlocked(id, x.username) == false
 			&& await this.blockService.isBlocked(x.id, user.username) == false
-		))
+		)))
+		myFriends = myFriends.filter((x, index) => (promises[index]))
 		return (myFriends)
 	}
 
 	async makeFriend(id: number, nick: string): Promise<boolean> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!user || !friend) return (false);
 		const areFriends = await this.isFriend(id, nick);
@@ -69,7 +71,7 @@ export class FriendshipService {
 	}
 
 	async unFriend(id: number, nick: string): Promise<boolean> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!user || !friend) return (false);
 		let friendship = await this.prisma.friendship.findMany({
@@ -98,7 +100,7 @@ export class FriendshipService {
 	}
 
 	async isFriend(myId: number, nick: string): Promise<boolean> {
-		const user = await this.usersService.getUserProfile(myId);
+		const user = await this.usersService.getUserById(myId);
 		if (!user) return (false);
 		let myFriends = await this.findAllFriends(myId);
 		myFriends = myFriends.filter((friend) => (friend.username == nick))

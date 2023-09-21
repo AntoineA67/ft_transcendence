@@ -11,24 +11,24 @@ import { UserDto } from 'src/dto/UserDto';
 
 @Injectable()
 export class FriendRequestService {
-	
+
 	private logger = new Logger('FriendReq');
-	
+
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly blockService: BlockService,
 		private readonly friendshipService: FriendshipService,
 		private prisma: PrismaService
-	) {}
+	) { }
 
 	// get nickname, avatar, online status, id
 	// minus those that are blocked
 	async findAllPendings(id: number): Promise<UserDto[]> {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
 		let reqs = await this.prisma.friendRequest.findMany({
 			where: {
-				possibleFriendId: {equals: id}, 
+				possibleFriendId: { equals: id },
 				status: ReqState.PENDING
 			},
 			include: {
@@ -47,9 +47,9 @@ export class FriendRequestService {
 		));
 		return (pendings);
 	}
-	
+
 	async sendFriendReq(id: number, nick: string): Promise<boolean> {
-		const me = await this.usersService.getUserProfile(id);
+		const me = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!me || !friend) return (false);
 		// check if the user had blocked you
@@ -67,11 +67,11 @@ export class FriendRequestService {
 		await this.prisma.friendRequest.create({
 			data: {
 				user: {
-					connect: {username: me.username}
+					connect: { username: me.username }
 				},
 				possibleFriend: {
-					connect: {username: friend.username}
-				} 
+					connect: { username: friend.username }
+				}
 			}
 		})
 		this.logger.log('after prisma create')
@@ -79,7 +79,7 @@ export class FriendRequestService {
 	}
 
 	async replyFriendReq(id: number, nick: string, accept: boolean): Promise<boolean> {
-		const me = await this.usersService.getUserProfile(id);
+		const me = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
 		if (!me || !friend) return (false);
@@ -113,12 +113,12 @@ export class FriendRequestService {
 					status: status
 				}
 			})
-		} catch (err: any) {console.log('err: replyFriendReq')};
+		} catch (err: any) { console.log('err: replyFriendReq') };
 		return (true);
 	}
 
 	async getPendingReq(id: number, nick: string) {
-		const user = await this.usersService.getUserProfile(id);
+		const user = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!user || !friend) return ([]);
 		const pendings = await this.prisma.friendRequest.findMany({
@@ -130,8 +130,8 @@ export class FriendRequestService {
 				],
 			},
 			include: {
-				user: {select: {username: true}},
-				possibleFriend: {select: {username: true}}
+				user: { select: { username: true } },
+				possibleFriend: { select: { username: true } }
 			}
 		})
 		return (pendings);
