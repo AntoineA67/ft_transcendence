@@ -11,12 +11,12 @@ export class RoomController {
     return this.roomService.createRoom(data);
   }
 
-  @Get(':id')
-  async getRoomById(@Param('id') id: string): Promise<Room> {
-    const roomId = parseInt(id, 10);
-    const room = await this.roomService.getRoomById(roomId);
-    return room;
-  }
+  // @Get(':id')
+  // async getRoomById(@Param('id') id: string): Promise<Room> {
+  //   const roomId = parseInt(id, 10);
+  //   const room = await this.roomService.getRoomById(roomId);
+  //   return room;
+  // }
 
   @Get()
   async getAllRooms(): Promise<Room[]> {

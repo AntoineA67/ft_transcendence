@@ -10,20 +10,33 @@ export class RoomService {
     return this.prisma.room.create({ data });
   }
 
-  async getRoomById(id: number): Promise<Room> {
-    const room = await this.prisma.room.findUnique({
-      where: {
-        id,
-      },
-    });
-    if (!room) {
-      throw new NotFoundException('Room not found');
-    }
-    return room;
-  }
+  // async getRoomById(id: number): Promise<Room> {
+  //   const room = await this.prisma.room.findUnique({
+  //     where: {
+  //       id,
+  //     },
+  //   });
+  //   if (!room) {
+  //     throw new NotFoundException('Room not found');
+  //   }
+  //   return room;
+  // }
 
   async getAllRooms(): Promise<Room[]> {
     return this.prisma.room.findMany();
+  }
+
+  async getAllRoomsByUserid(id: number): Promise<Room[]> {
+    const rooms = await this.prisma.room.findMany({
+      where: {
+        members: {
+          some: {
+            userId: id,
+          },
+        },
+      },
+    });
+    return rooms;
   }
 
   async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {
