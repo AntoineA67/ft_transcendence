@@ -16,7 +16,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { AuthContext } from '../utils/AuthProvider';
 
-// import { useAuth } from '../utils/AuthProvider';
 
 type newUser = {
 	username: string,
@@ -92,8 +91,7 @@ export function Login() {
 	}
 
 	return (
-		localStorage.getItem('token') ? <Navigate replace to="/" /> :
-			<Outlet context={{ togglePassword, handleSubmit }} />
+		<Outlet context={{ togglePassword, handleSubmit }} />
 	);
 }
 
@@ -158,7 +156,7 @@ export function Signup() {
 				</Row>
 			</Container>
 		</div>
-	)
+		)
 }
 
 /* sign in page */
@@ -228,7 +226,7 @@ export function Signin() {
 
 export function LandingPage() {
 
-	const [random, setRandom] = useState('');
+	const [random] = useState(Math.random().toString(36).slice(2, 12));
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
 	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
@@ -241,10 +239,8 @@ export function LandingPage() {
 	const { auth, setAuth } = useContext(AuthContext);
 
 	useEffect(() => {
-		const rand = Math.random().toString(36).slice(2, 12);
-		setRandom(rand);
-		setAuth({ ...auth, state: 'random text' });
-		console.log('login', auth, 'rand ', rand);
+		localStorage.setItem('random', random);
+		console.log('login', auth, 'rand ', random);
 	}, []);
 
 	console.log(oauth42)
@@ -269,12 +265,12 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								{auth.state &&
-									<a href={oauth42} className="btn-invisible w-75">
-										<span>Sign in with </span>
-										<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
-									</a>
-								}
+								
+								<a href={oauth42} className="btn-invisible w-75">
+									<span>Sign in with </span>
+									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
+								</a>
+								
 							</div>
 						</div>
 					</Col>

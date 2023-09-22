@@ -1,133 +1,146 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-export type User = any;
+import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
+import { UpdateUserDto } from './dto/UpdateUserDto';
+import { UserDto } from 'src/dto/UserDto';
+import { ProfileDto } from 'src/dto/ProfileDto';
+
+const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
+export type User = Prisma.UserGetPayload<typeof user>
+
+const game = Prisma.validator<Prisma.GameDefaultArgs>()({})
+export type Game = Prisma.GameGetPayload<typeof game>
+
+const player = Prisma.validator<Prisma.PlayerDefaultArgs>()({})
+export type Player = Prisma.PlayerGetPayload<typeof player>
 
 @Injectable()
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
+	//dont touch
 	async createUser(username: string, email: string, password: string) {
-		return this.prisma.user.create({
+		return await this.prisma.user.create({
 			data: {
 				username,
-				email: email,
-				password,
-				bio: "",
+				email,
+				password
 			},
 		});
 	}
 
-	async getUserById(userId: number) {
-		const user = await this.findUserById(userId);
-		return user;
-	}
-
-	async updateUser(userId: number, data: { username?: string; email?: string; password?: string; bio?: string }) {
-		const user = await this.findUserById(userId);
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data,
+	async getAllUsers(): Promise<UserDto[]> {
+		const users = await this.prisma.user.findMany({
+			select: {
+				id: true,
+				username: true,
+				avatar: true,
+				status: true,
+			}
 		});
-
-		return updatedUser;
-	}
-
-	async deleteUser(userId: number) {
-		const user = await this.findUserById(userId);
-		const deletedUser = await this.prisma.user.delete({
-			where: {
-				id: userId,
-			},
-		});
-
-		return deletedUser;
-	}
-
-	async getAllUsers() {
-		const users = await this.prisma.user.findMany();
 		return users;
 	}
 
+	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
+		let user: User;
+		try {
+			user = await this.prisma.user.update({
+				where: { id },
+				data
+			});
+		} catch (err: any) {
+			return (false);
+		}
+		return (true);
+	}
+
+	async deleteUser(userId: number): Promise<boolean> {
+		let user: User;
+		try {
+			user = await this.prisma.user.delete({
+				where: {
+					id: userId,
+				}
+			})
+		} catch (err: any) {
+			return (false)
+		}
+		return (true);
+	}
+
+	//dont touch
 	async getUserByUsername(username: string) {
 		console.log('getUserByUsername', username);
-		const user = await this.prisma.user.findFirst({
+		const user = await this.prisma.user.findUnique({
 			where: {
 				username,
 			},
 		});
-
-		// if (!user) {
-		// 	throw new NotFoundException(`User with username ${username} not found`);
-		// }
-
 		return user;
 	}
 
-
-	async getUsersByEmail(email: string) {
-		const users = await this.prisma.user.findMany({
-			where: {
-				email: email,
-			},
-		});
-
-		this.handleUsersNotFound(users, `No users found with email ${email}`);
-		return users;
+	async getUserByNick(nick: string): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { username: nick },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
 	}
 
-	async updateUserPassword(userId: number, newPassword: string) {
-		const updatedUser = await this.prisma.user.update({
-			where: {
-				id: userId,
-			},
-			data: {
-				password: newPassword,
-			},
-		});
-
-		return updatedUser;
-	}
-
-	private async findUserById(userId: number) {
-		const user = await this.prisma.user.findUnique({
-			where: {
-				id: userId,
-			},
-		});
-
-		this.handleUserNotFound(user, `User with ID ${userId} not found`);
-		return user;
-	}
-
-	private handleUserNotFound(user: any, errorMessage: string) {
-		if (!user) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
-
-	private handleUsersNotFound(users: any[], errorMessage: string) {
-		if (users.length === 0) {
-			throw new NotFoundException(errorMessage);
-		}
-	}
-
-	// private readonly users = [
-	// 	{
-	// 		userId: 1,
-	// 		username: 'john',
-	// 		password: 'changeme',
-	// 	},
-	// 	{
-	// 		userId: 2,
-	// 		username: 'maria',
-	// 		password: 'guess',
-	// 	},
-	// ];
-
-	// async findOne(username: string): Promise<User | undefined> {
-	// 	return this.users.find(user => user.username === username);
+	// async getNickById(id: number) {
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: { id }
+	// 	});
+	// 	if (!user) return (null);
+	// 	return (user.username);
 	// }
-}
 
+	async getUserById(id: number): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { id },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
+	}
+
+	async getUserProfileById(id: number)
+		: Promise<ProfileDto | null> {
+		return (await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true, 
+				username: true, 
+				avatar: true, 
+				bio: true, 
+				status: true,
+			}
+		}))
+	}
+
+	async getUserProfileByNick(nick: string)
+		: Promise<ProfileDto | null> {
+		return (await this.prisma.user.findUnique({
+			where: { username: nick },
+			select: {
+				id: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+			}
+		}))
+	}
+
+}

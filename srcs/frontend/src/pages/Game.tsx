@@ -2,7 +2,7 @@ import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
-import { useSocket } from "../utils/SocketProvider"
+import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
@@ -66,7 +66,7 @@ export default function Game() {
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	const socket = useSocket();
+	const socket = useGameSocket();
 
 	useEffect(() => {
 		socket?.on('connect', function () {
