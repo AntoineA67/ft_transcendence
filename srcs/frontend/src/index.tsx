@@ -22,10 +22,11 @@ import './styles/customForm.css';
 import './styles/index.css';
 
 import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
+import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { SocketProvider } from './utils/SocketProvider';
+import { GameSocketProvider } from './utils/GameSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -37,10 +38,12 @@ root.render(
 	<BrowserRouter>
 		<AuthProvider>
 			<Routes>
-				<Route path="/login" element={<Login />}>
-					<Route index element={<LandingPage />}></Route>
-					<Route path="signin" element={<Signin />}></Route>
-					<Route path="signup" element={<Signup />}></Route>
+				<Route element={<Guest />}>
+					<Route path="/login" element={<Login />}>
+						<Route index element={<LandingPage />}></Route>
+						<Route path="signin" element={<Signin />}></Route>
+						<Route path="signup" element={<Signup />}></Route>
+					</Route>
 				</Route>
 
 				<Route path='/42/callback' element={<CallBack42 />} />
@@ -58,9 +61,9 @@ root.render(
 							<Route path='changepassword' element={<ChangePassword />}></Route>
 						</Route>
 						<Route path="/game" element={<>
-							<SocketProvider>
+							<GameSocketProvider>
 								<Game />
-							</SocketProvider>
+							</GameSocketProvider>
 						</>}></Route>
 					</Route>
 					<Route path="/test-db" element={<TestDB />} />

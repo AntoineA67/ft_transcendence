@@ -8,7 +8,7 @@ import { User } from '@prisma/client';
 export class AuthService {
 	constructor(
 		private usersService: UsersService,
-		private jwtService: JwtService
+		public jwtService: JwtService
 	) { }
 
 	// async validateUser(username: string, pass: string): Promise<any> {
@@ -35,6 +35,7 @@ export class AuthService {
 
 		// generate and return JWT, expiresIn is in seconds
 		return this.jwtService.sign({
+			id: userExists.id,
 			sub: userExists.username,
 			email: userExists.email,
 			login: userExists.username,
