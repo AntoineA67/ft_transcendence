@@ -27,6 +27,7 @@ import { Guest } from './utils/Guest';
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 import { GameSocketProvider } from './utils/GameSocketProvider';
+import { ChatSocketProvider } from './utils/ChatSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -53,9 +54,17 @@ root.render(
 						<Route index element={<Profile />} />
 						<Route path="search" element={<Search />}></Route>
 						<Route path="friends" element={<Friends />}></Route>
+
+						{/* <Route path="/chat" element={<>
+							<ChatSocketProvider>
+								<Chat />
+							</ChatSocketProvider>
+						</>}></Route> */}
+
 						<Route path="chat" element={<Chat />}>
 							<Route path=':chatId' element={<ChatBox />}></Route>
 						</Route>
+
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />}></Route>
 							<Route path='changepassword' element={<ChangePassword />}></Route>
