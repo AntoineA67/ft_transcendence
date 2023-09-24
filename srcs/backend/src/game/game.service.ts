@@ -1,7 +1,3 @@
-// import { NotFoundException } from '@nestjs/common';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Game } from 'src/entities/game.entity';
-// import { Repository } from 'typeorm';
 import { Game, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -40,24 +36,15 @@ export class GamesService {
     } else {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
+        console.log('removeFromQueue', client.id)
         this.matchmakingQueue.splice(index, 1);
       }
     }
   }
 
-  // removeFromQueue(client: Socket) {
-  //   const index = this.matchmakingQueue.indexOf(client);
-  //   if (index !== -1) {
-  //     this.matchmakingQueue.splice(index, 1);
-  //   }
-  // }
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
     this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
-
-  // keyPressed(clientId: string, dir: number) {
-  //   this.rooms[this.clients[clientId]].handleKey(clientId, dir)
-  // }
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {
@@ -79,23 +66,10 @@ export class GamesService {
     }
   }
 
-  // leaveRoom(client: Socket) {
-  //   const roomId = this.clients[client.id];
-  //   if (roomId) {
-  //     const room = this.rooms[roomId];
-  //     if (room) {
-  //       room.leave(client.id);
-  //       delete this.clients[client.id];
-  //     }
-  //   }
-  // }
-
   async findAll(): Promise<any> {
-    // const prisma = new PrismaClient()
     const games = await this.prisma.game.findMany()
     console.log("oui", games)
     return games;
-    // return await this.prisma.game.findMany();
   }
 
   // async find(
@@ -107,7 +81,6 @@ export class GamesService {
   // }
 
   async create(data: Prisma.GameCreateInput): Promise<Game> {
-    // console.log("oui", this.prisma)
     return await this.prisma.game.create({
       data: {
         start_date: new Date(Date.now()).toISOString(),

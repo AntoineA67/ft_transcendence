@@ -26,7 +26,7 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { SocketProvider } from './utils/SocketProvider';
+import { GameSocketProvider } from './utils/GameSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -61,9 +61,9 @@ root.render(
 							<Route path='changepassword' element={<ChangePassword />}></Route>
 						</Route>
 						<Route path="/game" element={<>
-							<SocketProvider>
+							<GameSocketProvider>
 								<Game />
-							</SocketProvider>
+							</GameSocketProvider>
 						</>}></Route>
 					</Route>
 					<Route path="/test-db" element={<TestDB />} />
