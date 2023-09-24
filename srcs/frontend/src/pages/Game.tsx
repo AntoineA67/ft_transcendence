@@ -2,7 +2,7 @@ import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
-import { useSocket } from "../utils/SocketProvider"
+import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
@@ -66,7 +66,7 @@ export default function Game() {
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	const socket = useSocket();
+	const socket = useGameSocket();
 
 	useEffect(() => {
 		socket?.on('connect', function () {
@@ -125,24 +125,32 @@ export default function Game() {
 			};
 		}
 	}, [gameStatus])
-	const handleMatchClick = () => {
-		setGameStatus(GameStatus.Matching);
+	const startMatchmaking = () => {
+		if (gameStatus !== GameStatus.Idle) return
 		socket?.emit('match');
+		setGameStatus(GameStatus.Matching);
+	};
+	const cancelMatchmaking = () => {
+		if (gameStatus !== GameStatus.Matching) return
+		socket?.emit('cancel');
+		setGameStatus(GameStatus.Idle);
 	};
 
 	return (
 		<>
-			{gameStatus === GameStatus.Idle && <button onClick={handleMatchClick} disabled={!socket?.connected}>Match</button>}
-			{gameStatus === GameStatus.Matching && <FidgetSpinner
-				visible={socket?.connected}
-				height="80"
-				width="80"
-				ariaLabel="dna-loading"
-				wrapperStyle={{}}
-				wrapperClass="dna-wrapper"
-				ballColors={['#ff0000', '#00ff00', '#0000ff']}
-				backgroundColor="#F4442E"
-			/>}
+			{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected}>Match</button>}
+			{gameStatus === GameStatus.Matching && <>
+				<FidgetSpinner
+					visible={socket?.connected}
+					height="80"
+					width="80"
+					ariaLabel="dna-loading"
+					wrapperStyle={{}}
+					wrapperClass="dna-wrapper"
+					ballColors={['#ff0000', '#00ff00', '#0000ff']}
+					backgroundColor="#F4442E"
+				/> <button onClick={cancelMatchmaking}>Cancel</button></>
+			}
 			{gameStatus === GameStatus.Finished && <Circles
 				height="80"
 				width="80"

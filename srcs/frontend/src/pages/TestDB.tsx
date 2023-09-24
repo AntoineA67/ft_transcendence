@@ -2,7 +2,7 @@ import logo from '../assets/logo.svg';
 import '../styles/App.css';
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { useSocket } from '../utils/SocketProvider';
+import { useGameSocket } from '../utils/GameSocketProvider';
 
 interface Message {
 	id: number;
@@ -14,7 +14,7 @@ function Home() {
 
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [msg, setMsg] = useState('');
-	const socket = useSocket();
+	const socket = useGameSocket();
 
 	useEffect(() => {
 		axios.get('/messages')
