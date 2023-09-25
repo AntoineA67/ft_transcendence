@@ -43,5 +43,8 @@ export class UsersGateway
 		return (await this.usersService.updateUser(id, data))
 	}
 
-
-}
+	@SubscribeMessage('Test')
+	async handleTest(@ConnectedSocket() client: Socket) {
+		console.log("coucou");
+	}
+} 

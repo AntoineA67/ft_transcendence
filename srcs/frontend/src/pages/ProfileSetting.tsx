@@ -9,6 +9,7 @@ import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
+import { useState, useEffect } from 'react';
 
 export function Title({title}: {title: string}) {
 	return (
@@ -69,39 +70,49 @@ export function ChangePassword() {
 }
 
 export function DoubleAuth() {
-
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		console.log('double auth submit');
-		socket.emit('Test', (test: 1) => {
-		})
+	const [isSwitchOn, setIsSwitchOn] = useState(false);
+  
+	async function handleSubmit() {
+	  console.log('double auth submit');
+	//   if (isSwitchOn) {
+		socket.emit('Test', 1, () => {
+		  // Callback function after emitting 'Test'
+		});
+	//   }
 	}
-
-	// show message on console log when switch is activate
+  
+	// show message on console log when switch is activated
 	const switchActivate = () => {
-		console.log('switch activate');
+	  console.log('switch activate');
+	  setIsSwitchOn(!isSwitchOn); // Toggle switch state
 	};
-	
+  
+	// Utilisez useEffect pour appeler automatiquement handleSubmit à chaque changement de l'état du commutateur
+	useEffect(() => {
+	  handleSubmit();
+	}, [isSwitchOn]);
+  
 	return (
-		<Container fluid className='px-0 h-75'>
-			<Title title="Double Auth" />
-			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{minHeight: '400px' }}>
-				<form className='h-100 d-flex flex-column gap-3' onSubmit={(e) => handleSubmit(e)}>
-					<Form.Check
-						type="switch"
-						id="double-auth-switch"
-						label="Enable double auth"
-						onChange={switchActivate}
-					/>
-					{/* <InputPassword id='Current password' togglePassword={togglePassword} />
-					<InputPassword id='New password' togglePassword={togglePassword} />
-					<InputPassword id='Confirm password' togglePassword={togglePassword} />
-					<div  style={{color: 'white'}}>Error message if any</div>
-					<button type='submit' className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Confirm</button> */}
-				</form>
-			</Stack>
-		</Container>
+	  <Container fluid className="px-0 h-75">
+		<Title title="Double Auth" />
+		<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{ minHeight: '400px' }}>
+		  <form className="h-100 d-flex flex-column gap-3">
+			<Form.Check
+			  type="switch"
+			  id="double-auth-switch"
+			  label="Enable double auth"
+			  onChange={switchActivate}
+			  checked={isSwitchOn}
+			/>
+			{/* Rest of your form */}
+			<button type="submit" className="btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0">
+			  Confirm
+			</button>
+		  </form>
+		</Stack>
+	  </Container>
 	);
-}
+  }
 
 export function SettingMenu() {
 	return (
