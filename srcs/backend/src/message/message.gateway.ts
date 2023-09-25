@@ -41,13 +41,8 @@ export class MessageGateway
     this.wss.emit('id', client.id);
   }
 
-  // sasha: I commented out createmessage so I have to comment out this as well,
-  // sorry
-  
-//   @SubscribeMessage('sendMessage')
-//   async handleSendMessage(client: Socket, payload: any): Promise<void> {
-//     const newMessage = await this.messagesService.createMessage(payload);
-//     const allMessages = await this.messagesService.getAllMessages();
-//     this.wss.emit('receiveMessage', allMessages);
-//   }
+  // @SubscribeMessage('sendMessage')
+  // async handleSendMessage(@MessageBody() message: any) {
+  //   await this.messagesService.createMessage(message);
+  // }
 }

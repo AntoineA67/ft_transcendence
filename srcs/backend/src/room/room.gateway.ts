@@ -8,6 +8,8 @@ import { RoomService } from './room.service';
 import { Socket } from 'socket.io';
 import { users } from 'src/prisma/seeds/users';
 import { User } from 'src/users/users.service';
+import { MessagesService } from '../message/messages.service';
+import { Message } from '@prisma/client';
 
 @WebSocketGateway({ cors: true })
 export class RoomGateway
@@ -26,8 +28,16 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('getAllRoomsByUserid')
-	async handleMyProfile(@ConnectedSocket() client: Socket) {
+	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
 		return (await this.roomService.getAllRoomsByUserid(id));
+	}
+
+	@SubscribeMessage('getMessagesByRoomId')
+	async handleGetMessagesByRoomId( @ConnectedSocket() client: Socket, @MessageBody() roomId: number): Promise<Message[]> {
+		console.log('roomId', roomId);
+		const roomid = parseInt("1", 10);
+		return (await this.roomService.getMessagesByRoomId(roomid));
+		// client.emit('receiveMessages', messages);
 	}
 }

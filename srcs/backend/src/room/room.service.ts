@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Room, Prisma } from '@prisma/client';
+import { Room, Prisma, Message } from '@prisma/client';
 
 @Injectable()
 export class RoomService {
@@ -37,6 +37,21 @@ export class RoomService {
       },
     });
     return rooms;
+  }
+
+  async getMessagesByRoomId(roomid: number): Promise<Message[]> {
+    const room = await this.prisma.room.findMany({
+      where: {
+        id: roomid,
+      },
+      include: {
+        message: true,
+      },
+    });
+    if (room.length === 0) {
+      return [];
+    }
+    return room[0].message;
   }
 
   async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {
