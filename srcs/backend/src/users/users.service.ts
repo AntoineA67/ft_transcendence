@@ -121,10 +121,10 @@ export class UsersService {
 		return (await this.prisma.user.findUnique({
 			where: { id },
 			select: {
-				id: true, 
-				username: true, 
-				avatar: true, 
-				bio: true, 
+				id: true,
+				username: true,
+				avatar: true,
+				bio: true,
 				status: true,
 			}
 		}))
@@ -144,16 +144,23 @@ export class UsersService {
 		}))
 	}
 
-	async generate2FASecret(user : User) {
+	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
 		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
-	
-		//await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
-	
 		return {
-		  secret,
-		  otpauthUrl
+			secret,
+			otpauthUrl
 		}
-	  }
+	}
+
+	async verify2FA(user: User, token: string) {
+		user = await this.prisma.user.findUnique({
+			where: { id: user.id }
+		});
+		return (authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}));
+	}
 
 }

@@ -86,6 +86,9 @@ export function DoubleAuth() {
 		console.log('verify 2fa');
 		socket.emit('Verify2FA', verifyCode, (response: any) => {
 			console.log(response);
+			if (response == true) {
+				alert('2FA is enabled');
+			}
 		});
 	}
 

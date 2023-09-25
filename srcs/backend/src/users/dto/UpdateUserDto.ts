@@ -5,4 +5,5 @@ export class UpdateUserDto {
 	bio?: string;
 	status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
 	otpHash?: string;
+	activated2FA?: boolean;
 }
