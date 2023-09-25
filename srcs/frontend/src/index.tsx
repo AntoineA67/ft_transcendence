@@ -41,45 +41,41 @@ root.render(
 			<Routes>
 				<Route element={<Guest />}>
 					<Route path="/login" element={<Login />}>
-						<Route index element={<LandingPage />}></Route>
-						<Route path="signin" element={<Signin />}></Route>
-						<Route path="signup" element={<Signup />}></Route>
+						<Route index element={<LandingPage />} />
+						<Route path="signin" element={<Signin />} />
+						<Route path="signup" element={<Signup />} />
 					</Route>
 				</Route>
-
 				<Route path='/42/callback' element={<CallBack42 />} />
-
 				<Route element={<Protected />}>
 					<Route path="/" element={<Sidebar />}>
 						<Route index element={<Profile />} />
-						<Route path="search" element={<Search />}></Route>
-						<Route path="friends" element={<Friends />}></Route>
-
-						{/* <Route path="/chat" element={<>
+						<Route path="search" element={<Search />} />
+						<Route path="friends" element={<Friends />} />
+						<Route path="/chat/*" element={
 							<ChatSocketProvider>
-								<Chat />
+								<Routes>
+									<Route index element={<Chat />} />
+									<Route path=":chatId" element={<ChatBox />} />
+								</Routes>
 							</ChatSocketProvider>
-						</>}></Route> */}
-
-						<Route path="chat" element={<Chat />}>
-							<Route path=':chatId' element={<ChatBox />}></Route>
-						</Route>
-
+						} />
 						<Route path="setting" element={<Setting />}>
-							<Route index element={<SettingMenu />}></Route>
-							<Route path='changepassword' element={<ChangePassword />}></Route>
+							<Route index element={<SettingMenu />} />
+							<Route path='changepassword' element={<ChangePassword />} />
 						</Route>
-						<Route path="/game" element={<>
+						<Route path="/game" element={
 							<GameSocketProvider>
 								<Game />
 							</GameSocketProvider>
-						</>}></Route>
+						} />
 					</Route>
 					<Route path="/test-db" element={<TestDB />} />
 				</Route>
 			</Routes>
 		</AuthProvider>
 	</BrowserRouter>
+
 
 	//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 );
