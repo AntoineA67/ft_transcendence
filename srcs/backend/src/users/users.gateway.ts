@@ -43,11 +43,11 @@ export class UsersGateway
 		return (await this.usersService.updateUser(id, data))
 	}
 
-	@SubscribeMessage('Test')
+	@SubscribeMessage('Create2FA')
 	async handleTest(@ConnectedSocket() client: Socket) {
 		console.log("coucou");
-		const pif = this.usersService.generate2FASecret(client.data.user);
-		//console.log(pif);
-		return (await pif);
+		const data = this.usersService.generate2FASecret(client.data.user);
+		this.usersService.updateUser(client.data.user.id, { otpHash: (await data).secret });
+		return (await data);
 	}
 } 
