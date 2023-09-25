@@ -43,5 +43,11 @@ export class UsersGateway
 		return (await this.usersService.updateUser(id, data))
 	}
 
+	@SubscribeMessage('newAvatar')
+	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
+		const id: number = client.data.user.id;
+		// this.logger.log(file);
+		return (this.usersService.updateUser(id, {avatar: file}));
+	}
 
 }

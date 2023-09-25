@@ -2,7 +2,7 @@ export class ProfileDto {
 	id: number;
 	username: string;
 	bio: string;
-	avatar: ArrayBuffer | null;
+	avatar: Buffer | null | ArrayBuffer;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 	// game history
 }

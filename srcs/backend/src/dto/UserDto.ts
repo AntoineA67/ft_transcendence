@@ -1,6 +1,6 @@
 export class UserDto {
 	id: number;
 	username: string;
-	avatar: ArrayBuffer | null;
+	avatar: Buffer | null | ArrayBuffer;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 }
