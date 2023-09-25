@@ -74,21 +74,32 @@ export function ChangePassword() {
 export function DoubleAuth() {
 	const [isSwitchOn, setIsSwitchOn] = useState(false);
 	const [qrCodePath, setQrCodePath] = useState('');
+	const [verifyCode, setVerifyCode] = useState('');
 
-	async function handleSubmit() {
-		console.log('double auth submit');
+	async function create2FASubmit() {
 		socket.emit('Create2FA', (response: any) => {
 			setQrCodePath(response.otpauthUrl);
-			console.log(response.otpauthUrl);
 		});
 	}
+
+	async function verify2FASubmit() {
+		console.log('verify 2fa');
+		socket.emit('Verify2FA', verifyCode, (response: any) => {
+			console.log(response);
+		});
+	}
+
 	const switchActivate = () => {
 		console.log('switch activate');
 		setIsSwitchOn(!isSwitchOn); // Toggle switch state
 	};
 
+	const handleSetVerifyCode = (e: any) => {
+		setVerifyCode(e.target.value);
+	  };
+
 	useEffect(() => {
-		handleSubmit();
+		create2FASubmit();
 	}, [isSwitchOn]);
 
 	return (
@@ -106,12 +117,14 @@ export function DoubleAuth() {
 					<QRCode value={qrCodePath} />
 				</form>
 				<br></br>
-				<form className="d-flex flex-column">
+				<form className="d-flex flex-column"  onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
 					<Form.Control
 						size="lg"
 						type="number"
 						placeholder="Digit"
 						pattern="[0-9]*"
+						value={verifyCode}
+						onChange={handleSetVerifyCode}
 					/>
 					<br></br>
 					<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0'>Activer 2fa</button>

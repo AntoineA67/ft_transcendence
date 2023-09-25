@@ -44,10 +44,14 @@ export class UsersGateway
 	}
 
 	@SubscribeMessage('Create2FA')
-	async handleTest(@ConnectedSocket() client: Socket) {
-		console.log("coucou");
+	async handleCreate2FA(@ConnectedSocket() client: Socket) {
 		const data = this.usersService.generate2FASecret(client.data.user);
 		this.usersService.updateUser(client.data.user.id, { otpHash: (await data).secret });
 		return (await data);
+	}
+
+	@SubscribeMessage('Verify2FA')
+	async handleVerify2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		console.log(data);
 	}
 } 
