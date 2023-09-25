@@ -15,33 +15,39 @@ export function Avatar({ size, user }: avatarProp) {
 		
 		// define behavior to user online status
 		
+		user.status == 'ONLINE' && setColor('green');
+		user.status == 'OFFLINE' && setColor('grey');
+		user.status == 'INGAME' && setColor('red');
 		if (!user.avatar) return ;
 		const base64 = btoa(
 			new Uint8Array(user.avatar)
 				.reduce((data, byte) => data + String.fromCharCode(byte), '')
 		);
 		setAvatar(`data:image/jpeg;base64,${base64}`)
-		user.status == 'ONLINE' && setColor('green');
-		user.status == 'OFFLINE' && setColor('grey');
-		user.status == 'INGAME' && setColor('red');
 	}, [user]);
 
 	return (
-		<div className='d-flex justify-content-center align-items-center'
-			style={{
-				width: `${size}px`, 
-				height: `${size}px`, 
+		<>
+			<div style={{
+				height: `${size / 6}px`,
+				width: `${size / 6}px`, 
 				borderRadius: '50%',
-				border: `3px solid ${color}`
-			}}>
+				backgroundColor: color,
+				position: 'relative',
+				left: `${size / 3}px`, 
+				top: `${size / 4}px`
+			}} />	
 			<img 
+				className='p-0 m-0'
 				src={avatar} 
 				style={{
-					height: `${size}px`, 
-					width: 'auto'
+					maxHeight: `${size}px`, 
+					maxWidth: `auto`, 
+					objectFit: 'contain', 
+					clipPath: 'circle()', 
 				}}
 			/>			
-		</div>
+		</>
 	)
 }
 
