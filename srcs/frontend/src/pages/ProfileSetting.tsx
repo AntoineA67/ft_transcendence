@@ -75,8 +75,9 @@ export function DoubleAuth() {
 	async function handleSubmit() {
 	  console.log('double auth submit');
 	//   if (isSwitchOn) {
-		socket.emit('Test', 1, () => {
+		socket.emit('Test', (response: any) => {
 		  // Callback function after emitting 'Test'
+		  console.log(response);
 		});
 	//   }
 	}
@@ -105,9 +106,6 @@ export function DoubleAuth() {
 			  checked={isSwitchOn}
 			/>
 			{/* Rest of your form */}
-			<button type="submit" className="btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0">
-			  Confirm
-			</button>
 		  </form>
 		</Stack>
 	  </Container>

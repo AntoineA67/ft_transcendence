@@ -4,6 +4,7 @@ import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UserDto } from 'src/dto/UserDto';
 import { ProfileDto } from 'src/dto/ProfileDto';
+import { authenticator } from 'otplib';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -142,5 +143,17 @@ export class UsersService {
 			}
 		}))
 	}
+
+	async generate2FASecret(user : User) {
+		const secret = authenticator.generateSecret();
+		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+	
+		//await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
+	
+		return {
+		  secret,
+		  otpauthUrl
+		}
+	  }
 
 }

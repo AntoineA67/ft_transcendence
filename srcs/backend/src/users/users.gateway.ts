@@ -46,5 +46,8 @@ export class UsersGateway
 	@SubscribeMessage('Test')
 	async handleTest(@ConnectedSocket() client: Socket) {
 		console.log("coucou");
+		const pif = this.usersService.generate2FASecret(client.data.user);
+		//console.log(pif);
+		return (await pif);
 	}
 } 
