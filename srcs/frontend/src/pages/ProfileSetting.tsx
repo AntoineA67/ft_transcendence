@@ -10,6 +10,7 @@ import { Link, Outlet } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
+import QRCode from 'react-qr-code';
 
 export function Title({title}: {title: string}) {
 	return (
@@ -71,16 +72,22 @@ export function ChangePassword() {
 
 export function DoubleAuth() {
 	const [isSwitchOn, setIsSwitchOn] = useState(false);
+	const [qrCodePath, setQrCodePath] = useState('');
   
 	async function handleSubmit() {
 	  console.log('double auth submit');
 	//   if (isSwitchOn) {
 		socket.emit('Test', (response: any) => {
 		  // Callback function after emitting 'Test'
-		  console.log(response);
+		  setQrCodePath(response.otpauthUrl);
+		  console.log(response.otpauthUrl);
 		});
 	//   }
 	}
+
+	// async function generate2faQr(url: string) {
+	// 	return toDataURL(url);
+	//   }
   
 	// show message on console log when switch is activated
 	const switchActivate = () => {
@@ -106,6 +113,8 @@ export function DoubleAuth() {
 			  checked={isSwitchOn}
 			/>
 			{/* Rest of your form */}
+
+			<QRCode value={qrCodePath} />
 		  </form>
 		</Stack>
 	  </Container>
