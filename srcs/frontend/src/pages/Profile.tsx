@@ -107,7 +107,7 @@ function NewAvatar() {
 
 	return (
 		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
-			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "30px" }}>
+			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "50px" }}>
 				<input 
 					className='d-none' 
 					id="new-avatar" 
@@ -142,7 +142,7 @@ function Profile() {
 					style={{ color: "white"}}>			
 					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
-					<Avatar size={100} user={{
+					<Avatar size={150} user={{
 						id: profile.id, 
 						username: profile.username, 
 						avatar: profile.avatar,
