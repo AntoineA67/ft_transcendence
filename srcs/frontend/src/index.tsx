@@ -10,7 +10,7 @@ import Sidebar from './pages/Sidebar'
 import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
-import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
+import { Setting, ChangePassword, DoubleAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
@@ -59,6 +59,7 @@ root.render(
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />}></Route>
 							<Route path='changepassword' element={<ChangePassword />}></Route>
+							<Route path='doubleauth' element={<DoubleAuth />}></Route>
 						</Route>
 						<Route path="/game" element={<>
 							<GameSocketProvider>
