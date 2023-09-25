@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,10 @@ export class AuthService {
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
+		}
+
+		if (userExists.activated2FA) {
+			return { twoFA: true };
 		}
 
 		// generate and return JWT, expiresIn is in seconds

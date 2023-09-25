@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 //import component
 import TestDB from './pages/TestDB';
-import { Login, Signin, Signup, LandingPage } from './pages/Login';
+import { Login, Signin, Signup, LandingPage, TokenPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
 import { Home } from './pages/Home';
 import Game from './pages/Game';
@@ -43,6 +43,7 @@ root.render(
 						<Route index element={<LandingPage />}></Route>
 						<Route path="signin" element={<Signin />}></Route>
 						<Route path="signup" element={<Signup />}></Route>
+						<Route path="2fa" element={<TokenPage />}></Route>
 					</Route>
 				</Route>
 

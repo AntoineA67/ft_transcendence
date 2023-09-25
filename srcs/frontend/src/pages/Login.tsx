@@ -222,6 +222,36 @@ export function Signin() {
 	);
 }
 
+
+export function TokenPage() {
+	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
+
+	const [token, setToekn] = useState<string>('');
+	const [err, setErr] = useState('');
+
+	return (
+		<div className='scrollbar'>
+			<Container >
+				<Row className="justify-content-center">
+					<Col sm="6" lg="4" >
+						<Form className="w-100">
+							<Form.Group className="my-4" controlId="token">
+								<Form.Label>Token</Form.Label>
+								<Form.Control required type="text" placeholder="token"
+									value={token} />
+							</Form.Group>
+
+							<button type="submit" className="btn btn-primary w-100">
+								Login
+							</button>
+						</Form>
+					</Col>
+				</Row>
+			</Container>
+		</div>
+	);
+}
+
 /* landing page */
 
 export function LandingPage() {
