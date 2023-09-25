@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function CallBack42() {
 	const { auth, setAuth } = useContext(AuthContext);
-	const [status, setStatus] = useState<'loading' | 'done'>('loading');
+	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
@@ -41,8 +41,16 @@ export function CallBack42() {
 		try {
 			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			if (!response.ok) throw new Error('response not ok');
-			const data: string = await response.json();
-			localStorage.setItem('token', data); // add this line to set the token in localStorage
+			const data = await response.json();
+
+			if (data.twoFA) {
+				console.log('2fa');
+				setStatus('2fa');
+				return;
+			} else {
+				localStorage.setItem('token', data); // add this line to set the token in localStorage
+			}
+
 		} catch (error: any) {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
@@ -54,6 +62,7 @@ export function CallBack42() {
 
 	return (
 		<>
+			{status == '2fa' && <Navigate to='/login/2fa' replace />}
 			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
 			{status == 'done' && <Navigate to='/' replace />}
 		</>
