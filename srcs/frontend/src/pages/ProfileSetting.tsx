@@ -8,6 +8,7 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
+import { socket } from '../utils/socket';
 
 export function Title({title}: {title: string}) {
 	return (
@@ -67,23 +68,13 @@ export function ChangePassword() {
 	);
 }
 
-async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: string, content: string) {
-	e.preventDefault();
-	if (mod == content) {
-		setEdit('done');
-		return ;
-	}
-	let data = (type == 'nick') ? {username: mod} : {bio: mod};
-	socket.emit('Test', data, (success: boolean) => {
-		success && setContent(mod);
-	})
-	setEdit('done');
-}
-
 export function DoubleAuth() {
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		console.log('double auth send');
-	};
+
+	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+		console.log('double auth submit');
+		socket.emit('Test', (test: 1) => {
+		})
+	}
 
 	// show message on console log when switch is activate
 	const switchActivate = () => {
@@ -94,7 +85,7 @@ export function DoubleAuth() {
 		<Container fluid className='px-0 h-75'>
 			<Title title="Double Auth" />
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{minHeight: '400px' }}>
-				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+				<form className='h-100 d-flex flex-column gap-3' onSubmit={(e) => handleSubmit(e)}>
 					<Form.Check
 						type="switch"
 						id="double-auth-switch"
