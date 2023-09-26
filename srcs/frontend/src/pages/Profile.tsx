@@ -114,7 +114,8 @@ function NewAvatar() {
 					type="file" 
 					name="new-avatar" 
 					// accept="image/*"
-					accept=".png, .jpg, .jpeg"
+					// accept=".png, .jpg, .jpeg"
+					accept=".jpg"
 					onChange={autoUpload}
 				/>
 			</label>
@@ -124,14 +125,12 @@ function NewAvatar() {
 
 function Profile() {
 	const [profile, setProfile] = useState<profileType | null>(null);
-	// const [nickname, setNickname] = useState('');
-	// const [bio, setBio] = useState('');
-	// const [avatar, setAvatar] = useState('') //base 64 string
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	useEffect(() => {
 		socket.emit('MyProfile', (response: profileType) => {
 			setProfile(response)
+			console.log(response);
 		})
 	}, []);
 
@@ -147,23 +146,25 @@ function Profile() {
 						username: profile.username, 
 						avatar: profile.avatar,
 						status: profile.status
-						}} />
+					}} />
 					<NewAvatar />
 
-					{edit == 'nick' ?
-						<EditText 
-						type={'nick'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
-						: <Text type={'nick'} profile={profile} setEdit={setEdit} />}
+					{ (edit == 'nick'
+						) ? ( 
+							<EditText type={'nick'} profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+						) : (
+							<Text type={'nick'} profile={profile} setEdit={setEdit} /> )}
 					
-					{edit == 'bio' ?
-						<EditText type={'bio'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
-						: <Text type={'bio'} profile={profile} setEdit={setEdit} />}
-
+					 { (edit == 'bio'
+					 	) ? (
+							<EditText type={'bio'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
+						) : (
+							<Text type={'bio'} profile={profile} setEdit={setEdit} />)}
 				</Container>
 				<Stat></Stat>
 			</>
 		) : (
-			<p>loading</p>
+			<p style={{color: 'white'}}>loading</p>
 		)
 	);
 }

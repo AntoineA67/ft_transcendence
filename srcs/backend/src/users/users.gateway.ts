@@ -14,20 +14,19 @@ export class UsersGateway
 	constructor(private readonly usersService: UsersService) { }
 	private logger: Logger = new Logger('UsersGateway');
 
-	// I think we need to make a restroction on the name of the channel, that it cannot be all number
-	// all number is reserved for the id of the client
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
 		this.usersService.updateUser(id, { status: 'ONLINE' });
-		client.join(id.toString());
-		//emit to all freinds
+		//emit to everyone
+		client.broadcast.emit('online', id);
+		
 	}
-
+	
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
 		this.usersService.updateUser(id, { status: 'OFFLINE' });
-		client.leave(id.toString());
-		// emit to all friends
+		// emit to everyone
+		client.broadcast.emit('offline', id);
 	}
 
 	@SubscribeMessage('MyProfile')
