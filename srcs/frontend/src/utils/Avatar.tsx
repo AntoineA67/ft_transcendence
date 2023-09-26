@@ -38,6 +38,7 @@ export function Avatar({ size, user }: avatarProp) {
 				new Uint8Array(user.avatar)
 				.reduce((data, byte) => data + String.fromCharCode(byte), '')
 			);
+			// no need to decide file type, idk it just works
 			setAvatar(`data:image/jpeg;base64,${base64}`)
 		}
 		return () => {
@@ -62,7 +63,7 @@ export function Avatar({ size, user }: avatarProp) {
 				border: '2px solid white',
 				backgroundColor: color,
 				position: 'relative',
-				left: `${size / 3}px`, 
+				left: `${size / 2}px`, 
 				top: `${size / 4}px`
 			}} />	
 			<img 
