@@ -8,11 +8,11 @@ import { AuthService } from './auth.service';
 export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) { }
 
-	@UseGuards(FortyTwoAuthGuard)
-	@Get('/login')
-	async login(@Req() req) {
-		return this.authService.login(req.user);
-	}
+	// @UseGuards(FortyTwoAuthGuard)
+	// @Get('/login')
+	// async login(@Req() req) {
+	// 	return this.authService.login(req.user);
+	// }
 
 	// @Public()
 	@UseGuards(FortyTwoAuthGuard)
@@ -21,10 +21,15 @@ export class AuthController {
 		// return { message: '42 callback' };
 		console.log('42 callback', req.user);
 		// const users = await this.usersService.findAll();
-		console.log(req.query.code)
+		console.log("code =>",req.query.code);
+		console.log("token =>",req.query.token);
 
 		// return '42 Callback';
 		// return await req.user;
+		// if (req.query.token)
+			//req.user.token = 494554;
+			// console.log("req", req);
+
 		res.status(HttpStatus.OK).json(req.user);
 
 		// res.redirect('/');

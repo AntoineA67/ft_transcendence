@@ -15,6 +15,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { AuthContext } from '../utils/AuthProvider';
+import { socket } from '../utils/socket';
 
 
 type newUser = {
@@ -226,19 +227,30 @@ export function Signin() {
 export function TokenPage() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
-	const [token, setToekn] = useState<string>('');
-	const [err, setErr] = useState('');
+	const [token, setToken] = useState<string>('');
+
+
+	async function sendToken() {
+		console.log('send token 2fa');
+		alert(token);
+		// socket.emit('Verify2FA', verifyCode, (response: any) => {
+		// 	console.log(response);
+		// 	if (response == true) {
+		// 		alert('2FA is enabled');
+		// 	}
+		// });
+	}
 
 	return (
 		<div className='scrollbar'>
 			<Container >
 				<Row className="justify-content-center">
 					<Col sm="6" lg="4" >
-						<Form className="w-100">
+						<Form className="w-100"  onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
 							<Form.Group className="my-4" controlId="token">
 								<Form.Label>Token</Form.Label>
 								<Form.Control required type="text" placeholder="token"
-									value={token} />
+									value={token} onChange={(e) => setToken(e.target.value)} />
 							</Form.Group>
 
 							<button type="submit" className="btn btn-primary w-100">

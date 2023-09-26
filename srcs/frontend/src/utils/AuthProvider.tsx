@@ -35,13 +35,21 @@ export function CallBack42() {
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
 	const random = localStorage.getItem('random') || null;
+	const token = localStorage.getItem('token') || 1234;
 	
 	const api42_continue = async () => {
 		if (!code || !state || !random || state != random) return;
 		try {
-			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+			let response;
+			if (token == null) {
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+			} else {
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&token=${token}`);
+			}
 			if (!response.ok) throw new Error('response not ok');
 			const data = await response.json();
+
+			console.log(code);
 
 			if (data.twoFA) {
 				console.log('2fa');

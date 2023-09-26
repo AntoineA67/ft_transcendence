@@ -28,14 +28,15 @@ export class AuthService {
 		}
 
 		let userExists: any = await this.findUserByLogin(user.username);
-		console.log('userExists', userExists);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
 		}
 
+		//console.log('userExists', userExists);
+
 		if (userExists.activated2FA) {
-			return { twoFA: true };
+			return { id: userExists.id, twoFA: true };
 		}
 
 		// generate and return JWT, expiresIn is in seconds

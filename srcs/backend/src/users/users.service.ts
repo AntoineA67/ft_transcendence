@@ -71,7 +71,7 @@ export class UsersService {
 
 	//dont touch
 	async getUserByUsername(username: string) {
-		console.log('getUserByUsername', username);
+		//console.log('getUserByUsername', username);
 		const user = await this.prisma.user.findUnique({
 			where: {
 				username,
