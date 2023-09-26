@@ -2,10 +2,10 @@ import '../styles/ProfileSetting.css';
 import '../styles/Chat.css';
 import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { socket } from '../utils/socket';
-import io from 'socket.io-client';
+import { useNavigate } from 'react-router-dom';
 
 type Message = {
 	id: number,
@@ -13,75 +13,135 @@ type Message = {
 	send_date: Date,
 	userId: number,
 	roomId: number,
+	username: string,
 };
 
+type Profile = {
+	avatar: string | null;
+	bio: string;
+	id: number;
+	status: string;
+	username: string;
+  };
+
 export function ChatBox() {
-	console.log('inside a chatbox');
 	const { chatId } = useParams();
 	const [mess, setMess] = useState('');
 	const [messages, setMessages] = useState<Message[]>([]);
+	const [roomTitle, setRoomTitle] = useState<string>('');
+	const [loading, setLoading] = useState<boolean>(true);
+	const [profile, setProfile] = useState<Profile>({
+		avatar: null,
+		bio: '',
+		id: 0,
+		status: '',
+		username: '',
+	  });
+	const navigate = useNavigate();
 
 	useEffect(() => {
-		socket.connect();
-		socket.emit('getMessagesByRoomId', chatId, (message: Message[]) => {
-		setMessages(message);
-		});
-		return () => {
+	socket.connect();
+	socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string }) => {
+		setRoomTitle(data.roomTitle);
+		setMessages(data.messages);
+		setLoading(false);
+		console.log('data', data);
+	});
+
+	socket.emit('MyProfile', (data: Profile) => {
+		console.log('Profile', data);
+		setProfile(data);
+	});
+
+	return () => {
 		socket.disconnect();
-		};
+	};
 	}, [chatId]);
 
-	console.log('messages', messages);
+	useEffect(() => {
+	if (!loading && roomTitle === '') {
+		navigate('/chat');
+	}
+	}, [loading, roomTitle, navigate]);
 
-	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-	e.preventDefault();
-	socket.emit('sendMessage', {
-		to: chatId,
-		content: mess,
-	});
-	setMess('');
+	if (loading) {
+	return <p>Loading...</p>;
+	}
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+		if (mess.trim()) {
+			handleSendMessage();
+		}
+		}
 	};
 
-	const myMap = (message: Message, userId: number) => {
-		const classname = message.userId === userId ? 'messageBlue' : 'messagePink';
+	const handleClick = () => {
+		if (mess.trim()) {
+			handleSendMessage();
+		}
+	};
+
+	const handleSendMessage = () => {
+		socket.emit('sendMessage', {
+		roomId: chatId,
+		content: mess,
+		userid: profile.id,
+		}, (response: any) => {
+		if (response.error) {
+			console.error('Erreur lors de l\'envoi du message :', response.error);
+		} else {
+			setMess('');
+		}
+		});
+	};
+
+	const myMap = (message: Message, profile: Profile) => {
+		const classname = message.username === profile.username ? 'messageBlue' : 'messagePink';
+		const classuser = message.username === profile.username ? 'userBlue' : 'userPink';
+		const formattedTime = new Date(message.send_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
 		return (
-		  <li key={message.id} className={classname}>
-			{message.message}
-		  </li>
+		  <div className="message-container" key={message.id}>
+			<strong className={`message ${classuser}`}>{message.username} - {formattedTime}</strong>
+			<div className={`message ${classname}`}>
+			  {message.message}
+			</div>
+		  </div>
 		);
 	  };
 
 	return (
-	<div className="h-100 d-flex flex-column">
-		<div
-		className="d-flex w-100 align-items-center p-1 ps-sm-5"
-		style={{ backgroundColor: 'black' }}
-		>
-		<span className="d-sm-none">
-			<Link to="..">
-			<button className="goBack"></button>
-			</Link>
-		</span>
-		<h4 style={{ color: 'white', margin: 'auto 0' }}>{chatId}</h4>
-		</div>
-
-		<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
-		<ul className="nostyleList d-flex flex-column" style={{ color: 'white' }}>
-			{messages.map(myMap)}
-		</ul>
-		</div>
-
-		<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
-		<input
+		<div className="h-100 d-flex flex-column">
+			<div
+			className="d-flex w-100 align-items-center p-1 ps-sm-5"
+			style={{ backgroundColor: 'black' }}
+			>
+			<span className="d-sm-none">
+				<Link to="..">
+				<button className="goBack"></button>
+				</Link>
+			</span>
+			<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+			</div>
+			<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
+			<ul className="nostyleList d-flex flex-column" style={{ color: 'white' }}>
+				{messages.map((message) => myMap(message, profile))}
+			</ul>
+			</div>
+	
+			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+			<input
 			className="p-2 flex-grow-1"
 			style={{ borderRadius: '10px' }}
 			value={mess}
 			onChange={(e) => setMess(e.target.value)}
-		/>
-		<button className="send-message" onClick={handleClick}></button>
+			onKeyDown={handleKeyDown}
+			/>
+			<button className="send-message" onClick={handleClick}></button>
+			</div>
 		</div>
-	</div>
-	);
+		);
 }
 
 type formProp = {
@@ -90,10 +150,6 @@ type formProp = {
 	value: string,
 	setValue: React.Dispatch<React.SetStateAction<string>>,
 }
-const users = [
-	{ id: 1, username: 'user1', avatar: 'url_de_l_avatar' },
-	{ id: 2, username: 'user2', avatar: 'url_de_l_avatar' },
-];
 
 const MyForm = ({ label, button, value, setValue }: formProp) => {
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
@@ -194,8 +250,8 @@ export function ChatList() {
 export function Chat() {
 	const location = useLocation();
 	console.log('location', location);
-	const classname1 = location.pathname == '/chat' ? '' : 'd-none d-sm-flex';
-	const classname2 = location.pathname == '/chat' ? 'd-none d-sm-flex' : '';
+	const classname1 = location.pathname === '/chat' ? '' : 'd-none d-sm-flex';
+	const classname2 = location.pathname === '/chat' ? 'd-none d-sm-flex' : '';
 
 	return (
 		<div className='container-fluid h-100' >

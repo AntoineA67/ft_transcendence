@@ -11,6 +11,15 @@ import { User } from 'src/users/users.service';
 import { MessagesService } from '../message/messages.service';
 import { Message } from '@prisma/client';
 
+type MessageWithUsername = {
+	id: number;
+	message: string;
+	send_date: Date;
+	userId: number;
+	roomId: number;
+	username: string;
+};
+
 @WebSocketGateway({ cors: true })
 export class RoomGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
@@ -33,11 +42,12 @@ export class RoomGateway
 		return (await this.roomService.getAllRoomsByUserid(id));
 	}
 
-	@SubscribeMessage('getMessagesByRoomId')
-	async handleGetMessagesByRoomId( @ConnectedSocket() client: Socket, @MessageBody() roomId: number): Promise<Message[]> {
+	@SubscribeMessage('getRoomData')
+	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string }> {
 		console.log('roomId', roomId);
-		const roomid = parseInt("1", 10);
-		return (await this.roomService.getMessagesByRoomId(roomid));
-		// client.emit('receiveMessages', messages);
+		const userId: number = client.data.user.id;
+		const roomid = parseInt(roomId, 10);
+		const roomData = await this.roomService.getRoomData(roomid, userId);
+		return roomData;
 	}
 }
