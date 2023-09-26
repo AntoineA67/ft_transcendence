@@ -114,8 +114,7 @@ function NewAvatar() {
 					type="file" 
 					name="new-avatar" 
 					// accept="image/*"
-					// accept=".png, .jpg, .jpeg"
-					accept=".jpg"
+					accept=".png, .jpg, .jpeg"
 					onChange={autoUpload}
 				/>
 			</label>
