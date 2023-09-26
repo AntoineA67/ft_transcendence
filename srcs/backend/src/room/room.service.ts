@@ -2,6 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Room, Prisma, Message } from '@prisma/client';
 
+type MessageWithUsername = {
+  id: number;
+  message: string;
+  send_date: Date;
+  userId: number;
+  roomId: number;
+  username: string;
+};
+
 @Injectable()
 export class RoomService {
   constructor(private prisma: PrismaService) {}
@@ -39,19 +48,40 @@ export class RoomService {
     return rooms;
   }
 
-  async getMessagesByRoomId(roomid: number): Promise<Message[]> {
-    const room = await this.prisma.room.findMany({
+  async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string }> {
+    const room = await this.prisma.room.findUnique({
       where: {
         id: roomid,
+        members: {
+          some: {
+            userId: userid,
+          },
+        },
       },
       include: {
-        message: true,
+        message: {
+          include: {
+            user: { // Include the user associated with the message
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
       },
     });
-    if (room.length === 0) {
-      return [];
+    if (!room) {
+      return { messages: [], roomTitle: '' };
     }
-    return room[0].message;
+    const messagesWithUsername = room.message.map((message) => ({
+      id: message.id,
+      message: message.message,
+      send_date: message.send_date,
+      userId: message.userId,
+      roomId: message.roomId,
+      username: message.user.username, // Access the username from the included user
+    }));
+    return { messages: messagesWithUsername, roomTitle: room.title };
   }
 
   async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {

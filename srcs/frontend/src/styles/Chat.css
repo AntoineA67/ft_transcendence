@@ -1,19 +1,48 @@
+.message-container {
+	display: flex;
+	flex-direction: column;
+	max-width: 75%;
+	margin-bottom: 5px;
+}
+
+.messageBlue, .messagePink {
+	border-radius: 10px;
+	padding: 5px;
+	margin-bottom: 1px;
+	max-width: 75%;
+}
+
 .messageBlue {
 	border: 1px solid blue;
-	border-radius: 10px;
 	margin-left: auto;
-	padding: 15px;
-	margin-bottom: 10px;
-	max-width: 75%;
+	text-align: right;
 }
 
 .messagePink {
 	border: 1px solid pink;
-	border-radius: 10px;
 	margin-right: auto;
-	padding: 15px;
-	margin-bottom: 10px;
+	text-align: left;
+}
+
+.userBlue, .userPink {
+	display: flex;
+	align-items: center;
+	border-radius: 1px;
+	padding: 5px;
 	max-width: 75%;
+	font-style: italic;
+	font-size: smaller;
+	margin-bottom: 5px;
+}
+
+.userBlue {
+	margin-left: auto;
+	text-align: right;
+}
+
+.userPink {
+	margin-right: auto;
+	text-align: left;
 }
 
 .nostyleList {

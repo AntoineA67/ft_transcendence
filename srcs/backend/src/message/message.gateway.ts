@@ -1,5 +1,7 @@
 import { Logger } from '@nestjs/common';
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -22,9 +24,6 @@ export class MessageGateway
 
   afterInit(server: Server) {
     this.logger.log('Messages Initializedd');
-    // setInterval(() => {
-    // this.wss.emit('clients', this.clients);
-    // }, 50);
   }
 
   handleDisconnect(client: Socket) {
@@ -41,8 +40,11 @@ export class MessageGateway
     this.wss.emit('id', client.id);
   }
 
-  // @SubscribeMessage('sendMessage')
-  // async handleSendMessage(@MessageBody() message: any) {
-  //   await this.messagesService.createMessage(message);
-  // }
+  @SubscribeMessage('sendMessage')
+  async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number }) {
+    const roomid = parseInt(message.roomId.toString(), 10);
+    const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
+    client.emit('messageSent', createdMessage);
+  }
+
 }
