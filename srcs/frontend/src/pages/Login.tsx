@@ -237,15 +237,13 @@ export function TokenPage() {
 
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
-	const [token, setToken] = useState<string>('');
+	const [_2fa, set2fa] = useState<string>('');
 
 
 	async function sendToken() {
 		console.log('send token 2fa');
 
-		// set token in local storage
-		localStorage.setItem('token', token);
-		
+		localStorage.setItem('_2fa', _2fa);
 		window.location.href = oauth42;
 		
 		//alert(token);
@@ -266,7 +264,7 @@ export function TokenPage() {
 							<Form.Group className="my-4" controlId="token">
 								<Form.Label>Token</Form.Label>
 								<Form.Control required type="text" placeholder="token"
-									value={token} onChange={(e) => setToken(e.target.value)} />
+									value={_2fa} onChange={(e) => set2fa(e.target.value)} />
 							</Form.Group>
 
 							<button type="submit" className="btn btn-primary w-100">

@@ -29,23 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function CallBack42() {
-	const { auth, setAuth } = useContext(AuthContext);
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
-	const random = localStorage.getItem('random') || null;
-	const token = localStorage.getItem('token') || null;
+	const _2fa = localStorage.getItem('_2fa') || null;
 	
 	const api42_continue = async () => {
 		if (!code || !state) return;
 		try {
 			let response;
-			console.log('token: ', token);
-			if (token == null) {
+			console.log('token: ', _2fa);
+			if (_2fa == null) {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			} else {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&token=${token}`);
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa}`);
 			}
 			if (!response.ok) throw new Error('response not ok');
 			const data = await response.json();
@@ -64,7 +62,7 @@ export function CallBack42() {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
 		}
-		//localStorage.removeItem('random');
+		localStorage.removeItem('_2fa');
 		setStatus('done');
 	}
 	useEffect(() => { api42_continue() }, []);
