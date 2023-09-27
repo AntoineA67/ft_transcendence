@@ -84,6 +84,41 @@ export class RoomService {
     return { messages: messagesWithUsername, roomTitle: room.title };
   }
 
+  async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<boolean> {
+    console.log('roomname', roomname);
+    console.log('roomid', roomid);
+    console.log('password', password);
+    const room = await this.prisma.room.findUnique({
+      where: {
+        id: roomid,
+        title: roomname,
+        isChannel: true,
+      },
+    });
+    if (!room || (room.password && room.password !== password)) {
+      return false;
+    }
+    const existingMember = await this.prisma.member.findFirst({
+      where: {
+        roomId: roomid,
+        userId: userid,
+      },
+    });
+    if (existingMember) {
+      return false;
+    }
+    await this.prisma.member.create({
+      data: {
+        admin: false,
+        ban: false,
+        owner: false,
+        user: { connect: { id: userid } },
+        room: { connect: { id: roomid } },
+      },
+    });
+    return true;
+  }
+
   async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {
     const existingRoom = await this.prisma.room.findUnique({ where: { id } });
     if (!existingRoom) {

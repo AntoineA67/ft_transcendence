@@ -4,6 +4,7 @@
 	max-width: 75%;
 	margin-bottom: 5px;
 	height: auto;
+	word-wrap: break-word;
 }
 
 .messageBlue, .messagePink {
@@ -53,11 +54,23 @@
 	margin: 0;
 }
 
-.chatListItem {
+.chatListItemChannel {
+	border-radius: 10px;
 	margin: 0;
-	background-color: grey;
+	background-color: rgb(44, 109, 170);
 	margin-bottom: 3px;
 	padding: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.chatListItemPrivate {
+	margin: 0;
+	background-color: rgb(245, 93, 237);
+	margin-bottom: 3px;
+	padding: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .chat-container {
