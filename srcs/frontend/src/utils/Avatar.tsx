@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { userType } from "../../types/user"
 import { useState } from "react"
-import DefaultAvatar from '../assets/defaultAvatar.svg'
+import DefaultAvatar from '../assets/defaultAvatar.png'
 import Friend from '../assets/Friend.svg'
 import { socket } from "./socket"
 
