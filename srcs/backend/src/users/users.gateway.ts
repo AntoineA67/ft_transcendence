@@ -6,17 +6,24 @@ import { UsersService } from './users.service';
 import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
+import { FriendshipService } from 'src/friendship/friendship.service';
+import { BlockService } from 'src/block/block.service';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 
-	constructor(private readonly usersService: UsersService) { }
+	constructor(
+		private readonly usersService: UsersService, 
+		private readonly friendService: FriendshipService, 
+		private readonly blockService: BlockService
+	) { }
+
 	private logger: Logger = new Logger('UsersGateway');
 
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
-		this.usersService.updateUser(id, { status: 'ONLINE' });
+		await this.usersService.updateUser(id, { status: 'ONLINE' });
 		//emit to everyone
 		client.broadcast.emit('online', id);
 		
@@ -24,7 +31,7 @@ export class UsersGateway
 	
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
-		this.usersService.updateUser(id, { status: 'OFFLINE' });
+		await this.usersService.updateUser(id, { status: 'OFFLINE' });
 		// emit to everyone
 		client.broadcast.emit('offline', id);
 	}
@@ -46,7 +53,15 @@ export class UsersGateway
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
 		// this.logger.log(file);
-		return (this.usersService.updateUser(id, {avatar: file}));
+		return (await this.usersService.updateUser(id, {avatar: file}));
 	}
+
+	// @SubscribeMessage('Profile')
+	// async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
+	// 	const id: number = client.data.user.id;
+	// 	let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
+	// 	const friend = await this.friendService.isFriend(id, otherNick);
+	// 	const block = await this.blockService.isBlocked
+	// }
 
 }

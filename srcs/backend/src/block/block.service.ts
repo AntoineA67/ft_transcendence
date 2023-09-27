@@ -31,17 +31,17 @@ export class BlockService {
 		return (blocked.map((x) => (x.blocked)));
 	}
 
-	async createBlock(id: number, nick: string): Promise<Boolean> {
+	async createBlock(id: number, otherId: number): Promise<Boolean> {
 		const user = await this.usersService.getUserById(id);
-		const block = await this.usersService.getUserByNick(nick);
+		const block = await this.usersService.getUserById(otherId);
 		if (!user || !block) return (false);
-		const alreadyBlock = await this.isBlocked(user.id, nick);
+		const alreadyBlock = await this.isBlocked(user.id, otherId);
 		if (alreadyBlock) return (true);
 		try {
 			await this.prisma.block.create({
 				data: {
 					userId: id,
-					blockedId: block.id,
+					blockedId: otherId,
 				}
 			})
 		} catch (err: any) {
@@ -51,18 +51,18 @@ export class BlockService {
 		return (true);
 	}
 
-	async unBlock(id: number, nick: string): Promise<boolean> {
+	async unBlock(id: number, otherId: number): Promise<boolean> {
 		const user = await this.usersService.getUserById(id);
-		const block = await this.usersService.getUserByNick(nick);
+		const block = await this.usersService.getUserById(otherId);
 		if (!user || !block) return (false);
-		const alreadyBlock = await this.isBlocked(user.id, nick);
+		const alreadyBlock = await this.isBlocked(user.id, otherId);
 		if (!alreadyBlock) return (true);
 		try {
 			await this.prisma.block.deleteMany({
 				where: {
 					AND: [
 						{ userId: id },
-						{ blockedId: block.id }
+						{ blockedId: otherId }
 					]
 				}
 			})
@@ -74,9 +74,9 @@ export class BlockService {
 	}
 
 	// whether first person block second person
-	async isBlocked(id: number, nick: string): Promise<Boolean> {
+	async isBlocked(id: number, otherId: number): Promise<Boolean> {
 		const user = await this.usersService.getUserById(id);
-		const block = await this.usersService.getUserByNick(nick);
+		const block = await this.usersService.getUserById(otherId);
 		if (!user || !block) return (false);
 		let blocks = await this.getAllBlocked(id);
 		blocks = blocks.filter((x) => (x.username == block.username))
