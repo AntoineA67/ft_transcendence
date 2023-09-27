@@ -18,7 +18,6 @@ function connectToSocketWithToken(token: any) {
 export const ChatSocketContext = createContext(null);
 
 export const ChatSocketProvider = ({ children, store }: any) => {
-  console.log("ChatSocketProvider");
 
   const [isConnected, setConnected] = useState(false);
 
@@ -31,10 +30,8 @@ export const ChatSocketProvider = ({ children, store }: any) => {
   }
 
   useEffect(() => {
-    console.log("ChatSocketProvider useEffect");
     if (!isConnected) {
       const token = localStorage.getItem('token');
-      console.log("ChatSocketProvider useEffect !isConnected", token);
       socket.current = connectToSocketWithToken(token);
 
       socket.current.on('connect', () => {
@@ -63,7 +60,7 @@ export const ChatSocketProvider = ({ children, store }: any) => {
         socket.current.disconnect();
       }
     }
-  }, []);
+  }, [isConnected, socketUrl]);
 
   return (
     <ChatSocketContext.Provider value={socket.current}>

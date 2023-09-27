@@ -24,6 +24,14 @@ type Profile = {
 	username: string;
 };
 
+type Rooms = {
+	id: number,
+	isChannel: boolean,
+	title: string,
+	private: boolean,
+	password: string,
+}
+
 export function ChatBox() {
 	const { chatId } = useParams();
 	const [mess, setMess] = useState('');
@@ -60,7 +68,6 @@ export function ChatBox() {
 			socket.off('messageSent');
 		};
 	}, [chatId]);
-	console.log('new message', messages);
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -78,7 +85,7 @@ export function ChatBox() {
 
 	useEffect(() => {
 		if (messagesEndRef.current) {
-		  messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+		  messagesEndRef.current.scrollIntoView({ block: "end", inline: "nearest" });
 		}
 	  }, [messages]);
 
@@ -99,7 +106,6 @@ export function ChatBox() {
 			}
 		});
 		setMess('');
-		messagesEndRef.current?.scrollTo(0, messagesEndRef.current.scrollHeight);
 	};
 
 	const myMap = (message: Message, profile: Profile) => {
@@ -110,6 +116,7 @@ export function ChatBox() {
 		if (message.userId === profile.id) {
 			message.username = profile.username;
 		}
+
 		return (
 			<div className="message-container" key={message.id}>
 				<strong className={`message ${classuser}`}>{message.username} - {formattedTime}</strong>
@@ -126,11 +133,9 @@ export function ChatBox() {
 			className="d-flex w-100 align-items-center p-1 ps-sm-5"
 			style={{ backgroundColor: 'black' }}
 		>
-			<span className="d-sm-none">
 			<Link to="..">
 				<button className="goBack"></button>
 			</Link>
-			</span>
 			<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
 		</div>
 		<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
@@ -156,33 +161,33 @@ export function ChatBox() {
 	);
 }
 
-type formProp = {
-	label: string,
-	button: 'Send' | 'Join' | 'Create',
-	value: string,
-	setValue: React.Dispatch<React.SetStateAction<string>>,
-}
-
-const MyForm = ({ label, button, value, setValue }: formProp) => {
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
-		type: 'Send' | 'Join' | 'Create', value: string, setValue: React.Dispatch<React.SetStateAction<string>>) {
+function MyForm({
+	label,
+	button,
+	value,
+	setValue,
+	onSubmit,
+}: {
+	label: string;
+	button: "Send" | "Join" | "Create" | "Cancel" | "Submit";
+	value: string;
+	setValue: React.Dispatch<React.SetStateAction<string>>;
+	onSubmit: () => void;
+}) {
+	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		setValue('');
-	}
-
+		onSubmit();
+	};
 	return (
-		<form className='d-flex flex-column align-items-center p-2 gap-2'
-			onSubmit={(e) => handleSubmit(e, button, value, setValue)}>
-			<label
-				className='w-75'
-				htmlFor='private-message'>
+		<form className='d-flex flex-column align-items-center p-2 gap-2' onSubmit={handleSubmit}>
+			<label className='w-75' htmlFor='private-message'>
 				{label}
 			</label>
 			<input
-				id='private-message'
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
-				className='w-75' />
+				className='w-75'
+			/>
 			<button type='submit' className='btn btn-outline-secondary w-75'>
 				{button}
 			</button>
@@ -190,28 +195,124 @@ const MyForm = ({ label, button, value, setValue }: formProp) => {
 	);
 }
 
-function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
+function handleCreateGroup(groupname: string) {
+	if (groupname.trim() !== '') {
+		console.log(`Creating group: ${groupname}`);
+		// Effectuez ici l'action pour créer le groupe
+	}
+}
 
+function handlePrivateMessage(tonick: string) {
+	if (tonick.trim() !== '') {
+		console.log(`Sending a private message to: ${tonick}`);
+		// Effectuez ici l'action pour envoyer un message privé
+	}
+}
+
+function JoinGroupHandler({ roomname, roomid, password }: { roomname: string; roomid: string; password: string }) {
+	const [joinbool, setJoinbool] = useState<boolean>(false);
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const roomdata = {
+			roomname: roomname,
+			roomid: roomid,
+			password: password,
+		};
+	  socket.emit('joinRoom', roomdata, (response: boolean) => {
+		if (response === false) {
+		  console.error('Erreur lors de la connexion au groupe : ', roomname);
+		} else {
+		  setJoinbool(true);
+		}
+	  });
+	  return () => {
+		socket.disconnect();
+	  };
+	}, [roomname, roomid, password]);
+
+	useEffect(() => {
+	  if (joinbool === true) {
+		navigate(`/chat/${roomid}`);
+	  } else {
+		alert('Wrong Name or Room ID or Password or you\'re already in the room');
+		navigate('/chat');
+	  }
+	}, [joinbool, navigate, roomid]);
+	return null;
+}
+
+  function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
 	const [nick, setNick] = useState('');
 	const [join, setJoin] = useState('');
 	const [create, setCreate] = useState('');
+	const [roomId, setRoomId] = useState('');
+	const [password, setPassword] = useState('');
+	const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
+	const [isJoinHandlerVisible, setJoinHandlerVisible] = useState(false);
 
+	  const JoinGroup = (roomname: string) => {
+		if (roomname.trim() !== '') {
+		  setJoinDialogOpen(true);
+		}
+	  };
+
+	const handleSecondJoinClick = () => {
+	  if (roomId.trim() === '' || join.trim() === '') {
+		alert('Please enter both Room ID and Room title. (the password is optional)');
+		return;
+	  }
+	  setJoinHandlerVisible(true);
+	  setJoinDialogOpen(false);
+	};
 	return (
 		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
 			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
-			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} />
-			<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} />
-			<MyForm label='Create a group' button='Create' value={create} setValue={setCreate} />
-		</div>
-	)
-}
+			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} onSubmit={() => handlePrivateMessage(nick)} />
+			{!isJoinDialogOpen && (
+				<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} onSubmit={() => JoinGroup(join)} />
+			)}
+			<MyForm label='Create a group:' button='Create' value={create} setValue={setCreate} onSubmit={() => handleCreateGroup(create)} />
 
-type Rooms = {
-	id: number,
-	isChannel: boolean,
-	title: string,
-	private: boolean,
-	password: string,
+			{isJoinDialogOpen && (
+				<div className='join-dialog'>
+					<div className='d-flex justify-content-between'>
+						<h5>Join {join}</h5>
+						<button className='cross' onClick={() => setJoinDialogOpen(false)} />
+					</div>
+					<div className='form-group'>
+						<label htmlFor='roomID'>Room ID:</label>
+						<input
+							type='text'
+							id='roomID'
+							value={roomId}
+							onChange={(e) => setRoomId(e.target.value)}
+							className='form-control'
+						/>
+					</div>
+					<div className='form-group'>
+						<label htmlFor='password'>Password:</label>
+						<input
+							type='password'
+							id='password'
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							className='form-control'
+						/>
+					</div>
+					<div className='d-flex justify-content-between'>
+						<button type='submit' className='btn btn-outline-secondary w-45' onClick={handleSecondJoinClick}>
+							Join
+						</button>
+						<button type='submit' className='btn btn-outline-secondary w-45' onClick={() => setJoinDialogOpen(false)}>
+							Cancel
+						</button>
+					</div>
+				</div>
+			)}
+			{isJoinHandlerVisible && (<JoinGroupHandler roomname={join} roomid={roomId} password={password} />)}
+		</div>
+	);
 }
 
 export function ChatList() {
@@ -229,10 +330,12 @@ export function ChatList() {
 	}, []);
 
 	const myMap = (room: Rooms) => {
+		const channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
+
 		return (
 			<li key={room.title}>
 				<Link to={`/chat/${room.id}`} className='link-text' style={{ color: 'white' }}>
-					<div className='chatListItem'>{room.title}</div>
+					<div className={`${channelclass}`}>{room.title}</div>
 				</Link>
 			</li>
 		);
@@ -261,7 +364,6 @@ export function ChatList() {
 
 export function Chat() {
 	const location = useLocation();
-	console.log('location', location);
 	const classname1 = location.pathname === '/chat' ? '' : 'd-none d-sm-flex';
 	const classname2 = location.pathname === '/chat' ? 'd-none d-sm-flex' : '';
 

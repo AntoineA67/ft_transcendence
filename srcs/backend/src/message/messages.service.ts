@@ -10,7 +10,7 @@ export class MessagesService {
     return this.prisma.message.findMany();
   }
 
-  async createMessage(messageContent: string, roomId: number, userid: number): Promise<Message> {
+  async createMessage(messageContent: string, roomId: number, userid: number): Promise<Message> { 
     return this.prisma.message.create({
       data: {
         message: messageContent,
@@ -20,5 +20,4 @@ export class MessagesService {
       },
     });
   }
-
 }

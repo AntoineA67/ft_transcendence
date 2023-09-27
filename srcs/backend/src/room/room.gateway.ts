@@ -50,4 +50,21 @@ export class RoomGateway
 		const roomData = await this.roomService.getRoomData(roomid, userId);
 		return roomData;
 	}
+
+	// @SubscribeMessage('createRoom')
+	// async handleCreateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomTitle: string): Promise<void> {
+	// 	const userId: number = client.data.user.id;
+	// 	const createdRoom = await this.roomService.createRoom({ title: roomTitle, members: { connect: { id: userId } } });
+	// 	client.emit('roomCreated', createdRoom);
+	// }
+// message: { content: string, roomId: string, userid: number }
+
+	@SubscribeMessage('joinRoom')
+	async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomdata: {roomname: string, roomid: string, password: string}): Promise<boolean> {
+		const userId: number = client.data.user.id;
+		const roomId = parseInt(roomdata.roomid, 10);
+		if (Number.isNaN(roomId))
+			return false;
+		return await this.roomService.joinRoom(roomdata.roomname, roomId, roomdata.password, userId);
+	}
 }
