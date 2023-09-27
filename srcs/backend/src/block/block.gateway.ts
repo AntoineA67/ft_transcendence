@@ -16,25 +16,25 @@ export class BlockGateway {
 	@SubscribeMessage('block')
 	async handleBlock(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
+		@MessageBody() otherId: number) {
 		const id: number = client.data.user.id;
-		return (await this.blockService.createBlock(id, nick));
+		return (await this.blockService.createBlock(id, otherId));
 		}
 		
 	@SubscribeMessage('unblock')
 	async handleUnblock(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
+		@MessageBody() otherId: number) {
 		const id: number = client.data.user.id;
-		return (await this.blockService.unBlock(id, nick));
+		return (await this.blockService.unBlock(id, otherId));
 	}
 		
 	@SubscribeMessage('')
 	async handle(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
+		@MessageBody() otherId: number) {
 		const id: number = client.data.user.id;
-		return (await this.blockService.isBlocked(id, nick));
+		return (await this.blockService.isBlocked(id, otherId));
 	}
 	
 }

@@ -10,7 +10,10 @@ export type profileType = {
 	username: string,
 	avatar: null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
-	bio: string
+	bio: string,
 	// game history
 	// achieve
+	friend: boolean | null,   // null when the profile is user himself
+	block: boolean | null,
+	blocked: boolean | null
 }

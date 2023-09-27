@@ -38,19 +38,19 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('replyReq')
 	async handleReplyReq(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody('nick') nick: string, 
+		@MessageBody('other') otherId: number, 
 		@MessageBody('result') result: boolean): Promise<boolean> {
 		const id: number = client.data.user.id;
-		this.logger.log(nick, result);
-		return (await this.friendReqService.replyFriendReq(id, nick, result))
+		// this.logger.log(otherId, result);
+		return (await this.friendReqService.replyFriendReq(id, otherId, result))
 	}
 
 	@SubscribeMessage('reqSent')
 	async handleReqSent(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() nick: string,): Promise<boolean> {
+		@MessageBody() otherId): Promise<boolean> {
 		const id: number = client.data.user.id;
-		const pendings = await this.friendReqService.getPendingReq(id, nick);
+		const pendings = await this.friendReqService.getPendingReq(id, otherId);
 		if (pendings.length == 0) return (false)
 		return (true);
 	}

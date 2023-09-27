@@ -35,13 +35,13 @@ function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Disp
 
 	async function handleClick(
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>, 
-		possibleFriend: string, 
+		possibleFriendId: number, 
 		result: boolean
 	) {
 		e.preventDefault();
-		socket.emit('replyReq', {nick: possibleFriend, result}, (success: boolean) => {
+		socket.emit('replyReq', { other: possibleFriendId, result}, (success: boolean) => {
 			if (success) {
-				const update = reqs.filter((x) => (x.username != possibleFriend))
+				const update = reqs.filter((x) => (x.id != possibleFriendId))
 				setReqs(update);
 			}
 		})	
@@ -56,12 +56,12 @@ function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Disp
 					</p>
 					<button 
 						className='btn btn-primary' 
-						onClick={(e) => handleClick(e, user.username, true)}>
+						onClick={(e) => handleClick(e, user.id, true)}>
 						Accept
 					</button>
 					<button 
 						className='btn btn-secondary' 
-						onClick={(e) => handleClick(e, user.username, false)}>
+						onClick={(e) => handleClick(e, user.id, false)}>
 						Decline
 					</button>
 				</div>
@@ -108,41 +108,41 @@ function SendRequest() {
 	)
 }
 
-function AddBlock({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
-	const [nick, setNick] = useState('');
-	const [mess, setMess] = useState('');
+// function AddBlock({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
+// 	const [nick, setNick] = useState('');
+// 	const [mess, setMess] = useState('');
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		socket.emit('block', nick, (success: boolean) => {
-			success ? setMess('Success') : setMess('Fails')
-			setNick('');
-			socket.emit('findAllBlocks', (res: UserDto[]) => {
-				setBlocks(res);
-			})
-		})
-	}
+// 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+// 		e.preventDefault();
+// 		socket.emit('block', nick, (success: boolean) => {
+// 			success ? setMess('Success') : setMess('Fails')
+// 			setNick('');
+// 			socket.emit('findAllBlocks', (res: UserDto[]) => {
+// 				setBlocks(res);
+// 			})
+// 		})
+// 	}
 
-	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
-			<label htmlFor='block-someone'>Block someone</label>
-			<input type='text'
-				value={nick}
-				onChange={(e) => setNick(e.target.value)}
-			></input>
-			<button type="submit" className=""> block </button>
-			<div id='form-message' style={{ color: 'white' }}>{mess}</div>
-		</form>
-	)
-}
+// 	return (
+// 		<form onSubmit={(e) => handleSubmit(e)}>
+// 			<label htmlFor='block-someone'>Block someone</label>
+// 			<input type='text'
+// 				value={nick}
+// 				onChange={(e) => setNick(e.target.value)}
+// 			></input>
+// 			<button type="submit" className=""> block </button>
+// 			<div id='form-message' style={{ color: 'white' }}>{mess}</div>
+// 		</form>
+// 	)
+// }
 
 function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
 	
-	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, nick: string) => {
+	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: number) => {
 		e.preventDefault();
-		socket.emit('unblock', nick, (success: boolean) => {
+		socket.emit('unblock', id, (success: boolean) => {
 			if (success) {
-				const update = blocks.filter((x) => (x.username != nick));
+				const update = blocks.filter((x) => (x.id != id));
 				setBlocks(update);
 			}
 		})
@@ -152,7 +152,7 @@ function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.
 		return (
 			<li key={user.id}>
 				{user.username}
-				<button onClick={(e) => handleClick(e, user.username)}>
+				<button onClick={(e) => handleClick(e, user.id)}>
 					unBlock
 				</button>
 			</li>
@@ -200,7 +200,7 @@ export function Friends() {
 			<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
 			<FriendList friends={friends}></FriendList>
 			<BlockList blocks={blocks} setBlocks={setBlocks}></BlockList>
-			<AddBlock blocks={blocks} setBlocks={setBlocks}></AddBlock>
+			{/* <AddBlock blocks={blocks} setBlocks={setBlocks}></AddBlock> */}
 		</div>
 	);
 }
