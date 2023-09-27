@@ -33,19 +33,23 @@ export class AuthService {
 			userExists = await this.registerUser(user);
 		}
 
-		//console.log('userExists', userExists);
+		return (userExists);
 
-		if (userExists.activated2FA) {
-			return { id: userExists.id, twoFA: true };
-		}
+		// //console.log('userExists', userExists);
 
-		// generate and return JWT, expiresIn is in seconds
-		return this.jwtService.sign({
-			id: userExists.id,
-			sub: userExists.username,
-			email: userExists.email,
-			login: userExists.username,
-		}, { expiresIn: 3600 });
+		// //console.log("user42 ->", user);
+
+		// if (userExists.activated2FA) {
+		// 	return { id: userExists.id, twoFA: true };
+		// }
+
+		// // generate and return JWT, expiresIn is in seconds
+		// return this.jwtService.sign({
+		// 	id: userExists.id,
+		// 	sub: userExists.username,
+		// 	email: userExists.email,
+		// 	login: userExists.username,
+		// }, { expiresIn: 3600 });
 	}
 
 	// select * from "user";

@@ -35,12 +35,13 @@ export function CallBack42() {
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
 	const random = localStorage.getItem('random') || null;
-	const token = localStorage.getItem('token') || 1234;
+	const token = localStorage.getItem('token') || null;
 	
 	const api42_continue = async () => {
-		if (!code || !state || !random || state != random) return;
+		if (!code || !state) return;
 		try {
 			let response;
+			console.log('token: ', token);
 			if (token == null) {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			} else {
@@ -51,7 +52,7 @@ export function CallBack42() {
 
 			console.log(code);
 
-			if (data.twoFA) {
+			if (data._2fa) {
 				console.log('2fa');
 				setStatus('2fa');
 				return;
@@ -63,7 +64,7 @@ export function CallBack42() {
 			console.log('api42_continue fails: ', error);
 			console.log('code:', code, 'state: ', state);
 		}
-		localStorage.removeItem('random');
+		//localStorage.removeItem('random');
 		setStatus('done');
 	}
 	useEffect(() => { api42_continue() }, []);

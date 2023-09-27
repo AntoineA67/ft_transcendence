@@ -225,6 +225,16 @@ export function Signin() {
 
 
 export function TokenPage() {
+
+	const [random] = useState(Math.random().toString(36).slice(2, 12));
+
+	const api42 = 'https://api.intra.42.fr/oauth/authorize';
+	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
+	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
+	const type = 'response_type=code';
+	const scope = 'scope=public';
+	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
+
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
 	const [token, setToken] = useState<string>('');
@@ -232,7 +242,13 @@ export function TokenPage() {
 
 	async function sendToken() {
 		console.log('send token 2fa');
-		alert(token);
+
+		// set token in local storage
+		localStorage.setItem('token', token);
+		
+		window.location.href = oauth42;
+		
+		//alert(token);
 		// socket.emit('Verify2FA', verifyCode, (response: any) => {
 		// 	console.log(response);
 		// 	if (response == true) {

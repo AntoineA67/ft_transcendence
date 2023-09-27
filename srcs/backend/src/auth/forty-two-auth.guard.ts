@@ -20,6 +20,8 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 		if (isPublic) {
 			return true;
 		}
+		//console.log("canActivate token", cont);
+		
 		return super.canActivate(context);
 	}
 }
