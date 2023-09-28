@@ -5,7 +5,7 @@ import { Navigate, useLocation, useParams } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import { useEffect, useState } from "react";
 import { socket } from "./socket";
-
+import { Options } from "./Options";
 
 export function UserProfile() {
 	const { friendNick } = useParams();
@@ -25,7 +25,7 @@ export function UserProfile() {
 			{ profile && location.pathname.startsWith('/friends/')
 				&& !profile.friend && <Navigate to={`/search/`} replace={true} /> }
 			{ profile && 
-				<>
+				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<Container 
 						className="my-5 pb-sm-5 d-flex flex-column align-items-center"
 						style={{ color: "white" }}>	
@@ -37,7 +37,7 @@ export function UserProfile() {
 							status: profile.status
 						}} />
 
-						<h5 style={{ color: "white" }}>
+						<h5 className='my-3' style={{ color: "white" }}>
 							{profile.username}
 						</h5>
 
@@ -45,19 +45,14 @@ export function UserProfile() {
 							{profile.bio}
 						</p>
 					</Container>
-					<Option/>
+					<Options profile={profile} />
 					<Stat></Stat>
-				</>
+				</div>
 			}
 		</>
 	)
 }
 
-function Option() {
-	
-	return (
-		<div className='' style={{color: 'white'}}>
-			Add chat pong block etc
-		</div>
-	)
-}
+
+
+
