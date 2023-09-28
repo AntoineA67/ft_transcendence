@@ -24,7 +24,7 @@ function AddPage({ setPage }: AddPageProp) {
 	}
 	
 	return (
-		<>
+		<div>
 			<button className='goBack' onClick={() => setPage('friendPage')}/>		
 			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
 				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
@@ -38,7 +38,7 @@ function AddPage({ setPage }: AddPageProp) {
 				<button type="submit" className="btn btn-primary w-100"> send </button>
 				<div id='form-message mt-1' style={{color: 'white'}}>{mess}</div>
 			</form>
-		</>
+		</div>
 	)
 }
 
@@ -68,7 +68,7 @@ type BlockPageProp = {
 }
 function BlockPage({ setPage, blocks }: BlockPageProp) {
 	return (
-		<div style={{color: 'white'}}>
+		<>
 			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
 				<button 
 					className='goBack m-2' 
@@ -77,7 +77,7 @@ function BlockPage({ setPage, blocks }: BlockPageProp) {
 				<h5 style={{color: 'white'}}>Blocks</h5>
 			</div>
 			<BlockList blocks={blocks}/>
-		</div>
+		</>
 	)
 }
 
@@ -94,7 +94,7 @@ function RelationPages(prop: RelationsProp) {
 	const [page, setPage] = useState<'friendPage' | 'blockPage' | 'addPage'>('friendPage');
 
 	return (
-		<>
+		<div className='w-100'>
 			{page == 'friendPage' && <FriendPage 
 				setPage={setPage}
 				friends={prop.friends}
@@ -106,7 +106,7 @@ function RelationPages(prop: RelationsProp) {
 				blocks={prop.blocks} 
 			/>}
 			{page == 'addPage' && <AddPage setPage={setPage}/>}
-		</>
+		</div>
 	)
 }
 
@@ -141,7 +141,8 @@ export function Friends() {
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`} >
+				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
+					style={{overflowY: 'auto'}} >
 					<RelationPages 
 						friends={friends}
 						setFriends={setFriends}
@@ -151,51 +152,13 @@ export function Friends() {
 						setBlocks={setBlocks}
 					/>
 				</div>
-				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}>
+				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
+					style={{overflowY: 'auto'}}>
 					<Outlet />
 				</div>
 			</div>
 		</div>
 	);
-	
-	// return (
-		// 	<div style={{color: 'white'}}>
-		// 		<SendRequest></SendRequest>
-		// 		<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
-		// 		<FriendList friends={friends}></FriendList>
-		// 		<BlockList blocks={blocks} setBlocks={setBlocks}></BlockList>
-		// 		<AddBlock blocks={blocks} setBlocks={setBlocks}></AddBlock>
-		// 	</div>
-		// );
-	}
+}
 
-	export default Friends;
-
-
-	// function AddBlock({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
-	// 	const [nick, setNick] = useState('');
-	// 	const [mess, setMess] = useState('');
-	
-	// 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-	// 		e.preventDefault();
-	// 		socket.emit('block', nick, (success: boolean) => {
-	// 			success ? setMess('Success') : setMess('Fails')
-	// 			setNick('');
-	// 			socket.emit('findAllBlocks', (res: UserDto[]) => {
-	// 				setBlocks(res);
-	// 			})
-	// 		})
-	// 	}
-	
-	// 	return (
-	// 		<form onSubmit={(e) => handleSubmit(e)}>
-	// 			<label htmlFor='block-someone'>Block someone</label>
-	// 			<input type='text'
-	// 				value={nick}
-	// 				onChange={(e) => setNick(e.target.value)}
-	// 			></input>
-	// 			<button type="submit" className=""> block </button>
-	// 			<div id='form-message' style={{ color: 'white' }}>{mess}</div>
-	// 		</form>
-	// 	)
-	// }
+export default Friends;

@@ -14,6 +14,7 @@ import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
+import { UserProfile } from './utils/UserProfile';
 
 //css
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -52,14 +53,19 @@ root.render(
 					<Route path="/" element={<Sidebar />}>
 						<Route index element={<Profile />} />
 						<Route path="search" element={<Search />}></Route>
-						<Route path="friends" element={<Friends />}></Route>
+						<Route path="friends" element={<Friends />}>
+							<Route path=':friendNick' element={<UserProfile />}></Route>
+						</Route>
+						
 						<Route path="chat" element={<Chat />}>
 							<Route path=':chatId' element={<ChatBox />}></Route>
 						</Route>
+						
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />}></Route>
 							<Route path='changepassword' element={<ChangePassword />}></Route>
 						</Route>
+						
 						<Route path="/game" element={<>
 							<GameSocketProvider>
 								<Game />

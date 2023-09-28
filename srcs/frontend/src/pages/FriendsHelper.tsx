@@ -7,7 +7,7 @@ export function FriendList({ friends }: { friends: userType[] }) {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id} className='m-0 p-0'>
-				<UserItem user={user} linkTo={'.'} />
+				<UserItem user={user} linkTo={user.username} />
 			</li>
 		)
 	}
@@ -45,7 +45,7 @@ export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
 			<li key={user.id}>
 				<ReqItem 
 					user={user} 
-					linkTo={'.'} 
+					linkTo={user.username} 
 					onAccept={(e: any) => handleClick(e, user.id,true)} 
 					onDecline={(e: any) => handleClick(e, user.id, false)}/>
 			</li>
@@ -79,7 +79,7 @@ export function BlockList({ blocks }: BlockListProp) {
 		return (
 			<li key={user.id}>
 				{/* ideally I wish to redirect it to search page */}
-				<UserItem user={user} linkTo={'.'} />
+				<UserItem user={user} linkTo={user.username} />
 				{/* <button
 					className='accept'
 					onClick={(e) => handleClick(e, user.id)} /> */}

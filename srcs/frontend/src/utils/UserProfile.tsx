@@ -1,47 +1,49 @@
-import { profileType } from "../../types/user";
-import { Container } from "react-bootstrap/lib/Tab";
+import { userType } from "../../types/user";
 import { Avatar } from "./Avatar";
 import Stat from "../pages/Stat";
+import { useLocation, useParams } from "react-router-dom";
+import Container from 'react-bootstrap/Container';
+import { useEffect } from "react";
 
-type UserProfileProp = {
-	profile: profileType;
-}
 
-export function UserProfile({ profile }: UserProfileProp) {
+
+export function UserProfile() {
+	const { username } = useParams();
+	const location = useLocation();
+
+	useEffect(() => {
+		// get user, relationship
+		// location might be search or friend
+		console.log(location);
+		location.pathname.startsWith('/friends/');
+	}, [])
 	return (
 		<>
 			<Container 
 				className="my-5 pb-sm-5 d-flex flex-column align-items-center"
 				style={{ color: "white" }}>	
 
-				<Avatar size={150} user={{
-					id: profile.id,
-					username: profile.username,
-					avatar: profile.avatar,
-					status: profile.status
-				}} />
+				{/* <Avatar size={150} user={user} /> */}
 
 				<h5 style={{ color: "white" }}>
-					{profile.username}
+					username
 				</h5>
 
 				<p style={{ color: "white" }}>
-					{profile.bio}
+					user bio
 				</p>
 			</Container>
-			<Option profile={profile} />
+			<Option/>
 			<Stat></Stat>
 		</>
 	)
 }
 
-function Option({ profile }: UserProfileProp) {
-	
-	
+function Option() {
 	
 	return (
-		<div style={{border: '1px solid red'}}>
-			{/* four button with socket event */}
+		<div style={{border: '1px solid red', color: 'white'}}>
+			Add chat pong block etc
 		</div>
 	)
 }
