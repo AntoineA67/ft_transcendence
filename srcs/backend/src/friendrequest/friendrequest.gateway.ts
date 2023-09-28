@@ -3,6 +3,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 import { FriendRequestService } from './friendrequest.service';
 import { UserDto } from 'src/dto/UserDto';
+import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({ cors: true })
 export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -19,7 +20,10 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	// Gestion de la déconnexion du client
 	}
 
-	constructor(private readonly friendReqService: FriendRequestService) { }
+	constructor(
+		private readonly friendReqService: FriendRequestService,
+		private readonly usersService: UsersService
+	) { }
 
 	@SubscribeMessage('findAllReqs')
 	async handleFindAllReqs(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
@@ -27,21 +31,27 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		return (await this.friendReqService.findAllPendings(id));
 	}
 	
+	// emit event 'friendReq' to recver
 	@SubscribeMessage('sendReq')
 	async handleSendReq(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() nick: string): Promise<boolean> {
 		const id: number = client.data.user.id;
+		const sender: UserDto = await this.usersService.getUserById(id);
+		const recver: UserDto = await this.usersService.getUserByNick(nick);
+		this.server.to(recver.id.toString()).emit('friendReq', sender);
 		return (await this.friendReqService.sendFriendReq(id, nick))
 	}
-	
+
+	// emit event 'friendReqAccept' to the original sender
 	@SubscribeMessage('replyReq')
 	async handleReplyReq(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody('other') otherId: number, 
 		@MessageBody('result') result: boolean): Promise<boolean> {
 		const id: number = client.data.user.id;
-		// this.logger.log(otherId, result);
+		const other: UserDto = await this.usersService.getUserById(otherId);
+		result && this.server.to(otherId.toString()).emit('friendReqAccept', other)
 		return (await this.friendReqService.replyFriendReq(id, otherId, result))
 	}
 
