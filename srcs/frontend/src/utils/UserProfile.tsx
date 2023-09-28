@@ -1,40 +1,54 @@
-import { userType } from "../../types/user";
+import { profileType } from "../../types/user";
 import { Avatar } from "./Avatar";
 import Stat from "../pages/Stat";
-import { useLocation, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
-import { useEffect } from "react";
-
+import { useEffect, useState } from "react";
+import { socket } from "./socket";
 
 
 export function UserProfile() {
-	const { username } = useParams();
+	const { friendNick } = useParams();
 	const location = useLocation();
+	const [ profile, setProfile ] = useState<profileType | null>(null);
 
+	
 	useEffect(() => {
-		// get user, relationship
-		// location might be search or friend
-		console.log(location);
-		location.pathname.startsWith('/friends/');
-	}, [])
+		socket.emit('Profile', friendNick, (res: profileType) => {
+			setProfile(res)
+		})
+	}, [friendNick])
+	
 	return (
 		<>
-			<Container 
-				className="my-5 pb-sm-5 d-flex flex-column align-items-center"
-				style={{ color: "white" }}>	
+			{ !profile &&  <p style={{color: 'white'}}>loading</p> }
+			{ profile && location.pathname.startsWith('/friends/')
+				&& !profile.friend && <Navigate to={`/search/`} replace={true} /> }
+			{ profile && 
+				<>
+					<Container 
+						className="my-5 pb-sm-5 d-flex flex-column align-items-center"
+						style={{ color: "white" }}>	
 
-				{/* <Avatar size={150} user={user} /> */}
+						<Avatar size={150} user={{
+							id: profile.id,
+							username: profile.username,
+							avatar: profile.avatar,
+							status: profile.status
+						}} />
 
-				<h5 style={{ color: "white" }}>
-					username
-				</h5>
+						<h5 style={{ color: "white" }}>
+							{profile.username}
+						</h5>
 
-				<p style={{ color: "white" }}>
-					user bio
-				</p>
-			</Container>
-			<Option/>
-			<Stat></Stat>
+						<p style={{ color: "white" }}>
+							{profile.bio}
+						</p>
+					</Container>
+					<Option/>
+					<Stat></Stat>
+				</>
+			}
 		</>
 	)
 }
@@ -42,7 +56,7 @@ export function UserProfile() {
 function Option() {
 	
 	return (
-		<div style={{border: '1px solid red', color: 'white'}}>
+		<div className='' style={{color: 'white'}}>
 			Add chat pong block etc
 		</div>
 	)

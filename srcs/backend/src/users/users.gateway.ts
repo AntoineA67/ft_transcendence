@@ -14,9 +14,9 @@ export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(
-		private readonly usersService: UsersService 
-		// private readonly friendService: FriendshipService, 
-		// private readonly blockService: BlockService
+		private readonly usersService: UsersService, 
+		private readonly friendService: FriendshipService, 
+		private readonly blockService: BlockService
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -56,12 +56,16 @@ export class UsersGateway
 		return (await this.usersService.updateUser(id, {avatar: file}));
 	}
 
-	// @SubscribeMessage('Profile')
-	// async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
-	// 	const id: number = client.data.user.id;
-	// 	let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
-	// 	const friend = await this.friendService.isFriend(id, otherNick);
-	// 	const block = await this.blockService.isBlocked
-	// }
+	// this function cannot be done in the service, it will create circular dependency
+	@SubscribeMessage('Profile')
+	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
+		const id: number = client.data.user.id;
+		let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
+		if (id == otherprofile.id) return (otherprofile);
+		const friend = await this.friendService.isFriend(id, otherprofile.id);
+		const block = await this.blockService.isBlocked(id, otherprofile.id);
+		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
+		return ({ ... otherprofile, friend, block, blocked });
+	}
 
 }
