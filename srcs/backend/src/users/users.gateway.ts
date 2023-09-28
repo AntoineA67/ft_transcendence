@@ -8,6 +8,8 @@ import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
+import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
+import { ProfileDto } from 'src/dto/ProfileDto';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -16,6 +18,7 @@ export class UsersGateway
 	constructor(
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
+		private readonly friendReqService: FriendRequestService, 
 		private readonly blockService: BlockService
 	) { }
 
@@ -24,14 +27,17 @@ export class UsersGateway
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
 		await this.usersService.updateUser(id, { status: 'ONLINE' });
+		// client join a room 
+		client.join(id.toString())
 		//emit to everyone
-		client.broadcast.emit('online', id);
-		
+		client.broadcast.emit('online', id);	
 	}
 	
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
 		await this.usersService.updateUser(id, { status: 'OFFLINE' });
+		// client leave a room 
+		client.leave(id.toString())
 		// emit to everyone
 		client.broadcast.emit('offline', id);
 	}
@@ -58,14 +64,15 @@ export class UsersGateway
 
 	// this function cannot be done in the service, it will create circular dependency
 	@SubscribeMessage('Profile')
-	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
+	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string): Promise<ProfileDto> {
 		const id: number = client.data.user.id;
 		let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
 		if (id == otherprofile.id) return (otherprofile);
 		const friend = await this.friendService.isFriend(id, otherprofile.id);
+		const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
 		const block = await this.blockService.isBlocked(id, otherprofile.id);
 		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
-		return ({ ... otherprofile, friend, block, blocked });
+		return ({ ... otherprofile, friend, block, blocked, sent });
 	}
 
 }

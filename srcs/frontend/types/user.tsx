@@ -14,6 +14,7 @@ export type profileType = {
 	// game history
 	// achieve
 	friend: boolean | null,   // null when the profile is user himself
+	sent: boolean | null,
 	block: boolean | null,    // do I block this person
 	blocked: boolean | null   // does this person block me
 }

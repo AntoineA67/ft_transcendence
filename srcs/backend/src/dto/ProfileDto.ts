@@ -7,6 +7,7 @@ export class ProfileDto {
 	// game history
 	// achieve
 	friend: boolean | null;   // null when the profile is user himself
+	sent: boolean | null;
 	block: boolean | null;
 	blocked: boolean | null;
 }
