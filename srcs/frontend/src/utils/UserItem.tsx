@@ -2,12 +2,18 @@ import { Avatar } from './Avatar';
 import { userType } from '../../types/user';
 import { Link } from 'react-router-dom';
 
-export function UserItem(user: userType, linkTo: string) {
+type UserItemProp = {
+	user: userType,
+	linkTo: string,
+}
+
+export function UserItem({user, linkTo}: UserItemProp) {
 	return (
-		<Link to={linkTo}>
-			<div>
-				<Avatar size={100} user={user} />
-				<p>{user.username}</p>
+		<Link to={linkTo} className='link-text w-100 ' style={{color: 'white'}}>
+			<div 
+				className='userItem d-flex flex-row align-items-center'>
+				<Avatar size={40} user={user} />
+				<p className='m-0 ms-3'>{user.username}</p>
 			</div>
 		</Link>
 	)

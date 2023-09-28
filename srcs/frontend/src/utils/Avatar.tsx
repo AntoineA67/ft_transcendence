@@ -55,19 +55,17 @@ export function Avatar({ size, user }: avatarProp) {
 	}, [status])
 
 	return (
-		<>
-			<div style={{
-				height: `${size / 6}px`,
-				width: `${size / 6}px`, 
+		<div style={{position: 'relative'}}>
+			<span style={{
+				height: `15px`,
+				width: `15px`, 
 				borderRadius: '50%',
 				border: '2px solid white',
 				backgroundColor: color,
-				position: 'relative',
-				left: `${size / 2}px`, 
-				top: `${size / 4}px`
+				position: 'absolute',
+				left: `${size / 1.1}px`, 
 			}} />	
 			<img 
-				className='p-0 m-0'
 				src={avatar} 
 				style={{
 					height: `${size}px`, 
@@ -76,7 +74,7 @@ export function Avatar({ size, user }: avatarProp) {
 					clipPath: 'circle()', 
 				}}
 			/>			
-		</>
+		</div>
 	)
 }
 

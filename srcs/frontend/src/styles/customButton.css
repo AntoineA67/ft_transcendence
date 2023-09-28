@@ -1,4 +1,52 @@
 
+.block {
+	background: url(../assets/block.svg) no-repeat;
+	background-position: center;
+	background-color: transparent;
+	width: 40px !important;
+	height: 40px !important;
+	border: none;
+	border-radius: 50%;
+	display: inline-block;
+	padding: 0;
+}
+
+.addFriend {
+	background: url(../assets/addFriend.svg) no-repeat;
+	background-position: center;
+	background-color: transparent;
+	width: 40px !important;
+	height: 40px !important;
+	border: none;
+	border-radius: 50%;
+	display: inline-block;
+	padding: 0;
+}
+
+.accept {
+	background: url(../assets/accept.svg) no-repeat;
+	background-position: center;
+	background-color: #FF8360;
+	width: 40px !important;
+	height: 40px !important;
+	border: none;
+	border-radius: 50%;
+	display: inline-block;
+	padding: 0;
+}
+
+.decline {
+	background: url(../assets/decline.svg) no-repeat;
+	background-position: center;
+	background-color: #C4C4C4;
+	width: 40px;
+	height: 40px;
+	border: none;
+	border-radius: 50%;
+	display: inline-block;
+	padding: 0 0;
+}
+
 .leftArrow {
 	background: url(../assets/leftArrow.svg) no-repeat;
 	background-position: center;

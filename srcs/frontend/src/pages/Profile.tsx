@@ -140,7 +140,7 @@ function Profile() {
 					style={{ color: "white"}}>			
 					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
-					<Avatar size={150} user={{
+					<Avatar size={100} user={{
 						id: profile.id, 
 						username: profile.username, 
 						avatar: profile.avatar,

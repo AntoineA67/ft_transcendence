@@ -40,7 +40,7 @@ function Option({ profile }: UserProfileProp) {
 	
 	
 	return (
-		<div>
+		<div style={{border: '1px solid red'}}>
 			{/* four button with socket event */}
 		</div>
 	)
