@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Room, Prisma, Message } from '@prisma/client';
+import { Room, Prisma } from '@prisma/client';
+import { MemberService } from 'src/member/member.service';
 
 type MessageWithUsername = {
   id: number;
@@ -13,7 +14,7 @@ type MessageWithUsername = {
 
 @Injectable()
 export class RoomService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async createRoom(data: Prisma.RoomCreateInput): Promise<Room> {
     return this.prisma.room.create({ data });
@@ -35,6 +36,7 @@ export class RoomService {
     return this.prisma.room.findMany();
   }
 
+  // TODO : check how to change this (found on prisma.io), maybe there are too many operations to sort...
   async getAllRoomsByUserid(id: number): Promise<Room[]> {
     const rooms = await this.prisma.room.findMany({
       where: {
@@ -45,7 +47,194 @@ export class RoomService {
         },
       },
     });
-    return rooms;
+    const roomsWithLatestMessage = await Promise.all(
+      rooms.map(async (room) => {
+        const latestMessage = await this.prisma.message.findFirst({
+          where: {
+            roomId: room.id,
+          },
+          orderBy: {
+            send_date: 'desc',
+          },
+        });
+        return {
+          ...room,
+          latestMessage,
+        };
+      })
+    );
+    roomsWithLatestMessage.sort((a, b) => {
+      if (!a.latestMessage && !b.latestMessage) {
+        return 0;
+      } else if (!a.latestMessage) {
+        return -1;
+      } else if (!b.latestMessage) {
+        return 1;
+      } else {
+        return b.latestMessage.send_date.getTime() - a.latestMessage.send_date.getTime();
+      }
+    });
+    return roomsWithLatestMessage;
+  }
+
+  async createChannelRoom(roomtitle: string, userId: number): Promise<Room> {
+    const existingRoom = await this.prisma.room.findFirst({
+      where: {
+        title: roomtitle,
+        isChannel: true,
+      },
+    });
+    if (existingRoom)
+      return null;
+    return this.prisma.room.create(
+      {
+        data: {
+          title: roomtitle,
+          isChannel: true,
+          members: {
+            create: {
+              admin: true,
+              ban: false,
+              owner: true,
+              user: { connect: { id: userId } },
+            },
+          },
+        },
+      },
+    );
+  }
+
+  async findUserByUsername(username: string) {
+    return await this.prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+    });
+  }
+
+  async findExistingPrivateRoom(userId: number, otherUserId: number) {
+    return await this.prisma.room.findFirst({
+      where: {
+        isChannel: false,
+        members: {
+          some: {
+            userId: userId,
+          },
+        },
+        AND: [
+          {
+            members: {
+              some: {
+                userId: otherUserId,
+              },
+            },
+          },
+        ],
+      },
+    });
+  }
+
+  async findFriendship(userId: number, otherUserId: number) {
+    return await this.prisma.friendship.findFirst({
+      where: {
+        AND: [
+          {
+            OR: [
+              {
+                id: userId,
+              },
+              {
+                id: otherUserId,
+              },
+            ],
+          },
+          {
+            OR: [
+              {
+                id: otherUserId,
+              },
+              {
+                id: userId,
+              },
+            ],
+          },
+        ],
+      },
+    });
+  }
+
+  async isBlockedBy(userId: number, otherUserId: number): Promise<boolean> {
+    const blockedBy = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                userId: otherUserId,
+              },
+              {
+                blockedId: userId,
+              },
+            ],
+          },
+          {
+            AND: [
+              {
+                userId: userId,
+              },
+              {
+                blockedId: otherUserId,
+              },
+            ],
+          }
+        ],
+      },
+    });
+    if (!blockedBy)
+      return false;
+    return true;
+  }
+
+  async createPrivateRoom(userId: number, username: string) {
+    const user = await this.findUserByUsername(username);
+    if (!user)
+      return null;
+
+    const existingRoom = await this.findExistingPrivateRoom(userId, user.id);
+    if (existingRoom)
+      return null;
+
+    const friendship = await this.findFriendship(userId, user.id);
+    if (!friendship)
+      return null;
+
+    const isBlocked = await this.isBlockedBy(userId, user.id);
+    if (isBlocked)
+      return null;
+
+    return this.prisma.room.create({
+      data: {
+        title: user.username,
+        isChannel: false,
+        private: true,
+        members: {
+          create: [
+            {
+              admin: true,
+              ban: false,
+              owner: true,
+              user: { connect: { id: userId } },
+            },
+            {
+              admin: false,
+              ban: false,
+              owner: false,
+              user: { connect: { id: user.id } },
+            },
+          ],
+        },
+      },
+    });
   }
 
   async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string }> {
@@ -61,7 +250,7 @@ export class RoomService {
       include: {
         message: {
           include: {
-            user: { // Include the user associated with the message
+            user: {
               select: {
                 username: true,
               },
@@ -70,6 +259,10 @@ export class RoomService {
         },
       },
     });
+    const memberService = new MemberService(this.prisma);
+    const memberStatus = await memberService.getMemberDatabyRoomId(userid, roomid);
+    if (memberStatus.ban)
+      return null;
     if (!room) {
       return { messages: [], roomTitle: '' };
     }
@@ -79,15 +272,13 @@ export class RoomService {
       send_date: message.send_date,
       userId: message.userId,
       roomId: message.roomId,
-      username: message.user.username, // Access the username from the included user
+      username: message.user.username,
     }));
+
     return { messages: messagesWithUsername, roomTitle: room.title };
   }
 
   async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<boolean> {
-    console.log('roomname', roomname);
-    console.log('roomid', roomid);
-    console.log('password', password);
     const room = await this.prisma.room.findUnique({
       where: {
         id: roomid,

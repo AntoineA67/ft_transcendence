@@ -6,6 +6,7 @@ const prisma = new PrismaClient()
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+  friend: any;
 	constructor() {
 		super({
 			log: ["error", "info", "query", "warn"],

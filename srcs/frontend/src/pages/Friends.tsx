@@ -21,7 +21,7 @@ function FriendList({ friends }: { friends: UserDto[]}) {
 	return (
 		<ul>
 			<p style={{color: 'white'}}>FriendList</p>
-			{(friends.length == 0) ? (
+			{(friends.length === 0) ? (
 				<p style={{ color: 'white' }}>
 					Nothing
 				</p>
@@ -41,7 +41,7 @@ function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Disp
 		e.preventDefault();
 		socket.emit('replyReq', {nick: possibleFriend, result}, (success: boolean) => {
 			if (success) {
-				const update = reqs.filter((x) => (x.username != possibleFriend))
+				const update = reqs.filter((x) => (x.username !== possibleFriend))
 				setReqs(update);
 			}
 		})	
@@ -72,7 +72,7 @@ function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Disp
 	return (
 		<ul>
 			<p style={{color: 'white'}}>Friend request</p>
-			{(reqs.length == 0) ? (
+			{(reqs.length === 0) ? (
 				<p style={{color: 'white'}}>
 					Nothing
 				</p> 
@@ -142,7 +142,7 @@ function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.
 		e.preventDefault();
 		socket.emit('unblock', nick, (success: boolean) => {
 			if (success) {
-				const update = blocks.filter((x) => (x.username != nick));
+				const update = blocks.filter((x) => (x.username !== nick));
 				setBlocks(update);
 			}
 		})
@@ -162,7 +162,7 @@ function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.
 	return (
 		<ul style={{color: 'white'}}>
 			<p>Block list</p>
-			{blocks.length == 0 ? (
+			{blocks.length === 0 ? (
 				<p>Nothing</p>
 			) : (
 				blocks.map(myMap)

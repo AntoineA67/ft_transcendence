@@ -1,16 +1,29 @@
-import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import { Member } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
+import { MemberService } from './member.service';
+import { Logger } from '@nestjs/common';
 
-@WebSocketGateway()
-export class MemberGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
+@WebSocketGateway({ cors: true })
+export class MemberGateway
+  implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly memberService: MemberService) { }
+  private logger: Logger = new Logger('MemberService');
 
-  handleConnection(client: Socket) {
-
+  async handleConnection(client: Socket) {
+    const id: number = client.data.user.id;
+    client.join(id.toString());
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
+    const id: number = client.data.user.id;
+    client.leave(id.toString());
+  }
 
+  @SubscribeMessage('getMemberDatabyRoomId')
+  async GetMemberDatabyRoomId(@ConnectedSocket() client: Socket, @MessageBody() roomId: string) {
+    const id: number = client.data.user.id;
+    const roomid = parseInt(roomId, 10);
+    return (await this.memberService.getMemberDatabyRoomId(id, roomid));
   }
 }
