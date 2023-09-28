@@ -1,15 +1,10 @@
 import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Server } from 'socket.io';
 import { OnGatewayConnection } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Socket } from 'socket.io';
-import { users } from 'src/prisma/seeds/users';
-import { User } from 'src/users/users.service';
-import { MessagesService } from '../message/messages.service';
-import { Message } from '@prisma/client';
 
 type MessageWithUsername = {
 	id: number;
@@ -51,13 +46,25 @@ export class RoomGateway
 		return roomData;
 	}
 
-	// @SubscribeMessage('createRoom')
-	// async handleCreateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomTitle: string): Promise<void> {
-	// 	const userId: number = client.data.user.id;
-	// 	const createdRoom = await this.roomService.createRoom({ title: roomTitle, members: { connect: { id: userId } } });
-	// 	client.emit('roomCreated', createdRoom);
-	// }
-// message: { content: string, roomId: string, userid: number }
+	@SubscribeMessage('createChannelRoom')
+	async handleCreateChannelRoom(@ConnectedSocket() client: Socket, @MessageBody() roomTitle: string): Promise<void> {
+		const userId: number = client.data.user.id;
+		const createdRoom = await this.roomService.createChannelRoom(roomTitle, userId);
+		if (createdRoom)
+			client.emit('roomCreated', createdRoom);
+		else
+			client.emit('roomCreated', null);
+	}
+
+	@SubscribeMessage('createPrivateRoom')
+	async handleCreatePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() username: string): Promise<void> {
+		const userId: number = client.data.user.id;
+		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
+		if (createdRoom)
+			client.emit('roomCreated', createdRoom);
+		else
+			client.emit('roomCreated', null);
+	}
 
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() roomdata: {roomname: string, roomid: string, password: string}): Promise<boolean> {

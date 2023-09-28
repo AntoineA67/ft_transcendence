@@ -1,11 +1,9 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
+import { Box, Text } from "@react-three/drei"
 import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
-
 
 const BallWrapper = ({ ball, client }: any) => {
 	const ballClientPosition: THREE.Vector3 = useMemo(() => {

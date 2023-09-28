@@ -64,7 +64,7 @@ export const GameSocketProvider = ({ children, store }: any) => {
         socket.current.disconnect()
       }
     }
-  }, [])
+  }, [isConnected, socketUrl])
 
   return (
     <SocketContext.Provider value={socket.current}>

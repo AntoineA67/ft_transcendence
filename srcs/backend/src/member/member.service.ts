@@ -22,6 +22,15 @@ export class MemberService {
     return member;
   }
 
+  async getMemberDatabyRoomId(userid: number, roomid: number): Promise<Member> {
+    return await this.prisma.member.findFirst({
+      where: {
+        userId: userid,
+        roomId: roomid,
+      },
+    });
+  }
+
   async getAllMembers(): Promise<Member[]> {
     return this.prisma.member.findMany();
   }

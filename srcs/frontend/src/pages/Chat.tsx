@@ -32,11 +32,17 @@ type Rooms = {
 	password: string,
 }
 
+type Memberstatus = {
+	owner: boolean,
+	admin: boolean,
+	banned: boolean,
+};
+
 export function ChatBox() {
 	const { chatId } = useParams();
 	const [mess, setMess] = useState('');
 	const [messages, setMessages] = useState<Message[]>([]);
-	const [roomTitle, setRoomTitle] = useState<string>('');
+	const [roomTitle, setroomTitle] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(true);
 	const [profile, setProfile] = useState<Profile>({
 		avatar: null,
@@ -45,19 +51,28 @@ export function ChatBox() {
 		status: '',
 		username: '',
 	});
+	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
+		owner: false,
+		admin: false,
+		banned: false,
+	});
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
 		socket.connect();
 		socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string }) => {
-			setRoomTitle(data.roomTitle);
+			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setLoading(false);
 		});
 
 		socket.emit('MyProfile', (data: Profile) => {
 			setProfile(data);
+		});
+
+		socket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
+			setMemberstatus(data);
 		});
 
 		socket.on('messageSent', (newMessage: Message) => {
@@ -85,9 +100,9 @@ export function ChatBox() {
 
 	useEffect(() => {
 		if (messagesEndRef.current) {
-		  messagesEndRef.current.scrollIntoView({ block: "end", inline: "nearest" });
+			messagesEndRef.current.scrollIntoView({ block: "end", inline: "nearest" });
 		}
-	  }, [messages]);
+	}, [messages]);
 
 	const handleClick = () => {
 		if (mess.trim()) {
@@ -108,10 +123,11 @@ export function ChatBox() {
 		setMess('');
 	};
 
-	const myMap = (message: Message, profile: Profile) => {
+	const myMap = (message: Message, profile: Profile, member: Memberstatus) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+		const role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.banned ? 'Banned' : 'Member';
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
@@ -119,7 +135,7 @@ export function ChatBox() {
 
 		return (
 			<div className="message-container" key={message.id}>
-				<strong className={`message ${classuser}`}>{message.username} - {formattedTime}</strong>
+				<strong className={`message ${classuser}`}>{message.username} - {role} - {formattedTime}</strong>
 				<div className={`message ${classname}`}>
 					{message.message}
 				</div>
@@ -129,34 +145,34 @@ export function ChatBox() {
 
 	return (
 		<div className="h-100 d-flex flex-column">
-		<div
-			className="d-flex w-100 align-items-center p-1 ps-sm-5"
-			style={{ backgroundColor: 'black' }}
-		>
-			<Link to="..">
-				<button className="goBack"></button>
-			</Link>
-			<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
-		</div>
-		<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
-			<ul
-			ref={messagesEndRef}
-			className="nostyleList d-flex flex-column"
-			style={{ color: 'white' }}
+			<div
+				className="d-flex w-100 align-items-center p-1 ps-sm-5"
+				style={{ backgroundColor: '' }}
 			>
-			{messages.map((message) => myMap(message, profile))}
-			</ul>
-		</div>
-		<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
-			<input
-			className="p-2 flex-grow-1"
-			style={{ borderRadius: '10px' }}
-			value={mess}
-			onChange={(e) => setMess(e.target.value)}
-			onKeyDown={handleKeyDown}
-			/>
-			<button className="send-message" onClick={handleClick}></button>
-		</div>
+				<Link to="..">
+					<button className="goBack"></button>
+				</Link>
+				<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+			</div>
+			<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
+				<ul
+					ref={messagesEndRef}
+					className="nostyleList d-flex flex-column"
+					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
+				>
+					{messages.map((message) => myMap(message, profile, memberstatus))}
+				</ul>
+			</div>
+			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+				<input
+					className="p-2 flex-grow-1"
+					style={{ borderRadius: '10px' }}
+					value={mess}
+					onChange={(e) => setMess(e.target.value)}
+					onKeyDown={handleKeyDown}
+				/>
+				<button className="send-message" onClick={handleClick}></button>
+			</div>
 		</div>
 	);
 }
@@ -195,54 +211,42 @@ function MyForm({
 	);
 }
 
-function handleCreateGroup(groupname: string) {
-	if (groupname.trim() !== '') {
-		console.log(`Creating group: ${groupname}`);
-		// Effectuez ici l'action pour créer le groupe
-	}
-}
-
-function handlePrivateMessage(tonick: string) {
-	if (tonick.trim() !== '') {
-		console.log(`Sending a private message to: ${tonick}`);
-		// Effectuez ici l'action pour envoyer un message privé
-	}
-}
-
-function JoinGroupHandler({ roomname, roomid, password }: { roomname: string; roomid: string; password: string }) {
-	const [joinbool, setJoinbool] = useState<boolean>(false);
+function JoinGroupHandler({ roomTitle, roomid, password }: { roomTitle: string; roomid: string; password: string }) {
+	const [joinbool, setJoinbool] = useState<boolean>();
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		const roomdata = {
-			roomname: roomname,
+			roomTitle: roomTitle,
 			roomid: roomid,
 			password: password,
 		};
-	  socket.emit('joinRoom', roomdata, (response: boolean) => {
-		if (response === false) {
-		  console.error('Erreur lors de la connexion au groupe : ', roomname);
-		} else {
-		  setJoinbool(true);
-		}
-	  });
-	  return () => {
-		socket.disconnect();
-	  };
-	}, [roomname, roomid, password]);
+		socket.emit('joinRoom', roomdata, (response: boolean) => {
+			if (response === false) {
+				console.error('Erreur lors de la connexion au groupe : ', roomTitle);
+			} else {
+				setJoinbool(true);
+			}
+		});
+		return () => {
+			socket.disconnect();
+		};
+	}, [roomTitle, roomid, password]);
 
 	useEffect(() => {
-	  if (joinbool === true) {
-		navigate(`/chat/${roomid}`);
-	  } else {
-		alert('Wrong Name or Room ID or Password or you\'re already in the room');
-		navigate('/chat');
-	  }
+		if (joinbool === undefined)
+			return;
+		if (joinbool === true) {
+			navigate(`/chat/${roomid}`);
+		} else {
+			alert('Wrong Name or Room ID or Password or you\'re already in the room');
+			navigate('/chat');
+		}
 	}, [joinbool, navigate, roomid]);
 	return null;
 }
 
-  function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
+function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
 	const [nick, setNick] = useState('');
 	const [join, setJoin] = useState('');
 	const [create, setCreate] = useState('');
@@ -251,20 +255,47 @@ function JoinGroupHandler({ roomname, roomid, password }: { roomname: string; ro
 	const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
 	const [isJoinHandlerVisible, setJoinHandlerVisible] = useState(false);
 
-	  const JoinGroup = (roomname: string) => {
-		if (roomname.trim() !== '') {
-		  setJoinDialogOpen(true);
+	const JoinGroup = (roomTitle: string) => {
+		if (roomTitle.trim() !== '') {
+			setJoinDialogOpen(true);
 		}
-	  };
+	};
 
 	const handleSecondJoinClick = () => {
-	  if (roomId.trim() === '' || join.trim() === '') {
-		alert('Please enter both Room ID and Room title. (the password is optional)');
-		return;
-	  }
-	  setJoinHandlerVisible(true);
-	  setJoinDialogOpen(false);
+		if (roomId.trim() === '' || join.trim() === '') {
+			alert('Please enter both Room ID and Room title. (the password is optional)');
+			return;
+		}
+		setJoinHandlerVisible(true);
+		setJoinDialogOpen(false);
 	};
+
+	const handleCreateGroup = (roomTitle: string) => {
+		if (roomTitle.trim() !== '') {
+			socket.emit('createChannelRoom', roomTitle);
+			socket.on('roomCreated', (response: Rooms) => {
+				if (response)
+					setPage('chatList');
+				else
+					console.error(`Erreur lors de la création du groupe : `, roomTitle);
+				return ;
+			});
+		}
+	}
+
+	const handlePrivateMessage = (username: string) => {
+		if (username.trim() !== '') {
+			socket.emit('createPrivateRoom', username);
+			socket.on('roomCreated', (response: Rooms) => {
+				if (response)
+					setPage('chatList');
+				else
+					console.error(`Erreur lors de la création du groupe : `, username); // TODO: why this is called exponential time ?
+				return ;
+			});
+		}
+	}
+
 	return (
 		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
 			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
@@ -310,7 +341,7 @@ function JoinGroupHandler({ roomname, roomid, password }: { roomname: string; ro
 					</div>
 				</div>
 			)}
-			{isJoinHandlerVisible && (<JoinGroupHandler roomname={join} roomid={roomId} password={password} />)}
+			{isJoinHandlerVisible && (<JoinGroupHandler roomTitle={join} roomid={roomId} password={password} />)}
 		</div>
 	);
 }
@@ -324,18 +355,23 @@ export function ChatList() {
 		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
 			setRooms(response);
 		});
+		socket.on('roomCreated', (response: Rooms) => {
+			if (response)
+				setRooms((prevRooms) => [response, ...prevRooms]);
+		});
 		return () => {
 			socket.disconnect();
 		};
 	}, []);
 
 	const myMap = (room: Rooms) => {
+		console.log(room);
 		const channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
 
 		return (
 			<li key={room.title}>
 				<Link to={`/chat/${room.id}`} className='link-text' style={{ color: 'white' }}>
-					<div className={`${channelclass}`}>{room.title}</div>
+					<div className={`chatListItemButton ${channelclass}`}>{room.title}</div>
 				</Link>
 			</li>
 		);
@@ -346,13 +382,12 @@ export function ChatList() {
 			{page === 'newChat' && <NewChat setPage={setPage} />}
 			{page === 'chatList' && (
 				<>
-					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-2' style={{ backgroundColor: "black" }}>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: "" }}>
 						<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
 						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
-
-					<div className='flex-grow-1 pb-5 pb-sm-0' style={{ overflowY: 'auto' }}>
-						<ul className='nostyleList py-0' >
+					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
+						<ul className='nostyleList py-1' >
 							{rooms.map(myMap)}
 						</ul>
 					</div>
