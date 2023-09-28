@@ -88,6 +88,7 @@
 	border-radius: 50%;
 	cursor: pointer;
 	display: inline-block;
+	padding: 0;
 }
 
 .goBack:hover {

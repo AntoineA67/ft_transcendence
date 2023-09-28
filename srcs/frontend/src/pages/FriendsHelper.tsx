@@ -61,20 +61,19 @@ export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
 
 type BlockListProp = {
 	blocks: userType[], 
-	setBlocks: React.Dispatch<React.SetStateAction<userType[]>>
 }
 
-export function BlockList({ blocks, setBlocks }: BlockListProp) {
+export function BlockList({ blocks }: BlockListProp) {
 
-	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: number) => {
-		e.preventDefault();
-		socket.emit('unblock', id, (success: boolean) => {
-			if (success) {
-				const update = blocks.filter((x) => (x.id != id));
-				setBlocks(update);
-			}
-		})
-	}
+	// const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: number) => {
+	// 	e.preventDefault();
+	// 	socket.emit('unblock', id, (success: boolean) => {
+	// 		if (success) {
+	// 			const update = blocks.filter((x) => (x.id != id));
+	// 			setBlocks(update);
+	// 		}
+	// 	})
+	// }
 
 	const myMap = (user: userType) => {
 		return (
@@ -89,7 +88,7 @@ export function BlockList({ blocks, setBlocks }: BlockListProp) {
 	}
 
 	return (
-		<ul>
+		<ul className='p-0'>
 			{blocks.map(myMap)}
 		</ul>
 	);

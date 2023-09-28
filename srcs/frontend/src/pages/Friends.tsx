@@ -3,7 +3,7 @@ import { socket } from '../utils/socket';
 import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { userType } from '../../types/user';
-import { FriendList } from './FriendsHelper';
+import { BlockList, FriendList } from './FriendsHelper';
 import { FriendReqList } from './FriendsHelper';
 import { Block } from '@react-three/fiber/dist/declarations/src/core/utils';
 
@@ -24,16 +24,21 @@ function AddPage({ setPage }: AddPageProp) {
 	}
 	
 	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
-			<button className='leftArrow' onClick={() => setPage('friendPage')}/>
-			<label htmlFor='send-friend-request'>Send friend request</label>
-			<input type='text'
-				value={nick}
-				onChange={(e) => setNick(e.target.value)}
-				></input>
-			<button type="submit" className=""> send </button>
-			<div id='form-message' style={{color: 'white'}}>{mess}</div>
-		</form>
+		<>
+			<button className='goBack' onClick={() => setPage('friendPage')}/>		
+			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
+				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
+				<input 
+					autoFocus
+					className='form-control w-100 my-2'
+					type='text'
+					value={nick}
+					onChange={(e) => setNick(e.target.value)}
+				/>
+				<button type="submit" className="btn btn-primary w-100"> send </button>
+				<div id='form-message mt-1' style={{color: 'white'}}>{mess}</div>
+			</form>
+		</>
 	)
 }
 
@@ -46,7 +51,7 @@ type FriendPageProp = {
 function FriendPage({ setPage, friends, reqs, setReqs }: FriendPageProp) {
 	return (
 		<>
-			<div className='w-100 d-flex flex-row' style={{background: 'black'}}>
+			<div className='w-100 p-1 d-flex flex-row align-items-center' style={{background: 'black'}}>
 				<button className='block me-auto' onClick={() => setPage('blockPage')}/>
 				<h5 style={{color: 'white'}}>Friends</h5>
 				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
@@ -64,8 +69,14 @@ type BlockPageProp = {
 function BlockPage({ setPage, blocks }: BlockPageProp) {
 	return (
 		<div style={{color: 'white'}}>
-			<button className='leftArrow' onClick={() => setPage('friendPage')}/>
-			blockpage
+			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
+				<button 
+					className='goBack m-2' 
+					onClick={() => setPage('friendPage')}
+				/>
+				<h5 style={{color: 'white'}}>Blocks</h5>
+			</div>
+			<BlockList blocks={blocks}/>
 		</div>
 	)
 }
@@ -130,7 +141,7 @@ export function Friends() {
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className={`col-12 col-sm-3 p-0 m-0 h-100 ${classname1}`} >
+				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`} >
 					<RelationPages 
 						friends={friends}
 						setFriends={setFriends}
@@ -140,7 +151,7 @@ export function Friends() {
 						setBlocks={setBlocks}
 					/>
 				</div>
-				<div className={`col-12 col-sm-9 p-0 m-0 h-100 ${classname2}`}>
+				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}>
 					<Outlet />
 				</div>
 			</div>
