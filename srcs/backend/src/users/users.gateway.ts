@@ -14,9 +14,9 @@ export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 
 	constructor(
-		private readonly usersService: UsersService, 
-		private readonly friendService: FriendshipService, 
-		private readonly blockService: BlockService
+		private readonly usersService: UsersService 
+		// private readonly friendService: FriendshipService, 
+		// private readonly blockService: BlockService
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
