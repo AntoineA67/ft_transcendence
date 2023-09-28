@@ -5,9 +5,10 @@ import { UsersController } from './users.controller';
 import { UsersGateway } from './users.gateway';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
+import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 
 @Module({
-  providers: [UsersService, UsersGateway, FriendshipService, BlockService],
+  providers: [UsersService, UsersGateway, FriendshipService, BlockService, FriendRequestService],
   controllers: [UsersController],
   exports: [UsersService],
   imports: [PrismaModule],

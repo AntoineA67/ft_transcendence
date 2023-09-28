@@ -74,7 +74,7 @@ export class BlockService {
 	}
 
 	// whether first person block second person
-	async isBlocked(id: number, otherId: number): Promise<Boolean> {
+	async isBlocked(id: number, otherId: number): Promise<boolean> {
 		const user = await this.usersService.getUserById(id);
 		const block = await this.usersService.getUserById(otherId);
 		if (!user || !block) return (false);
