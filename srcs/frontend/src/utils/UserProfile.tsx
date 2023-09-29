@@ -16,6 +16,7 @@ export function UserProfile() {
 	useEffect(() => {
 		socket.emit('Profile', friendNick, (res: profileType) => {
 			setProfile(res)
+			console.log('res', res)
 		})
 	}, [friendNick])
 	
@@ -23,7 +24,7 @@ export function UserProfile() {
 		<>
 			{ !profile &&  <p style={{color: 'white'}}>loading</p> }
 			{ profile && location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search/`} replace={true} /> }
+				&& !profile.friend && <Navigate to={`/search`} replace={true} /> }
 			{ profile && 
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<Container 
@@ -45,7 +46,7 @@ export function UserProfile() {
 							{profile.bio}
 						</p>
 					</Container>
-					<Options profile={profile} />
+					<Options profile={profile} key={profile.id} />
 					<Stat></Stat>
 				</div>
 			}

@@ -78,7 +78,6 @@ export function BlockList({ blocks }: BlockListProp) {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				{/* ideally I wish to redirect it to search page */}
 				<UserItem user={user} linkTo={user.username} />
 				{/* <button
 					className='accept'
