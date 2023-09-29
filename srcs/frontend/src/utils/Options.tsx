@@ -11,7 +11,7 @@ export function Options(prop: OptionsProp) {
 
 	return (
 		<div className='d-flex flex-row'>
-			<AddOption profile={profile}  setProfile={setProfile} />
+			<AddOption  profile={profile}  setProfile={setProfile} />
 			<ChatOption profile={profile} setProfile={setProfile}/>
 			<PongOption profile={profile} setProfile={setProfile}/>
 			<BlockOption profile={profile} setProfile={setProfile} />
@@ -73,10 +73,12 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 		if (text == 'Block') {
 			socket.emit('block', profile.id);
 			setProfile({ ...profile, block: true })
+			setText('Unblock')
 		}
 		if (text == 'Unblock') {
 			socket.emit('unblock', profile.id);
 			setProfile({ ...profile, block: false })
+			setText('Block')
 		}
 	}
 
