@@ -39,11 +39,13 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const id: number = client.data.user.id;
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
-		if (this.server.sockets.adapter.rooms[recver.id.toString()]) {
-			//if room exist
+		const result = await this.friendReqService.sendFriendReq(id, nick);
+		// if fail, no emit
+		if (!result) return (result);
+		if (this.server.sockets.adapter.rooms[recver.id.toString()]) { //if room exist
 			this.server.to(recver.id.toString()).emit('friendReq', sender);
 		}
-		return (await this.friendReqService.sendFriendReq(id, nick))
+		return (result);
 	}
 
 	// emit event 'friendReqAccept' to the original sender
@@ -54,11 +56,13 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@MessageBody('result') result: boolean): Promise<boolean> {
 		const id: number = client.data.user.id;
 		const newFriend: UserDto = await this.usersService.getUserById(id);
-		if (this.server.sockets.adapter.rooms[otherId.toString()]) {
-			//if room exist
+		const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
+		// if fail, no emit
+		if (!ret) return (ret);
+		if (this.server.sockets.adapter.rooms[otherId.toString()]) { //if room exist
 			result && this.server.to(otherId.toString()).emit('friendReqAccept', newFriend)
 		}
-		return (await this.friendReqService.replyFriendReq(id, otherId, result))
+		return (ret);
 	}
 
 	@SubscribeMessage('reqSent')

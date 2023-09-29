@@ -45,10 +45,11 @@ function AddPage({ setPage }: AddPageProp) {
 type FriendPageProp = {
 	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 	friends: userType[],
+	setFriends: React.Dispatch<React.SetStateAction<userType[]>>,
 	reqs: userType[],
 	setReqs: React.Dispatch<React.SetStateAction<userType[]>>,
 }
-function FriendPage({ setPage, friends, reqs, setReqs }: FriendPageProp) {
+function FriendPage({ setPage, friends, setFriends, reqs, setReqs }: FriendPageProp) {
 	return (
 		<>
 			<div className='w-100 p-1 d-flex flex-row align-items-center' style={{background: 'black'}}>
@@ -57,7 +58,7 @@ function FriendPage({ setPage, friends, reqs, setReqs }: FriendPageProp) {
 				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
 			</div>
 			<FriendReqList reqs={reqs} setReqs={setReqs} />
-			<FriendList friends={friends} />
+			<FriendList friends={friends} setFriends={setFriends} />
 		</>
 	)
 }
@@ -65,8 +66,9 @@ function FriendPage({ setPage, friends, reqs, setReqs }: FriendPageProp) {
 type BlockPageProp = {
 	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 	blocks: userType[],
+	setBlocks: React.Dispatch<React.SetStateAction<userType[]>>,
 }
-function BlockPage({ setPage, blocks }: BlockPageProp) {
+function BlockPage({ setPage, blocks, setBlocks }: BlockPageProp) {
 	return (
 		<>
 			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
@@ -76,7 +78,7 @@ function BlockPage({ setPage, blocks }: BlockPageProp) {
 				/>
 				<h5 style={{color: 'white'}}>Blocks</h5>
 			</div>
-			<BlockList blocks={blocks}/>
+			<BlockList blocks={blocks} setBlocks={setBlocks}/>
 		</>
 	)
 }
@@ -98,18 +100,19 @@ function RelationPages(prop: RelationsProp) {
 			{page == 'friendPage' && <FriendPage 
 				setPage={setPage}
 				friends={prop.friends}
+				setFriends={prop.setFriends}
 				reqs={prop.reqs}
 				setReqs={prop.setReqs}
 			/>}
 			{page == 'blockPage' && <BlockPage 
 				setPage={setPage} 
 				blocks={prop.blocks} 
+				setBlocks={prop.setBlocks}
 			/>}
 			{page == 'addPage' && <AddPage setPage={setPage}/>}
 		</div>
 	)
 }
-
 
 export function Friends() {
 	const location = useLocation();

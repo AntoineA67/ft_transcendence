@@ -2,8 +2,28 @@ import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
 import { socket } from "../utils/socket";
 import { ReqItem } from "../utils/ReqItem";
+import { useEffect } from "react";
 
-export function FriendList({ friends }: { friends: userType[] }) {
+
+type FriendListProp = {
+	friends: userType[],
+	setFriends: React.Dispatch<React.SetStateAction<userType[]>>,
+}
+export function FriendList({ friends, setFriends }: FriendListProp) {
+	
+	useEffect(() => {
+		// define behavior on friendReqAccept
+		function handleFriendReqAccept(replier: userType) {
+			setFriends([...friends, replier]);
+		}
+
+		socket.on('friendReqAccept', handleFriendReqAccept);
+		return (() => {
+			socket.off('friendReqAccept', handleFriendReqAccept);
+		});
+	}, [])
+	
+	
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id} className='m-0 p-0'>
@@ -23,9 +43,20 @@ type FriendReqListProp = {
 	reqs: userType[], 
 	setReqs: React.Dispatch<React.SetStateAction<userType[]>>
 }
-
 export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
 
+	useEffect(() => {
+		// define behavior on new invitation
+		function handleReq(sender: userType) {
+			setReqs([...reqs, sender]);
+		}
+
+		socket.on('friendReq', handleReq);
+		return (() => {
+			socket.off('friendReq', handleReq);
+		});
+	}, [])
+	
 	async function handleClick(
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
 		possibleFriendId: number,
@@ -60,28 +91,18 @@ export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
 }
 
 type BlockListProp = {
-	blocks: userType[], 
+	blocks: userType[],
+	setBlocks: React.Dispatch<React.SetStateAction<userType[]>>,
 }
+export function BlockList({ blocks, setBlocks }: BlockListProp) {
 
-export function BlockList({ blocks }: BlockListProp) {
-
-	// const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: number) => {
-	// 	e.preventDefault();
-	// 	socket.emit('unblock', id, (success: boolean) => {
-	// 		if (success) {
-	// 			const update = blocks.filter((x) => (x.id != id));
-	// 			setBlocks(update);
-	// 		}
-	// 	})
-	// }
+	
 
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
 				<UserItem user={user} linkTo={user.username} />
-				{/* <button
-					className='accept'
-					onClick={(e) => handleClick(e, user.id)} /> */}
+				
 			</li>
 		)
 	}
