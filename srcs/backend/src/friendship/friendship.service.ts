@@ -49,6 +49,30 @@ export class FriendshipService {
 		return (myFriends)
 	}
 
+	//return all friends of a user, id, nick, avatar, status
+	// and those that block you or those that you block
+	async findAllFriendsIncludeBlocks(id: number): Promise<UserDto[]> {
+		const user = await this.usersService.getUserById(id);
+		if (!user) return ([]);
+		const friendships = await this.prisma.friendship.findMany({
+			where: { friends: { some: { id } } },
+			include: {
+				friends: {
+					select: {
+						id: true,
+						username: true,
+						avatar: true,
+						status: true
+					}
+				}
+			}
+		})
+		let myFriends: UserDto[] = friendships.map((x) => (
+			x.friends[0].username != user.username ? x.friends[0] : x.friends[1]
+		))
+		return (myFriends)
+	}
+
 	async makeFriend(id: number, otherId: number): Promise<boolean> {
 		const user = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserById(otherId);
@@ -102,7 +126,7 @@ export class FriendshipService {
 	async isFriend(myId: number, otherId: number): Promise<boolean> {
 		const user = await this.usersService.getUserById(myId);
 		if (!user) return (false);
-		let myFriends = await this.findAllFriends(myId);
+		let myFriends = await this.findAllFriendsIncludeBlocks(myId);
 		myFriends = myFriends.filter((friend) => (friend.id == otherId))
 		return (myFriends.length != 0 ? true : false);
 	}

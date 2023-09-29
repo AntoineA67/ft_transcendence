@@ -3,10 +3,11 @@ import { useEffect, useInsertionEffect, useState } from "react";
 import { socket } from "./socket";
 
 type OptionsProp = {
-	profile: profileType
+	key: number  //profile id
+	profile: profileType,
 }
 export function Options(prop: OptionsProp) {
-	const [ profile, setProfile ] = useState(prop.profile)
+	const [ profile, setProfile ] = useState<profileType>(prop.profile);
 
 	return (
 		<div className='d-flex flex-row'>
@@ -64,6 +65,7 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		profile.block && setText('Unblock');
+		!profile.block && setText('Block');
 	}, [])
 	
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
