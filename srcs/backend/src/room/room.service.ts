@@ -137,28 +137,13 @@ export class RoomService {
   async findFriendship(userId: number, otherUserId: number) {
     return await this.prisma.friendship.findFirst({
       where: {
-        AND: [
-          {
-            OR: [
-              {
-                id: userId,
-              },
-              {
-                id: otherUserId,
-              },
-            ],
+        friends: {
+          every: {
+            id: {
+              in: [userId, otherUserId],
+            },
           },
-          {
-            OR: [
-              {
-                id: otherUserId,
-              },
-              {
-                id: userId,
-              },
-            ],
-          },
-        ],
+        },
       },
     });
   }
