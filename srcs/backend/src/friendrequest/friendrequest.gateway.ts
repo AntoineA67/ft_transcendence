@@ -39,7 +39,10 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const id: number = client.data.user.id;
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
-		this.server.to(recver.id.toString()).emit('friendReq', sender);
+		if (this.server.sockets.adapter.rooms[recver.id.toString()]) {
+			//if room exist
+			this.server.to(recver.id.toString()).emit('friendReq', sender);
+		}
 		return (await this.friendReqService.sendFriendReq(id, nick))
 	}
 
@@ -50,8 +53,11 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@MessageBody('other') otherId: number, 
 		@MessageBody('result') result: boolean): Promise<boolean> {
 		const id: number = client.data.user.id;
-		const other: UserDto = await this.usersService.getUserById(otherId);
-		result && this.server.to(otherId.toString()).emit('friendReqAccept', other)
+		const newFriend: UserDto = await this.usersService.getUserById(id);
+		if (this.server.sockets.adapter.rooms[otherId.toString()]) {
+			//if room exist
+			result && this.server.to(otherId.toString()).emit('friendReqAccept', newFriend)
+		}
 		return (await this.friendReqService.replyFriendReq(id, otherId, result))
 	}
 
