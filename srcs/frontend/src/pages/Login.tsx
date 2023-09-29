@@ -226,6 +226,8 @@ export function Signin() {
 
 export function TokenPage() {
 
+	//const { auth, setAuth } = useContext(AuthContext);
+
 	const [random] = useState(Math.random().toString(36).slice(2, 12));
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
@@ -243,8 +245,13 @@ export function TokenPage() {
 	async function sendToken() {
 		console.log('send token 2fa');
 
-		localStorage.setItem('_2fa', _2fa);
-		window.location.href = oauth42;
+		//localStorage.setItem('_2fa', _2fa);
+		//window.location.href = oauth42;
+
+		console.log(_2fa);
+		//console.log('test', auth);
+
+
 		
 		//alert(token);
 		// socket.emit('Verify2FA', verifyCode, (response: any) => {
@@ -292,11 +299,10 @@ export function LandingPage() {
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
-	const { auth, setAuth } = useContext(AuthContext);
+	//const { auth, setAuth } = useContext(AuthContext);
 
 	useEffect(() => {
 		localStorage.setItem('random', random);
-		console.log('login', auth, 'rand ', random);
 	}, []);
 
 	console.log(oauth42)

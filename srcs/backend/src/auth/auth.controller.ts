@@ -9,37 +9,35 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService, public jwtService: JwtService) { }
 
-	// @UseGuards(FortyTwoAuthGuard)
-	// @Get('/login')
-	// async login(@Req() req) {
-	// 	return this.authService.login(req.user);
-	// }
-
-	// @Public()
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
-		let jsonRes;
+		let response;
 
-
-		console.log("2fa _>>", req.query._2fa);
-
+		// if 2fa is activated and user have not send token
 		if (!req.query._2fa && req.user.activated2FA) {
-			jsonRes = { id: req.user.id , _2fa: true };
-		} else if (req.query._2fa && req.user.activated2FA) { 
-			const isValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-			console.log('token valid ->>', isValid);
-			if (isValid) {
-				jsonRes = this.jwtService.sign({
-					id: req.user.id,
-					sub: req.user.username,
-					email: req.user.email,
-					login: req.user.username,
-				}, { expiresIn: 3600 });
+			response = { id: req.user.id, _2fa: true };
+			// if 2fa is activated and user have send token
+		} else if (req.query._2fa && req.user.activated2FA) {
+			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+			if (_2faValid) {
+				response = this.createJWT(req);
 			} else {
-				jsonRes = { error: '2fa' };
+				response = { error: '2fa' };
 			}
+			// no 2fa
+		} else {
+			response = this.createJWT(req);
 		}
-		res.status(HttpStatus.OK).json(jsonRes);
+		res.status(HttpStatus.OK).json(response);
+	}
+
+	createJWT(req: any) {
+		return this.jwtService.sign({
+			id: req.user.id,
+			sub: req.user.username,
+			email: req.user.email,
+			login: req.user.username,
+		}, { expiresIn: 3600 });
 	}
 }
