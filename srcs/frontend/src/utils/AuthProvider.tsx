@@ -4,82 +4,113 @@ import { useSearchParams } from "react-router-dom";
 import { Socket } from 'socket.io-client';
 import { socket } from './socket';
 
-type auth = {
-	id: string | null,
-	nickname: string | null,
-	socket: Socket | null,
-	token: string | null,
+interface AuthData {
+	id: number;
+	_2fa: string;
 }
 
-export const AuthContext = createContext<any>(null);
+export const AuthContext = createContext<{ data: AuthData | null; testTest: () => void } | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-	const [auth, setAuth] = useState<auth>({
-		id: null,
-		nickname: null,
-		socket: null,
-		token: null,
+export function AuthProvider({ children }: any) {
+	const [data, setData] = useState<AuthData | null>({
+		id: 0,
+		_2fa: '',
 	});
 
+	const testTest = () => {
+		setData({
+			_2fa: 'sfsd',
+			id: 2332,
+		});
+	};
+
 	return (
-		<AuthContext.Provider value={{ auth, setAuth }}>
+		<AuthContext.Provider value={{ data, testTest }}>
 			{children}
 		</AuthContext.Provider>
 	);
 }
 
+export function useDataContext() {
+	return useContext(AuthContext);
+}
+
+
+// export function AuthProvider({ children }: { children: React.ReactNode }) {
+// 	const [auth, setAuth] = useState('');
+
+// 	return (
+// 		<AuthContext.Provider value={auth.socket}>
+// 			{children}
+// 		</AuthContext.Provider>
+// 	);
+// }
+
 export function CallBack42() {
+	//const authContext = useContext(AuthContext);
+
+	const auth = useContext(AuthContext);
+
+	//const { data, setData } = useAuthContext();
+	//const [auth, setAuth] = AuthProvider();
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
 	const _2fa = localStorage.getItem('_2fa') || null;
-	
-	const api42_continue = async () => {
+
+
+	const cb = async () => {
 		if (!code || !state) return;
 		try {
 			let response;
-			console.log('token: ', _2fa);
-			if (_2fa == null) {
+			if (auth?.data?._2fa === '') {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			} else {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa}`);
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${auth?.data?._2fa}`);
 			}
-			if (!response.ok) throw new Error('response not ok');
 			const data = await response.json();
-
-			console.log(code);
-
 			if (data._2fa) {
-				console.log('2fa');
+
+				//authContext?.setAuth({ ...authContext, _2fa: "aaa" });
+				//authContext?.setAuth({ ...authContext, _2fa: "aaa" });
+				//let updatedAuth;
+				//updatedAuth = 
+				//({ ...authContext?.auth, _2fa: "aaa", id: '212112' });
+				//auth?.setData({ _2fa: '32923');
+
+				// set data on auth?data context
+				//auth?.setData({ ...auth?.data, _2fa: '11', id: 1 });
+
+				
+
+				console.log("asasassaas", auth?.data);
 				setStatus('2fa');
 				return;
 			} else {
-				localStorage.setItem('token', data); // add this line to set the token in localStorage
+				localStorage.setItem('token', data);
 			}
-
-		} catch (error: any) {
-			console.log('api42_continue fails: ', error);
-			console.log('code:', code, 'state: ', state);
+		} catch (err: any) {
+			console.log(err.message)
 		}
-		localStorage.removeItem('_2fa');
+		//localStorage.removeItem('_2fa');
 		setStatus('done');
 	}
-	useEffect(() => { api42_continue() }, []);
+	useEffect(() => { cb() }, []);
 
 	return (
 		<>
 			{status == '2fa' && <Navigate to='/login/2fa' replace />}
-			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
 			{status == 'done' && <Navigate to='/' replace />}
 		</>
 	);
 }
 
 export function Protected() {
-	const { auth, setAuth } = useContext(AuthContext);
-	const [ status, setStatus ] = useState<'connect' | 'error' | 'loading'>('loading');
-	
+	//const { auth, setAuth } = useContext(AuthContext);
+	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
+
 	useEffect(() => {
 		socket.auth = { token: localStorage.getItem('token') };
 		socket.connect();
@@ -103,14 +134,14 @@ export function Protected() {
 		socket.on('connect_error', onError);
 		return () => {
 			socket.off('connect', onConnect);
-			socket.off('disconnect',onDisconnect);
+			socket.off('disconnect', onDisconnect);
 			socket.off('connect_error', onError);
 		};
 	}, []);
 
 	return (
 		<>
-			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
 			{status == 'connect' && <Outlet />}
 			{status == 'error' && <Navigate to="/login" replace />}
 		</>
