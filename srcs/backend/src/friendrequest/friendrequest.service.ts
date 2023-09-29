@@ -52,6 +52,7 @@ export class FriendRequestService {
 		const me = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!me || !friend) return (false);
+		if (me.id == friend.id) return (false);
 		// check if the user had blocked you
 		const blocked = await this.blockService.isBlocked(friend.id, me.id);
 		if (blocked) return (false);
