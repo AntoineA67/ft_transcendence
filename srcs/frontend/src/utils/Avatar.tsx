@@ -16,7 +16,6 @@ export function Avatar({ size, user }: avatarProp) {
 	const [status, setStatus] = useState<'ONLINE' | 'OFFLINE' | 'INGAME'>(user.status);
 	
 	useEffect(() => {
-		console.log(user);
 		// define behavior to user online status
 		function onOnline(id: number) {
 			user.id == id && setStatus('ONLINE');
