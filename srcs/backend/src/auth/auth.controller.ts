@@ -32,6 +32,22 @@ export class AuthController {
 		res.status(HttpStatus.OK).json(response);
 	}
 
+	@Public()
+	@Get('/_2fa/id=:id&token=:token')
+	async twoFactorAuth(@Res() res, @Param('id') id: number, @Param('token') token: string): Promise<any> {
+		const user = await this.usersService.getUserById(id);
+		if (!user) {
+			res.status(HttpStatus.UNAUTHORIZED).json({ error: 'Unauthorized' });
+			return;
+		}
+		const _2faValid = await this.usersService.verify2FA(user, token);
+		if (_2faValid) {
+			res.status(HttpStatus.OK).json({ '2fa' : 'success'});
+		} else {
+			res.status(HttpStatus.UNAUTHORIZED).json({  error: '2fa' });
+		}
+	}
+
 	createJWT(req: any) {
 		return this.jwtService.sign({
 			id: req.user.id,

@@ -14,7 +14,6 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { AuthContext } from '../utils/AuthProvider';
 import { socket } from '../utils/socket';
 
 
@@ -157,7 +156,7 @@ export function Signup() {
 				</Row>
 			</Container>
 		</div>
-		)
+	)
 }
 
 /* sign in page */
@@ -226,10 +225,6 @@ export function Signin() {
 
 export function TokenPage() {
 
-	//const { auth, setAuth } = useContext(AuthContext);
-
-	const pif = useContext(AuthContext);
-
 	const [random] = useState(Math.random().toString(36).slice(2, 12));
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
@@ -239,23 +234,29 @@ export function TokenPage() {
 	const scope = 'scope=public';
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 
-	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
+	const [token, setToken] = useState<string>('');
 
-	const [_2fa, set2fa] = useState<string>('');
+	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 
 	async function sendToken() {
 		console.log('send token 2fa');
 
 		//localStorage.setItem('_2fa', _2fa);
+		console.log("aaa", _2fa);
+
+		localStorage.setItem('_2fa', JSON.stringify({ token: token }));
+
+		const reponse = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&?token=${token}`);
+
+		console.log(reponse);
+
 		//window.location.href = oauth42;
 
-		console.log(_2fa);
-		console.log('sdad', pif);
 		//console.log('test', auth);
 
 		//console.log('ewwe', data);
-		
+
 		//alert(token);
 		// socket.emit('Verify2FA', verifyCode, (response: any) => {
 		// 	console.log(response);
@@ -270,11 +271,11 @@ export function TokenPage() {
 			<Container >
 				<Row className="justify-content-center">
 					<Col sm="6" lg="4" >
-						<Form className="w-100"  onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
+						<Form className="w-100" onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
 							<Form.Group className="my-4" controlId="token">
 								<Form.Label>Token</Form.Label>
 								<Form.Control required type="text" placeholder="token"
-									value={_2fa} onChange={(e) => set2fa(e.target.value)} />
+									value={token} onChange={(e) => setToken(e.target.value)} />
 							</Form.Group>
 
 							<button type="submit" className="btn btn-primary w-100">
@@ -330,12 +331,12 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								
+
 								<a href={oauth42} className="btn-invisible w-75">
 									<span>Sign in with </span>
 									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
 								</a>
-								
+
 							</div>
 						</div>
 					</Col>

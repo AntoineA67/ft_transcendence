@@ -21,7 +21,7 @@ import './styles/customButton.css';
 import './styles/customForm.css';
 import './styles/index.css';
 
-import AuthProvider, { CallBack42, Protected } from './utils/AuthProvider';
+import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';
@@ -36,42 +36,40 @@ const root = ReactDOM.createRoot(
 );
 root.render(
 	<BrowserRouter>
-		<AuthProvider>
-			<Routes>
-				<Route element={<Guest />}>
-					<Route path="/login" element={<Login />}>
-						<Route index element={<LandingPage />}></Route>
-						<Route path="signin" element={<Signin />}></Route>
-						<Route path="signup" element={<Signup />}></Route>
-						<Route path="2fa" element={<TokenPage />}></Route>
-					</Route>
+		<Routes>
+			<Route element={<Guest />}>
+				<Route path="/login" element={<Login />}>
+					<Route index element={<LandingPage />}></Route>
+					<Route path="signin" element={<Signin />}></Route>
+					<Route path="signup" element={<Signup />}></Route>
+					<Route path="2fa" element={<TokenPage />}></Route>
 				</Route>
+			</Route>
 
-				<Route path='/42/callback' element={<CallBack42 />} />
+			<Route path='/42/callback' element={<CallBack42 />} />
 
-				<Route element={<Protected />}>
-					<Route path="/" element={<Sidebar />}>
-						<Route index element={<Profile />} />
-						<Route path="search" element={<Search />}></Route>
-						<Route path="friends" element={<Friends />}></Route>
-						<Route path="chat" element={<Chat />}>
-							<Route path=':chatId' element={<ChatBox />}></Route>
-						</Route>
-						<Route path="setting" element={<Setting />}>
-							<Route index element={<SettingMenu />}></Route>
-							<Route path='changepassword' element={<ChangePassword />}></Route>
-							<Route path='doubleauth' element={<DoubleAuth />}></Route>
-						</Route>
-						<Route path="/game" element={<>
-							<GameSocketProvider>
-								<Game />
-							</GameSocketProvider>
-						</>}></Route>
+			<Route element={<Protected />}>
+				<Route path="/" element={<Sidebar />}>
+					<Route index element={<Profile />} />
+					<Route path="search" element={<Search />}></Route>
+					<Route path="friends" element={<Friends />}></Route>
+					<Route path="chat" element={<Chat />}>
+						<Route path=':chatId' element={<ChatBox />}></Route>
 					</Route>
-					<Route path="/test-db" element={<TestDB />} />
+					<Route path="setting" element={<Setting />}>
+						<Route index element={<SettingMenu />}></Route>
+						<Route path='changepassword' element={<ChangePassword />}></Route>
+						<Route path='doubleauth' element={<DoubleAuth />}></Route>
+					</Route>
+					<Route path="/game" element={<>
+						<GameSocketProvider>
+							<Game />
+						</GameSocketProvider>
+					</>}></Route>
 				</Route>
-			</Routes>
-		</AuthProvider>
+				<Route path="/test-db" element={<TestDB />} />
+			</Route>
+		</Routes>
 	</BrowserRouter>
 
 	//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />

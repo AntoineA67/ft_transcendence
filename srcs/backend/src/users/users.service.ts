@@ -153,7 +153,7 @@ export class UsersService {
 		}
 	}
 
-	async verify2FA(user: User, token: string) {
+	async verify2FA(user: any, token: string) {
 		user = await this.prisma.user.findUnique({
 			where: { id: user.id }
 		});
