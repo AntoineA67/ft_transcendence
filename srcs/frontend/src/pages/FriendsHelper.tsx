@@ -38,10 +38,13 @@ export function FriendList() {
 		)
 	}
 	return (
-		<ul className='p-0 m-0'>
-			{friends.map(myMap)}
-		</ul>
-
+		(friends.length == 0) ? (
+			<h5 style={{color: 'grey'}}>Empty</h5>
+		) : (
+			<ul className='p-0 m-0'>
+				{friends.map(myMap)}
+			</ul>
+		)
 	);
 }
 
@@ -129,8 +132,12 @@ export function BlockList() {
 	}
 
 	return (
-		<ul className='p-0'>
-			{blocks.map(myMap)}
-		</ul>
+		(blocks.length == 0) ? (
+			<h5 style={{ color: 'grey' }}>Empty</h5>
+		) : (
+			<ul className='p-0'>
+				{blocks.map(myMap)}
+			</ul>
+		)
 	);
 }
