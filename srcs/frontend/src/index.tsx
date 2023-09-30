@@ -21,7 +21,7 @@ import './styles/customButton.css';
 import './styles/customForm.css';
 import './styles/index.css';
 
-import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
+import AuthProvider, { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';

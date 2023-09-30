@@ -228,6 +228,8 @@ export function TokenPage() {
 
 	//const { auth, setAuth } = useContext(AuthContext);
 
+	const pif = useContext(AuthContext);
+
 	const [random] = useState(Math.random().toString(36).slice(2, 12));
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
@@ -249,9 +251,10 @@ export function TokenPage() {
 		//window.location.href = oauth42;
 
 		console.log(_2fa);
+		console.log('sdad', pif);
 		//console.log('test', auth);
 
-
+		//console.log('ewwe', data);
 		
 		//alert(token);
 		// socket.emit('Verify2FA', verifyCode, (response: any) => {
