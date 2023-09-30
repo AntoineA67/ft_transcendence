@@ -96,13 +96,28 @@ type BlockListProp = {
 }
 export function BlockList({ blocks, setBlocks }: BlockListProp) {
 
-	
+	useEffect(() => {
+		// get newest blocks
+		function handleBlock(otherUser: userType) {
+			console.log('unblock event: ', otherUser)
+			// setBlocks([... blocks, otherUser])
+		}
+		function handleUnblock(otherUser: userType) {
+			console.log('unblock event: ', otherUser)
+			// setBlocks(blocks.filter((x) => (x.id != otherUser.id)))
+		}
+		socket.on('block', handleBlock);
+		socket.on('unblock', handleUnblock);
+		return (() => {
+			socket.off('block', handleBlock);
+			socket.off('unblock', handleUnblock);
+		})
+	}, [])
 
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				<UserItem user={user} linkTo={user.username} />
-				
+				<UserItem user={user} linkTo={user.username} />	
 			</li>
 		)
 	}
