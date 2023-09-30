@@ -235,35 +235,17 @@ export function TokenPage() {
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 
 	const [token, setToken] = useState<string>('');
-
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
-
 	async function sendToken() {
-		console.log('send token 2fa');
-
-		//localStorage.setItem('_2fa', _2fa);
-		console.log("aaa", _2fa);
-
-		localStorage.setItem('_2fa', JSON.stringify({ token: token }));
-
-		const reponse = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&?token=${token}`);
-
-		console.log(reponse);
-
-		//window.location.href = oauth42;
-
-		//console.log('test', auth);
-
-		//console.log('ewwe', data);
-
-		//alert(token);
-		// socket.emit('Verify2FA', verifyCode, (response: any) => {
-		// 	console.log(response);
-		// 	if (response == true) {
-		// 		alert('2FA is enabled');
-		// 	}
-		// });
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived : _2fa.actived }));
+		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		const data = await response.json();
+		if (data._2fa === 'success') {
+			window.location.href = oauth42;
+		} else {
+			alert('bad 2fa !');
+		}
 	}
 
 	return (
@@ -303,10 +285,9 @@ export function LandingPage() {
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
-	//const { auth, setAuth } = useContext(AuthContext);
-
 	useEffect(() => {
 		localStorage.setItem('random', random);
+		localStorage.removeItem('_2fa');
 	}, []);
 
 	console.log(oauth42)
