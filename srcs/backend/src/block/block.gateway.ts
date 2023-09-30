@@ -32,11 +32,11 @@ export class BlockGateway {
 		const result = await this.blockService.createBlock(id, otherId); 
 		// if fails, no emit
 		if (!result) return (result);
-		if (this.server.sockets.adapter.rooms[id.toString()]) {
-			this.server.to(id.toString()).emit('block', user, otherUser);
+		if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(id.toString()).emit('block', otherUser);
 		}
-		if (this.server.sockets.adapter.rooms[otherId.toString()]) {
-			this.server.to(otherId.toString()).emit('block', user, otherUser);
+		if (this.server.of('/').adapter.rooms.get(otherId.toString())) {
+			this.server.to(otherId.toString()).emit('blocked', user);
 		}
 		return (result);
 	}
@@ -52,11 +52,11 @@ export class BlockGateway {
 		const result = await this.blockService.unBlock(id, otherId);
 		// if fails, no emit
 		if (!result) return (result);
-		if (this.server.sockets.adapter.rooms[id.toString()]) {
-			this.server.to(id.toString()).emit('unblock', user, otherUser);
+		if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(id.toString()).emit('unblock', otherUser);
 		}
-		if (this.server.sockets.adapter.rooms[otherId.toString()]) {
-			this.server.to(otherId.toString()).emit('unblock', user, otherUser);
+		if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(otherId.toString()).emit('unblocked', user);
 		}
 		return (result);
 	}
