@@ -6,7 +6,7 @@ import Container from 'react-bootstrap/Container';
 import { useEffect, useState } from "react";
 import { socket } from "./socket";
 import { Options } from "./Options";
-
+import { GoUp } from './GoUp'
 export function UserProfile() {
 	const { friendNick } = useParams();
 	const location = useLocation();
@@ -27,6 +27,7 @@ export function UserProfile() {
 				&& !profile.friend && <Navigate to={`/search`} replace={true} /> }
 			{ profile && 
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
+					<GoUp />
 					<Container 
 						className="my-5 pb-sm-5 d-flex flex-column align-items-center"
 						style={{ color: "white" }}>	
