@@ -27,6 +27,7 @@ export function CallBack42() {
 				return;
 			}
 			localStorage.setItem('token', data);
+			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log(err.message)
 		}
