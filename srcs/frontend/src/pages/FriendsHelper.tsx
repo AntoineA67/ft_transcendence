@@ -2,27 +2,33 @@ import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
 import { socket } from "../utils/socket";
 import { ReqItem } from "../utils/ReqItem";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-
-type FriendListProp = {
-	friends: userType[],
-	setFriends: React.Dispatch<React.SetStateAction<userType[]>>,
-}
-export function FriendList({ friends, setFriends }: FriendListProp) {
+export function FriendList() {
+	const [ friends, setFriends ] = useState<userType[]>([]);
+	
+	const findAllFriends = () => {
+		socket.emit('findAllFriends', (res: userType[]) => {
+			setFriends(res);
+		})
+	}
+	const handleFriendReqAccept = (replier: userType) => {
+		console.log('handleaccept: ', replier);
+		setFriends((prev) => ([...prev, replier]));
+	}
 	
 	useEffect(() => {
-		// define behavior on friendReqAccept
-		function handleFriendReqAccept(replier: userType) {
-			setFriends([...friends, replier]);
-		}
-
+		findAllFriends();
 		socket.on('friendReqAccept', handleFriendReqAccept);
+		socket.on('block', findAllFriends)
+		socket.on('unblock', findAllFriends)
+		
 		return (() => {
 			socket.off('friendReqAccept', handleFriendReqAccept);
+			socket.off('block', findAllFriends)
+			socket.off('unblock', findAllFriends)
 		});
 	}, [])
-	
 	
 	const myMap = (user: userType) => {
 		return (
@@ -39,18 +45,17 @@ export function FriendList({ friends, setFriends }: FriendListProp) {
 	);
 }
 
-type FriendReqListProp = {
-	reqs: userType[], 
-	setReqs: React.Dispatch<React.SetStateAction<userType[]>>
-}
-export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
+export function FriendReqList() {
+	const [ reqs, setReqs ] = useState<userType[]>([])
 
 	useEffect(() => {
-		// define behavior on new invitation
+		socket.emit('findAllReqs', (res: userType[]) => {
+			setReqs(res);
+		})
 		function handleReq(sender: userType) {
-			setReqs([...reqs, sender]);
+			setReqs((prev) => ([... prev, sender]))
+			// setReqs([...reqs, sender]);
 		}
-
 		socket.on('friendReq', handleReq);
 		return (() => {
 			socket.off('friendReq', handleReq);
@@ -90,21 +95,22 @@ export function FriendReqList({ reqs, setReqs }: FriendReqListProp) {
 	);
 }
 
-type BlockListProp = {
-	blocks: userType[],
-	setBlocks: React.Dispatch<React.SetStateAction<userType[]>>,
-}
-export function BlockList({ blocks, setBlocks }: BlockListProp) {
+
+export function BlockList() {
+	const [ blocks, setBlocks ] = useState<userType[]>([])
 
 	useEffect(() => {
-		// get newest blocks
+		socket.emit('findAllBlocks', (res: userType[]) => {
+			setBlocks(res)
+			console.log('res', res);
+		})
+
 		function handleBlock(otherUser: userType) {
-			console.log('unblock event: ', otherUser)
-			// setBlocks([... blocks, otherUser])
+			console.log('blocks', otherUser)
+			setBlocks((prev) => ([... prev, otherUser]))
 		}
-		function handleUnblock(otherUser: userType) {
-			console.log('unblock event: ', otherUser)
-			// setBlocks(blocks.filter((x) => (x.id != otherUser.id)))
+		function handleUnblock(otherUser: userType) {			
+			setBlocks((prev) => (prev.filter((x) => (x.id != otherUser.id))))
 		}
 		socket.on('block', handleBlock);
 		socket.on('unblock', handleUnblock);
