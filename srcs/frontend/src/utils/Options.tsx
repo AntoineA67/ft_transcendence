@@ -100,11 +100,37 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 }
 
 export function ChatOption({ profile, setProfile }: optionProp) {
-	const [text, setText] = useState<'Chat' | 'blocked'>('Chat');
+	const [text, setText] = useState<'Chat' | 'block'>('Chat');
 
 	useEffect(() => {
-		profile.blocked && setText('blocked');
+		function handleBlock() {
+			setProfile((prev) => ({... prev, block: true}))
+		}
+		function handleBlocked() {
+			setProfile((prev) => ({... prev, blocked: true}))
+		}
+		function handleUnblock() {
+			setProfile((prev) => ({... prev, block: false}))
+		}
+		function handleUnblocked() {
+			setProfile((prev) => ({... prev, blocked: false}))
+		}
+		socket.on('block', handleBlock)
+		socket.on('blocked', handleBlocked)
+		socket.on('unblock', handleUnblock)
+		socket.on('unblocked', handleUnblocked)
+		return (() => {
+			socket.off('block', handleBlock)
+			socket.off('blocked', handleBlocked)
+			socket.off('unblock', handleUnblock)
+			socket.off('unblocked', handleUnblocked)
+		})
+		
 	}, [])
+
+	useEffect(() => {
+		(profile.block || profile.blocked) ? setText('block') : setText('Chat');
+	}, [profile.block, profile.blocked])
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
@@ -122,11 +148,37 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 }
 
 export function PongOption({ profile, setProfile }: optionProp) {
-	const [text, setText] = useState<'Pong' | 'blocked'>('Pong');
+	const [text, setText] = useState<'Pong' | 'block'>('Pong');
 
 	useEffect(() => {
-		profile.blocked && setText('blocked');
+		function handleBlock() {
+			setProfile((prev) => ({ ...prev, block: true }))
+		}
+		function handleBlocked() {
+			setProfile((prev) => ({ ...prev, blocked: true }))
+		}
+		function handleUnblock() {
+			setProfile((prev) => ({ ...prev, block: false }))
+		}
+		function handleUnblocked() {
+			setProfile((prev) => ({ ...prev, blocked: false }))
+		}
+		socket.on('block', handleBlock)
+		socket.on('blocked', handleBlocked)
+		socket.on('unblock', handleUnblock)
+		socket.on('unblocked', handleUnblocked)
+		return (() => {
+			socket.off('block', handleBlock)
+			socket.off('blocked', handleBlocked)
+			socket.off('unblock', handleUnblock)
+			socket.off('unblocked', handleUnblocked)
+		})
+
 	}, [])
+
+	useEffect(() => {
+		(profile.block || profile.blocked) ? setText('block') : setText('Pong');
+	}, [profile.block, profile.blocked])
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
