@@ -23,8 +23,8 @@ export function UserProfile() {
 	return (
 		<>
 			{ !profile &&  <p style={{color: 'white'}}>loading</p> }
-			{ profile && location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search`} replace={true} /> }
+			{/* { profile && location.pathname.startsWith('/friends/')
+				&& !profile.friend && <Navigate to={`/search`} replace={true} /> } */}
 			{ profile && 
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<GoUp />
