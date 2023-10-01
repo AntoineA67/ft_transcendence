@@ -33,14 +33,23 @@ export function AddOption({profile, setProfile}: optionProp) {
 		profile.friend && setText('Friend!');
 		// define socket listener
 		function handleReqAccept(newFriend: userType) {
-			(newFriend.id == profile.id) && setProfile(
-				{... profile, sent: false, friend: true }
-			)
+			if (newFriend.id == profile.id) {
+				setText('Friend!')
+				setProfile((prev) => ({... prev, sent: false, friend: true }))
+			}
+		}
+		function handleSendFriendReq(recver: userType) {
+			if (recver.id == profile.id) {
+				setText('Sent');
+				setProfile((prev) => ({... prev, sent: true}))
+			}
 		}
 		socket.on('friendReqAccept', handleReqAccept);
+		socket.on('sendfriendReq', handleSendFriendReq);
 		
 		return (() => {
 			socket.off('friendReqAccept', handleReqAccept);
+			socket.off('sendfriendReq', handleSendFriendReq);
 		})
 	}, [])
 
@@ -48,7 +57,7 @@ export function AddOption({profile, setProfile}: optionProp) {
 		e.preventDefault();
 		if (text == 'Add') {
 			socket.emit('sendReq', profile.username);
-			setProfile({... profile, sent: true})
+			setProfile((prev) => ({... prev, sent: true}))
 		}
 	}
 	
@@ -72,12 +81,12 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 		e.preventDefault();
 		if (text == 'Block') {
 			socket.emit('block', profile.id);
-			setProfile({ ...profile, block: true })
+			setProfile((prev) => ({ ... prev, block: true }))
 			setText('Unblock')
 		}
 		if (text == 'Unblock') {
 			socket.emit('unblock', profile.id);
-			setProfile({ ...profile, block: false })
+			setProfile((prev) => ({ ...prev, block: false }))
 			setText('Block')
 		}
 	}
