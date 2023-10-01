@@ -43,7 +43,10 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		// if fail, no emit
 		if (!result) return (result);
 		if (this.server.of('/').adapter.rooms.get(recver.id.toString())) {
-			this.server.to(recver.id.toString()).emit('friendReq', sender);
+			this.server.to(recver.id.toString()).emit('recvfriendReq', sender);
+		}
+		if (this.server.of('/').adapter.rooms.get(sender.id.toString())) {
+			this.server.to(sender.id.toString()).emit('sendfriendReq', recver);
 		}
 		return (result);
 	}

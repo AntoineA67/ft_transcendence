@@ -56,12 +56,12 @@ export function FriendReqList() {
 			setReqs(res);
 		})
 		function handleReq(sender: userType) {
-			setReqs((prev) => ([... prev, sender]))
+			setReqs((prev) => ([sender, ... prev]))
 			// setReqs([...reqs, sender]);
 		}
-		socket.on('friendReq', handleReq);
+		socket.on('recvfriendReq', handleReq);
 		return (() => {
-			socket.off('friendReq', handleReq);
+			socket.off('recvfriendReq', handleReq);
 		});
 	}, [])
 	
