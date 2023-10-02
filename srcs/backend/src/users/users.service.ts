@@ -122,19 +122,27 @@ export class UsersService {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
-				id: true, 
-				username: true, 
-				avatar: true, 
-				bio: true, 
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
 				status: true
 			}
 		});
-		return ({ ... profile, 
-			friend: null, block: null, blocked: null, sent: null })
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null
+		})
 	}
 
 	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile =  await this.prisma.user.findUnique({
+		let profile = await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
