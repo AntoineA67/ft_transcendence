@@ -64,9 +64,9 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		e: React.FormEvent<HTMLFormElement>, 
 		type: string, profile: profileType, 
 		setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
-		) {
+	) {
 		const content = (type == 'nick') ? profile.username : profile.bio;
-		const obj = (type == 'nick') ? { username: content } : { bio: content };
+		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
 		e.preventDefault();
 		if (mod == content) {
 			setEdit('done');
@@ -74,7 +74,11 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			success && setProfile({... profile, ... obj});
+			console.log('profile', profile)
+			console.log('obj', obj)
+			success && setProfile((prev) => (
+				prev ? ({... prev, ... obj}) : prev
+			));
 		})
 		setEdit('done');
 	}
