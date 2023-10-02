@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -25,21 +26,12 @@ export class AuthService {
 		if (!user) {
 			throw new BadRequestException('Unauthenticated');
 		}
-
 		let userExists: any = await this.findUserByLogin(user.username);
-		console.log('userExists', userExists);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
 		}
-
-		// generate and return JWT, expiresIn is in seconds
-		return this.jwtService.sign({
-			id: userExists.id,
-			sub: userExists.username,
-			email: userExists.email,
-			login: userExists.username,
-		}, { expiresIn: 3600 });
+		return (userExists);
 	}
 
 	// select * from "user";

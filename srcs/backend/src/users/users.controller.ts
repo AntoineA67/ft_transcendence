@@ -9,19 +9,24 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Controller('users')
 export class UsersController {
-	constructor(private readonly usersService: UsersService, private prisma: PrismaService) {
-		this.logger.log('users controller')
-	}
+	constructor(private readonly usersService: UsersService) { }
 
-	private logger = new Logger('users');
+	// @Get()
+	// async getUsers() {
+	// 	return await (this.usersService.getAllUsers());
+	// }
+	
+	
 
-	// @Post('newAvatar')
-	// @UseInterceptors(FileInterceptor('avatar'))
-	// uploadFile(@UploadedFile() file: Express.Multer.File) {
-		
-	// 	console.log(file);
-		
-	// 	if (file.mimetype != 'image/jpeg') { return ('not jpeg') }
-	// 	return ('get it')
+	// @Get(':nick')
+	// async getUser(@Param('nick') nick: string): Promise<any> {
+	// 	// return ('wtf')
+	// 	let res: any;
+	// 	try {
+	// 		res =  await (this.usersService.getUserByNick(nick));
+	// 	} catch (err: any) {
+	// 		return ('wtf');
+	// 	}
+	// 	return (res);
 	// }
 }
