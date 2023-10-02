@@ -5,6 +5,7 @@ import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Socket } from 'socket.io';
+import { UsersService } from 'src/users/users.service';
 
 type MessageWithUsername = {
 	id: number;
@@ -18,19 +19,28 @@ type MessageWithUsername = {
 @WebSocketGateway({ cors: true })
 export class RoomGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private readonly roomService: RoomService) { }
+	constructor(private readonly roomService: RoomService, private readonly usersService: UsersService) { }
 	private logger: Logger = new Logger('RoomGateway');
 
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
-		client.join(id.toString());
+		await this.usersService.updateUser(id, { status: 'ONLINE' });
+		// client join a room
+		const name = "room_" + id.toString();
+		client.join(name);
+		//emit to everyone
+		client.broadcast.emit('online', id);	
 	}
-
+	
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
-		client.leave(id.toString());
+		await this.usersService.updateUser(id, { status: 'OFFLINE' });
+		// client leave a room
+		const name = "room_" + id.toString();
+		client.leave(name);
+		// emit to everyone
+		client.broadcast.emit('offline', id);
 	}
-
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
@@ -47,23 +57,23 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('createChannelRoom')
-	async handleCreateChannelRoom(@ConnectedSocket() client: Socket, @MessageBody() roomTitle: string): Promise<void> {
+	async handleCreateChannelRoom(@ConnectedSocket() client: Socket, @MessageBody() roomTitle: string): Promise<Number> {
 		const userId: number = client.data.user.id;
 		const createdRoom = await this.roomService.createChannelRoom(roomTitle, userId);
 		if (createdRoom)
-			client.emit('roomCreated', createdRoom);
+			return(createdRoom.id);
 		else
-			client.emit('roomCreated', null);
+			return(0);
 	}
 
 	@SubscribeMessage('createPrivateRoom')
-	async handleCreatePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() username: string): Promise<void> {
+	async handleCreatePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() username: string): Promise<Number> {
 		const userId: number = client.data.user.id;
 		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 		if (createdRoom)
-			client.emit('roomCreated', createdRoom);
+			return(createdRoom.id);
 		else
-			client.emit('roomCreated', null);
+			return(0);
 	}
 
 	@SubscribeMessage('joinRoom')

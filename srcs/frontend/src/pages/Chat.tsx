@@ -60,7 +60,6 @@ export function ChatBox() {
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
-		socket.connect();
 		socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string }) => {
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
@@ -74,13 +73,12 @@ export function ChatBox() {
 		socket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
 			setMemberstatus(data);
 		});
-
-		socket.on('messageSent', (newMessage: Message) => {
+		function fc(newMessage: Message) {
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
-		});
+		}
+		socket.on('messageSent', fc);
 		return () => {
-			socket.disconnect();
-			socket.off('messageSent');
+			socket.off('messageSent', fc);
 		};
 	}, [chatId]);
 
@@ -219,41 +217,6 @@ function MyForm({
 	);
 }
 
-function JoinGroupHandler({ roomTitle, roomid, password }: { roomTitle: string; roomid: string; password: string }) {
-	const [joinbool, setJoinbool] = useState<boolean>();
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		const roomdata = {
-			roomTitle: roomTitle,
-			roomid: roomid,
-			password: password,
-		};
-		socket.emit('joinRoom', roomdata, (response: boolean) => {
-			if (response === false) {
-				console.error('Erreur lors de la connexion au groupe : ', roomTitle);
-			} else {
-				setJoinbool(true);
-			}
-		});
-		return () => {
-			socket.disconnect();
-		};
-	}, [roomTitle, roomid, password]);
-
-	useEffect(() => {
-		if (joinbool === undefined)
-			return;
-		if (joinbool === true) {
-			navigate(`/chat/${roomid}`);
-		} else {
-			alert('Wrong Name or Room ID or Password or you\'re already in the room');
-			navigate('/chat');
-		}
-	}, [joinbool, navigate, roomid]);
-	return null;
-}
-
 function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
 	const [nick, setNick] = useState('');
 	const [join, setJoin] = useState('');
@@ -261,7 +224,8 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	const [roomId, setRoomId] = useState('');
 	const [password, setPassword] = useState('');
 	const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
-	const [isJoinHandlerVisible, setJoinHandlerVisible] = useState(false);
+	const navigate = useNavigate();
+
 
 	const JoinGroup = (roomTitle: string) => {
 		if (roomTitle.trim() !== '') {
@@ -274,34 +238,52 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 			alert('Please enter both Room ID and Room title. (the password is optional)');
 			return;
 		}
-		setJoinHandlerVisible(true);
 		setJoinDialogOpen(false);
+		handleJoinGroup();
 	};
 
 	const handleCreateGroup = (roomTitle: string) => {
-		if (roomTitle.trim() !== '') {
-			socket.emit('createChannelRoom', roomTitle);
-			socket.on('roomCreated', (response: Rooms) => {
-				if (response)
-					setPage('chatList');
-				else
-					console.error(`Erreur lors de la création du groupe : `, roomTitle);
-				return ;
-			});
-		}
+		if (roomTitle.trim() === '')
+			return ;
+		socket.emit('createChannelRoom', roomTitle, (response: number) => {
+			if (response > 0) {
+				setPage('chatList');
+				navigate(`/chat/${response}`);
+			}
+			else
+				alert(`Error while creating room ${roomTitle}`);
+		});
 	}
 
 	const handlePrivateMessage = (username: string) => {
-		if (username.trim() !== '') {
-			socket.emit('createPrivateRoom', username);
-			socket.on('roomCreated', (response: Rooms) => {
-				if (response)
-					setPage('chatList');
-				else
-					console.error(`Erreur lors de la création du groupe : `, username); // TODO: why this is called exponential time ?
-				return ;
+		if (username.trim() === '')
+			return ;
+		socket.emit('createPrivateRoom', username, (response: number) => {
+			if (response > 0) {
+				setPage('chatList');
+				navigate(`/chat/${response}`);
+			}
+			else
+				alert(`Error while creating room with ${username}`);
+		});
+	}
+
+	const handleJoinGroup = () => {
+			const roomdata = {
+				roomTitle: join,
+				roomid: roomId,
+				password: password,
+			};
+			socket.emit('joinRoom', roomdata, (response: boolean) => {
+				if (response === false) {
+					alert('Wrong Name or Room ID or Password or you\'re already in the room');
+					setJoin('');
+					setRoomId('');
+					setPassword('');
+				} else {
+					navigate(`/chat/${roomId}`);
+				}
 			});
-		}
 	}
 
 	return (
@@ -349,7 +331,6 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 					</div>
 				</div>
 			)}
-			{isJoinHandlerVisible && (<JoinGroupHandler roomTitle={join} roomid={roomId} password={password} />)}
 		</div>
 	);
 }

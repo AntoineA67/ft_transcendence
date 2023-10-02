@@ -51,15 +51,9 @@ root.render(
 						<Route index element={<Profile />} />
 						<Route path="search" element={<Search />} />
 						<Route path="friends" element={<Friends />} />
-						<Route path="/chat/*" element={
-							<ChatSocketProvider>
-								<Routes>
-									<Route path='/' element={<Chat />} children={<Route path=":chatId" element={<ChatBox />} />} />
-
-
-								</Routes>
-							</ChatSocketProvider>
-						} />
+						<Route path="chat" element={<Chat />}>
+							<Route path=':chatId' element={<ChatBox />}></Route>
+						</Route>
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />} />
 							<Route path='changepassword' element={<ChangePassword />} />
