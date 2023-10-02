@@ -54,8 +54,9 @@ root.render(
 						<Route path="/chat/*" element={
 							<ChatSocketProvider>
 								<Routes>
-									<Route index element={<Chat />} />
-									<Route path=":chatId" element={<ChatBox />} />
+									<Route path='/' element={<Chat />} children={<Route path=":chatId" element={<ChatBox />} />} />
+
+
 								</Routes>
 							</ChatSocketProvider>
 						} />
