@@ -10,27 +10,27 @@ import { GoUp } from './GoUp'
 export function UserProfile() {
 	const { friendNick } = useParams();
 	const location = useLocation();
-	const [ profile, setProfile ] = useState<profileType | null>(null);
+	const [profile, setProfile] = useState<profileType | null>(null);
 
-	
+
 	useEffect(() => {
 		socket.emit('Profile', friendNick, (res: profileType) => {
 			setProfile(res)
 			console.log('res', res)
 		})
 	}, [friendNick])
-	
+
 	return (
 		<>
-			{ !profile &&  <p style={{color: 'white'}}>loading</p> }
-			{/* { profile && location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search`} replace={true} /> } */}
-			{ profile && 
+			{!profile && <p style={{ color: 'white' }}>loading</p>}
+			{profile && location.pathname.startsWith('/friends/')
+				&& !profile.friend && <Navigate to={`/search`} replace={true} />}
+			{profile &&
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<GoUp />
-					<Container 
+					<Container
 						className="my-5 pb-sm-5 d-flex flex-column align-items-center"
-						style={{ color: "white" }}>	
+						style={{ color: "white" }}>
 
 						<Avatar size={150} user={{
 							id: profile.id,
