@@ -62,4 +62,13 @@ export class UsersGateway
 		}
 		return (false);
 	}
+
+	@SubscribeMessage('Status2FA')
+	async handleStatus2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		const user = await this.usersService.getUserById(client.data.user.id);
+		console.log(user);
+		if (user.activated2FA === true)
+			return (true);
+		return (false);
+	}
 } 

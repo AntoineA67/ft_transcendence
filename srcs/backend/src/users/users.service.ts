@@ -111,6 +111,7 @@ export class UsersService {
 					username: true,
 					avatar: true,
 					status: true,
+					activated2FA: true,
 				}
 			})
 		)

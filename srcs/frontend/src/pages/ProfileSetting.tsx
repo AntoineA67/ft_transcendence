@@ -99,10 +99,20 @@ export function DoubleAuth() {
 
 	const handleSetVerifyCode = (e: any) => {
 		setVerifyCode(e.target.value);
-	  };
+	};
+
+	const get2faStatus = () => {
+		socket.emit('Status2FA', (response: any) => {
+			console.log(response);
+			if (response == true) {
+				console.log('2FA is enabled');
+			}
+		});
+	};
 
 	useEffect(() => {
 		create2FASubmit();
+		get2faStatus();
 	}, [isSwitchOn]);
 
 	return (
@@ -120,7 +130,7 @@ export function DoubleAuth() {
 					<QRCode value={qrCodePath} />
 				</form>
 				<br></br>
-				<form className="d-flex flex-column"  onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
+				<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
 					<Form.Control
 						size="lg"
 						type="number"
