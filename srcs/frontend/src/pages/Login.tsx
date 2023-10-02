@@ -15,6 +15,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { socket } from '../utils/socket';
+import { closeSnackbar, enqueueSnackbar } from "notistack";
 
 
 type newUser = {
@@ -238,13 +239,14 @@ export function TokenPage() {
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	async function sendToken() {
-		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived : _2fa.actived }));
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived: _2fa.actived }));
 		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
 			window.location.href = oauth42;
 		} else {
-			alert('bad 2fa !');
+			enqueueSnackbar('bad 2fa !', { variant: 'error' });
+			// alert('bad 2fa !');
 		}
 	}
 

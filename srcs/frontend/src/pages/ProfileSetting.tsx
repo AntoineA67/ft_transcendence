@@ -11,6 +11,7 @@ import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
+import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 
 
 export function Title({ title }: { title: string }) {
@@ -56,18 +57,21 @@ export function ChangePassword() {
 	}
 
 	return (
-		<Container fluid className='px-0 h-75'>
-			<Title title="Change password" />
-			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{ minHeight: '400px' }}>
-				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
-					<InputPassword id='Current password' togglePassword={togglePassword} />
-					<InputPassword id='New password' togglePassword={togglePassword} />
-					<InputPassword id='Confirm password' togglePassword={togglePassword} />
-					<div style={{ color: 'white' }}>Error message if any</div>
-					<button type='submit' className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Confirm</button>
-				</form>
-			</Stack>
-		</Container>
+		<>
+			<SnackbarProvider />
+			<Container fluid className='px-0 h-75'>
+				<Title title="Change password" />
+				<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{ minHeight: '400px' }}>
+					<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+						<InputPassword id='Current password' togglePassword={togglePassword} />
+						<InputPassword id='New password' togglePassword={togglePassword} />
+						<InputPassword id='Confirm password' togglePassword={togglePassword} />
+						<div style={{ color: 'white' }}>Error message if any</div>
+						<button type='submit' className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Confirm</button>
+					</form>
+				</Stack>
+			</Container>
+		</>
 	);
 }
 
@@ -87,7 +91,8 @@ export function DoubleAuth() {
 		socket.emit('Verify2FA', verifyCode, (response: any) => {
 			console.log(response);
 			if (response == true) {
-				alert('2FA is enabled');
+				// alert('2FA is enabled');
+				enqueueSnackbar('2FA is enabled', { variant: 'success' });
 			}
 		});
 	}
