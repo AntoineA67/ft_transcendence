@@ -6,11 +6,12 @@ import Col from 'react-bootstrap/Col';
 
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
+import { profileType } from '../../types/user';
 
 
 export function Title({ title }: { title: string }) {
@@ -148,9 +149,70 @@ export function DoubleAuth() {
 }
 
 export function SettingMenu() {
+
+	const [profile, setProfile] = useState<profileType | null>(null);
+
+	useEffect(() => {
+		if (!profile) {
+			console.log("emit");
+			socket.emit('MyProfile', profile, (res: profileType) => {
+				setProfile(res);
+			});
+		}
+	}, [profile]);
+
+
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		console.log('handle submit: change password');
+	};
+
+	const togglePassword = (id: string) => {
+		let x = document.getElementById(id) as HTMLInputElement;
+		let eye = document.getElementById("eye") as HTMLImageElement;
+		if (x.type === "password") {
+			x.type = "text";
+			eye.src = eyeclose;
+		} else {
+			x.type = "password";
+			eye.src = eyeopen;
+		}
+	}
+
+
 	return (
 		<Container fluid className='px-0 h-75'>
 			<Title title="Setting" />
+
+
+
+			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" style={{ minHeight: '400px' }}>
+				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+					<InputPassword id='Current password' togglePassword={togglePassword} />
+					<InputPassword id='New password' togglePassword={togglePassword} />
+					<InputPassword id='Confirm password' togglePassword={togglePassword} />
+					{/* <div style={{ color: 'white' }}>Error message if any</div> */}
+					<button type='submit' className='btn btn-outline-secondary w-100'>Confirm</button>
+					<p>{profile!.bio}</p>
+				</form>
+			</Stack>
+
+
+			<Form>
+				<Form.Group as={Row} className="mb-3" controlId="formPlaintextPassword">
+					<Form.Label column sm="2">
+						Password
+					</Form.Label>
+					<Col sm="10">
+						<Form.Control type="password" placeholder="Password" />
+					</Col>
+				</Form.Group>
+			</Form>
+
+
+
+
+
+
 			<Stack className="col-12 col-sm-6 col-md-4 p-3 p-sm-6 gap-5 h-100" style={{ minHeight: '400px' }}>
 				<Link to="changepassword" className='link-text link fs-5'>Change password </Link>
 				<Link to="doubleauth" className='link-text link fs-5'>Double Authenticate </Link>

@@ -34,26 +34,11 @@ export class AuthService {
 		return (userExists);
 	}
 
-	// select * from "user";
-	// DELETE FROM "user" WHERE id = 1;
 	async registerUser(user: any): Promise<User> {
 		try {
 			console.log('registering user', user);
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
-			// .then((res) => {
-			// return this.jwtService.sign({
-			// 	sub: res.username,
-			// 	email: res.email,
-			// 	login: res.username,
-			// });
-			// });
-
-			// return this.jwtService.sign({
-			// 	sub: newUser.username,
-			// 	email: newUser.email,
-			// 	login: newUser.username,
-			// });
 		} catch {
 			throw new InternalServerErrorException();
 		}

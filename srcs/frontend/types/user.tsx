@@ -7,6 +7,7 @@ export type userType = {
 
 export type profileType = {
 	id: number,
+	password: string,
 	username: string,
 	avatar: null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
