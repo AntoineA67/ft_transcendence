@@ -1,69 +1,52 @@
-import React, { createContext, ReactComponentElement, useContext, useState, useEffect } from 'react';
+import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-import { Socket } from 'socket.io-client';
 import { socket } from './socket';
 
-type auth = {
-	id: string | null,
-	nickname: string | null,
-	socket: Socket | null,
-	token: string | null,
-}
-
-export const AuthContext = createContext<any>(null);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-	const [auth, setAuth] = useState<auth>({
-		id: null,
-		nickname: null,
-		socket: null,
-		token: null,
-	});
-
-	return (
-		<AuthContext.Provider value={{ auth, setAuth }}>
-			{children}
-		</AuthContext.Provider>
-	);
-}
-
 export function CallBack42() {
-	const { auth, setAuth } = useContext(AuthContext);
-	const [status, setStatus] = useState<'loading' | 'done'>('loading');
+	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const state = searchParams.get('state') || null;
-	const random = localStorage.getItem('random') || null;
-	
-	const api42_continue = async () => {
-		if (!code || !state || !random || state != random) return;
+	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
+
+	const cb = async () => {
+		if (!code || !state) return;
+
 		try {
-			const response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
-			if (!response.ok) throw new Error('response not ok');
-			const data: string = await response.json();
-			localStorage.setItem('token', data); // add this line to set the token in localStorage
-		} catch (error: any) {
-			console.log('api42_continue fails: ', error);
-			console.log('code:', code, 'state: ', state);
+			let response;
+			if (_2fa?.actived === true) {
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
+			} else {
+				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+			}
+			const data = await response.json();
+			if (data._2fa) {
+				localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
+				setStatus('2fa');
+				return;
+			}
+			localStorage.setItem('token', data);
+			localStorage.removeItem('_2fa');
+		} catch (err: any) {
+			console.log(err.message)
 		}
-		localStorage.removeItem('random');
 		setStatus('done');
 	}
-	useEffect(() => { api42_continue() }, []);
+	useEffect(() => { cb() }, []);
 
 	return (
 		<>
-			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == '2fa' && <Navigate to='/login/2fa' replace />}
+			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
 			{status == 'done' && <Navigate to='/' replace />}
 		</>
 	);
 }
 
 export function Protected() {
-	const { auth, setAuth } = useContext(AuthContext);
-	const [ status, setStatus ] = useState<'connect' | 'error' | 'loading'>('loading');
-	
+	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
+
 	useEffect(() => {
 		socket.auth = { token: localStorage.getItem('token') };
 		socket.connect();
@@ -87,14 +70,14 @@ export function Protected() {
 		socket.on('connect_error', onError);
 		return () => {
 			socket.off('connect', onConnect);
-			socket.off('disconnect',onDisconnect);
+			socket.off('disconnect', onDisconnect);
 			socket.off('connect_error', onError);
 		};
 	}, []);
 
 	return (
 		<>
-			{status == 'loading' && <p style={{color: 'white'}}> loading ... </p>}
+			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
 			{status == 'connect' && <Outlet />}
 			{status == 'error' && <Navigate to="/login" replace />}
 		</>

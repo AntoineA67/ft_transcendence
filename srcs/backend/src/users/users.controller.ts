@@ -8,11 +8,13 @@ import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
-	@Get()
-	async getUsers() {
-		return await (this.usersService.getAllUsers());
-	}
+	// @Get()
+	// async getUsers() {
+	// 	return await (this.usersService.getAllUsers());
+	// }
 	
+	
+
 	// @Get(':nick')
 	// async getUser(@Param('nick') nick: string): Promise<any> {
 	// 	// return ('wtf')

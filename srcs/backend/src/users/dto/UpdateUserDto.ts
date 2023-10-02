@@ -4,4 +4,6 @@ export class UpdateUserDto {
 	password?: string;
 	bio?: string;
 	status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
+	otpHash?: string;
+	activated2FA?: boolean;
 }
