@@ -3,4 +3,5 @@ export class UserDto {
 	username: string;
 	avatar: Buffer | null | ArrayBuffer;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
+	activated2FA?: boolean;
 }

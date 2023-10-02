@@ -14,7 +14,7 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { AuthContext } from '../utils/AuthProvider';
+import { socket } from '../utils/socket';
 
 
 type newUser = {
@@ -156,7 +156,7 @@ export function Signup() {
 				</Row>
 			</Container>
 		</div>
-		)
+	)
 }
 
 /* sign in page */
@@ -222,6 +222,55 @@ export function Signin() {
 	);
 }
 
+
+export function TokenPage() {
+
+	const [random] = useState(Math.random().toString(36).slice(2, 12));
+
+	const api42 = 'https://api.intra.42.fr/oauth/authorize';
+	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
+	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
+	const type = 'response_type=code';
+	const scope = 'scope=public';
+	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
+
+	const [token, setToken] = useState<string>('');
+	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
+
+	async function sendToken() {
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived : _2fa.actived }));
+		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		const data = await response.json();
+		if (data._2fa === 'success') {
+			window.location.href = oauth42;
+		} else {
+			alert('bad 2fa !');
+		}
+	}
+
+	return (
+		<div className='scrollbar'>
+			<Container >
+				<Row className="justify-content-center">
+					<Col sm="6" lg="4" >
+						<Form className="w-100" onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
+							<Form.Group className="my-4" controlId="token">
+								<Form.Label>Token</Form.Label>
+								<Form.Control required type="text" placeholder="token"
+									value={token} onChange={(e) => setToken(e.target.value)} />
+							</Form.Group>
+
+							<button type="submit" className="btn btn-primary w-100">
+								Login
+							</button>
+						</Form>
+					</Col>
+				</Row>
+			</Container>
+		</div>
+	);
+}
+
 /* landing page */
 
 export function LandingPage() {
@@ -236,11 +285,9 @@ export function LandingPage() {
 	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
-	const { auth, setAuth } = useContext(AuthContext);
-
 	useEffect(() => {
 		localStorage.setItem('random', random);
-		console.log('login', auth, 'rand ', random);
+		localStorage.removeItem('_2fa');
 	}, []);
 
 	console.log(oauth42)
@@ -265,12 +312,12 @@ export function LandingPage() {
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								
+
 								<a href={oauth42} className="btn-invisible w-75">
 									<span>Sign in with </span>
 									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
 								</a>
-								
+
 							</div>
 						</div>
 					</Col>

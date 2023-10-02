@@ -12,7 +12,7 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 	}
 
 	canActivate(context: ExecutionContext) {
-		console.log('guard context', context.getHandler(), context.getClass());
+		//console.log('guard context', context.getHandler(), context.getClass());
 		const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
 			context.getHandler(),
 			context.getClass(),
@@ -20,6 +20,8 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 		if (isPublic) {
 			return true;
 		}
+		//console.log("canActivate token", cont);
+		
 		return super.canActivate(context);
 	}
 }

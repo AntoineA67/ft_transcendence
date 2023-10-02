@@ -75,4 +75,31 @@ export class UsersGateway
 		return ({ ... otherprofile, friend, block, blocked, sent });
 	}
 
-}
+	@SubscribeMessage('Create2FA')
+	async handleCreate2FA(@ConnectedSocket() client: Socket) {
+		const data = this.usersService.generate2FASecret(client.data.user);
+		this.usersService.updateUser(client.data.user.id, { otpHash: (await data).secret });
+		return (await data);
+	}
+
+	@SubscribeMessage('Verify2FA')
+	async handleVerify2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		console.log(data);
+		const isValid = await this.usersService.verify2FA(client.data.user, data);
+
+		if (isValid === true) {
+			this.usersService.updateUser(client.data.user.id, { activated2FA: true });
+			return (true);
+		}
+		return (false);
+	}
+
+	@SubscribeMessage('Status2FA')
+	async handleStatus2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		const user = await this.usersService.getUserById(client.data.user.id);
+		console.log(user);
+		if (user.activated2FA === true)
+			return (true);
+		return (false);
+	}
+} 
