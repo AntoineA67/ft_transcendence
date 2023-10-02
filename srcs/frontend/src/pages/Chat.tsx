@@ -33,9 +33,9 @@ type Rooms = {
 }
 
 type Memberstatus = {
-	owner: boolean,
 	admin: boolean,
-	banned: boolean,
+	ban: boolean,
+	owner: boolean,
 };
 
 export function ChatBox() {
@@ -54,7 +54,7 @@ export function ChatBox() {
 	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
 		owner: false,
 		admin: false,
-		banned: false,
+		ban: false,
 	});
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
@@ -127,7 +127,7 @@ export function ChatBox() {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-		const role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.banned ? 'Banned' : 'Member';
+		const role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
@@ -162,22 +162,22 @@ export function ChatBox() {
 			</div>
 			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
 				<input
-					className={`p-2 flex-grow-1 ${memberstatus.banned ? 'banned-text' : ''}`}
-					style={{ borderRadius: '10px', textDecoration: memberstatus.banned ? 'line-through' : 'none' }}
+					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
+					style={{ borderRadius: '10px', textDecoration: memberstatus.ban ? 'line-through' : 'none' }}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
-					disabled={memberstatus.banned}
-					placeholder={memberstatus.banned ? 'You\'re banned...' : 'Write a message...'}
+					disabled={memberstatus.ban}
+					placeholder={memberstatus.ban ? 'You\'re banned...' : 'Write a message...'}
 				/>
 				<button
 					className="send-message"
 					onClick={() => {
-						if (!memberstatus.banned) {
+						if (!memberstatus.ban) {
 							handleClick();
 						}
 					}}
-					disabled={memberstatus.banned}
+					disabled={memberstatus.ban}
 				>
 				</button>
 			</div>
