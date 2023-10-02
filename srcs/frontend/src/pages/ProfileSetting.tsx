@@ -155,7 +155,10 @@ export function SettingMenu() {
 				<Link to="changepassword" className='link-text link fs-5'>Change password </Link>
 				<Link to="doubleauth" className='link-text link fs-5'>Double Authenticate </Link>
 				<Link to="." className='link-text link fs-5'>Change sth else </Link>
-				<button className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Log out</button>
+				<button onClick={() => {
+					localStorage.removeItem('token');
+					window.location.href = '/';
+				}} className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Log out</button>
 			</Stack>
 		</Container>
 	);
