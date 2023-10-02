@@ -29,3 +29,10 @@
 	margin-bottom: 3px;
 	padding: 20px;
 }
+
+.userItem {
+	margin: 0;
+	background-color: grey;
+	/* margin-bottom: 3px; */
+	padding: 10px;
+}
