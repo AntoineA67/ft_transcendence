@@ -145,10 +145,7 @@ export function ChatBox() {
 
 	return (
 		<div className="h-100 d-flex flex-column">
-			<div
-				className="d-flex w-100 align-items-center p-1 ps-sm-5"
-				style={{ backgroundColor: '' }}
-			>
+			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
 				<Link to="..">
 					<button className="goBack"></button>
 				</Link>
@@ -165,13 +162,24 @@ export function ChatBox() {
 			</div>
 			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
 				<input
-					className="p-2 flex-grow-1"
-					style={{ borderRadius: '10px' }}
+					className={`p-2 flex-grow-1 ${memberstatus.banned ? 'banned-text' : ''}`}
+					style={{ borderRadius: '10px', textDecoration: memberstatus.banned ? 'line-through' : 'none' }}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
+					disabled={memberstatus.banned}
+					placeholder={memberstatus.banned ? 'You\'re banned...' : 'Write a message...'}
 				/>
-				<button className="send-message" onClick={handleClick}></button>
+				<button
+					className="send-message"
+					onClick={() => {
+						if (!memberstatus.banned) {
+							handleClick();
+						}
+					}}
+					disabled={memberstatus.banned}
+				>
+				</button>
 			</div>
 		</div>
 	);
