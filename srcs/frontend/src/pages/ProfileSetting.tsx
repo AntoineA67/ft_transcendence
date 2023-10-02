@@ -7,6 +7,7 @@ import Col from 'react-bootstrap/Col';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet, useParams } from "react-router-dom";
+//import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
@@ -192,12 +193,12 @@ export function SettingMenu() {
 					<InputPassword id='Confirm password' togglePassword={togglePassword} />
 					{/* <div style={{ color: 'white' }}>Error message if any</div> */}
 					<button type='submit' className='btn btn-outline-secondary w-100'>Confirm</button>
-					<p>{profile!.bio}</p>
+		
 				</form>
 			</Stack>
 
 
-			<Form>
+			{/* <Form>
 				<Form.Group as={Row} className="mb-3" controlId="formPlaintextPassword">
 					<Form.Label column sm="2">
 						Password
@@ -207,8 +208,15 @@ export function SettingMenu() {
 					</Col>
 				</Form.Group>
 			</Form>
+ */}
 
 
+<Form >
+			<Form.Group className="my-4" controlId="nickname" >
+				<Form.Label>Nickname</Form.Label>
+				<Form.Control  type="password" placeholder="Password" disabled />
+			</Form.Group>
+</Form>
 
 
 
