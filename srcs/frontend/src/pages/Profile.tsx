@@ -11,26 +11,28 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import { arrayBuffer } from 'stream/consumers';
+import { profileType } from '../../types/user';
+import { Avatar } from '../utils/Avatar';
 
 
 type textProp = {
 	type: 'nick' | 'bio',
-	content: string,
+	profile: profileType,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-function Text({ type, content, setEdit }: textProp) {
+function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
 	
 	return (
 		<>
 			{type == 'nick' ? (
 				<h5 style={{ color: "white"}} className={classname}>
-					{content}
+					{profile.username}
 				</h5>
 			) : (
 				<p style={{ color: "white" }} className={classname}>
-					{content}
+					{profile.bio}
 				</p>
 			)}
 			<button className="edit-pen" onClick={() => setEdit(type)} />
@@ -40,13 +42,13 @@ function Text({ type, content, setEdit }: textProp) {
 
 type editTextProp = {
 	type: 'nick' | 'bio',
-	content: string,
-	setContent: React.Dispatch<React.SetStateAction<string>>,
+	profile: profileType,
+	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-function EditText({ type, content, setContent, setEdit }: editTextProp) {
-	const [mod, setMod] = useState(content);
+function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
+	const [mod, setMod] = useState(type == 'nick' ? profile.username : profile.bio);
 	
 	useEffect(() => {
 		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
@@ -58,7 +60,13 @@ function EditText({ type, content, setContent, setEdit }: editTextProp) {
 		el.setSelectionRange(el.value.length, el.value.length);
 	}, []);
 
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>, type: string, content: string) {
+	async function handleSubmit(
+		e: React.FormEvent<HTMLFormElement>, 
+		type: string, profile: profileType, 
+		setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+	) {
+		const content = (type == 'nick') ? profile.username : profile.bio;
+		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
 		e.preventDefault();
 		if (mod == content) {
 			setEdit('done');
@@ -66,14 +74,18 @@ function EditText({ type, content, setContent, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			success && setContent(mod);
+			console.log('profile', profile)
+			console.log('obj', obj)
+			success && setProfile((prev) => (
+				prev ? ({... prev, ... obj}) : prev
+			));
 		})
 		setEdit('done');
 	}
 
 	return (
 		<form className="my-3 w-50 d-flex flex-column align-items-center" 
-			onSubmit={(e) => handleSubmit(e, type, content)}>
+			onSubmit={(e) => handleSubmit(e, type, profile, setProfile)}>
 			<label htmlFor={`edit-${type}`}></label>
 			<textarea id={`edit-${type}`} className="w-100 text-center my-1 edit-text-area" 
 				autoFocus value={mod} onChange={(e) => setMod(e.target.value)}></textarea>
@@ -88,31 +100,18 @@ function NewAvatar() {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
 		const file = input.files ? input.files[0] : null;
 		if (!file) return ;
-		if (file.size >= 1073741824) {
-			console.log('file size limit: 1GB');
+		if (file.size >= 10485760) {
+			console.log('file size limit: 10MB');
 			return ;
 		}
-		let data = new FormData();
-		data.append('avatar', file);
-		try {
-			const response = await fetch('http://localhost:3000/users/avatar', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'multipart/form-data',
-					'Accept': 'application/json'
-				},
-				body: data
-			});
-			if (!response.ok) { throw new Error('response not ok') }
-		} catch (err: any) {
-			console.log('err autoUpload: ', err);
-		}
-		//rerender the page to refetch avatar
+		socket.emit('newAvatar', file, (success: boolean) => {
+			success ? console.log('success') : console.log('fail');
+		})
 	}
 
 	return (
 		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
-			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "30px" }}>
+			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "50px" }}>
 				<input 
 					className='d-none' 
 					id="new-avatar" 
@@ -127,52 +126,49 @@ function NewAvatar() {
 	);
 }
 
-type Profile = {
-	id: number,
-	username: string,
-	avatar: null,
-	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
-	bio: string,
-}
-
 function Profile() {
-	const [nickname, setNickname] = useState('');
-	const [bio, setBio] = useState('');
-	const [avatar, setAvatar] = useState('') //base 64 string
+	const [profile, setProfile] = useState<profileType | null>(null);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
 	useEffect(() => {
-		socket.emit('MyProfile', (response: Profile) => {
-			setNickname(response.username);
-			setBio(response.bio);
+		socket.emit('MyProfile', (response: profileType) => {
+			setProfile(response)
+			console.log(response);
 		})
-		//fetch avatar
 	}, []);
 
 	return (
-		<>
-			<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" 
-				style={{ color: "white"}}>			
-				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+		profile ? (
+			<>
+				<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" 
+					style={{ color: "white"}}>			
+					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
-				<img 
-					src={`data:image/jpeg;base64,${avatar}`} 
-					className="my-3"
-					style={{ minHeight: "100px", minWidth: "100px",  borderRadius: "50%", border: "1px solid white" }} 
-				/>
-				<NewAvatar />
+					<Avatar size={100} user={{
+						id: profile.id, 
+						username: profile.username, 
+						avatar: profile.avatar,
+						status: profile.status
+					}} />
+					<NewAvatar />
 
-				{edit == 'nick' ?
-					<EditText type={'nick'} content={nickname} setContent={setNickname} setEdit={setEdit} />
-					: <Text type={'nick'} content={nickname} setEdit={setEdit} />}
-				
-				{edit == 'bio' ?
-					<EditText type={'bio'} content={bio} setContent={setBio} setEdit={setEdit} />
-					: <Text type={'bio'} content={bio} setEdit={setEdit} />}
-
-			</Container>
-			<Stat></Stat>
-		</>
+					{ (edit == 'nick'
+						) ? ( 
+							<EditText type={'nick'} profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+						) : (
+							<Text type={'nick'} profile={profile} setEdit={setEdit} /> )}
+					
+					 { (edit == 'bio'
+					 	) ? (
+							<EditText type={'bio'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
+						) : (
+							<Text type={'bio'} profile={profile} setEdit={setEdit} />)}
+				</Container>
+				<Stat></Stat>
+			</>
+		) : (
+			<p style={{color: 'white'}}>loading</p>
+		)
 	);
 }
 

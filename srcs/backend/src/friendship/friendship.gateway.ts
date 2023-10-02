@@ -21,16 +21,16 @@ export class FriendshipGateway {
 	@SubscribeMessage('isFriend')
 	async handleIsFriend(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() data: string): Promise<boolean> {
+		@MessageBody() otherId: number): Promise<boolean> {
 		const id: number = client.data.user.id;
-		return (await this.friendshipService.isFriend(id, data))
+		return (await this.friendshipService.isFriend(id, otherId))
 	}
 	
 	@SubscribeMessage('Unfriend')
 	async handleUnfriend(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() data: string): Promise<boolean> {
+		@MessageBody() otherId: number): Promise<boolean> {
 		const id: number = client.data.user.id;
-		return (await this.friendshipService.unFriend(id, data))	
+		return (await this.friendshipService.unFriend(id, otherId))	
 	}
 }
