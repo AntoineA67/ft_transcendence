@@ -15,8 +15,8 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/constants';
 
-@WebSocketGateway({ cors: true })
-// @WebSocketGateway({ cors: true, namespace: 'game' })
+// @WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     constructor(private readonly gamesService: GamesService, private jwtService: JwtService) { }
@@ -48,7 +48,7 @@ export class GameGateway
         //     return;
         // }
         console.log(`Client successfully connected to Game Gateway! 🆔  ${client.id}`)
-        // client.emit('id', client.id)
+        client.emit('id', client.id)
     }
 
     @SubscribeMessage('match')

@@ -2,10 +2,10 @@ import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
-import { useGameSocket } from "../utils/GameSocketProvider"
+// import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
-import { socket } from "../utils/socket"
+import { gameSocket as socket } from "../utils/socket"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -62,7 +62,7 @@ export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
 	// const clients = useRef({} as any)
-	// const id = useRef('' as any)
+	const id = useRef('' as any)
 	// const [id, setId] = useState('' as any)
 	const [ball, setBall] = useState({} as any)
 	// const ball = useRef({} as any)
@@ -71,23 +71,26 @@ export default function Game() {
 	// const socket = useGameSocket();
 
 	useEffect(() => {
-		socket?.on('connect', function () {
+		socket.auth = { token: localStorage.getItem('token') };
+		socket.connect();
+		// id.current = localStorage.getItem('token')
+		socket.on('connect', function () {
 			console.log('connect')
 		})
-		socket?.on('disconnect', function (message: any) {
+		socket.on('disconnect', function (message: any) {
 			console.log('disconnect ' + message)
 		})
 
-		// socket?.on('id', (newId: any) => {
-		// 	// setId(newId)
-		// 	id.current = newId
-		// 	console.log('id: ', id.current)
-		// })
-		socket?.on('startGame', (newId: any) => {
+		socket.on('id', (newId: any) => {
+			// setId(newId)
+			id.current = newId
+			console.log('id: ', id.current)
+		})
+		socket.on('startGame', (newId: any) => {
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
 		})
-		socket?.on('clients', (newClients: any) => {
+		socket.on('clients', (newClients: any) => {
 			setClients(newClients.clients)
 			// clients.current = newClients.clients
 			if (newClients.ball) {
@@ -95,18 +98,18 @@ export default function Game() {
 				// ball.current = newClients.ball
 			}
 		})
-		socket?.on('gameOver', (winner: any) => {
+		socket.on('gameOver', (winner: any) => {
 			console.log('Game Over! Winner: ', winner);
 			setGameStatus(GameStatus.Finished);
 		})
 		return () => {
-			socket?.disconnect();
+			socket.disconnect();
 		}
 	}, [socket])
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
-		socket?.emit("keyPresses", keysPressed.current);
+		socket.emit("keyPresses", keysPressed.current);
 		// console.log("sendPressed", keysPressed.current)
 	}
 	const onkeydown = (event: KeyboardEvent) => {
@@ -126,25 +129,28 @@ export default function Game() {
 				window.removeEventListener('keydown', onkeydown);
 				window.removeEventListener('keyup', onkeyup);
 			};
+		} else {
+			window.removeEventListener('keydown', onkeydown);
+			window.removeEventListener('keyup', onkeyup);
 		}
 	}, [gameStatus])
 	const startMatchmaking = () => {
 		if (gameStatus !== GameStatus.Idle) return
-		socket?.emit('match');
+		socket.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
 	const cancelMatchmaking = () => {
 		if (gameStatus !== GameStatus.Matching) return
-		socket?.emit('cancel');
+		socket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
 
 	return (
 		<>
-			{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected}>Match</button>}
+			{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} >Match</button>}
 			{gameStatus === GameStatus.Matching && <>
 				<FidgetSpinner
-					visible={socket?.connected}
+					visible={socket.connected}
 					height="80"
 					width="80"
 					ariaLabel="dna-loading"
@@ -196,7 +202,7 @@ export default function Game() {
 
 
 
-				<Canvas shadows camera={{ position: [0, 0, 50], fov: 30 }}>
+				<Canvas shadows camera={{ position: [0, 0, 50], fov: 50 }}>
 					{Object.keys(clients)
 						.map((client) => {
 							const { y, dir, score } = clients[client]

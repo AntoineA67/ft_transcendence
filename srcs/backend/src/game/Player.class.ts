@@ -6,7 +6,7 @@ export default class Player {
 	public score: number = 0;
 
 	constructor(public id: string, public invertedSide: boolean = false, public y: number = .5, private direction: number = 0) {
-		this.xDistance = invertedSide ? -1 + Player.distanceFromWall : 1 - Player.distanceFromWall;
+		this.xDistance = !invertedSide ? -1 + Player.distanceFromWall : 1 - Player.distanceFromWall;
 	}
 
 	handleKeysPresses({ up, down, time }: { up: boolean, down: boolean, time: number }) {
@@ -24,6 +24,6 @@ export default class Player {
 	earnPoint() {
 		this.score++;
 		console.log('score', this.score);
-		return this.score >= 5;
+		return this.score >= 50;
 	}
 }
