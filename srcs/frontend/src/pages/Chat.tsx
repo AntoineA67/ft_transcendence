@@ -24,12 +24,41 @@ type Profile = {
 	username: string;
 };
 
+type ProfileTest = {
+	avatar: string | null;
+	bio: string;
+	id: number;
+	status: string;
+	username: string;
+	membership: Member[];
+};
+
+type Member = {
+	id: number;
+	userId: number;
+	roomId: number;
+	room: Room;
+	owner: boolean;
+	admin: boolean;
+	ban: boolean;
+	mute: Date | null;
+};
+
 type Rooms = {
 	id: number,
 	isChannel: boolean,
 	title: string,
 	private: boolean,
 	password: string,
+}
+
+type Room = {
+    id: number;
+    isChannel: boolean;
+    title: string;
+    private: boolean;
+    password: string;
+	messages: Message[];
 }
 
 type Memberstatus = {
@@ -197,6 +226,11 @@ export function ChatBox() {
 			</div>
 		</div>
 	);
+	return (
+		<div>
+
+		</div>
+	);
 }
 
 function MyForm({
@@ -355,12 +389,22 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
 	const [rooms, setRooms] = useState<Rooms[]>([]);
+	const [profile, setProfile] = useState<ProfileTest>();
 
 	useEffect(() => {
 		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
 		  setRooms(response);
 		});
-	}, []);
+	  }, []);
+
+	  useEffect(() => {
+		socket.emit('getProfileForUser', (response: ProfileTest) => {
+		  setProfile(response);
+		//   const roomsArray = response.membership.map(member => member.room);
+		//   setRooms(roomsArray);
+		});
+	  }, []);
+	  console.log('Profile', profile);
 
 	useEffect(() => {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
