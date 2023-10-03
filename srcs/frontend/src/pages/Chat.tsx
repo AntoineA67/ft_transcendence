@@ -33,9 +33,10 @@ type Rooms = {
 }
 
 type Memberstatus = {
-	admin: boolean,
-	ban: boolean,
-	owner: boolean,
+    owner: boolean;
+    admin: boolean;
+    ban: boolean;
+    mute: Date | null;
 };
 
 export function ChatBox() {
@@ -56,6 +57,7 @@ export function ChatBox() {
 		owner: false,
 		admin: false,
 		ban: false,
+		mute: null,
 	});
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
@@ -355,12 +357,14 @@ export function ChatList() {
 	const [rooms, setRooms] = useState<Rooms[]>([]);
 
 	useEffect(() => {
+		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
+		  setRooms(response);
+		});
+	}, []);
+
+	useEffect(() => {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
-		const getAllRooms = () => {
-		  socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
-			setRooms(response);
-		  });
-		};
+
 		const handleNewRoom = (response: Rooms) => {
 		  setRooms((prevRooms) => [response, ...prevRooms]);
 		};
@@ -373,12 +377,14 @@ export function ChatList() {
 			setRooms([targetRoom, ...filteredRooms]);
 		  }
 		};
-		socketListeners.push({ event: 'getAllRoomsByUserid', handler: getAllRooms });
+
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
+
 		socketListeners.forEach(({ event, handler }) => {
 		  socket.on(event, handler);
 		});
+
 		return () => {
 		  socketListeners.forEach(({ event, handler }) => {
 			socket.off(event, handler);

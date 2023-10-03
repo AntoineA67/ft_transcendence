@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Room, Prisma } from '@prisma/client';
+import { Room, Prisma, Member } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 
 type MessageWithUsername = {
@@ -180,7 +180,7 @@ export class RoomService {
     return true;
   }
 
-  async createPrivateRoom(userId: number, username: string) {
+  async createPrivateRoom(userId: number, username: string, userName: string) {
     const user = await this.findUserByUsername(username);
     if (!user)
       return null;
@@ -197,9 +197,11 @@ export class RoomService {
     if (isBlocked)
       return null;
 
+	let resTitle = userName + '/' + username;
+
     return this.prisma.room.create({
       data: {
-        title: user.username,
+        title: resTitle,
         isChannel: false,
         private: true,
         members: {
@@ -263,7 +265,7 @@ export class RoomService {
     return { messages: messagesWithUsername, roomTitle: room.title, roomChannel: room.isChannel };
   }
 
-  async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<boolean> {
+  async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<Room> {
     const room = await this.prisma.room.findUnique({
       where: {
         id: roomid,
@@ -272,7 +274,7 @@ export class RoomService {
       },
     });
     if (!room || (room.password && room.password !== password)) {
-      return false;
+      return null;
     }
     const existingMember = await this.prisma.member.findFirst({
       where: {
@@ -281,7 +283,7 @@ export class RoomService {
       },
     });
     if (existingMember) {
-      return false;
+      return null;
     }
     await this.prisma.member.create({
       data: {
@@ -292,7 +294,7 @@ export class RoomService {
         room: { connect: { id: roomid } },
       },
     });
-    return true;
+    return room;
   }
 
   async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {
