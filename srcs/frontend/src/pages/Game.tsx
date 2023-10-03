@@ -5,6 +5,7 @@ import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
 import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { socket } from "../utils/socket"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -61,12 +62,13 @@ export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
 	// const clients = useRef({} as any)
-	const [id, setId] = useState('' as any)
+	const id = useRef('' as any)
+	// const [id, setId] = useState('' as any)
 	const [ball, setBall] = useState({} as any)
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	const socket = useGameSocket();
+	// const socket = useGameSocket();
 
 	useEffect(() => {
 		socket?.on('connect', function () {
@@ -77,8 +79,9 @@ export default function Game() {
 		})
 
 		socket?.on('id', (newId: any) => {
-			setId(newId)
-			console.log('id: ', id)
+			// setId(newId)
+			id.current = newId
+			console.log('id: ', id.current)
 		})
 		socket?.on('startGame', (newId: any) => {
 			setGameStatus(GameStatus.Started);
@@ -197,7 +200,7 @@ export default function Game() {
 					{Object.keys(clients)
 						.map((client) => {
 							const { y, dir, score } = clients[client]
-							const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
+							const pos = [client === id.current ? -10 : 10, y * 20 - 10, 0]
 							return (
 								<UserWrapper
 									key={client}
@@ -208,7 +211,7 @@ export default function Game() {
 								/>
 							)
 						})}
-					{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
+					{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
 					< color attach="background" args={["#171720"]} />
 					<ambientLight intensity={0.5} />
 					<pointLight position={[-10, -10, -10]} />

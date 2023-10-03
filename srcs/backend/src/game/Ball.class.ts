@@ -4,6 +4,7 @@ export default class Ball {
 	[x: string]: any;
 	static initialSpeed = .01;
 	public speed = .01;
+	public maxSpeed = .02;
 
 	constructor(
 		public x: number = .5,

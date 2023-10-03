@@ -22,6 +22,7 @@ export class GamesService {
   isInQueue(client: Socket) {
     return this.matchmakingQueue.includes(client);
   }
+
   disconnect(client: Socket) {
     const roomId = this.clients[client.id];
     if (roomId) {
@@ -85,7 +86,6 @@ export class GamesService {
       data: {
         start_date: new Date(Date.now()).toISOString(),
       }
-
     });
   }
 }

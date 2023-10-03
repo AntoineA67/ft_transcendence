@@ -2,6 +2,7 @@ import React, { createContext, ReactComponentElement, useContext, useState, useE
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { socket } from './socket';
+import { Container } from 'react-bootstrap';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -22,7 +23,7 @@ export function CallBack42() {
 			}
 			const data = await response.json();
 			if (data._2fa) {
-				localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
+				localStorage.setItem('_2fa', JSON.stringify({ id: data.id, actived: true }));
 				setStatus('2fa');
 				return;
 			}
@@ -77,7 +78,11 @@ export function Protected() {
 
 	return (
 		<>
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			{status == 'loading' &&
+				<Container className='d-flex justify-content-center' >
+					<p style={{ color: 'white' }}> loading ... </p>
+				</Container>
+			}
 			{status == 'connect' && <Outlet />}
 			{status == 'error' && <Navigate to="/login" replace />}
 		</>

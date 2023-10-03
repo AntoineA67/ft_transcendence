@@ -7,10 +7,12 @@ function connectToSocketWithToken(token: any) {
   const options = {
     transports: ['websocket'],
     auth: {
-      'Authorization': `Bearer ${token}`,
+      token: token,
+      // 'Authorization': `Bearer ${token}`,
     },
   };
   const socket = io(`${hostAdress}/game`, options);
+  console.log("connectToSocketWithToken", socket)
 
   return socket;
 }

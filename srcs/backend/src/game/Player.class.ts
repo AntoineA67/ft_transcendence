@@ -1,5 +1,5 @@
 export default class Player {
-	static speedFactor: number = .015;
+	static speedFactor: number = .01;
 	static distanceFromWall: number = .02;
 	static halfPaddleHeight: number = .1;
 	public xDistance: number;
