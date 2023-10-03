@@ -44,6 +44,7 @@ export function ChatBox() {
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [roomTitle, setroomTitle] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(true);
+	const [roomChannel, setRoomChannel] = useState<boolean>(true);
 	const [profile, setProfile] = useState<Profile>({
 		avatar: null,
 		bio: '',
@@ -67,19 +68,16 @@ export function ChatBox() {
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
-		socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string }) => {
+		socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
+			setRoomChannel(data.roomChannel);
 			setLoading(false);
 		});
 
 		socket.emit('MyProfile', (data: Profile) => {
 			setProfile(data);
 		});
-
-		// socket.emit('getRoomData', chatId, (data: Room) => {
-		// 	setRoomData()
-		// });
 
 		socket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
 			setMemberstatus(data);
@@ -133,25 +131,36 @@ export function ChatBox() {
 		setMess('');
 	};
 
-	const myMap = (message: Message, profile: Profile, member: Memberstatus) => {
+	const myMap = (message: Message, profile: Profile, member: Memberstatus, roomChannel: boolean) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
-		const formattedTime = new Date(message.send_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-		const role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
-
-		if (message.userId === profile.id) {
-			message.username = profile.username;
+		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
+		  hour: '2-digit',
+		  minute: '2-digit',
+		  second: '2-digit'
+		});
+	  
+		let role = '';
+	  
+		if (roomChannel) {
+		  role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
+		  role += ' - ';
 		}
-
+	  
+		if (message.userId === profile.id) {
+		  message.username = profile.username;
+		}
+	  
 		return (
-			<div className="message-container" key={message.id}>
-				<strong className={`message ${classuser}`}>{message.username} - {role} - {formattedTime}</strong>
-				<div className={`message ${classname}`}>
-					{message.message}
-				</div>
-			</div>
+		  <div className="message-container" key={message.id}>
+			<strong className={`message ${classuser}`}>
+			  {message.username} - {role}
+			  {formattedTime}
+			</strong>
+			<div className={`message ${classname}`}>{message.message}</div>
+		  </div>
 		);
-	};
+	  };
 
 	return (
 		<div className="h-100 d-flex flex-column">
@@ -167,7 +176,7 @@ export function ChatBox() {
 					className="nostyleList d-flex flex-column"
 					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
 				>
-					{messages.map((message) => myMap(message, profile, memberstatus))}
+					{messages.map((message) => myMap(message, profile, memberstatus, roomChannel))}
 				</ul>
 			</div>
 			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
@@ -355,13 +364,29 @@ export function ChatList() {
 	useEffect(() => {
 		socket.connect();
 		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
-			setRooms(response);
+		  setRooms(response);
 		});
 		socket.on('newRoom', (response: Rooms) => {
-			if (response)
-				setRooms((prevRooms) => [response, ...prevRooms]);
+		  if (response)
+			setRooms((prevRooms) => [response, ...prevRooms]);
 		});
-	}, []);
+
+		socket.on('messageSent', (response: Message) => {
+		  if (response) {
+			const newRooms = [...rooms];
+			const targetRoom = newRooms.find((room) => room.id === response.roomId);
+			if (targetRoom) {
+			  const filteredRooms = newRooms.filter((room) => room.id !== response.roomId);
+			  setRooms([targetRoom, ...filteredRooms]);
+			}
+		  }
+		});
+	  
+		return () => {
+		  socket.off('messageSent');
+		};
+	  }, []);
+	  
 
 	const myMap = (room: Rooms) => {
 		console.log(room);
