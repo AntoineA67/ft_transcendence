@@ -6,6 +6,7 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
+import { Member } from '@prisma/client';
 
 type MessageWithUsername = {
 	id: number;
@@ -14,6 +15,14 @@ type MessageWithUsername = {
 	userId: number;
 	roomId: number;
 	username: string;
+};
+
+type ProfileUser = {
+	bio: string;
+	id: number;
+	status: string;
+	username: string;
+	membership: Member[];
 };
 
 @WebSocketGateway({ cors: true })
@@ -130,5 +139,11 @@ export class RoomGateway
 			return true;
 		} else
 			return false;
+	}
+
+	@SubscribeMessage('getProfileForUser')
+	async handlegetProfileForUser(@ConnectedSocket() client: Socket): Promise<ProfileUser | null> {
+		const userId: number = client.data.user.id;
+		return await this.roomService.getProfileForUser(userId);
 	}
 }

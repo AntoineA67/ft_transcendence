@@ -12,6 +12,14 @@ type MessageWithUsername = {
   username: string;
 };
 
+type ProfileUser = {
+	bio: string;
+	id: number;
+	status: string;
+	username: string;
+	membership: Member[];
+};
+
 @Injectable()
 export class RoomService {
   constructor(private prisma: PrismaService) { }
@@ -314,5 +322,36 @@ export class RoomService {
       throw new NotFoundException(`Room with ID ${id} not found`);
     }
     return this.prisma.room.delete({ where: { id } });
+  }
+
+  async getProfileForUser(userId: number): Promise<ProfileUser | null> {
+	const user = await this.prisma.user.findUnique({
+	  where: { id: userId },
+	  include: {
+		membership: {
+		  include: {
+			room: {
+			  include: {
+				message: true,
+			  },
+			},
+		  },
+		},
+	  },
+	});
+  
+	if (!user) {
+	  return null;
+	}
+
+	const profile: ProfileUser = {
+	  bio: user.bio,
+	  id: user.id,
+	  status: user.status,
+	  username: user.username,
+	  membership: user.membership,
+	};
+  
+	return profile;
   }
 }
