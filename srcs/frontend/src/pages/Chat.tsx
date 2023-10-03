@@ -52,13 +52,6 @@ export function ChatBox() {
 		status: '',
 		username: '',
 	});
-	const [roomData, setRoomData] = useState<Rooms>({
-		id: 0,
-		isChannel: false,
-		title: '',
-		private: false,
-		password: '',
-	});
 	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
 		owner: false,
 		admin: false,
@@ -362,31 +355,36 @@ export function ChatList() {
 	const [rooms, setRooms] = useState<Rooms[]>([]);
 
 	useEffect(() => {
-		socket.connect();
-		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
-		  setRooms(response);
-		});
-		socket.on('newRoom', (response: Rooms) => {
-		  if (response)
-			setRooms((prevRooms) => [response, ...prevRooms]);
-		});
-
-		socket.on('messageSent', (response: Message) => {
-		  if (response) {
-			const newRooms = [...rooms];
-			const targetRoom = newRooms.find((room) => room.id === response.roomId);
-			if (targetRoom) {
-			  const filteredRooms = newRooms.filter((room) => room.id !== response.roomId);
-			  setRooms([targetRoom, ...filteredRooms]);
-			}
-		  }
-		});
-	  
-		return () => {
-		  socket.off('messageSent');
+		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
+		const getAllRooms = () => {
+		  socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
+			setRooms(response);
+		  });
 		};
-	  }, []);
+		const handleNewRoom = (response: Rooms) => {
+		  setRooms((prevRooms) => [response, ...prevRooms]);
+		};
 	  
+		const handleMessageSent = (newMessage: Message) => {
+		  const newRooms = [...rooms];
+		  const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
+		  if (targetRoom) {
+			const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
+			setRooms([targetRoom, ...filteredRooms]);
+		  }
+		};
+		socketListeners.push({ event: 'getAllRoomsByUserid', handler: getAllRooms });
+		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
+		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
+		socketListeners.forEach(({ event, handler }) => {
+		  socket.on(event, handler);
+		});
+		return () => {
+		  socketListeners.forEach(({ event, handler }) => {
+			socket.off(event, handler);
+		  });
+		};
+	}, [rooms]);
 
 	const myMap = (room: Rooms) => {
 		console.log(room);
