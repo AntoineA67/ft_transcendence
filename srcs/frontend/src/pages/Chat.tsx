@@ -51,6 +51,13 @@ export function ChatBox() {
 		status: '',
 		username: '',
 	});
+	const [roomData, setRoomData] = useState<Rooms>({
+		id: 0,
+		isChannel: false,
+		title: '',
+		private: false,
+		password: '',
+	});
 	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
 		owner: false,
 		admin: false,
@@ -69,6 +76,10 @@ export function ChatBox() {
 		socket.emit('MyProfile', (data: Profile) => {
 			setProfile(data);
 		});
+
+		// socket.emit('getRoomData', chatId, (data: Room) => {
+		// 	setRoomData()
+		// });
 
 		socket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
 			setMemberstatus(data);
@@ -113,9 +124,10 @@ export function ChatBox() {
 			roomId: chatId,
 			content: mess,
 			userid: profile.id,
-		}, (response: any) => {
-			if (response.error) {
-				console.error('Erreur lors de l\'envoi du message :', response.error);
+			username: profile.username,
+		}, (response: boolean) => {
+			if (!response) {
+				console.error('Erreur lors de l\'envoi du message');
 			}
 		});
 		setMess('');
@@ -281,6 +293,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 					setRoomId('');
 					setPassword('');
 				} else {
+					setPage('chatList');
 					navigate(`/chat/${roomId}`);
 				}
 			});
@@ -344,13 +357,10 @@ export function ChatList() {
 		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
 			setRooms(response);
 		});
-		socket.on('roomCreated', (response: Rooms) => {
+		socket.on('newRoom', (response: Rooms) => {
 			if (response)
 				setRooms((prevRooms) => [response, ...prevRooms]);
 		});
-		return () => {
-			socket.disconnect();
-		};
 	}, []);
 
 	const myMap = (room: Rooms) => {

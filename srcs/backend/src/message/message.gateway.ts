@@ -20,31 +20,24 @@ export class MessageGateway
   private logger: Logger = new Logger('MessageGateway');
   private clients: any = {};
 
-  @WebSocketServer() wss: Server;
+  @WebSocketServer()
+  server: Server;
 
   afterInit(server: Server) {
-    this.logger.log('Messages Initializedd');
+    this.logger.log('Messages Initialized');
   }
 
   handleDisconnect(client: Socket) {
     this.logger.log(`Client Disconnected: ${client.id}`);
     if (this.clients && this.clients[client.id]) {
       delete this.clients[client.id];
-      this.wss.emit('removeClient', client.id);
+      this.server.emit('removeClient', client.id);
     }
   }
 
   handleConnection(client: Socket) {
     this.logger.log(`Client Connected: ${client.id}`);
     this.clients[client.id] = {};
-    this.wss.emit('id', client.id);
+    this.server.emit('id', client.id);
   }
-
-  @SubscribeMessage('sendMessage')
-  async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number }) {
-    const roomid = parseInt(message.roomId.toString(), 10);
-    const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
-    client.emit('messageSent', createdMessage);
-  }
-
 }
