@@ -187,15 +187,43 @@ export function SettingMenu() {
 
 
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" style={{ minHeight: '400px' }}>
-				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
-					<InputPassword id='Current password' togglePassword={togglePassword} />
-					<InputPassword id='New password' togglePassword={togglePassword} />
-					<InputPassword id='Confirm password' togglePassword={togglePassword} />
-					{/* <div style={{ color: 'white' }}>Error message if any</div> */}
-					<button type='submit' className='btn btn-outline-secondary w-100'>Confirm</button>
-		
-				</form>
+
+				<Form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+					<Form.Group controlId="currentPassword" >
+						<Form.Label>Confirm password</Form.Label>
+						<Form.Control type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
+					</Form.Group>
+					<Form.Group controlId="newPassword" >
+						<Form.Label>New password</Form.Label>
+						<Form.Control type="password" placeholder="New password" disabled={profile?.password === 'nopass'} />
+					</Form.Group>
+					<Form.Group controlId="confirmPassword" >
+						<Form.Label>Confirm password</Form.Label>
+						<Form.Control type="password" placeholder="Password" disabled={profile?.password === 'nopass'} />
+					</Form.Group>
+					<div style={{ color: 'red' }}>You cannot change the password because you are connected with the 42 school API</div>
+					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
+				</Form>
+
+				<hr />
+
+				<Form.Check
+					type="switch"
+					id="double-auth-switch"
+					label="Enable double auth"
+				// onChange={switchActivate}
+				// checked={isSwitchOn}
+				/>
+
+				<hr />
+
+				<button onClick={() => {
+					localStorage.removeItem('token');
+					window.location.href = '/';
+				}} className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Log out</button>
+
 			</Stack>
+
 
 
 			{/* <Form>
@@ -211,12 +239,7 @@ export function SettingMenu() {
  */}
 
 
-<Form >
-			<Form.Group className="my-4" controlId="nickname" >
-				<Form.Label>Nickname</Form.Label>
-				<Form.Control  type="password" placeholder="Password" disabled />
-			</Form.Group>
-</Form>
+
 
 
 
