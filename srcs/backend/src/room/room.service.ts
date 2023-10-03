@@ -222,7 +222,7 @@ export class RoomService {
     });
   }
 
-  async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string }> {
+  async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean }> {
     const room = await this.prisma.room.findUnique({
       where: {
         id: roomid,
@@ -249,7 +249,7 @@ export class RoomService {
     if (memberStatus.ban)
       return null;
     if (!room) {
-      return { messages: [], roomTitle: '' };
+      return { messages: [], roomTitle: '', roomChannel: true };
     }
     const messagesWithUsername = room.message.map((message) => ({
       id: message.id,
@@ -260,7 +260,7 @@ export class RoomService {
       username: message.user.username,
     }));
 
-    return { messages: messagesWithUsername, roomTitle: room.title };
+    return { messages: messagesWithUsername, roomTitle: room.title, roomChannel: room.isChannel };
   }
 
   async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<boolean> {

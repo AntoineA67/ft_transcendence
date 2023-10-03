@@ -6,7 +6,6 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
-const joinedRooms = new Set<string>();
 
 type MessageWithUsername = {
 	id: number;
@@ -30,11 +29,11 @@ export class RoomGateway
 	server: Server;
 
 	async handleConnection(client: Socket) {
-		const previousRooms = Array.from(joinedRooms);
-		for (const roomName of previousRooms) {
+		const previousRooms = await this.GetAllRoomsByUserid(client);
+		for (let i = 0; i < previousRooms.length; i += 1) {
+			const roomName = "room_" + previousRooms[i].id.toString();
 			client.join(roomName);
 		}
-		console.log(`Le client est connecté aux salles suivantes :`, client.rooms);
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -49,7 +48,7 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('getRoomData')
-	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string }> {
+	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean }> {
 		console.log('roomId', roomId);
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
@@ -67,7 +66,6 @@ export class RoomGateway
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
-			joinedRooms.add(roomName);
 			this.server.to(roomName).emit('newRoom', createdRoom);
 			return (createdRoom.id);
 		} else {
@@ -88,7 +86,6 @@ export class RoomGateway
 		const roomName = "room_" + roomId.toString();
 		if (canJoin) {
 			client.join(roomName);
-			joinedRooms.add(roomName);
 			return true;
 		} else {
 			return false;
@@ -105,7 +102,6 @@ export class RoomGateway
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
-			joinedRooms.add(roomName);
 			this.server.to(roomName).emit('newRoom', createdRoom);
 			return (createdRoom.id);
 		} else {
@@ -127,9 +123,7 @@ export class RoomGateway
 				roomId: createdMessage.roomId,
 				username: message.username,
 			};
-			console.log('newMessage', newMessage);
 			this.server.to(roomName).emit('messageSent', newMessage);
-			console.log(`Le client est connecté aux salles suivantes :`, client.rooms);
 			return true;
 		} else
 			return false;
