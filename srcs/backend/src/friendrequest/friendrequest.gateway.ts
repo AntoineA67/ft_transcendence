@@ -5,7 +5,7 @@ import { FriendRequestService } from './friendrequest.service';
 import { UserDto } from 'src/dto/UserDto';
 import { UsersService } from 'src/users/users.service';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'friends' })
 export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	private logger = new Logger('FriendReqGateway')
 	
@@ -13,10 +13,12 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	server: Server;
 
 	handleConnection(client: Socket) {
-	// Gestion de la connexion du client
+		this.logger.log('new connection')
+		// Gestion de la connexion du client
 	}
 
 	handleDisconnect(client: Socket) {
+		this.logger.log('disconnection')
 	// Gestion de la déconnexion du client
 	}
 
