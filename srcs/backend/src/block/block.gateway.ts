@@ -3,8 +3,8 @@ import { Server, Socket } from 'socket.io';
 import { BlockService } from './block.service';
 import { UsersService } from 'src/users/users.service';
 import { UserDto } from 'src/dto/UserDto';
-
-@WebSocketGateway()
+import { Logger } from '@nestjs/common';
+@WebSocketGateway({ cors: true, namespace: 'friends' })
 export class BlockGateway {
  
 	constructor(
@@ -14,6 +14,18 @@ export class BlockGateway {
 
 	@WebSocketServer()
 	server: Server;
+
+	private logger = new Logger('BlockGateway')
+
+	handleConnection(client: Socket) {
+		this.logger.log('new connection')
+		// Gestion de la connexion du client
+	}
+
+	handleDisconnect(client: Socket) {
+		this.logger.log('disconnection')
+		// Gestion de la déconnexion du client
+	}
 
 	@SubscribeMessage('findAllBlocks')
 	async handleFindAllBlocks(@ConnectedSocket() client: Socket) {

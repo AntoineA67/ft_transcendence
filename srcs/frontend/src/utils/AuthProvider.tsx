@@ -1,7 +1,7 @@
 import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-import { socket } from './socket';
+import { friendsSocket, socket } from './socket';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -50,6 +50,7 @@ export function Protected() {
 	useEffect(() => {
 		socket.auth = { token: localStorage.getItem('token') };
 		socket.connect();
+		friendsSocket.connect();
 
 		//socket io regitsre event
 		function onConnect() {

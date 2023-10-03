@@ -5,11 +5,24 @@ import { Server, Socket } from 'socket.io';
 import { FriendshipService } from './friendship.service';
 import { SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/UserDto';
+import { Logger } from '@nestjs/common';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'friends' })
 export class FriendshipGateway {
 	
 	constructor(private readonly friendshipService: FriendshipService) {}
+
+	private logger = new Logger('FriendshipGateway')
+
+	handleConnection(client: Socket) {
+		this.logger.log('new connection')
+		// Gestion de la connexion du client
+	}
+
+	handleDisconnect(client: Socket) {
+		this.logger.log('disconnection')
+		// Gestion de la déconnexion du client
+	}
 
 	@SubscribeMessage('findAllFriends')
 	async handlefindAllFriends(
