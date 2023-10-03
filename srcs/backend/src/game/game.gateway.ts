@@ -47,8 +47,8 @@ export class GameGateway
         //     client.disconnect();
         //     return;
         // }
-        // console.log(`Client successfully connected! 🆔  ${client.id}`)
-        client.emit('id', client.id)
+        console.log(`Client successfully connected to Game Gateway! 🆔  ${client.id}`)
+        // client.emit('id', client.id)
     }
 
     @SubscribeMessage('match')

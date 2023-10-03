@@ -7,7 +7,7 @@ export default class Ball {
 	public maxSpeed = .02;
 
 	constructor(
-		public x: number = .5,
+		public x: number = 0,
 		public y: number = .5,
 		public velocityX: number = Math.random() > 0.5 ? Ball.initialSpeed : -Ball.initialSpeed,
 		public velocityY: number = 0) { }
@@ -25,15 +25,15 @@ export default class Ball {
 			this.y = 1;
 			this.velocityY = -this.velocityY;
 		}
-		if (this.x < 0 || this.x > 1) {
-			const playerIndex = 1 - Math.round(this.x)
+		if (this.x < -1 || this.x > 1) {
+			const playerIndex = this.x > 0 ? 0 : 1;
 			if (playersList[playerIndex].earnPoint()) {
 				return playersList[playerIndex].id;
 			}
 			this.reset();
 		}
 
-		const player = playersList[this.x < .5 ? 0 : 1];
+		const player = playersList[this.x < 0 ? 0 : 1];
 		if (this.collide(player)) {
 			let collidePoint = this.y - player.y;
 			collidePoint = collidePoint / Player.halfPaddleHeight;
@@ -52,7 +52,7 @@ export default class Ball {
 	}
 
 	private reset() {
-		this.x = 0.5;
+		this.x = 0;
 		this.y = 0.5;
 		this.velocityX = Math.random() > 0.5 ? Ball.initialSpeed : -Ball.initialSpeed;
 		this.velocityY = 0;

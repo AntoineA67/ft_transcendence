@@ -62,7 +62,7 @@ export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
 	// const clients = useRef({} as any)
-	const id = useRef('' as any)
+	// const id = useRef('' as any)
 	// const [id, setId] = useState('' as any)
 	const [ball, setBall] = useState({} as any)
 	// const ball = useRef({} as any)
@@ -78,11 +78,11 @@ export default function Game() {
 			console.log('disconnect ' + message)
 		})
 
-		socket?.on('id', (newId: any) => {
-			// setId(newId)
-			id.current = newId
-			console.log('id: ', id.current)
-		})
+		// socket?.on('id', (newId: any) => {
+		// 	// setId(newId)
+		// 	id.current = newId
+		// 	console.log('id: ', id.current)
+		// })
 		socket?.on('startGame', (newId: any) => {
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
@@ -211,7 +211,8 @@ export default function Game() {
 								/>
 							)
 						})}
-					{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
+					< BallWrapper ball={ball} client={clients[id.current]} />
+					{/* {clients[] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />} */}
 					< color attach="background" args={["#171720"]} />
 					<ambientLight intensity={0.5} />
 					<pointLight position={[-10, -10, -10]} />
