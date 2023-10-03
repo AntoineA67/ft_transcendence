@@ -82,10 +82,11 @@ export class RoomGateway
 		const roomId = parseInt(roomdata.roomid, 10);
 		if (Number.isNaN(roomId))
 			return false;
-		const canJoin = await this.roomService.joinRoom(roomdata.roomname, roomId, roomdata.password, userId);
+		const room = await this.roomService.joinRoom(roomdata.roomname, roomId, roomdata.password, userId);
 		const roomName = "room_" + roomId.toString();
-		if (canJoin) {
+		if (room) {
 			client.join(roomName);
+			client.emit('newRoom', room);
 			return true;
 		} else {
 			return false;
@@ -98,7 +99,9 @@ export class RoomGateway
 		@MessageBody() username: string,
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
+		const userName: string = client.data.user.sub;
+		console.log(client);
+		const createdRoom = await this.roomService.createPrivateRoom(userId, username, userName);
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
