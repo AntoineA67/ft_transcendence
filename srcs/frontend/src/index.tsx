@@ -14,6 +14,7 @@ import { Setting, ChangePassword, DoubleAuth, SettingMenu } from './pages/Profil
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
+import { UserProfile } from './utils/UserProfile';
 
 //css
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -48,13 +49,28 @@ root.render(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />}>
-				<Route path="/" element={<Sidebar />}>
-					<Route index element={<Profile />} />
-					<Route path="search" element={<Search />}></Route>
-					<Route path="friends" element={<Friends />}></Route>
-					<Route path="chat" element={<Chat />}>
-						<Route path=':chatId' element={<ChatBox />}></Route>
+				<Route element={<Protected />}>
+					<Route path="/" element={<Sidebar />}>
+						<Route index element={<Profile />} />
+						<Route path="search" element={<Search />}></Route>
+						<Route path="friends" element={<Friends />}>
+							<Route path=':friendNick' element={<UserProfile />}></Route>
+						</Route>
+						
+						<Route path="chat" element={<Chat />}>
+							<Route path=':chatId' element={<ChatBox />}></Route>
+						</Route>
+						
+						<Route path="setting" element={<Setting />}>
+							<Route index element={<SettingMenu />}></Route>
+							<Route path='changepassword' element={<ChangePassword />}></Route>
+						</Route>
+						
+						<Route path="/game" element={<>
+							<GameSocketProvider>
+								<Game />
+							</GameSocketProvider>
+						</>}></Route>
 					</Route>
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
@@ -67,8 +83,7 @@ root.render(
 						</GameSocketProvider>
 					</>}></Route>
 				</Route>
-				<Route path="/test-db" element={<TestDB />} />
-			</Route>
+			<Route path="/test-db" element={<TestDB />} />			
 		</Routes>
 	</BrowserRouter>
 

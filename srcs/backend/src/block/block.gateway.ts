@@ -1,40 +1,86 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { BlockService } from './block.service';
-
-@WebSocketGateway()
+import { UsersService } from 'src/users/users.service';
+import { UserDto } from 'src/dto/UserDto';
+import { Logger } from '@nestjs/common';
+@WebSocketGateway({ cors: true, namespace: 'friends' })
 export class BlockGateway {
  
-	constructor(private readonly blockService: BlockService) {};
+	constructor(
+		private readonly blockService: BlockService,
+		private readonly usersService: UsersService
+	) {};
+
+	@WebSocketServer()
+	server: Server;
+
+	private logger = new Logger('BlockGateway')
+
+	handleConnection(client: Socket) {
+		this.logger.log('new connection')
+		// Gestion de la connexion du client
+	}
+
+	handleDisconnect(client: Socket) {
+		this.logger.log('disconnection')
+		// Gestion de la déconnexion du client
+	}
 
 	@SubscribeMessage('findAllBlocks')
 	async handleFindAllBlocks(@ConnectedSocket() client: Socket) {
-		const id: number = client.data.user.id;
+		// const id: number = client.data.user.id;
+		const id: number = client.client['user'].id;
 		return (await this.blockService.getAllBlocked(id))
 	}
 	
 	@SubscribeMessage('block')
 	async handleBlock(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
-		const id: number = client.data.user.id;
-		return (await this.blockService.createBlock(id, nick));
-		}
-		
+		@MessageBody() otherId: number
+	) {
+		const id: number = client.client['user'].id;
+		const user: UserDto = await this.usersService.getUserById(id);
+		const otherUser: UserDto = await this.usersService.getUserById(otherId);
+		const result = await this.blockService.createBlock(id, otherId); 
+		// if fails, no emit
+		if (!result) return (result);
+		// if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(id.toString()).emit('block', otherUser);
+		// }
+		// if (this.server.of('/').adapter.rooms.get(otherId.toString())) {
+			this.server.to(otherId.toString()).emit('blocked', user);
+		// }
+		return (result);
+	}
+	
 	@SubscribeMessage('unblock')
 	async handleUnblock(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
-		const id: number = client.data.user.id;
-		return (await this.blockService.unBlock(id, nick));
+		@MessageBody() otherId: number
+	) {
+		// const id: number = client.data.user.id;
+		const id: number = client.client['user'].id;
+		const user: UserDto = await this.usersService.getUserById(id);
+		const otherUser: UserDto = await this.usersService.getUserById(otherId);
+		const result = await this.blockService.unBlock(id, otherId);
+		// if fails, no emit
+		if (!result) return (result);
+		// if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(id.toString()).emit('unblock', otherUser);
+		// }
+		// if (this.server.of('/').adapter.rooms.get(id.toString())) {
+			this.server.to(otherId.toString()).emit('unblocked', user);
+		// }
+		return (result);
 	}
 		
-	@SubscribeMessage('')
-	async handle(
-		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string) {
-		const id: number = client.data.user.id;
-		return (await this.blockService.isBlocked(id, nick));
-	}
+	// @SubscribeMessage('')
+	// async handle(
+	// 	@ConnectedSocket() client: Socket, 
+	// 	@MessageBody() otherId: number) {
+	// 	const id: number = client.data.user.id;
+	// 	return (await this.blockService.isBlocked(id, otherId));
+	// }
 	
 }

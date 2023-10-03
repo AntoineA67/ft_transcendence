@@ -43,7 +43,7 @@ export class FriendRequestService {
 			}
 		})
 		const pendings = reqs.map((x) => (x.user)).filter(async (x) => (
-			await this.blockService.isBlocked(user.id, x.username) == false
+			await this.blockService.isBlocked(user.id, x.id) == false
 		));
 		return (pendings);
 	}
@@ -52,14 +52,15 @@ export class FriendRequestService {
 		const me = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserByNick(nick);
 		if (!me || !friend) return (false);
+		if (me.id == friend.id) return (false);
 		// check if the user had blocked you
-		const blocked = await this.blockService.isBlocked(friend.id, me.username);
+		const blocked = await this.blockService.isBlocked(friend.id, me.id);
 		if (blocked) return (false);
 		// check if they are already friends
-		const isFriend = await this.friendshipService.isFriend(id, friend.username);
+		const isFriend = await this.friendshipService.isFriend(id, friend.id);
 		if (isFriend) return (true);
 		//check if there are pending requests
-		const pendings = await this.getPendingReq(id, friend.username);
+		const pendings = await this.getPendingReq(id, friend.id);
 		if (pendings.length != 0) return (true);
 		this.logger.log('before prisma create')
 		this.logger.log(me.username)
@@ -78,14 +79,14 @@ export class FriendRequestService {
 		return (true);
 	}
 
-	async replyFriendReq(id: number, nick: string, accept: boolean): Promise<boolean> {
+	async replyFriendReq(id: number, otherId: number, accept: boolean): Promise<boolean> {
 		const me = await this.usersService.getUserById(id);
-		const friend = await this.usersService.getUserByNick(nick);
+		const friend = await this.usersService.getUserById(otherId);
 		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
 		if (!me || !friend) return (false);
 		// if error these two actions must rollback together
 		if (status == ReqState.ACCEPT) {
-			await this.friendshipService.makeFriend(id, nick);
+			await this.friendshipService.makeFriend(id, otherId);
 		}
 		this.logger.log('adter MakeFriend');
 		try {
@@ -105,7 +106,7 @@ export class FriendRequestService {
 				where: {
 					AND: [
 						{ userId: { equals: id } },
-						{ possibleFriendId: { equals: friend.id } },
+						{ possibleFriendId: { equals: otherId } },
 						{ status: { equals: 'PENDING' } }
 					],
 				},
@@ -117,9 +118,9 @@ export class FriendRequestService {
 		return (true);
 	}
 
-	async getPendingReq(id: number, nick: string) {
+	async getPendingReq(id: number, otherId: number) {
 		const user = await this.usersService.getUserById(id);
-		const friend = await this.usersService.getUserByNick(nick);
+		const friend = await this.usersService.getUserById(otherId);
 		if (!user || !friend) return ([]);
 		const pendings = await this.prisma.friendRequest.findMany({
 			where: {

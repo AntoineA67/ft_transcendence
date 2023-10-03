@@ -117,23 +117,24 @@ export class UsersService {
 		)
 	}
 
-	async getUserProfileById(id: number)
-		: Promise<ProfileDto | null> {
-		return (await this.prisma.user.findUnique({
+	// the freind, block, blocked should be given by other services
+	async getUserProfileById(id: number): Promise<ProfileDto | null> {
+		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
-				id: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
+				id: true, 
+				username: true, 
+				avatar: true, 
+				bio: true, 
+				status: true
 			}
-		}))
+		});
+		return ({ ... profile, 
+			friend: null, block: null, blocked: null, sent: null })
 	}
 
-	async getUserProfileByNick(nick: string)
-		: Promise<ProfileDto | null> {
-		return (await this.prisma.user.findUnique({
+	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
+		let profile =  await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
@@ -142,7 +143,11 @@ export class UsersService {
 				bio: true,
 				status: true,
 			}
-		}))
+		});
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null
+		})
 	}
 
 	async generate2FASecret(user: User) {
