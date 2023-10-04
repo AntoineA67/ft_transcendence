@@ -1,10 +1,9 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, SubscribeMessage, MessageBody } from '@nestjs/websockets';
-import { Member } from '@prisma/client';
 import { Server, Socket } from 'socket.io';
 import { MemberService } from './member.service';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'chats'  })
 export class MemberGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly memberService: MemberService) { }
