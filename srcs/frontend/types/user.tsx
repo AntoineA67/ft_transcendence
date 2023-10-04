@@ -12,6 +12,7 @@ export type profileType = {
 	avatar: null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
 	bio: string,
+	activated2FA: boolean,
 	// game history
 	// achieve
 	friend: boolean | null,   // null when the profile is user himself
