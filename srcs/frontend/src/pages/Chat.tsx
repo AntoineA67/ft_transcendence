@@ -24,13 +24,18 @@ type Profile = {
 	username: string;
 };
 
+type MemberWithLatestMessage = {
+	member: Member;
+	latestMessage: Message | null;
+  };
+
 type ProfileTest = {
 	avatar: string | null;
 	bio: string;
 	id: number;
 	status: string;
 	username: string;
-	membership: Member[];
+	membership: MemberWithLatestMessage[];
 };
 
 type Member = {
@@ -50,6 +55,7 @@ type Rooms = {
 	title: string,
 	private: boolean,
 	password: string,
+	messages: Message[];
 }
 
 type Room = {
@@ -226,11 +232,6 @@ export function ChatBox() {
 			</div>
 		</div>
 	);
-	return (
-		<div>
-
-		</div>
-	);
 }
 
 function MyForm({
@@ -388,28 +389,25 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
-	const [rooms, setRooms] = useState<Rooms[]>([]);
+	const [rooms, setRooms] = useState<Room[]>([]);
 	const [profile, setProfile] = useState<ProfileTest>();
 
 	useEffect(() => {
-		socket.emit('getAllRoomsByUserid', (response: Rooms[]) => {
-		  setRooms(response);
-		});
-	  }, []);
+		socket.emit('getProfileForUser', (profiletest: ProfileTest) => {
+			if (profiletest) {
+				setProfile(profiletest);
+				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
+				setRooms(allRooms);
+			}
+		  });
+	}, []);
 
-	  useEffect(() => {
-		socket.emit('getProfileForUser', (response: ProfileTest) => {
-		  setProfile(response);
-		//   const roomsArray = response.membership.map(member => member.room);
-		//   setRooms(roomsArray);
-		});
-	  }, []);
-	  console.log('Profile', profile);
+	console.log('Profile',profile);
 
 	useEffect(() => {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
 
-		const handleNewRoom = (response: Rooms) => {
+		const handleNewRoom = (response: Room) => {
 		  setRooms((prevRooms) => [response, ...prevRooms]);
 		};
 	  
@@ -436,8 +434,7 @@ export function ChatList() {
 		};
 	}, [rooms]);
 
-	const myMap = (room: Rooms) => {
-		console.log(room);
+	const myMap = (room: Room) => {
 		const channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
 
 		return (

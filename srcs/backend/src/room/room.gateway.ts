@@ -6,7 +6,7 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
-import { Member } from '@prisma/client';
+import { Member, Message } from '@prisma/client';
 
 type MessageWithUsername = {
 	id: number;
@@ -17,13 +17,18 @@ type MessageWithUsername = {
 	username: string;
 };
 
-type ProfileUser = {
+type ProfileTest = {
 	bio: string;
 	id: number;
 	status: string;
 	username: string;
-	membership: Member[];
-};
+	membership: MemberWithLatestMessage[];
+  };
+
+  type MemberWithLatestMessage = {
+	member: Member;
+	latestMessage: Message | null; // Incluez le dernier message
+  };
 
 @WebSocketGateway({ cors: true })
 export class RoomGateway
@@ -142,7 +147,7 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('getProfileForUser')
-	async handlegetProfileForUser(@ConnectedSocket() client: Socket): Promise<ProfileUser | null> {
+	async handlegetProfileForUser(@ConnectedSocket() client: Socket): Promise<ProfileTest | null> {
 		const userId: number = client.data.user.id;
 		return await this.roomService.getProfileForUser(userId);
 	}

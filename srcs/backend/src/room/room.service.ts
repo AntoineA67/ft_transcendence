@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Room, Prisma, Member } from '@prisma/client';
+import { Room, Prisma, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 
 type MessageWithUsername = {
@@ -12,12 +12,17 @@ type MessageWithUsername = {
   username: string;
 };
 
-type ProfileUser = {
-	bio: string;
-	id: number;
-	status: string;
-	username: string;
-	membership: Member[];
+type ProfileTest = {
+  bio: string;
+  id: number;
+  status: string;
+  username: string;
+  membership: MemberWithLatestMessage[];
+};
+
+type MemberWithLatestMessage = {
+  member: Member;
+  latestMessage: Message | null;
 };
 
 @Injectable()
@@ -324,34 +329,55 @@ export class RoomService {
     return this.prisma.room.delete({ where: { id } });
   }
 
-  async getProfileForUser(userId: number): Promise<ProfileUser | null> {
-	const user = await this.prisma.user.findUnique({
-	  where: { id: userId },
-	  include: {
-		membership: {
-		  include: {
-			room: {
-			  include: {
-				message: true,
-			  },
-			},
-		  },
-		},
-	  },
-	});
+  async getProfileForUser(userId: number): Promise<ProfileTest | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        membership: {
+          include: {
+            room: {
+              include: {
+                message: {
+                  orderBy: {
+                    send_date: 'desc', // Triez les messages par date d'envoi décroissante
+                  },
+                  take: 1, // Récupérez seulement le dernier message
+                },
+              },
+            },
+          },
+        },
+      },
+    });
   
-	if (!user) {
-	  return null;
-	}
+    if (!user) {
+      return null;
+    }
+  
+    const profile: ProfileTest = {
+      bio: user.bio,
+      id: user.id,
+      status: user.status,
+      username: user.username,
+      membership: user.membership.map((member) => ({
+        member: member,
+        latestMessage: member.room.message.length > 0 ? member.room.message[0] : null,
+      })),
+    };
 
-	const profile: ProfileUser = {
-	  bio: user.bio,
-	  id: user.id,
-	  status: user.status,
-	  username: user.username,
-	  membership: user.membership,
-	};
+    // Triez le tableau de membership par la date du dernier message
+    profile.membership.sort((a, b) => {
+      if (!a.latestMessage && !b.latestMessage) {
+        return 0;
+      } else if (!a.latestMessage) {
+        return -1;
+      } else if (!b.latestMessage) {
+        return 1;
+      } else {
+        return b.latestMessage.send_date.getTime() - a.latestMessage.send_date.getTime();
+      }
+    });
   
-	return profile;
+    return profile;
   }
 }
