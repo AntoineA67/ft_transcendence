@@ -4,6 +4,7 @@ import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UserDto } from 'src/dto/UserDto';
 import { ProfileDto } from 'src/dto/ProfileDto';
+import { authenticator } from 'otplib';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -70,7 +71,7 @@ export class UsersService {
 
 	//dont touch
 	async getUserByUsername(username: string) {
-		console.log('getUserByUsername', username);
+		//console.log('getUserByUsername', username);
 		const user = await this.prisma.user.findUnique({
 			where: {
 				username,
@@ -110,28 +111,30 @@ export class UsersService {
 					username: true,
 					avatar: true,
 					status: true,
+					activated2FA: true,
 				}
 			})
 		)
 	}
 
-	async getUserProfileById(id: number)
-		: Promise<ProfileDto | null> {
-		return (await this.prisma.user.findUnique({
+	// the freind, block, blocked should be given by other services
+	async getUserProfileById(id: number): Promise<ProfileDto | null> {
+		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
 				id: true, 
 				username: true, 
 				avatar: true, 
 				bio: true, 
-				status: true,
+				status: true
 			}
-		}))
+		});
+		return ({ ... profile, 
+			friend: null, block: null, blocked: null, sent: null })
 	}
 
-	async getUserProfileByNick(nick: string)
-		: Promise<ProfileDto | null> {
-		return (await this.prisma.user.findUnique({
+	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
+		let profile =  await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
@@ -140,7 +143,30 @@ export class UsersService {
 				bio: true,
 				status: true,
 			}
-		}))
+		});
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null
+		})
+	}
+
+	async generate2FASecret(user: User) {
+		const secret = authenticator.generateSecret();
+		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+		return {
+			secret,
+			otpauthUrl
+		}
+	}
+
+	async verify2FA(user: any, token: string) {
+		user = await this.prisma.user.findUnique({
+			where: { id: user.id }
+		});
+		return (authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}));
 	}
 
 }

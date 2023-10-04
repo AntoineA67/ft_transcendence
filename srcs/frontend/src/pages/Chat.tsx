@@ -4,7 +4,7 @@ import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { socket } from '../utils/socket';
+import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
 
 type Message = {
@@ -98,26 +98,26 @@ export function ChatBox() {
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 
 	useEffect(() => {
-		socket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
+		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
 			setLoading(false);
 		});
 
-		socket.emit('MyProfile', (data: Profile) => {
+		chatsSocket.emit('MyProfile', (data: Profile) => {
 			setProfile(data);
 		});
 
-		socket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
+		chatsSocket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
 			setMemberstatus(data);
 		});
 		function fc(newMessage: Message) {
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		}
-		socket.on('messageSent', fc);
+		chatsSocket.on('messageSent', fc);
 		return () => {
-			socket.off('messageSent', fc);
+			chatsSocket.off('messageSent', fc);
 		};
 	}, [chatId]);
 
@@ -148,7 +148,7 @@ export function ChatBox() {
 	};
 
 	const handleSendMessage = () => {
-		socket.emit('sendMessage', {
+		chatsSocket.emit('sendMessage', {
 			roomId: chatId,
 			content: mess,
 			userid: profile.id,
@@ -296,7 +296,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	const handleCreateGroup = (roomTitle: string) => {
 		if (roomTitle.trim() === '')
 			return ;
-		socket.emit('createChannelRoom', roomTitle, (response: number) => {
+		chatsSocket.emit('createChannelRoom', roomTitle, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
@@ -309,7 +309,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	const handlePrivateMessage = (username: string) => {
 		if (username.trim() === '')
 			return ;
-		socket.emit('createPrivateRoom', username, (response: number) => {
+		chatsSocket.emit('createPrivateRoom', username, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
@@ -325,7 +325,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 				roomid: roomId,
 				password: password,
 			};
-			socket.emit('joinRoom', roomdata, (response: boolean) => {
+			chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
 				if (response === false) {
 					alert('Wrong Name or Room ID or Password or you\'re already in the room');
 					setJoin('');
@@ -393,7 +393,7 @@ export function ChatList() {
 	const [profile, setProfile] = useState<ProfileTest>();
 
 	useEffect(() => {
-		socket.emit('getProfileForUser', (profiletest: ProfileTest) => {
+		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
 			if (profiletest) {
 				setProfile(profiletest);
 				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
@@ -424,12 +424,12 @@ export function ChatList() {
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
 
 		socketListeners.forEach(({ event, handler }) => {
-		  socket.on(event, handler);
+		  chatsSocket.on(event, handler);
 		});
 
 		return () => {
 		  socketListeners.forEach(({ event, handler }) => {
-			socket.off(event, handler);
+			chatsSocket.off(event, handler);
 		  });
 		};
 	}, [rooms]);

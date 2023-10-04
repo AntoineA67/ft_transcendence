@@ -142,3 +142,10 @@
 ::-webkit-scrollbar-thumb:hover {
 	background-color: #555;
 }
+
+.userItem {
+	margin: 0;
+	background-color: grey;
+	/* margin-bottom: 3px; */
+	padding: 10px;
+}

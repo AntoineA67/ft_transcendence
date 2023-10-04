@@ -30,7 +30,7 @@ type ProfileTest = {
 	latestMessage: Message | null; // Incluez le dernier message
   };
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
 	constructor(

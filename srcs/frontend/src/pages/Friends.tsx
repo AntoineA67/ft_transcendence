@@ -1,89 +1,14 @@
 import {useEffect, useState} from 'react';
 import { socket } from '../utils/socket';
+import { useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { BlockList, FriendList } from './FriendsHelper';
+import { FriendReqList } from './FriendsHelper';
 
-type UserDto = {
-	id: number,
-	username: string,
-	avatar: any,
-	onlineStatus: 'ONLINE' | 'OFFLINE' | 'INGAME',
+type AddPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 }
-
-function FriendList({ friends }: { friends: UserDto[]}) {
-	
-	const myMap = (user: UserDto) => {
-		return (
-			<li key={user.id}>
-				{user.username}
-			</li>
-		)
-	}
-
-	return (
-		<ul>
-			<p style={{color: 'white'}}>FriendList</p>
-			{(friends.length === 0) ? (
-				<p style={{ color: 'white' }}>
-					Nothing
-				</p>
-			) : (
-				friends.map(myMap))}
-		</ul>
-	);
-}
-
-function FriendReqList({ reqs, setReqs }: { reqs: UserDto[], setReqs: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
-
-	async function handleClick(
-		e: React.MouseEvent<HTMLButtonElement, MouseEvent>, 
-		possibleFriend: string, 
-		result: boolean
-	) {
-		e.preventDefault();
-		socket.emit('replyReq', {nick: possibleFriend, result}, (success: boolean) => {
-			if (success) {
-				const update = reqs.filter((x) => (x.username !== possibleFriend))
-				setReqs(update);
-			}
-		})	
-	}
-	
-	const myMap = (user: UserDto) => {
-		return (
-			<li key={user.id}>
-				<div>
-					<p style={{color: 'white'}}>
-						{user.username}
-					</p>
-					<button 
-						className='btn btn-primary' 
-						onClick={(e) => handleClick(e, user.username, true)}>
-						Accept
-					</button>
-					<button 
-						className='btn btn-secondary' 
-						onClick={(e) => handleClick(e, user.username, false)}>
-						Decline
-					</button>
-				</div>
-			</li>
-		)
-	}
-
-	return (
-		<ul>
-			<p style={{color: 'white'}}>Friend request</p>
-			{(reqs.length === 0) ? (
-				<p style={{color: 'white'}}>
-					Nothing
-				</p> 
-			): (
-				reqs.map(myMap))}
-		</ul>
-	);
-}
-
-function SendRequest() {
-	
+function AddPage({ setPage }: AddPageProp) {
 	const [nick, setNick] = useState('');
 	const [mess, setMess] = useState('');
 
@@ -96,111 +21,92 @@ function SendRequest() {
 	}
 	
 	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
-			<label htmlFor='send-friend-request'>Send friend request</label>
-			<input type='text'
-				value={nick}
-				onChange={(e) => setNick(e.target.value)}
-				></input>
-			<button type="submit" className=""> send </button>
-			<div id='form-message' style={{color: 'white'}}>{mess}</div>
-		</form>
+		<div>
+			<button className='goBack' onClick={() => setPage('friendPage')}/>		
+			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
+				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
+				<input 
+					autoFocus
+					className='form-control w-100 my-2'
+					type='text'
+					value={nick}
+					onChange={(e) => setNick(e.target.value)}
+				/>
+				<button type="submit" className="btn btn-primary w-100"> send </button>
+				<div id='form-message mt-1' style={{color: 'white'}}>{mess}</div>
+			</form>
+		</div>
 	)
 }
 
-function AddBlock({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
-	const [nick, setNick] = useState('');
-	const [mess, setMess] = useState('');
-
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		socket.emit('block', nick, (success: boolean) => {
-			success ? setMess('Success') : setMess('Fails')
-			setNick('');
-			socket.emit('findAllBlocks', (res: UserDto[]) => {
-				setBlocks(res);
-			})
-		})
-	}
-
+type FriendPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
+}
+function FriendPage({ setPage }: FriendPageProp) {
 	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
-			<label htmlFor='block-someone'>Block someone</label>
-			<input type='text'
-				value={nick}
-				onChange={(e) => setNick(e.target.value)}
-			></input>
-			<button type="submit" className=""> block </button>
-			<div id='form-message' style={{ color: 'white' }}>{mess}</div>
-		</form>
+		<>
+			<div className='w-100 p-1 d-flex flex-row align-items-center' style={{background: 'black'}}>
+				<button className='block me-auto' onClick={() => setPage('blockPage')}/>
+				<h5 style={{color: 'white'}}>Friends</h5>
+				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
+			</div>
+			<FriendReqList />
+			<FriendList />
+		</>
 	)
 }
 
-function BlockList({ blocks, setBlocks }: { blocks: UserDto[], setBlocks: React.Dispatch<React.SetStateAction<UserDto[]>> }) {
-	
-	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, nick: string) => {
-		e.preventDefault();
-		socket.emit('unblock', nick, (success: boolean) => {
-			if (success) {
-				const update = blocks.filter((x) => (x.username !== nick));
-				setBlocks(update);
-			}
-		})
-	}
-	
-	const myMap = (user: UserDto) => {
-		return (
-			<li key={user.id}>
-				{user.username}
-				<button onClick={(e) => handleClick(e, user.username)}>
-					unBlock
-				</button>
-			</li>
-		)
-	}
-	
+type BlockPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
+}
+function BlockPage({ setPage }: BlockPageProp) {
 	return (
-		<ul style={{color: 'white'}}>
-			<p>Block list</p>
-			{blocks.length === 0 ? (
-				<p>Nothing</p>
-			) : (
-				blocks.map(myMap)
-			)}
-		</ul>
+		<>
+			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
+				<button 
+					className='goBack m-2' 
+					onClick={() => setPage('friendPage')}
+				/>
+				<h5 style={{color: 'white'}}>Blocks</h5>
+			</div>
+			<BlockList />
+		</>
+	)
+}
+
+function RelationPages() {
+	const [page, setPage] = useState<'friendPage' | 'blockPage' | 'addPage'>('friendPage');
+
+	return (
+		<div className='w-100'>
+			{page == 'friendPage' && <FriendPage 
+				setPage={setPage}
+			/>}
+			{page == 'blockPage' && <BlockPage 
+				setPage={setPage}
+			/>}
+			{page == 'addPage' && <AddPage setPage={setPage}/>}
+		</div>
 	)
 }
 
 export function Friends() {
-	const [friends, setFriends] = useState<UserDto[]>([]);
-	const [reqs, setReqs] = useState<UserDto[]>([]);
-	const [blocks, setBlocks] = useState<UserDto[]>([]);
+	const location = useLocation();
+	const classname1 = location.pathname == '/friends' ? '' : 'd-none d-sm-flex';
+	const classname2 = location.pathname == '/friends' ? 'd-none d-sm-flex' : '';
 	
-	useEffect(() => {
-		socket.emit('findAllReqs', (res: UserDto[]) => {
-			setReqs(res)
-			console.log('reqs: ', res)
-		})
-		socket.emit('findAllBlocks', (res: UserDto[]) => {
-			setBlocks(res)
-			console.log('blocks: ', res)
-		})
-	}, [])
-
-	useEffect(() => {
-		socket.emit('findAllFriends', (res: UserDto[]) => {
-			setFriends(res)
-			console.log('friends: ', res)
-		})
-	}, [reqs, blocks])
-
 	return (
-		<div style={{color: 'white'}}>
-			<SendRequest></SendRequest>
-			<FriendReqList reqs={reqs} setReqs={setReqs}></FriendReqList>
-			<FriendList friends={friends}></FriendList>
-			<BlockList blocks={blocks} setBlocks={setBlocks}></BlockList>
-			<AddBlock blocks={blocks} setBlocks={setBlocks}></AddBlock>
+		<div className='container-fluid h-100' >
+			<div className='row h-100' >
+				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
+					style={{overflowY: 'auto'}} >
+					<RelationPages />
+				</div>
+				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
+					style={{overflowY: 'auto'}}>
+					<Outlet />
+				</div>
+			</div>
 		</div>
 	);
 }
