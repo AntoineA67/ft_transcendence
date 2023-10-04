@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-import { Link, Outlet, useParams } from "react-router-dom";
+import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 //import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
@@ -120,18 +120,23 @@ export function DoubleAuth() {
 	return (
 		<Container fluid className="px-0 h-75">
 			<Title title="Double Auth" />
-			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100" style={{ minHeight: '400px' }}>
+			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" style={{ minHeight: '400px' }}>
 				<form className="h-100 d-flex flex-column gap-3">
-					<Form.Check
-						type="switch"
-						id="double-auth-switch"
-						label="Enable double auth"
-						onChange={switchActivate}
-						checked={isSwitchOn}
-					/>
-					<QRCode value={qrCodePath} />
+					<div style={{ color: "white", margin: "auto 0" }}>
+						<h3>Enable two-factor authentication</h3>
+						<p>
+							To enable two-factor authentication, scan the QR code below with a 2FA app.
+						</p>
+					</div>
+					<div style={{ margin: "auto" }}>
+						<QRCode value={qrCodePath} />
+					</div>
+					<div style={{ color: "white", margin: "50px 0 0 0" }}>
+						<p>
+							Enter the 6-digit code from your 2FA app to confirm its authenticity.
+						</p>
+					</div>
 				</form>
-				<br></br>
 				<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
 					<Form.Control
 						size="lg"
@@ -152,12 +157,14 @@ export function DoubleAuth() {
 export function SettingMenu() {
 
 	const [profile, setProfile] = useState<profileType | null>(null);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!profile) {
 			console.log("emit");
 			socket.emit('MyProfile', profile, (res: profileType) => {
 				setProfile(res);
+				console.log("profile", res);
 			});
 		}
 	}, [profile]);
@@ -167,24 +174,14 @@ export function SettingMenu() {
 		console.log('handle submit: change password');
 	};
 
-	const togglePassword = (id: string) => {
-		let x = document.getElementById(id) as HTMLInputElement;
-		let eye = document.getElementById("eye") as HTMLImageElement;
-		if (x.type === "password") {
-			x.type = "text";
-			eye.src = eyeclose;
-		} else {
-			x.type = "password";
-			eye.src = eyeopen;
-		}
-	}
+	const switchActivate = () => {
+		navigate("/setting/doubleauth");
+	};
 
 
 	return (
 		<Container fluid className='px-0 h-75'>
 			<Title title="Setting" />
-
-
 
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" style={{ minHeight: '400px' }}>
 
@@ -210,9 +207,9 @@ export function SettingMenu() {
 				<Form.Check
 					type="switch"
 					id="double-auth-switch"
-					label="Enable double auth"
-				// onChange={switchActivate}
-				// checked={isSwitchOn}
+					label={profile?.activated2FA ? "Disable two-factor authentication" : "Enable two-factor authentication"}
+					onChange={switchActivate}
+					checked={profile?.activated2FA}
 				/>
 
 				<hr />
@@ -224,35 +221,6 @@ export function SettingMenu() {
 
 			</Stack>
 
-
-
-			{/* <Form>
-				<Form.Group as={Row} className="mb-3" controlId="formPlaintextPassword">
-					<Form.Label column sm="2">
-						Password
-					</Form.Label>
-					<Col sm="10">
-						<Form.Control type="password" placeholder="Password" />
-					</Col>
-				</Form.Group>
-			</Form>
- */}
-
-
-
-
-
-
-
-			<Stack className="col-12 col-sm-6 col-md-4 p-3 p-sm-6 gap-5 h-100" style={{ minHeight: '400px' }}>
-				<Link to="changepassword" className='link-text link fs-5'>Change password </Link>
-				<Link to="doubleauth" className='link-text link fs-5'>Double Authenticate </Link>
-				<Link to="." className='link-text link fs-5'>Change sth else </Link>
-				<button onClick={() => {
-					localStorage.removeItem('token');
-					window.location.href = '/';
-				}} className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Log out</button>
-			</Stack>
 		</Container>
 	);
 }

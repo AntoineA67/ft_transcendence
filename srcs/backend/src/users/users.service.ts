@@ -127,7 +127,8 @@ export class UsersService {
 				username: true,
 				avatar: true,
 				bio: true,
-				status: true
+				status: true,
+				activated2FA: true,
 			}
 		});
 		if (profile && profile.password === "nopass") {
