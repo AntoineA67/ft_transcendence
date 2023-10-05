@@ -82,8 +82,8 @@ export class UsersGateway
 		return (await data);
 	}
 
-	@SubscribeMessage('Verify2FA')
-	async handleVerify2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+	@SubscribeMessage('Activate2FA')
+	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
 		console.log(data);
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
 
@@ -94,12 +94,17 @@ export class UsersGateway
 		return (false);
 	}
 
-	@SubscribeMessage('Status2FA')
-	async handleStatus2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		const user = await this.usersService.getUserById(client.data.user.id);
-		console.log(user);
-		if (user.activated2FA === true)
+	@SubscribeMessage('Disable2FA')
+	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		console.log("Disable2FA --->", data);
+		const isValid = await this.usersService.verify2FA(client.data.user, data);
+
+		console.log("ISVALID", isValid);
+		if (isValid === true) {
+			this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
 			return (true);
+		}
 		return (false);
 	}
+
 } 

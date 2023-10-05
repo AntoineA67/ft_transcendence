@@ -10,7 +10,7 @@ import Sidebar from './pages/Sidebar'
 import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
-import { Setting, ChangePassword, DoubleAuth, SettingMenu } from './pages/ProfileSetting';
+import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
@@ -63,7 +63,6 @@ root.render(
 						
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />}></Route>
-							<Route path='changepassword' element={<ChangePassword />}></Route>
 						</Route>
 						
 						<Route path="/game" element={<>
@@ -74,8 +73,7 @@ root.render(
 					</Route>
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
-						<Route path='changepassword' element={<ChangePassword />}></Route>
-						<Route path='doubleauth' element={<DoubleAuth />}></Route>
+						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 					<Route path="/game" element={<>
 						<GameSocketProvider>
@@ -86,8 +84,6 @@ root.render(
 			<Route path="/test-db" element={<TestDB />} />			
 		</Routes>
 	</BrowserRouter>
-
-	//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 );
 
 // If you want to start measuring performance in your app, pass a function
