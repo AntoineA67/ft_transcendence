@@ -74,32 +74,12 @@ export function ChangePassword() {
 	);
 }
 
-function AlertMessage({ message }: any) {
-	const [isVisible, setIsVisible] = useState(true);
-
-	useEffect(() => {
-		setTimeout(() => {
-			setIsVisible(false);
-		}, 5000);
-	}, []);
-
-	return (
-		<Alert
-			variant="danger"
-			className="alert-message"
-			style={{ display: isVisible ? 'block' : 'none' }}
-		>
-			<p className="m-auto text-center">
-				{message}
-			</p>
-		</Alert>
-	);
-}
-
 export function DoubleAuth() {
 	const [isSwitchOn, setIsSwitchOn] = useState(false);
 	const [qrCodePath, setQrCodePath] = useState('');
 	const [token, setToken] = useState('');
+	const [invalidToken, setInvalidToken] = useState(false);
+	const navigate = useNavigate();
 
 	async function create2FASubmit() {
 		socket.emit('Create2FA', (response: any) => {
@@ -108,22 +88,15 @@ export function DoubleAuth() {
 	}
 
 	async function verify2FASubmit() {
-		console.log('verify 2fa');
-		alert(token);
 		socket.emit('Verify2FA', token, (response: any) => {
 			console.log(response);
 			if (response == true) {
-				alert('2FA is enabled');
+				navigate("/setting/");
 			} else {
-				alert('bad 2fa');
+				setInvalidToken(true);
 			}
 		});
 	}
-
-	const switchActivate = () => {
-		console.log('switch activate');
-		setIsSwitchOn(!isSwitchOn); // Toggle switch state
-	};
 
 	useEffect(() => {
 		create2FASubmit();
@@ -151,25 +124,27 @@ export function DoubleAuth() {
 				</form>
 				<br></br>
 				<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
-
-					<_2faInput
+					<InputToken
 						handleChange={(token: any) => {
 							setToken(token);
+							setInvalidToken(false);
 						}}
 					/>
 					<br></br>
-
-					<AlertMessage message="Your token is not valid !" />
-
-
-					<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0'>Activate</button>
+					{invalidToken === true && (
+						<>
+							<div style={{ color: 'red', textAlign: 'center' }}>Your token is invalid, please try again !</div>
+							<br></br>
+						</>
+					)}
+					<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0' disabled={invalidToken === true}>Activate</button>
 				</form>
 			</Stack>
 		</Container>
 	);
 }
 
-export const _2faInput = ({ handleChange }: any) => {
+export const InputToken = ({ handleChange }: any) => {
 	const [value, setValue] = useState("");
 
 	const handleChangeToken = (event: any) => {
@@ -179,7 +154,6 @@ export const _2faInput = ({ handleChange }: any) => {
 			handleChange(newValue);
 		}
 	};
-
 	return (
 		<Form.Control
 			size="lg"
@@ -238,7 +212,9 @@ export function SettingMenu() {
 						<Form.Label>Confirm password</Form.Label>
 						<Form.Control type="password" placeholder="Password" disabled={profile?.password === 'nopass'} />
 					</Form.Group>
-					<div style={{ color: 'red' }}>You cannot change the password because you are connected with the 42 school API</div>
+					{profile?.password === 'nopass' && (
+						<div style={{ color: 'red' }}>You cannot change the password because you are connected with the 42 school API</div>
+					)}
 					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
 				</Form>
 
