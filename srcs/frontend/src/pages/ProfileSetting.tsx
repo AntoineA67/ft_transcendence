@@ -13,6 +13,7 @@ import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
+import { Alert } from 'react-bootstrap';
 
 
 export function Title({ title }: { title: string }) {
@@ -73,10 +74,32 @@ export function ChangePassword() {
 	);
 }
 
+function AlertMessage({ message }: any) {
+	const [isVisible, setIsVisible] = useState(true);
+
+	useEffect(() => {
+		setTimeout(() => {
+			setIsVisible(false);
+		}, 5000);
+	}, []);
+
+	return (
+		<Alert
+			variant="danger"
+			className="alert-message"
+			style={{ display: isVisible ? 'block' : 'none' }}
+		>
+			<p className="m-auto text-center">
+				{message}
+			</p>
+		</Alert>
+	);
+}
+
 export function DoubleAuth() {
 	const [isSwitchOn, setIsSwitchOn] = useState(false);
 	const [qrCodePath, setQrCodePath] = useState('');
-	const [verifyCode, setVerifyCode] = useState('');
+	const [token, setToken] = useState('');
 
 	async function create2FASubmit() {
 		socket.emit('Create2FA', (response: any) => {
@@ -86,10 +109,13 @@ export function DoubleAuth() {
 
 	async function verify2FASubmit() {
 		console.log('verify 2fa');
-		socket.emit('Verify2FA', verifyCode, (response: any) => {
+		alert(token);
+		socket.emit('Verify2FA', token, (response: any) => {
 			console.log(response);
 			if (response == true) {
 				alert('2FA is enabled');
+			} else {
+				alert('bad 2fa');
 			}
 		});
 	}
@@ -99,22 +125,8 @@ export function DoubleAuth() {
 		setIsSwitchOn(!isSwitchOn); // Toggle switch state
 	};
 
-	const handleSetVerifyCode = (e: any) => {
-		setVerifyCode(e.target.value);
-	};
-
-	const get2faStatus = () => {
-		socket.emit('Status2FA', (response: any) => {
-			console.log(response);
-			if (response == true) {
-				console.log('2FA is enabled');
-			}
-		});
-	};
-
 	useEffect(() => {
 		create2FASubmit();
-		get2faStatus();
 	}, [isSwitchOn]);
 
 	return (
@@ -131,28 +143,56 @@ export function DoubleAuth() {
 					<div style={{ margin: "auto" }}>
 						<QRCode value={qrCodePath} />
 					</div>
-					<div style={{ color: "white", margin: "50px 0 0 0" }}>
+					<div style={{ color: "white" }}>
 						<p>
 							Enter the 6-digit code from your 2FA app to confirm its authenticity.
 						</p>
 					</div>
 				</form>
+				<br></br>
 				<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); verify2FASubmit(); }}>
-					<Form.Control
-						size="lg"
-						type="number"
-						placeholder="Digit"
-						pattern="[0-9]*"
-						value={verifyCode}
-						onChange={handleSetVerifyCode}
+
+					<_2faInput
+						handleChange={(token: any) => {
+							setToken(token);
+						}}
 					/>
 					<br></br>
-					<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0'>Activer 2fa</button>
+
+					<AlertMessage message="Your token is not valid !" />
+
+
+					<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0'>Activate</button>
 				</form>
 			</Stack>
 		</Container>
 	);
 }
+
+export const _2faInput = ({ handleChange }: any) => {
+	const [value, setValue] = useState("");
+
+	const handleChangeToken = (event: any) => {
+		const newValue = event.target.value;
+		if (newValue.length <= 6) {
+			setValue(newValue);
+			handleChange(newValue);
+		}
+	};
+
+	return (
+		<Form.Control
+			size="lg"
+			type="number"
+			pattern="[0-9]*"
+			value={value}
+			onChange={handleChangeToken}
+			style={{ overflow: "hidden", letterSpacing: "10px", display: 'flex' }}
+			className="text-center"
+		/>
+	);
+};
+
 
 export function SettingMenu() {
 
@@ -213,7 +253,7 @@ export function SettingMenu() {
 				/>
 
 				<hr />
-
+				<br></br>
 				<button onClick={() => {
 					localStorage.removeItem('token');
 					window.location.href = '/';
