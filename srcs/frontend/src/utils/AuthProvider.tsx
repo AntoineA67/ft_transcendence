@@ -52,8 +52,8 @@ export function Protected() {
 	useEffect(() => {
 		socket.auth = { token: localStorage.getItem('token') };
 		socket.connect();
-		// friendsSocket.connect();
-		// chatsSocket.connect();
+		friendsSocket.connect();
+		chatsSocket.connect();
 
 		//socket io regitsre event
 		function onConnect() {

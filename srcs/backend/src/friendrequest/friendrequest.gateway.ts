@@ -41,7 +41,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@MessageBody() nick: string): Promise<boolean> {
 		// const id: number = client.data.user.id;
 		const id: number = client.client['user'].id;
-
+		this.logger.log('id: ', id)
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
 		const result = await this.friendReqService.sendFriendReq(id, nick);
