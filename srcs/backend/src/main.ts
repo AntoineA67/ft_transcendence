@@ -10,6 +10,10 @@ async function bootstrap() {
 	app.enableCors({
 		origin: [
 			'http://localhost:8000',
+			'http://localhost:8000/42/callback',
+			// we have to add all the subdomain here
+			// whenever we fetch
+			// it's a problem of cors
 		],
 		methods: ["GET", "POST"],
 	});
