@@ -61,7 +61,6 @@ export function TwoFactorAuth() {
 
 	}
 
-
 	useEffect(() => {
 		if (!profile) {
 			socket.emit('MyProfile', profile, (res: profileType) => {
