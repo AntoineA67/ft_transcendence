@@ -172,6 +172,12 @@ export class UsersService {
 		user = await this.prisma.user.findUnique({
 			where: { id: user.id }
 		});
+		console.log('user', user);
+		console.log('token', token);
+		console.log('otp', authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}))
 		return (authenticator.verify({
 			token: token,
 			secret: user.otpHash

@@ -66,8 +66,10 @@ export function TwoFactorAuth() {
 		if (!profile) {
 			socket.emit('MyProfile', profile, (res: profileType) => {
 				setProfile(res);
+				if (res.activated2FA === false) {
+					create2FASubmit();
+				}
 			});
-			create2FASubmit();
 		}
 	}, [profile]);
 
