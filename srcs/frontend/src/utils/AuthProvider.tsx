@@ -50,13 +50,15 @@ export function Protected() {
 	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
 
 	useEffect(() => {
-		socket.auth = { token: localStorage.getItem('token') };
+		const token = localStorage.getItem('token');
+		socket.auth = { token: token };
+		friendsSocket.auth = { token: token };
+		chatsSocket.auth = { token: token };
 		socket.connect();
-		
+		friendsSocket.connect();
+		chatsSocket.connect();
 		//socket io regitsre event
 		function onConnect() {
-			friendsSocket.connect();
-			chatsSocket.connect();
 			setStatus('connect')
 			console.log('connect')
 		}
