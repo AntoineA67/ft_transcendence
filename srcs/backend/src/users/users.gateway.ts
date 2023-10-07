@@ -10,6 +10,7 @@ import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
 import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
+import { PlayerService } from 'src/player/player.service';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -19,7 +20,8 @@ export class UsersGateway
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
 		private readonly friendReqService: FriendRequestService, 
-		private readonly blockService: BlockService
+		private readonly blockService: BlockService, 
+		private readonly playerService: PlayerService,
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -45,7 +47,9 @@ export class UsersGateway
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (await this.usersService.getUserProfileById(id));
+		const gameHistory = await this.playerService.getHistory(id);
+		let profile = await this.usersService.getUserProfileById(id);
+		return ({ ... profile, gameHistory });
 	}
 
 	@SubscribeMessage('UpdateProfile')
@@ -72,7 +76,8 @@ export class UsersGateway
 		const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
 		const block = await this.blockService.isBlocked(id, otherprofile.id);
 		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
-		return ({ ... otherprofile, friend, block, blocked, sent });
+		const gameHistory = await this.playerService.getHistory(otherprofile.id);
+		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory });
 	}
 
 	@SubscribeMessage('Create2FA')

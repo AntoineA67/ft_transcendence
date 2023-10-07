@@ -4,46 +4,43 @@ import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
+import { gameHistoryType } from '../../types/user';
 
 import '../styles/Stat.css';
-import { lookupService } from 'dns';
 
-type match = {
-	date: string,
-	who: string, 
-	result: string,
-	win: boolean,
+type statProp = {
+	gameHistory: gameHistoryType[]
 }
 
 // 'more' fetch more data on click, data will be put in a useState
-function HistoryContent() {
+function HistoryContent({ gameHistory }: statProp) {
 
-	const data : match[] = [
-		{date: '4 days ago', who: 'Birb', result: '3:2', win: true}
-		, { date: '2 weeks ago', who: 'LooooooooongCat', result: '2:3', win: false}
-		, { date: '2/4', who: 'LooooooooongCat', result: '5:3', win: true}
-		, { date: '2/5', who: 'someone', result: '2:113', win: false}];
+	const dateStr = (input: any): string => {
+		let date = new Date(input);
+		var year = date.getFullYear();
+		var month = (1 + date.getMonth()).toString();
+		month = month.length > 1 ? month : '0' + month;
+		var day = date.getDate().toString();
+		day = day.length > 1 ? day : '0' + day;
+		return month + '/' + day + '/' + year;
+	}
 
-	const listItem = ({date, who, result, win}: match, index: number) => {
-		// const extraInfo = date + ' ' + who + ' ' + (win ? 'win' : 'lose');
+	const listItem = (x: gameHistoryType, index: number) => {
 		const classname = index % 2 ? 'history-item':'history-item-transparent';
-		const color = win ? 'text-magenta' : 'text-cyan';
-
+		const color = x.win ? 'text-magenta' : 'text-cyan';
 		return (
-			<li key={index}
-				// title={extraInfo} 
+			<li key={x.playerId}
 				className={`${classname} d-flex flex-wrap`}>
-				<div>{date}</div>
-				<div className='ms-auto me-3'> {who} </div>
-				<div className={color}> {result} </div>
+				<div>{dateStr(x.date)}</div>
+				<div className='ms-auto me-3'> {x.against} </div>
+				<div className={color}> {x.win ? 'win' : 'lose'} </div>
 			</li>
 		);
 	}
 	
 	return (
 		<ul className="tab-ul px-sm-5 py-5">
-			{data.map(listItem)}
-			<p style={{ color: "red", textAlign: "center" }}>more</p>
+			{gameHistory.map(listItem)}
 		</ul>
 	);
 }
@@ -69,20 +66,25 @@ function AchieveContent() {
 	);
 }
 
-function PieChart() {
+
+function PieChart({ gameHistory }: statProp) {
+	const [win] = useState(gameHistory.filter((x) => (x.win)).length)
+	const [lose] = useState(gameHistory.filter((x) => (!x.win)).length)
 	
-	// fetch data
-	const win = 100;
-	const lose = 300;
-	const total = win + lose;
-	const winRate = ((win / total) * 100).toFixed(1);
-	
-	function gradientDoghnut(xc:number, yc:number, r:number) {
+	// must fix it if total is zero
+	function gradientDoghnut(win: number, lose: number) {
 		
+		const total: number = win + lose;
+		const winRate: string = (total == 0) ? ('NA') : ((win / total) * 100).toFixed(1);
+
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 		if (!canvas) return ;
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
 		if (!ctx) return ;
+		
+		const xc = 100;
+		const yc = 100;
+		const r = 60;
 		
 		const magenta = '#fa34c3';
 		const cyan = '#34fafa';
@@ -110,22 +112,25 @@ function PieChart() {
 			let gradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
 			gradient.addColorStop(0, startColor);
 			gradient.addColorStop(1.0, endColor);
-
+			
 			ctx.beginPath();
 			ctx.strokeStyle = gradient;
 			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
 			// console.log(start, start + deg);
-
+			
 			start += deg;
 		}
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
 		ctx.fillText(winRate.toString() + '%', xc - 23, yc + 5);
 	}
-
-	useEffect(() => gradientDoghnut(100, 100, 60), []);
+	
+	
+	useEffect(() => {
+		gradientDoghnut(win, lose);
+	}, []);
 	
 	return (
 		<Container className='my-5'>
@@ -141,7 +146,7 @@ function PieChart() {
 	);
 }
 
-export default function Stat() {
+export default function Stat({ gameHistory } : statProp) {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
 	
 	useEffect(() => {
@@ -162,7 +167,7 @@ export default function Stat() {
 
 	return (
 		<>
-			<PieChart />
+			<PieChart gameHistory={gameHistory} />
 			<Container>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
@@ -194,64 +199,16 @@ export default function Stat() {
 				</div>
 				{/* content */}
 				<div className="row">
-					<div className="col-12 col-sm-6 d-none d-sm-flex" id='history-content'>
-						<HistoryContent></HistoryContent>
+					<div className="col-12 col-sm-6 d-none d-sm-flex p-0" id='history-content'>
+						<HistoryContent gameHistory={gameHistory} />
 					</div>
-					<div className="col-12 col-sm-6" id='achieve-content'>
+					<div className="col-12 col-sm-6 p-0" id='achieve-content'>
 						<AchieveContent />	
 					</div>
 				</div>
 			</Container>
 		</>
 
-		// <>
-		// 	<PieChart />
-		// 	{/* small screen  */}
-		// 	<Container className="d-sm-none" 
-		// 		style={{color: "white"}}>
-				// <div className="row">
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color tab-greyout" id="history" 
-				// 			onClick={(e) => (setShow('history') )}> 
-				// 			History
-				// 		</h5>
-				// 	</div>
-
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color" id="achieve"
-				// 			onClick={() => setShow('achieve')}>
-				// 			Achieve.
-				// 		</h5>
-				// 	</div>
-				// </div>
-		// 		{show == 'achieve' && <AchieveContent />}
-		// 		{show == 'history' && <HistoryContent></HistoryContent>}
-		// 	</Container>
-
-		// 	{/* big screan */}
-		// 	<Container className="d-none d-sm-block"
-		// 		style={{ color: "white" }}>
-				// <div className="row">
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color"> 
-				// 			History
-				// 		</h5>
-				// 		<div>
-				// 			<HistoryContent></HistoryContent>
-				// 		</div>
-				// 	</div>
-
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color">
-				// 			Achievement
-				// 		</h5>
-				// 		<div>
-				// 			{<AchieveContent />}
-				// 		</div>
-				// 	</div>
-				// </div>
-		// 	</Container>
-		// </>
 	);
 	
 }

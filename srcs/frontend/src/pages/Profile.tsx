@@ -164,7 +164,7 @@ function Profile() {
 						) : (
 							<Text type={'bio'} profile={profile} setEdit={setEdit} />)}
 				</Container>
-				<Stat></Stat>
+				<Stat gameHistory={profile.gameHistory}/>
 			</>
 		) : (
 			<p style={{color: 'white'}}>loading</p>
