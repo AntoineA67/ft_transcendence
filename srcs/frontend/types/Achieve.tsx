@@ -1,4 +1,5 @@
 export type AchieveType = {
+	userId: number;
 	firstWin: boolean;
 	win10Games: boolean;
 	win100Games: boolean;

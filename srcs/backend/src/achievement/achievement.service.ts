@@ -20,7 +20,7 @@ export class AchievementService {
 		});
 		delete achieve.id;
 		delete achieve.userId;
-		return achieve;
+		return {userId: id,  ... achieve};
 	}
 	
 	async updateAchievement(id: number) {
