@@ -11,6 +11,7 @@ import { BlockService } from 'src/block/block.service';
 import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
 import { PlayerService } from 'src/player/player.service';
+import { AchievementService } from 'src/achievement/achievement.service';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -22,6 +23,7 @@ export class UsersGateway
 		private readonly friendReqService: FriendRequestService, 
 		private readonly blockService: BlockService, 
 		private readonly playerService: PlayerService,
+		private readonly achieveService: AchievementService,
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -48,8 +50,9 @@ export class UsersGateway
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
 		const gameHistory = await this.playerService.getHistory(id);
+		const achieve = await this.achieveService.getAchieveById(id);
 		let profile = await this.usersService.getUserProfileById(id);
-		return ({ ... profile, gameHistory });
+		return ({ ... profile, gameHistory, achieve });
 	}
 
 	@SubscribeMessage('UpdateProfile')
@@ -77,7 +80,8 @@ export class UsersGateway
 		const block = await this.blockService.isBlocked(id, otherprofile.id);
 		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
 		const gameHistory = await this.playerService.getHistory(otherprofile.id);
-		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory });
+		const achieve = await this.achieveService.getAchieveById(id);
+		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
 	}
 
 	@SubscribeMessage('Create2FA')

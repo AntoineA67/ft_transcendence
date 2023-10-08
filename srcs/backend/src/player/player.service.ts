@@ -38,6 +38,25 @@ export class PlayerService {
 		return (history);
 	}
 
+	async getAllWin(id: number): Promise<number> {
+		let history = await this.prisma.player.findMany({
+			where: {
+				userId: {equals: id},
+				win: {equals: true}
+			} 
+		})
+		return (history.length);
+	}
+
+	async getAllGame(id: number): Promise<number> {
+		let history = await this.prisma.player.findMany({
+			where: {
+				userId: { equals: id },
+			}
+		})
+		return (history.length);
+	}
+
 
 
 
