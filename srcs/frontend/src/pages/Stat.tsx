@@ -35,6 +35,8 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 		return month + '/' + day + '/' + year;
 	}
 
+	// console.log(gameHistory);
+
 	const listItem = (x: gameHistoryType, index: number) => {
 		const classname = index % 2 ? 'history-item':'history-item-transparent';
 		const color = x.win ? 'text-magenta' : 'text-cyan';
@@ -75,6 +77,8 @@ function AchieveContent({ achieve }: achieveProp) {
 			</li>
 		);
 	}
+
+	console.log(achieve)
 
 	return (
 		<ul className="tab-ul px-sm-1 py-5">			
@@ -179,7 +183,7 @@ export default function Stat({ gameHistory, achieve} : statProp) {
 
 	return (
 		<>
-			<PieChart gameHistory={gameHistory} />
+			<PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} />
 			<Container>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
@@ -212,10 +216,10 @@ export default function Stat({ gameHistory, achieve} : statProp) {
 				{/* content */}
 				<div className="row">
 					<div className="col-12 col-sm-6 d-none d-sm-flex p-0" id='history-content'>
-						<HistoryContent gameHistory={gameHistory} />
+						<HistoryContent gameHistory={gameHistory.map((a) => ({... a}))} />
 					</div>
 					<div className="col-12 col-sm-6 p-0" id='achieve-content'>
-						<AchieveContent achieve={achieve} />	
+						<AchieveContent achieve={{... achieve}} />	
 					</div>
 				</div>
 			</Container>

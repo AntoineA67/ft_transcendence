@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { socket, friendsSocket } from "./socket";
 
 type OptionsProp = {
-	key: number  //profile id
 	profile: profileType,
 }
 export function Options(prop: OptionsProp) {
