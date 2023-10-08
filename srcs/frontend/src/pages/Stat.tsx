@@ -72,13 +72,13 @@ function AchieveContent({ achieve }: achieveProp) {
 		const classname = index % 2 ? 'history-item' : 'history-item-transparent';
 		const color = (achieve[x as keyof (typeof achieve)]) ? 'white' : 'grey';
 		return (
-			<li key={index} className={`${classname} d-flex flex-wrap`} style={{color}}>
+			<li key={`${achieve.userId}_${x}`} className={`${classname} d-flex flex-wrap`} style={{color}}>
 				{x}
 			</li>
 		);
 	}
 
-	console.log(achieve)
+	console.log('achieve: ', achieve)
 
 	return (
 		<ul className="tab-ul px-sm-1 py-5">			

@@ -81,7 +81,7 @@ export class UsersGateway
 		const block = await this.blockService.isBlocked(id, otherprofile.id);
 		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
 		const gameHistory = await this.playerService.getHistory(otherprofile.id);
-		const achieve = await this.achieveService.getAchieveById(id);
+		const achieve = await this.achieveService.getAchieveById(otherprofile.id);
 		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
 	}
 
