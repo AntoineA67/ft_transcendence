@@ -49,40 +49,37 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	}
 	
 	return (
-		// (gameHistory.length == 0) ? ( <p style={{color: 'grey'}}>Empty</p>) : (
-			<ul className="tab-ul px-sm-5 py-5">
+		(gameHistory.length == 0) ? ( 
+			<div className='pb-5 mb-5'>
+				<p className='mx-auto p-3'  style={{color: 'grey'}}>Empty</p>
+			</div>
+		) : (
+			<ul className="tab-ul px-sm-1 py-5">
 				{gameHistory.map(listItem)}
 			</ul>
-		// )
+		)
 	);
 }
 
 
 
 function AchieveContent({ achieve }: achieveProp) {
-	const [loading, setLoading] = useState<boolean>(true);
-	const [list, setList] = useState<string[]>([]);
+	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
 
-	useEffect(() => {
-		let key: keyof (typeof achieve);
-		for (key in achieve) {
-			achieve[key] && setList((prev) => ([... prev, key]));
-		}
-		setLoading(false);
-	}, [])
+	const myMap = (x: string, index: number) => {
+		const classname = index % 2 ? 'history-item' : 'history-item-transparent';
+		const color = (achieve[x as keyof (typeof achieve)]) ? 'white' : 'grey';
+		return (
+			<li key={index} className={`${classname} d-flex flex-wrap`} style={{color}}>
+				{x}
+			</li>
+		);
+	}
 
 	return (
-		( loading ) ? (
-			<p style={{color: 'white'}}>loading</p>
-		) : (
-			<ul className="tab-ul px-sm-5 py-5">			
-				{list.map((str, index) => (
-					<li key={index} style={{color: 'white'}}>
-						{str}
-					</li>
-				))}
-			</ul>
-		)
+		<ul className="tab-ul px-sm-1 py-5">			
+			{achieveList.map(myMap)}
+		</ul>
 	);
 }
 
