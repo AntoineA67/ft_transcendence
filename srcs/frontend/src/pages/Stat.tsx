@@ -4,16 +4,26 @@ import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
-import { gameHistoryType } from '../../types/user';
+import { gameHistoryType } from '../../types/gameHistoryType'; 
 
 import '../styles/Stat.css';
+import { AchieveType } from '../../types/Achieve';
 
 type statProp = {
 	gameHistory: gameHistoryType[]
+	achieve: AchieveType
+}
+
+type gameHistoryProp = {
+	gameHistory: gameHistoryType[]
+}
+
+type achieveProp = {
+	achieve: AchieveType
 }
 
 // 'more' fetch more data on click, data will be put in a useState
-function HistoryContent({ gameHistory }: statProp) {
+function HistoryContent({ gameHistory }: gameHistoryProp) {
 
 	const dateStr = (input: any): string => {
 		let date = new Date(input);
@@ -39,40 +49,48 @@ function HistoryContent({ gameHistory }: statProp) {
 	}
 	
 	return (
-		<ul className="tab-ul px-sm-5 py-5">
-			{gameHistory.map(listItem)}
-		</ul>
+		// (gameHistory.length == 0) ? ( <p style={{color: 'grey'}}>Empty</p>) : (
+			<ul className="tab-ul px-sm-5 py-5">
+				{gameHistory.map(listItem)}
+			</ul>
+		// )
 	);
 }
 
-function AchieveContent() {
-	const achieve = ['Never missed a match', 'Win 10 rounds!', 'Win 50 rounds!', 'Logged in everyday this week'];
 
-	const listItem = (value: string, index: number) => {
-		const classname = index % 2 ?'achieve-item':'achieve-item-transparent';
-		return (
-			<li key={index}
-				className={classname}>
-				{value}
-			</li>
-		);
-	};
+
+function AchieveContent({ achieve }: achieveProp) {
+	const [loading, setLoading] = useState<boolean>(true);
+	const [list, setList] = useState<string[]>([]);
+
+	useEffect(() => {
+		let key: keyof (typeof achieve);
+		for (key in achieve) {
+			achieve[key] && setList((prev) => ([... prev, key]));
+		}
+		setLoading(false);
+	}, [])
 
 	return (
-		<ul className="tab-ul px-sm-5 py-5">
-			{achieve.map(listItem)}
-			<p style={{color: "red", textAlign: "center"}}>more</p>
-		</ul>
+		( loading ) ? (
+			<p style={{color: 'white'}}>loading</p>
+		) : (
+			<ul className="tab-ul px-sm-5 py-5">			
+				{list.map((str, index) => (
+					<li key={index} style={{color: 'white'}}>
+						{str}
+					</li>
+				))}
+			</ul>
+		)
 	);
 }
 
 
-function PieChart({ gameHistory }: statProp) {
+function PieChart({ gameHistory }: gameHistoryProp) {
 	const [win] = useState(gameHistory.filter((x) => (x.win)).length)
 	const [lose] = useState(gameHistory.filter((x) => (!x.win)).length)
 	
-
-
 	// must fix it if total is zero, rate is 0 or 100
 	function gradientDoghnut(win: number, lose: number) {
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -143,7 +161,7 @@ function PieChart({ gameHistory }: statProp) {
 	);
 }
 
-export default function Stat({ gameHistory } : statProp) {
+export default function Stat({ gameHistory, achieve} : statProp) {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
 	
 	useEffect(() => {
@@ -200,7 +218,7 @@ export default function Stat({ gameHistory } : statProp) {
 						<HistoryContent gameHistory={gameHistory} />
 					</div>
 					<div className="col-12 col-sm-6 p-0" id='achieve-content'>
-						<AchieveContent />	
+						<AchieveContent achieve={achieve} />	
 					</div>
 				</div>
 			</Container>

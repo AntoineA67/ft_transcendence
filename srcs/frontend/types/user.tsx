@@ -1,3 +1,6 @@
+import { AchieveType } from "./Achieve";
+import { gameHistoryType } from "./gameHistoryType";
+
 export type userType = {
 	id: number;
 	username: string;
@@ -12,17 +15,9 @@ export type profileType = {
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
 	bio: string,
 	gameHistory: gameHistoryType[],
-	// achieve
+	achieve: AchieveType,
 	friend: boolean | null,   // null when the profile is user himself
 	sent: boolean | null,
 	block: boolean | null,    // do I block this person
 	blocked: boolean | null   // does this person block me
-}
-
-export type gameHistoryType = {
-	playerId: number;
-	date: Date;
-	win: boolean;
-	against: string;
-	score: string;
 }
