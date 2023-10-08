@@ -1,4 +1,5 @@
 import { HistoryDto } from "./HistoryDto";
+import { AchieveDto } from "./AchieveDto";
 
 export class ProfileDto {
 	id: number;
@@ -7,7 +8,7 @@ export class ProfileDto {
 	avatar: Buffer | null | ArrayBuffer;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 	gameHistory: HistoryDto[];
-	// achieve
+	achieve: AchieveDto | null;
 	friend: boolean | null;   // null when the profile is user himself
 	sent: boolean | null;
 	block: boolean | null;

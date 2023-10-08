@@ -20,9 +20,9 @@ export type profileType = {
 }
 
 export type gameHistoryType = {
-	playerId: number,
-	date: Date,
-	win: boolean,
-	against: string,
-	score: string,
+	playerId: number;
+	date: Date;
+	win: boolean;
+	against: string;
+	score: string;
 }
