@@ -26,7 +26,7 @@ export class PlayerService {
 		});
 		history = history.filter((x) => (x.game.finish));
 		history = history.map((x) => ({
-			playerId: id,
+			playerId: x.id,
 			date: x.game.end_date,
 			win: x.win,
 			against: (x.game.players[0].userId == id
