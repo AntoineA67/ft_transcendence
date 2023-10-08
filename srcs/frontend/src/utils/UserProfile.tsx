@@ -48,7 +48,7 @@ export function UserProfile() {
 						</p>
 					</Container>
 					<Options profile={profile} key={profile.id} />
-					<Stat gameHistory={profile.gameHistory} />
+					<Stat gameHistory={profile.gameHistory} achieve={profile.achieve} />
 
 				</div>
 			}

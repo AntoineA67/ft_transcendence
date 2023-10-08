@@ -66,6 +66,7 @@ export class UsersGateway
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
 		// this.logger.log(file);
+		// need some protection here
 		return (await this.usersService.updateUser(id, {avatar: file}));
 	}
 
