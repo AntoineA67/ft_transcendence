@@ -29,8 +29,8 @@ export class BlockGateway {
 
 	@SubscribeMessage('findAllBlocks')
 	async handleFindAllBlocks(@ConnectedSocket() client: Socket) {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 		return (await this.blockService.getAllBlocked(id))
 	}
 	
@@ -39,7 +39,8 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
-		const id: number = client.client['user'].id;
+		// const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const result = await this.blockService.createBlock(id, otherId); 
@@ -59,8 +60,8 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const result = await this.blockService.unBlock(id, otherId);
