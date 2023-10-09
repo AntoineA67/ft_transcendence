@@ -161,7 +161,7 @@ export class UsersService {
 
 	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
-		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);
 		return {
 			secret,
 			otpauthUrl
