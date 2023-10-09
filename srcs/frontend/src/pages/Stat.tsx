@@ -87,10 +87,14 @@ function AchieveContent({ achieve }: achieveProp) {
 	);
 }
 
+type pieProp = {
+	win: number,
+	lose: number
+}
 
-function PieChart({ gameHistory }: gameHistoryProp) {
-	const [win] = useState(gameHistory.filter((x) => (x.win)).length)
-	const [lose] = useState(gameHistory.filter((x) => (!x.win)).length)
+function PieChart({ win, lose }: pieProp) {
+	// const [win, setWin] = useState(gameHistory.filter((x) => (x.win)).length)
+	// const [lose, setLose] = useState(gameHistory.filter((x) => (!x.win)).length)
 	
 	// must fix it if total is zero, rate is 0 or 100
 	function gradientDoghnut(win: number, lose: number) {
@@ -101,11 +105,18 @@ function PieChart({ gameHistory }: gameHistoryProp) {
 		const yc = 100;
 		const r = 60;
 		let total: number = win + lose;
-		const winRate: string = ((win / total) * 100).toFixed(1);
+		// const winRate: string = ((win / total) * 100).toFixed(1);
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
-		total != 0 ? ctx.fillText(winRate.toString() + '%', xc - 23, yc + 5) : (ctx.fillText('NA', xc - 23, yc +5));
-		if (total == 0) return ;
+		// if total == 0 , draw a grey circle
+		if (total == 0) {
+			ctx.beginPath();
+			ctx.strokeStyle = 'grey';
+			ctx.arc(xc, yc, r, 0, (2 * Math.PI), false);
+			ctx.lineWidth = 10;
+			ctx.stroke();
+			return ;
+		}
 		
 		const magenta = '#fa34c3';
 		const cyan = '#34fafa';
@@ -146,23 +157,30 @@ function PieChart({ gameHistory }: gameHistoryProp) {
 	
 	useEffect(() => {
 		gradientDoghnut(win, lose);
-	}, []);
+	}, [win, lose]);
 	
 	return (
 		<Container className='my-5'>
 			<div className='row justify-content-center'>
-				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
+				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
+					<h5 style={{color: 'white', position: 'relative', bottom: '110px', left: '5px'}}> 
+						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'} 
+					</h5>
 				</div>
 				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
-					<h5 style={{color: 'white'}}> Win: {win}<br />Lose: {lose} </h5>
+					<h5 style={{color: 'white'}}> 
+						Win: {win}<br />
+						Lose: {lose} <br />
+						{/* Rate: {(win + lose == 0) ? ('NA') : (win / (win + lose)).toFixed(2) + '%'} */}
+					</h5>
 				</div>
 			</div>
 		</Container>
 	);
 }
 
-export default function Stat({ gameHistory, achieve} : statProp) {
+export default function Stat({gameHistory, achieve} : statProp) {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
 	
 	useEffect(() => {
@@ -183,7 +201,8 @@ export default function Stat({ gameHistory, achieve} : statProp) {
 
 	return (
 		<>
-			<PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} />
+			{/* <PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} /> */}
+			<PieChart win={gameHistory.filter((x) => (x.win)).length} lose={gameHistory.filter((x) => (!x.win)).length} />
 			<Container>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
