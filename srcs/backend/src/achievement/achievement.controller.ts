@@ -6,32 +6,32 @@ import { Achievement, Prisma } from '@prisma/client';
 export class AchievementController {
   constructor(private readonly achievementService: AchievementService) {}
 
-  @Post()
-  async createAchievement(@Body() data: Prisma.AchievementCreateInput): Promise<Achievement> {
-    return this.achievementService.createAchievement(data);
-  }
+//   @Post()
+//   async createAchievement(@Body() data: Prisma.AchievementCreateInput): Promise<Achievement> {
+//     return this.achievementService.createAchievement(data);
+//   }
 
-  @Get(':id')
-  async getAchievementById(@Param('id') id: string): Promise<Achievement> {
-    const achievementId = parseInt(id, 10);
-    const achievement = await this.achievementService.getAchievementById(achievementId);
-    return achievement;
-  }
+//   @Get(':id')
+//   async getAchievementById(@Param('id') id: string): Promise<Achievement> {
+//     const achievementId = parseInt(id, 10);
+//     const achievement = await this.achievementService.getAchievementById(achievementId);
+//     return achievement;
+//   }
 
-  @Get()
-  async getAllAchievements(): Promise<Achievement[]> {
-    return this.achievementService.getAllAchievements();
-  }
+//   @Get()
+//   async getAllAchievements(): Promise<Achievement[]> {
+//     return this.achievementService.getAllAchievements();
+//   }
 
-  @Put(':id')
-  async updateAchievement(@Param('id') id: string, @Body() data: Prisma.AchievementUpdateInput): Promise<Achievement | null> {
-    const achievementId = parseInt(id, 10);
-    return this.achievementService.updateAchievement(achievementId, data);
-  }
+//   @Put(':id')
+//   async updateAchievement(@Param('id') id: string, @Body() data: Prisma.AchievementUpdateInput): Promise<Achievement | null> {
+//     const achievementId = parseInt(id, 10);
+//     return this.achievementService.updateAchievement(achievementId, data);
+//   }
 
-  @Delete(':id')
-  async deleteAchievement(@Param('id') id: string): Promise<Achievement | null> {
-    const achievementId = parseInt(id, 10);
-    return this.achievementService.deleteAchievement(achievementId);
-  }
+//   @Delete(':id')
+//   async deleteAchievement(@Param('id') id: string): Promise<Achievement | null> {
+//     const achievementId = parseInt(id, 10);
+//     return this.achievementService.deleteAchievement(achievementId);
+//   }
 }
