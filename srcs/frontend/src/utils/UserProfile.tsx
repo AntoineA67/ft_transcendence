@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { socket } from "./socket";
 import { Options } from "./Options";
 import { GoUp } from './GoUp'
+
 export function UserProfile() {
 	const { friendNick } = useParams();
 	const location = useLocation();
@@ -47,8 +48,9 @@ export function UserProfile() {
 							{profile.bio}
 						</p>
 					</Container>
-					<Options profile={profile} key={profile.id} />
-					<Stat></Stat>
+					<Options profile={{... profile}} />
+					<Stat gameHistory={profile.gameHistory.map((a) => ({ ...a }))} achieve={{ ... (profile.achieve) }} />
+
 				</div>
 			}
 		</>

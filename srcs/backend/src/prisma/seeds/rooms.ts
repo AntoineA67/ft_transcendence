@@ -1,7 +1,7 @@
 
 export const rooms = [
 	{
-		id: 1,
+		// id: 1,
 		isChannel: true,
 		title: 'transcendance',
 		private: false,
@@ -45,7 +45,7 @@ export const rooms = [
 
 	},
 	{
-		id: 2, 
+		// id: 2, 
 		isChannel: false,
 		members: {
 			create: [
@@ -79,7 +79,7 @@ export const rooms = [
 		}
 	},
 	{
-		id: 3,
+		// id: 3,
 		isChannel: false,
 		members: {
 			create: [
