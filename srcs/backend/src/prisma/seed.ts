@@ -50,10 +50,8 @@ async function seedAchieves() {
 
 async function seedRooms() {
 	for (let room of rooms ){
-		await prisma.room.upsert({
-			where: {id: room.id},
-			update: {},
-			create: room
+		await prisma.room.create({
+			data: room
 		});
 	}
 }

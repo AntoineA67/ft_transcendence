@@ -4,144 +4,183 @@ import Col from 'react-bootstrap/Col';
 import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
+import { gameHistoryType } from '../../types/gameHistoryType'; 
 
 import '../styles/Stat.css';
-import { lookupService } from 'dns';
+import { AchieveType } from '../../types/Achieve';
 
-type match = {
-	date: string,
-	who: string, 
-	result: string,
-	win: boolean,
+type statProp = {
+	gameHistory: gameHistoryType[]
+	achieve: AchieveType
+}
+
+type gameHistoryProp = {
+	gameHistory: gameHistoryType[]
+}
+
+type achieveProp = {
+	achieve: AchieveType
 }
 
 // 'more' fetch more data on click, data will be put in a useState
-function HistoryContent() {
+function HistoryContent({ gameHistory }: gameHistoryProp) {
 
-	const data : match[] = [
-		{date: '4 days ago', who: 'Birb', result: '3:2', win: true}
-		, { date: '2 weeks ago', who: 'LooooooooongCat', result: '2:3', win: false}
-		, { date: '2/4', who: 'LooooooooongCat', result: '5:3', win: true}
-		, { date: '2/5', who: 'someone', result: '2:113', win: false}];
+	const dateStr = (input: any): string => {
+		let date = new Date(input);
+		var year = date.getFullYear();
+		var month = (1 + date.getMonth()).toString();
+		month = month.length > 1 ? month : '0' + month;
+		var day = date.getDate().toString();
+		day = day.length > 1 ? day : '0' + day;
+		return month + '/' + day + '/' + year;
+	}
 
-	const listItem = ({date, who, result, win}: match, index: number) => {
-		// const extraInfo = date + ' ' + who + ' ' + (win ? 'win' : 'lose');
+	// console.log(gameHistory);
+
+	const listItem = (x: gameHistoryType, index: number) => {
 		const classname = index % 2 ? 'history-item':'history-item-transparent';
-		const color = win ? 'text-magenta' : 'text-cyan';
-
+		const color = x.win ? 'text-magenta' : 'text-cyan';
 		return (
-			<li key={index}
-				// title={extraInfo} 
+			<li key={x.playerId}
 				className={`${classname} d-flex flex-wrap`}>
-				<div>{date}</div>
-				<div className='ms-auto me-3'> {who} </div>
-				<div className={color}> {result} </div>
+				<div>{dateStr(x.date)}</div>
+				<div className='ms-auto me-3'> {x.against} </div>
+				<div className={color}> {x.score} </div>
 			</li>
 		);
 	}
 	
 	return (
-		<ul className="tab-ul px-sm-5 py-5">
-			{data.map(listItem)}
-			<p style={{ color: "red", textAlign: "center" }}>more</p>
-		</ul>
+		(gameHistory.length == 0) ? ( 
+			<div className='pb-5 mb-5'>
+				<p className='mx-auto p-3'  style={{color: 'grey'}}>Empty</p>
+			</div>
+		) : (
+			<ul className="tab-ul px-sm-1 py-5">
+				{gameHistory.map(listItem)}
+			</ul>
+		)
 	);
 }
 
-function AchieveContent() {
-	const achieve = ['Never missed a match', 'Win 10 rounds!', 'Win 50 rounds!', 'Logged in everyday this week'];
 
-	const listItem = (value: string, index: number) => {
-		const classname = index % 2 ?'achieve-item':'achieve-item-transparent';
+
+function AchieveContent({ achieve }: achieveProp) {
+	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
+
+	const myMap = (x: string, index: number) => {
+		const classname = index % 2 ? 'history-item' : 'history-item-transparent';
+		const color = (achieve[x as keyof (typeof achieve)]) ? 'white' : 'grey';
 		return (
-			<li key={index}
-				className={classname}>
-				{value}
+			<li key={`${achieve.userId}_${x}`} className={`${classname} d-flex flex-wrap`} style={{color}}>
+				{x}
 			</li>
 		);
-	};
+	}
+
+	console.log('achieve: ', achieve)
 
 	return (
-		<ul className="tab-ul px-sm-5 py-5">
-			{achieve.map(listItem)}
-			<p style={{color: "red", textAlign: "center"}}>more</p>
+		<ul className="tab-ul px-sm-1 py-5">			
+			{achieveList.map(myMap)}
 		</ul>
 	);
 }
 
-function PieChart() {
+type pieProp = {
+	win: number,
+	lose: number
+}
+
+function PieChart({ win, lose }: pieProp) {
+	// const [win, setWin] = useState(gameHistory.filter((x) => (x.win)).length)
+	// const [lose, setLose] = useState(gameHistory.filter((x) => (!x.win)).length)
 	
-	// fetch data
-	const win = 100;
-	const lose = 300;
-	const total = win + lose;
-	const winRate = ((win / total) * 100).toFixed(1);
-	
-	function gradientDoghnut(xc:number, yc:number, r:number) {
-		
+	// must fix it if total is zero, rate is 0 or 100
+	function gradientDoghnut(win: number, lose: number) {
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-		if (!canvas) return ;
-		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+		const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D || null;
 		if (!ctx) return ;
+		const xc = 100;
+		const yc = 100;
+		const r = 60;
+		let total: number = win + lose;
+		// const winRate: string = ((win / total) * 100).toFixed(1);
+		ctx.font = "20px normal";
+		ctx.fillStyle = '#fff';
+		// if total == 0 , draw a grey circle
+		if (total == 0) {
+			ctx.beginPath();
+			ctx.strokeStyle = 'grey';
+			ctx.arc(xc, yc, r, 0, (2 * Math.PI), false);
+			ctx.lineWidth = 10;
+			ctx.stroke();
+			return ;
+		}
 		
 		const magenta = '#fa34c3';
 		const cyan = '#34fafa';
-		const color = [cyan, cyan, magenta, magenta];
-		
 		const winDegree = (2 * Math.PI) * (win / total);
 		const loseDegree = (2 * Math.PI) * (lose / total);
 		const tran = winDegree < loseDegree ? winDegree / 2 : loseDegree / 2;
 		const degree = [loseDegree - tran, tran, winDegree - tran, tran];
+		const color = [cyan, cyan, magenta, magenta];
 		
 		let start = (2 * Math.PI) * (-1 / 4);
 		
-		for (let i = 0; i < degree.length; i++) {
+		for (let i = 0; i < 4; i++) {
 			let deg = degree[i];
-			
-			// x start / end of the next arc to draw
 			let xStart = xc + Math.cos(start) * r;
 			let xEnd = xc + Math.cos(start + deg) * r;
-			// y start / end of the next arc to draw
 			let yStart = yc + Math.sin(start) * r;
 			let yEnd = yc + Math.sin(start + deg) * r;
 			
 			let startColor = color[i];
 			let endColor = color[(i + 1) % color.length];
-			let gradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
+			let gradient: string | CanvasGradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
 			gradient.addColorStop(0, startColor);
 			gradient.addColorStop(1.0, endColor);
-
+			if (startColor == endColor) {
+				gradient = startColor;
+			}
+			
 			ctx.beginPath();
 			ctx.strokeStyle = gradient;
 			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
 			// console.log(start, start + deg);
-
 			start += deg;
 		}
-		ctx.font = "20px normal";
-		ctx.fillStyle = '#fff';
-		ctx.fillText(winRate.toString() + '%', xc - 23, yc + 5);
 	}
-
-	useEffect(() => gradientDoghnut(100, 100, 60), []);
+	
+	
+	useEffect(() => {
+		gradientDoghnut(win, lose);
+	}, [win, lose]);
 	
 	return (
 		<Container className='my-5'>
 			<div className='row justify-content-center'>
-				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
+				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
+					<h5 style={{color: 'white', position: 'relative', bottom: '110px', left: '5px'}}> 
+						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'} 
+					</h5>
 				</div>
 				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
-					<h5 style={{color: 'white'}}> Win: {win}<br />Lose: {lose} </h5>
+					<h5 style={{color: 'white'}}> 
+						Win: {win}<br />
+						Lose: {lose} <br />
+						{/* Rate: {(win + lose == 0) ? ('NA') : (win / (win + lose)).toFixed(2) + '%'} */}
+					</h5>
 				</div>
 			</div>
 		</Container>
 	);
 }
 
-export default function Stat() {
+export default function Stat({gameHistory, achieve} : statProp) {
 	const [show, setShow] = useState<'history' | 'achieve'>('history');
 	
 	useEffect(() => {
@@ -162,7 +201,8 @@ export default function Stat() {
 
 	return (
 		<>
-			<PieChart />
+			{/* <PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} /> */}
+			<PieChart win={gameHistory.filter((x) => (x.win)).length} lose={gameHistory.filter((x) => (!x.win)).length} />
 			<Container>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
@@ -194,64 +234,16 @@ export default function Stat() {
 				</div>
 				{/* content */}
 				<div className="row">
-					<div className="col-12 col-sm-6 d-none d-sm-flex" id='history-content'>
-						<HistoryContent></HistoryContent>
+					<div className="col-12 col-sm-6 d-none d-sm-flex p-0" id='history-content'>
+						<HistoryContent gameHistory={gameHistory.map((a) => ({... a}))} />
 					</div>
-					<div className="col-12 col-sm-6" id='achieve-content'>
-						<AchieveContent />	
+					<div className="col-12 col-sm-6 p-0" id='achieve-content'>
+						<AchieveContent achieve={{... achieve}} />	
 					</div>
 				</div>
 			</Container>
 		</>
 
-		// <>
-		// 	<PieChart />
-		// 	{/* small screen  */}
-		// 	<Container className="d-sm-none" 
-		// 		style={{color: "white"}}>
-				// <div className="row">
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color tab-greyout" id="history" 
-				// 			onClick={(e) => (setShow('history') )}> 
-				// 			History
-				// 		</h5>
-				// 	</div>
-
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color" id="achieve"
-				// 			onClick={() => setShow('achieve')}>
-				// 			Achieve.
-				// 		</h5>
-				// 	</div>
-				// </div>
-		// 		{show == 'achieve' && <AchieveContent />}
-		// 		{show == 'history' && <HistoryContent></HistoryContent>}
-		// 	</Container>
-
-		// 	{/* big screan */}
-		// 	<Container className="d-none d-sm-block"
-		// 		style={{ color: "white" }}>
-				// <div className="row">
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color"> 
-				// 			History
-				// 		</h5>
-				// 		<div>
-				// 			<HistoryContent></HistoryContent>
-				// 		</div>
-				// 	</div>
-
-				// 	<div className="col-6">
-				// 		<h5 className="tab-main-color">
-				// 			Achievement
-				// 		</h5>
-				// 		<div>
-				// 			{<AchieveContent />}
-				// 		</div>
-				// 	</div>
-				// </div>
-		// 	</Container>
-		// </>
 	);
 	
 }
