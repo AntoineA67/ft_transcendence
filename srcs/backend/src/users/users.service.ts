@@ -19,7 +19,6 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
-	//dont touch
 	async createUser(username: string, email: string, password: string) {
 		return await this.prisma.user.create({
 			data: {
@@ -42,11 +41,11 @@ export class UsersService {
 		return users;
 	}
 
-	async updateUser(email: string, data: UpdateUserDto) {
+	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
 		let user: User;
 		try {
 			user = await this.prisma.user.update({
-				where: { email: email },
+				where: { id },
 				data
 			});
 		} catch (err: any) {
@@ -99,7 +98,7 @@ export class UsersService {
 	async getUserBasic(id: number) {
 		return (
 			await this.prisma.user.findUnique({
-				where: { username: nick },
+				where: { id },
 				select: {
 					id: true,
 					username: true,
@@ -109,14 +108,6 @@ export class UsersService {
 			})
 		)
 	}
-
-	// async getNickById(id: number) {
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: { id }
-	// 	});
-	// 	if (!user) return (null);
-	// 	return (user.username);
-	// }
 
 	async getUserById(id: number): Promise<UserDto> {
 		return (
@@ -175,6 +166,20 @@ export class UsersService {
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
+	}
+
+	async getUserByNick(nick: string): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { username: nick },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
 	}
 
 	async generate2FASecret(user: User) {

@@ -3,7 +3,6 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -12,33 +11,16 @@ export class AuthService {
 		public jwtService: JwtService
 	) { }
 
-	// async validateUser(username: string, pass: string): Promise<any> {
-	// 	const user = await this.usersService.findOne(username);
-	// 	if (user && user.password === pass) {
-	// 		const { password, ...result } = user;
-	// 		return result;
-	// 	}
-	// 	return null;
-	// }
-
-
 	async login(user: any) {
 		if (!user) {
 			throw new BadRequestException('Unauthenticated');
 		}
-		console.log('User  -> ', user.emails[0].value);
 		let userExists: any = await this.findUserByEmail(user.emails[0].value);
-		//console.log('userExists', userExists);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
-			console.log('>> id', userExists.id);
 		}
-
-		// generate and return JWT, expiresIn is in seconds
-		return this.jwtService.sign({
-			id: userExists.id,
-		}, { expiresIn: 3600 });
+		return (userExists);
 	}
 
 	async registerUser(user: any): Promise<User> {
@@ -52,11 +34,9 @@ export class AuthService {
 
 	async findUserByEmail(email: string) {
 		const user = await this.usersService.getUserByEmail(email);
-
 		if (!user) {
 			return null;
 		}
-
 		return user;
 	}
 }
