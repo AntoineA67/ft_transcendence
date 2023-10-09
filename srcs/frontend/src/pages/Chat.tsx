@@ -6,73 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-
-type Message = {
-	id: number,
-	message: string,
-	send_date: Date,
-	userId: number,
-	roomId: number,
-	username: string,
-};
-
-type Profile = {
-	avatar: string | null;
-	bio: string;
-	id: number;
-	status: string;
-	username: string;
-};
-
-type MemberWithLatestMessage = {
-	member: Member;
-	latestMessage: Message | null;
-  };
-
-type ProfileTest = {
-	avatar: string | null;
-	bio: string;
-	id: number;
-	status: string;
-	username: string;
-	membership: MemberWithLatestMessage[];
-};
-
-type Member = {
-	id: number;
-	userId: number;
-	roomId: number;
-	room: Room;
-	owner: boolean;
-	admin: boolean;
-	ban: boolean;
-	mute: Date | null;
-};
-
-type Rooms = {
-	id: number,
-	isChannel: boolean,
-	title: string,
-	private: boolean,
-	password: string,
-	messages: Message[];
-}
-
-type Room = {
-    id: number;
-    isChannel: boolean;
-    title: string;
-    private: boolean;
-    password: string;
-	messages: Message[];
-}
-
-type Memberstatus = {
-    owner: boolean;
-    admin: boolean;
-    ban: boolean;
-    mute: Date | null;
-};
+import { Message, ProfileTest, Room, Memberstatus, Pvrooms } from './ChatDto';
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -81,13 +15,6 @@ export function ChatBox() {
 	const [roomTitle, setroomTitle] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(true);
 	const [roomChannel, setRoomChannel] = useState<boolean>(true);
-	const [profile, setProfile] = useState<Profile>({
-		avatar: null,
-		bio: '',
-		id: 0,
-		status: '',
-		username: '',
-	});
 	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
 		owner: false,
 		admin: false,
@@ -96,6 +23,7 @@ export function ChatBox() {
 	});
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
+	const [profile, setProfile] = useState<ProfileTest>();
 
 	useEffect(() => {
 		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
@@ -105,8 +33,10 @@ export function ChatBox() {
 			setLoading(false);
 		});
 
-		chatsSocket.emit('MyProfile', (data: Profile) => {
-			setProfile(data);
+		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
+			if (profiletest) {
+				setProfile(profiletest);
+			}
 		});
 
 		chatsSocket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
@@ -148,9 +78,11 @@ export function ChatBox() {
 	};
 
 	const handleSendMessage = () => {
+		if (profile === undefined)
+			return;
 		chatsSocket.emit('sendMessage', {
-			roomId: chatId,
 			content: mess,
+			roomId: chatId,
 			userid: profile.id,
 			username: profile.username,
 		}, (response: boolean) => {
@@ -161,36 +93,39 @@ export function ChatBox() {
 		setMess('');
 	};
 
-	const myMap = (message: Message, profile: Profile, member: Memberstatus, roomChannel: boolean) => {
+	const myMap = (message: Message, profile: ProfileTest, member: Memberstatus, roomChannel: boolean) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
-		  hour: '2-digit',
-		  minute: '2-digit',
-		  second: '2-digit'
+			hour: '2-digit',
+			minute: '2-digit',
+			second: '2-digit'
 		});
-	  
+
 		let role = '';
-	  
+
 		if (roomChannel) {
-		  role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
-		  role += ' - ';
+			role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
+			role += ' - ';
 		}
-	  
+
 		if (message.userId === profile.id) {
-		  message.username = profile.username;
+			message.username = profile.username;
 		}
-	  
+
 		return (
-		  <div className="message-container" key={message.id}>
-			<strong className={`message ${classuser}`}>
-			  {message.username} - {role}
-			  {formattedTime}
-			</strong>
-			<div className={`message ${classname}`}>{message.message}</div>
-		  </div>
+			<div className="message-container" key={message.id}>
+				<strong className={`message ${classuser}`}>
+					{message.username} - {role}
+					{formattedTime}
+				</strong>
+				<div className={`message ${classname}`}>{message.message}</div>
+			</div>
 		);
-	  };
+	};
+
+	let communicate = memberstatus.ban; //TODO: ADD ban status for priv channel;
+
 
 	return (
 		<div className="h-100 d-flex flex-column">
@@ -206,27 +141,27 @@ export function ChatBox() {
 					className="nostyleList d-flex flex-column"
 					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
 				>
-					{messages.map((message) => myMap(message, profile, memberstatus, roomChannel))}
+					{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
 				</ul>
 			</div>
 			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
 				<input
-					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
-					style={{ borderRadius: '10px', textDecoration: memberstatus.ban ? 'line-through' : 'none' }}
+					className={`p-2 flex-grow-1 ${communicate ? 'banned-text' : ''}`}
+					style={{ borderRadius: '10px' }}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
-					disabled={memberstatus.ban}
-					placeholder={memberstatus.ban ? 'You\'re banned...' : 'Write a message...'}
+					disabled={communicate}
+					placeholder={communicate ? 'You\'re banned/blocked...' : 'Write a message...'}
 				/>
 				<button
 					className="send-message"
 					onClick={() => {
-						if (!memberstatus.ban) {
+						if (!communicate) {
 							handleClick();
 						}
 					}}
-					disabled={memberstatus.ban}
+					disabled={communicate}
 				>
 				</button>
 			</div>
@@ -277,7 +212,6 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
 	const navigate = useNavigate();
 
-
 	const JoinGroup = (roomTitle: string) => {
 		if (roomTitle.trim() !== '') {
 			setJoinDialogOpen(true);
@@ -295,7 +229,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 
 	const handleCreateGroup = (roomTitle: string) => {
 		if (roomTitle.trim() === '')
-			return ;
+			return;
 		chatsSocket.emit('createChannelRoom', roomTitle, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
@@ -308,7 +242,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 
 	const handlePrivateMessage = (username: string) => {
 		if (username.trim() === '')
-			return ;
+			return;
 		chatsSocket.emit('createPrivateRoom', username, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
@@ -320,22 +254,22 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	}
 
 	const handleJoinGroup = () => {
-			const roomdata = {
-				roomTitle: join,
-				roomid: roomId,
-				password: password,
-			};
-			chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
-				if (response === false) {
-					alert('Wrong Name or Room ID or Password or you\'re already in the room');
-					setJoin('');
-					setRoomId('');
-					setPassword('');
-				} else {
-					setPage('chatList');
-					navigate(`/chat/${roomId}`);
-				}
-			});
+		const roomdata = {
+			roomTitle: join,
+			roomid: roomId,
+			password: password,
+		};
+		chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
+			if (response === false) {
+				alert('Wrong Name or Room ID or Password or you\'re already in the room');
+				setJoin('');
+				setRoomId('');
+				setPassword('');
+			} else {
+				setPage('chatList');
+				navigate(`/chat/${roomId}`);
+			}
+		});
 	}
 
 	return (
@@ -391,6 +325,7 @@ export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
 	const [rooms, setRooms] = useState<Room[]>([]);
 	const [profile, setProfile] = useState<ProfileTest>();
+	const [pvrooms, setPvrooms] = useState<Pvrooms[]>();
 
 	useEffect(() => {
 		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
@@ -399,52 +334,86 @@ export function ChatList() {
 				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
 				setRooms(allRooms);
 			}
-		  });
+		});
+		chatsSocket.emit('getallPrivateRooms', (pvrooms: any[]) => {
+			if (pvrooms)
+				setPvrooms(pvrooms);
+		});
 	}, []);
 
-	console.log('Profile',profile);
+	console.log('Profile', profile);
+	console.log('Block', pvrooms);
 
 	useEffect(() => {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
 
 		const handleNewRoom = (response: Room) => {
-		  setRooms((prevRooms) => [response, ...prevRooms]);
+			setRooms((prevRooms) => [response, ...prevRooms]);
 		};
-	  
+
 		const handleMessageSent = (newMessage: Message) => {
-		  const newRooms = [...rooms];
-		  const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
-		  if (targetRoom) {
-			const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
-			setRooms([targetRoom, ...filteredRooms]);
-		  }
+			const newRooms = [...rooms];
+			const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
+			if (targetRoom) {
+				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
+				setRooms([targetRoom, ...filteredRooms]);
+			}
 		};
 
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
 
 		socketListeners.forEach(({ event, handler }) => {
-		  chatsSocket.on(event, handler);
+			chatsSocket.on(event, handler);
 		});
 
 		return () => {
-		  socketListeners.forEach(({ event, handler }) => {
-			chatsSocket.off(event, handler);
-		  });
+			socketListeners.forEach(({ event, handler }) => {
+				chatsSocket.off(event, handler);
+			});
 		};
 	}, [rooms]);
 
-	const myMap = (room: Room) => {
-		const channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
+	const myMap = (room: Room, pvrooms: Pvrooms[], profile: ProfileTest) => {
+		let channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
+		const roomId = room.id;
+		let roomtitle;
+		const matchingMember = profile.membership.find((memberWithLatestMessage) => memberWithLatestMessage.member.roomId === roomId);
+		let isBanned = matchingMember ? matchingMember.member.ban : false;
+		const textClass = isBanned ? 'banned-text' : '';
+		if (isBanned)
+			channelclass = 'chatListItemBan';
+		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId == roomId);
+		if (privateroom) {
+			roomtitle = privateroom.username2;
+			if (privateroom.blocked) {
+				channelclass = 'chatListItemBan';
+				isBanned = true;
+			}
+		}
+		else
+			roomtitle = room.title;
 
 		return (
-			<li key={room.title}>
-				<Link to={`/chat/${room.id}`} className='link-text' style={{ color: 'white' }}>
-					<div className={`chatListItemButton ${channelclass}`}>{room.title}</div>
+			<li key={roomtitle}>
+				<Link
+					to={isBanned ? "#" : `/chat/${room.id}`}
+					className={`link-text ${isBanned ? "banned-link" : ""}`}
+					style={{ color: 'white', pointerEvents: isBanned ? "none" : "auto" }}
+				>
+					<div className={`chatListItemButton ${channelclass}`}>
+						<span
+							className={textClass}
+							style={{ textDecoration: isBanned ? 'line-through' : 'none', color: isBanned ? 'black' : 'white' }}
+						>
+							{roomtitle}
+						</span>
+					</div>
 				</Link>
 			</li>
 		);
 	};
+
 
 	return (
 		<div className='w-100 h-100 d-flex flex-column'>
@@ -457,7 +426,7 @@ export function ChatList() {
 					</div>
 					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
 						<ul className='nostyleList py-1' >
-							{rooms.map(myMap)}
+							{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
 						</ul>
 					</div>
 				</>

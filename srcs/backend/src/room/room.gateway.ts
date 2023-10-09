@@ -6,7 +6,7 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
-import { Member, Message } from '@prisma/client';
+import { Block, Member, Message } from '@prisma/client';
 
 type MessageWithUsername = {
 	id: number;
@@ -25,9 +25,16 @@ type ProfileTest = {
 	membership: MemberWithLatestMessage[];
   };
 
+  type Pvrooms = {
+	roomId: number,
+	userId2: number,
+	username2: string,
+	blocked: boolean,
+  };
+
   type MemberWithLatestMessage = {
 	member: Member;
-	latestMessage: Message | null; // Incluez le dernier message
+	latestMessage: Message | null;
   };
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
@@ -54,7 +61,6 @@ export class RoomGateway
 
 	}
 	
-
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
@@ -113,9 +119,8 @@ export class RoomGateway
 		@MessageBody() username: string,
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		const userName: string = client.data.user.sub;
 		console.log(client);
-		const createdRoom = await this.roomService.createPrivateRoom(userId, username, userName);
+		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
@@ -129,6 +134,7 @@ export class RoomGateway
 	@SubscribeMessage('sendMessage')
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number, username: string }) {
 		const roomid = parseInt(message.roomId, 10);
+		this.logger.log('message',message);
 		const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
 		const roomName = "room_" + roomid.toString();
 		if (createdMessage) {
@@ -150,5 +156,25 @@ export class RoomGateway
 	async handlegetProfileForUser(@ConnectedSocket() client: Socket): Promise<ProfileTest | null> {
 		const userId: number = client.data.user.id;
 		return await this.roomService.getProfileForUser(userId);
+	}
+
+	@SubscribeMessage('getallPrivateRooms')
+	async handleallPrivateRooms(@ConnectedSocket() client: Socket): Promise<Pvrooms[] | null> {
+		const userId: number = client.data.user.id;
+		return await this.roomService.getAllPrivateRooms(userId);
+	}
+
+	@SubscribeMessage('getPrivateRoom')
+	async handlePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<Pvrooms | null> {
+	  const userId: number = client.data.user.id;
+	  const roomid = parseInt(roomId, 10);
+	  return await this.roomService.getPrivateRoomById(userId, roomid);
+	}	
+
+	@SubscribeMessage('getBlockStatus')
+	async handlegetBlockStatus(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<boolean> {
+		const userId: number = client.data.user.id;
+		const roomid = parseInt(roomId, 10);
+		return await this.roomService.getBlockStatus(userId, roomid);
 	}
 }

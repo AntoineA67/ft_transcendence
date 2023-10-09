@@ -7,7 +7,7 @@
 	word-wrap: break-word;
 }
 
-.messageBlue, .messagePink {
+.messageBlue, .messagePink, .messagebanned {
 	border-radius: 10px;
 	padding: 5px;
 	margin-bottom: 1px;
@@ -25,6 +25,10 @@
 	margin-right: auto;
 	text-align: left;
 }
+
+.banned-text {
+	color: #000000;
+  }
 
 .userBlue, .userPink {
 	display: flex;
@@ -62,6 +66,7 @@
 	text-overflow: ellipsis;
 	border-radius: 10px;
 	cursor: pointer;
+	text-align: center;
 	transition: border-color 0.2s ease;
 	border: 2px solid transparent;
 }
@@ -72,6 +77,10 @@
 
 .chatListItemPrivate {
 	background-color: rgb(245, 93, 237);
+}
+
+.chatListItemBan {
+	background-color: #777;
 }
 
 .chatListItemButton:hover {
