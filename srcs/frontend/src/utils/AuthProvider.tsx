@@ -1,7 +1,7 @@
 import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-import { socket } from './socket';
+import { chatsSocket, friendsSocket, socket } from './socket';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -12,15 +12,16 @@ export function CallBack42() {
 
 	const cb = async () => {
 		if (!code || !state) return;
+		let response;
 
 		try {
-			let response;
 			if (_2fa?.actived === true) {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
 			} else {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
 			}
 			const data = await response.json();
+			console.log('data: ', data)
 			if (data._2fa) {
 				localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
 				setStatus('2fa');
@@ -29,6 +30,7 @@ export function CallBack42() {
 			localStorage.setItem('token', data);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
+			console.log('response: ', response)
 			console.log(err.message)
 		}
 		setStatus('done');
@@ -48,9 +50,13 @@ export function Protected() {
 	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
 
 	useEffect(() => {
-		socket.auth = { token: localStorage.getItem('token') };
+		const token = localStorage.getItem('token');
+		socket.auth = { token: token };
+		friendsSocket.auth = { token: token };
+		chatsSocket.auth = { token: token };
 		socket.connect();
-
+		friendsSocket.connect();
+		chatsSocket.connect();
 		//socket io regitsre event
 		function onConnect() {
 			setStatus('connect')
