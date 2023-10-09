@@ -1,6 +1,6 @@
 import { profileType, userType } from "../../types/user";
-import { useEffect, useInsertionEffect, useState } from "react";
-import { socket } from "./socket";
+import { useEffect, useState } from "react";
+import { socket, friendsSocket } from "./socket";
 
 type OptionsProp = {
 	key: number  //profile id
@@ -44,19 +44,19 @@ export function AddOption({profile, setProfile}: optionProp) {
 				setProfile((prev) => ({... prev, sent: true}))
 			}
 		}
-		socket.on('friendReqAccept', handleReqAccept);
-		socket.on('sendfriendReq', handleSendFriendReq);
+		friendsSocket.on('friendReqAccept', handleReqAccept);
+		friendsSocket.on('sendfriendReq', handleSendFriendReq);
 		
 		return (() => {
-			socket.off('friendReqAccept', handleReqAccept);
-			socket.off('sendfriendReq', handleSendFriendReq);
+			friendsSocket.off('friendReqAccept', handleReqAccept);
+			friendsSocket.off('sendfriendReq', handleSendFriendReq);
 		})
 	}, [])
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text == 'Add') {
-			socket.emit('sendReq', profile.username);
+			friendsSocket.emit('sendReq', profile.username);
 			setProfile((prev) => ({... prev, sent: true}))
 		}
 	}
@@ -80,12 +80,12 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text == 'Block') {
-			socket.emit('block', profile.id);
+			friendsSocket.emit('block', profile.id);
 			setProfile((prev) => ({ ... prev, block: true }))
 			setText('Unblock')
 		}
 		if (text == 'Unblock') {
-			socket.emit('unblock', profile.id);
+			friendsSocket.emit('unblock', profile.id);
 			setProfile((prev) => ({ ...prev, block: false }))
 			setText('Block')
 		}
@@ -115,15 +115,15 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 		function handleUnblocked() {
 			setProfile((prev) => ({... prev, blocked: false}))
 		}
-		socket.on('block', handleBlock)
-		socket.on('blocked', handleBlocked)
-		socket.on('unblock', handleUnblock)
-		socket.on('unblocked', handleUnblocked)
+		friendsSocket.on('block', handleBlock)
+		friendsSocket.on('blocked', handleBlocked)
+		friendsSocket.on('unblock', handleUnblock)
+		friendsSocket.on('unblocked', handleUnblocked)
 		return (() => {
-			socket.off('block', handleBlock)
-			socket.off('blocked', handleBlocked)
-			socket.off('unblock', handleUnblock)
-			socket.off('unblocked', handleUnblocked)
+			friendsSocket.off('block', handleBlock)
+			friendsSocket.off('blocked', handleBlocked)
+			friendsSocket.off('unblock', handleUnblock)
+			friendsSocket.off('unblocked', handleUnblocked)
 		})
 		
 	}, [])
@@ -163,15 +163,15 @@ export function PongOption({ profile, setProfile }: optionProp) {
 		function handleUnblocked() {
 			setProfile((prev) => ({ ...prev, blocked: false }))
 		}
-		socket.on('block', handleBlock)
-		socket.on('blocked', handleBlocked)
-		socket.on('unblock', handleUnblock)
-		socket.on('unblocked', handleUnblocked)
+		friendsSocket.on('block', handleBlock)
+		friendsSocket.on('blocked', handleBlocked)
+		friendsSocket.on('unblock', handleUnblock)
+		friendsSocket.on('unblocked', handleUnblocked)
 		return (() => {
-			socket.off('block', handleBlock)
-			socket.off('blocked', handleBlocked)
-			socket.off('unblock', handleUnblock)
-			socket.off('unblocked', handleUnblocked)
+			friendsSocket.off('block', handleBlock)
+			friendsSocket.off('blocked', handleBlocked)
+			friendsSocket.off('unblock', handleUnblock)
+			friendsSocket.off('unblocked', handleUnblocked)
 		})
 
 	}, [])
