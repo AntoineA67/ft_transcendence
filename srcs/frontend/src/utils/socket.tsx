@@ -16,3 +16,8 @@ export const chatsSocket = io(`${URL}/chats`, {
 	autoConnect: false,
 	transports: ['websocket'],
 })
+
+export const gamesSocket = io(`${URL}/game`, {
+	autoConnect: false,
+	transports: ['websocket'],
+})

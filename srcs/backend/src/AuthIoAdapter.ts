@@ -39,6 +39,7 @@ export class AuthIoAdapter extends IoAdapter {
 		})
 		server.of('/friends');
 		server.of('/chats');
+		server.of('/game');
 		// game ?
 		
 		return server;

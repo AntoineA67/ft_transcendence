@@ -1,7 +1,7 @@
 import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
-import { chatsSocket, friendsSocket, socket } from './socket';
+import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -54,9 +54,11 @@ export function Protected() {
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
 		chatsSocket.auth = { token: token };
+		gamesSocket.auth = { token: token };
 		socket.connect();
 		friendsSocket.connect();
 		chatsSocket.connect();
+		gamesSocket.connect();
 		//socket io regitsre event
 		function onConnect() {
 			setStatus('connect')
