@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import { socket } from '../utils/socket';
+import { friendsSocket } from '../utils/socket';
 import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { BlockList, FriendList } from './FriendsHelper';
@@ -14,7 +14,7 @@ function AddPage({ setPage }: AddPageProp) {
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		socket.emit('sendReq', nick, (success: boolean) => {
+		friendsSocket.emit('sendReq', nick, (success: boolean) => {
 			success ? setMess('Success') : setMess('Fails')
 			setNick('');
 		})
