@@ -1,6 +1,6 @@
 import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
-import { socket } from "../utils/socket";
+import { friendsSocket } from "../utils/socket";
 import { ReqItem } from "../utils/ReqItem";
 import { useEffect, useState } from "react";
 
@@ -8,7 +8,7 @@ export function FriendList() {
 	const [ friends, setFriends ] = useState<userType[]>([]);
 	
 	const findAllFriends = () => {
-		socket.emit('findAllFriends', (res: userType[]) => {
+		friendsSocket.emit('findAllFriends', (res: userType[]) => {
 			setFriends(res);
 		})
 	}
@@ -19,14 +19,14 @@ export function FriendList() {
 	
 	useEffect(() => {
 		findAllFriends();
-		socket.on('friendReqAccept', handleFriendReqAccept);
-		socket.on('block', findAllFriends)
-		socket.on('unblock', findAllFriends)
+		friendsSocket.on('friendReqAccept', handleFriendReqAccept);
+		friendsSocket.on('block', findAllFriends)
+		friendsSocket.on('unblock', findAllFriends)
 		
 		return (() => {
-			socket.off('friendReqAccept', handleFriendReqAccept);
-			socket.off('block', findAllFriends)
-			socket.off('unblock', findAllFriends)
+			friendsSocket.off('friendReqAccept', handleFriendReqAccept);
+			friendsSocket.off('block', findAllFriends)
+			friendsSocket.off('unblock', findAllFriends)
 		});
 	}, [])
 	
@@ -52,16 +52,16 @@ export function FriendReqList() {
 	const [ reqs, setReqs ] = useState<userType[]>([])
 
 	useEffect(() => {
-		socket.emit('findAllReqs', (res: userType[]) => {
+		friendsSocket.emit('findAllReqs', (res: userType[]) => {
 			setReqs(res);
 		})
 		function handleReq(sender: userType) {
 			setReqs((prev) => ([sender, ... prev]))
 			// setReqs([...reqs, sender]);
 		}
-		socket.on('recvfriendReq', handleReq);
+		friendsSocket.on('recvfriendReq', handleReq);
 		return (() => {
-			socket.off('recvfriendReq', handleReq);
+			friendsSocket.off('recvfriendReq', handleReq);
 		});
 	}, [])
 	
@@ -71,7 +71,7 @@ export function FriendReqList() {
 		result: boolean
 	) {
 		e.preventDefault();
-		socket.emit('replyReq', { other: possibleFriendId, result }, (success: boolean) => {
+		friendsSocket.emit('replyReq', { other: possibleFriendId, result }, (success: boolean) => {
 			if (success) {
 				const update = reqs.filter((x) => (x.id != possibleFriendId))
 				setReqs(update);
@@ -103,7 +103,7 @@ export function BlockList() {
 	const [ blocks, setBlocks ] = useState<userType[]>([])
 
 	useEffect(() => {
-		socket.emit('findAllBlocks', (res: userType[]) => {
+		friendsSocket.emit('findAllBlocks', (res: userType[]) => {
 			setBlocks(res)
 			console.log('res', res);
 		})
@@ -115,11 +115,11 @@ export function BlockList() {
 		function handleUnblock(otherUser: userType) {			
 			setBlocks((prev) => (prev.filter((x) => (x.id != otherUser.id))))
 		}
-		socket.on('block', handleBlock);
-		socket.on('unblock', handleUnblock);
+		friendsSocket.on('block', handleBlock);
+		friendsSocket.on('unblock', handleUnblock);
 		return (() => {
-			socket.off('block', handleBlock);
-			socket.off('unblock', handleUnblock);
+			friendsSocket.off('block', handleBlock);
+			friendsSocket.off('unblock', handleUnblock);
 		})
 	}, [])
 
