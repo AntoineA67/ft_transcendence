@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
+import { UserDto } from 'src/dto/UserDto';
+import { ProfileDto } from 'src/dto/ProfileDto';
+import { authenticator } from 'otplib';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -14,11 +17,11 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 
 @Injectable()
 export class UsersService {
-	constructor(private prisma: PrismaService) {}
+	constructor(private prisma: PrismaService) { }
 
 	//dont touch
 	async createUser(username: string, email: string, password: string) {
-		return this.prisma.user.create({
+		return await this.prisma.user.create({
 			data: {
 				username,
 				email,
@@ -27,12 +30,12 @@ export class UsersService {
 		});
 	}
 
-	async getAllUsers() {
+	async getAllUsers(): Promise<UserDto[]> {
 		const users = await this.prisma.user.findMany({
 			select: {
 				id: true,
 				username: true,
-				avatar: true, 
+				avatar: true,
 				status: true,
 			}
 		});
@@ -47,12 +50,12 @@ export class UsersService {
 				data
 			});
 		} catch (err: any) {
-			return ({error: 'user not found'});
+			return (false);
 		}
-		return user;
+		return (true);
 	}
 
-	async deleteUser(userId: number) {
+	async deleteUser(userId: number): Promise<boolean> {
 		let user: User;
 		try {
 			user = await this.prisma.user.delete({
@@ -61,9 +64,9 @@ export class UsersService {
 				}
 			})
 		} catch (err: any) {
-			return ({error: 'user not found'})
+			return (false)
 		}
-		return ({nickname: user.username});
+		return (true);
 	}
 
 	//dont touch
@@ -96,16 +99,105 @@ export class UsersService {
 	async getUserBasic(id: number) {
 		return (
 			await this.prisma.user.findUnique({
-				where: {id},
+				where: { username: nick },
 				select: {
 					id: true,
 					username: true,
 					avatar: true,
 					status: true,
-					bio: true, 
-
 				}
 			})
 		)
 	}
+
+	// async getNickById(id: number) {
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: { id }
+	// 	});
+	// 	if (!user) return (null);
+	// 	return (user.username);
+	// }
+
+	async getUserById(id: number): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { id },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+					activated2FA: true,
+				}
+			})
+		)
+	}
+
+	// the freind, block, blocked should be given by other services
+	async getUserProfileById(id: number): Promise<ProfileDto | null> {
+		let profile = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
+			}
+		});
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null
+		})
+	}
+
+	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
+		let profile = await this.prisma.user.findUnique({
+			where: { username: nick },
+			select: {
+				id: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+			}
+		});
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null
+		})
+	}
+
+	async generate2FASecret(user: User) {
+		const secret = authenticator.generateSecret();
+		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);
+		return {
+			secret,
+			otpauthUrl
+		}
+	}
+
+	async verify2FA(user: any, token: string) {
+		user = await this.prisma.user.findUnique({
+			where: { id: user.id }
+		});
+		console.log('user', user);
+		console.log('token', token);
+		console.log('otp', authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}))
+		return (authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}));
+	}
+
 }

@@ -11,13 +11,13 @@ export default class MessagesController {
     return await this.messagesService.getAllMessages();
   }
 
-  @Get(':id')
-  async getMessageById(@Param('id') id: string): Promise<Message> {
-    const messageId = parseInt(id, 10);
+  // @Get(':id')
+  // async getMessageById(@Param('id') id: string): Promise<Message> {
+  //   const messageId = parseInt(id, 10);
   
-    const message = await this.messagesService.getMessageById(messageId);
-    return message;
-  }
+  //   const message = await this.messagesService.getMessageById(messageId);
+  //   return message;
+  // }
 
   @Post()
   async createMessage(@Body() messageData: Message) {

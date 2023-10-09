@@ -14,7 +14,7 @@ import Form from 'react-bootstrap/Form';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import { AuthContext } from '../utils/AuthProvider';
+import { socket } from '../utils/socket';
 
 
 type newUser = {
@@ -156,7 +156,7 @@ export function Signup() {
 				</Row>
 			</Container>
 		</div>
-		)
+	)
 }
 
 /* sign in page */
@@ -222,33 +222,115 @@ export function Signin() {
 	);
 }
 
-/* landing page */
-
-export function LandingPage() {
-
-	const [random] = useState(Math.random().toString(36).slice(2, 12));
+export function Oauth42() {
+	const random = Math.random().toString(36).slice(2, 12);
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
-	const id = `client_id=u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89`;
-	const redirect = `redirect_uri=http://localhost:8000/42/callback`;
-	const type = 'response_type=code';
-	const scope = 'scope=public';
-	const oauth42 = `${api42}?${id}&${redirect}&${type}&${scope}&state=${random}`;
-	const github = "https://github.com/AntoineA67/ft_transcendence";
+	const clientId = 'u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89';
+	const redirectUri = 'http://localhost:8000/42/callback';
+	const responseType = 'code';
+	const scope = 'public';
 
-	const { auth, setAuth } = useContext(AuthContext);
+	const oauth42 = `${api42}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&state=${random}`;
 
 	useEffect(() => {
 		localStorage.setItem('random', random);
-		console.log('login', auth, 'rand ', random);
 	}, []);
 
-	console.log(oauth42)
+	return oauth42;
+}
+
+export const InputToken = ({ handleChange }: any) => {
+	const [value, setValue] = useState("");
+
+	const handleChangeToken = (event: any) => {
+		const newValue = event.target.value;
+		if (newValue.length <= 6) {
+			setValue(newValue);
+			handleChange(newValue);
+		}
+	};
+	return (
+		<Form.Control
+			size="lg"
+			type="number"
+			pattern="[0-9]*"
+			value={value}
+			onChange={handleChangeToken}
+			style={{ overflow: "hidden", letterSpacing: "10px", display: 'flex' }}
+			className="text-center"
+		/>
+	);
+};
+
+export function TokenPage() {
+
+	const oauth42Url = Oauth42();
+	const [token, setToken] = useState<string>('');
+	const [invalidToken, setInvalidToken] = useState(false);
+	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
+
+	async function sendToken() {
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived: _2fa.actived }));
+		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		const data = await response.json();
+		if (data._2fa === 'success') {
+			window.location.href = oauth42Url;
+		} else {
+			setInvalidToken(true);
+		}
+	}
+
 	return (
 		<div className='scrollbar'>
-			<Container className="text-center" style={{ height: "650px" }}>
+			<Container >
+				<Row className="justify-content-center">
+					<Col sm="6" lg="6" >
+
+						<div style={{ color: "white", margin: "60px 0 0 0" }}>
+							<h2>Two-factor authentication</h2>
+							<p>
+								Enter the 6-digit code from your 2FA app to pass two-factor authentication.
+							</p>
+						</div>
+						<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
+							<InputToken
+								handleChange={(token: any) => {
+									setToken(token);
+									setInvalidToken(false);
+								}}
+							/>
+							<br></br>
+							{invalidToken === true && (
+								<>
+									<div style={{ color: 'red', textAlign: 'center' }}>Your token is invalid, please try again !</div>
+									<br></br>
+								</>
+							)}
+							<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0' disabled={invalidToken === true}>Login</button>
+						</form>
+
+					</Col>
+				</Row>
+			</Container>
+		</div>
+	);
+}
+
+export function LandingPage() {
+
+	const oauth42Url = Oauth42();
+	const github = "https://github.com/AntoineA67/ft_transcendence";
+
+	useEffect(() => {
+		localStorage.removeItem('_2fa');
+	}, []);
+
+	return (
+		<div className='scrollbar'>
+			<Container className="text-center" style={{ marginTop: "70px" }}>
 				<Row className="justify-content-center h-100">
-					<Col sm="6" lg="4">
+					<Col sm="6" lg="6">
 						<div className="h-75 d-flex flex-column justify-content-evenly mt-5">
 							<div className="pt-9 w-75 align-self-center">
 								<h2 style={{ color: "#fa34c3", fontSize: "40px" }}><b>Ping Pang Pong</b></h2>
@@ -258,25 +340,25 @@ export function LandingPage() {
 									Si vous avez des amis, vous pouvez jouer à ce jeu en multi joueur, sinon, une IA va se charger de vous !
 								</p>
 							</div>
-							<div className="mt-5 d-flex flex-column gap-3 justify-content-center align-items-center" style={{ position: "relative", top: "30px" }}>
+							<div className="mt-4 d-flex flex-column gap-3 justify-content-center align-items-center" style={{ position: "relative", top: "30px" }}>
 								<Link to={'signin'} className="w-75 link-text">
 									<button className="btn btn-primary w-100"><b>Login</b></button>
 								</Link>
 								<Link to={'signup'} className="w-75 link-text">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								
-								<a href={oauth42} className="btn-invisible w-75">
+
+								<a href={oauth42Url} className="btn-invisible w-75">
 									<span>Sign in with </span>
 									<img style={{ marginLeft: "10px", height: "30px" }} src={fortytwologo} />
 								</a>
-								
+
 							</div>
 						</div>
 					</Col>
 				</Row>
 			</Container>
-			<footer className="d-flex flex-column align-items-center" style={{ color: "grey" }}>
+			<footer className="d-flex flex-column align-items-center" style={{ color: "grey", paddingTop: "50px" }}>
 				Projet de fin de tronc-commun de l’école 42
 				<a href={github}><img src={githubLogo} /></a>
 			</footer>

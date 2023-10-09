@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { stat } from 'fs';
 
 @Injectable()
 export class AuthService {
@@ -40,25 +41,10 @@ export class AuthService {
 		}, { expiresIn: 3600 });
 	}
 
-	// select * from "user";
-	// DELETE FROM "user" WHERE id = 1;
 	async registerUser(user: any): Promise<User> {
 		try {
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "changeme")
+			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
-			// .then((res) => {
-			// return this.jwtService.sign({
-			// 	sub: res.username,
-			// 	email: res.email,
-			// 	login: res.username,
-			// });
-			// });
-
-			// return this.jwtService.sign({
-			// 	sub: newUser.username,
-			// 	email: newUser.email,
-			// 	login: newUser.username,
-			// });
 		} catch {
 			throw new InternalServerErrorException();
 		}

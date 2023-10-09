@@ -5,15 +5,16 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 //import component
 import TestDB from './pages/TestDB';
-import { Login, Signin, Signup, LandingPage } from './pages/Login';
+import { Login, Signin, Signup, LandingPage, TokenPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
 import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
-import { Setting, ChangePassword, SettingMenu } from './pages/ProfileSetting';
+import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
+import { UserProfile } from './utils/UserProfile';
 
 //css
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,12 +22,12 @@ import './styles/customButton.css';
 import './styles/customForm.css';
 import './styles/index.css';
 
-import { AuthProvider, CallBack42, Protected } from './utils/AuthProvider';
+import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { SocketProvider } from './utils/SocketProvider';
+import { GameSocketProvider } from './utils/GameSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -36,43 +37,53 @@ const root = ReactDOM.createRoot(
 );
 root.render(
 	<BrowserRouter>
-		<AuthProvider>
-			<Routes>
-				<Route element={<Guest />}>
-					<Route path="/login" element={<Login />}>
-						<Route index element={<LandingPage />}></Route>
-						<Route path="signin" element={<Signin />}></Route>
-						<Route path="signup" element={<Signup />}></Route>
-					</Route>
+		<Routes>
+			<Route element={<Guest />}>
+				<Route path="/login" element={<Login />}>
+					<Route index element={<LandingPage />}></Route>
+					<Route path="signin" element={<Signin />}></Route>
+					<Route path="signup" element={<Signup />}></Route>
+					<Route path="2fa" element={<TokenPage />}></Route>
 				</Route>
+			</Route>
 
-				<Route path='/42/callback' element={<CallBack42 />} />
+			<Route path='/42/callback' element={<CallBack42 />} />
 
 				<Route element={<Protected />}>
 					<Route path="/" element={<Sidebar />}>
 						<Route index element={<Profile />} />
 						<Route path="search" element={<Search />}></Route>
-						<Route path="friends" element={<Friends />}></Route>
+						<Route path="friends" element={<Friends />}>
+							<Route path=':friendNick' element={<UserProfile />}></Route>
+						</Route>
+						
 						<Route path="chat" element={<Chat />}>
 							<Route path=':chatId' element={<ChatBox />}></Route>
 						</Route>
+						
 						<Route path="setting" element={<Setting />}>
 							<Route index element={<SettingMenu />}></Route>
-							<Route path='changepassword' element={<ChangePassword />}></Route>
 						</Route>
+						
 						<Route path="/game" element={<>
-							<SocketProvider>
+							<GameSocketProvider>
 								<Game />
-							</SocketProvider>
+							</GameSocketProvider>
 						</>}></Route>
 					</Route>
-					<Route path="/test-db" element={<TestDB />} />
+					<Route path="setting" element={<Setting />}>
+						<Route index element={<SettingMenu />}></Route>
+						<Route path='2fa' element={<TwoFactorAuth />}></Route>
+					</Route>
+					<Route path="/game" element={<>
+						<GameSocketProvider>
+							<Game />
+						</GameSocketProvider>
+					</>}></Route>
 				</Route>
-			</Routes>
-		</AuthProvider>
+			<Route path="/test-db" element={<TestDB />} />			
+		</Routes>
 	</BrowserRouter>
-
-	//   <RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 );
 
 // If you want to start measuring performance in your app, pass a function

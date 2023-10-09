@@ -64,6 +64,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 		// You can implement your own logic to find or create the user here
 		//console.log('accessToken', accessToken, refreshToken, profile);
 		// const user: any = await this.usersService.findOrCreate(profile.username).then(
+		//console.log("profile ===>", profile);
 		const user: any = await this.authService.login(profile).then(
 			(user) => {
 				//console.log('user', user);
