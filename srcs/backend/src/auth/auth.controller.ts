@@ -4,15 +4,20 @@ import { UsersService } from 'src/users/users.service';
 import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { Logger } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService, public jwtService: JwtService) { }
 
+	private logger = new Logger('auth');
+
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		let response;
+		
+		this.logger.log('/42/callback');
 
 		// if 2fa is activated and user have not send token
 		if (!req.query._2fa && req.user.activated2FA) {
