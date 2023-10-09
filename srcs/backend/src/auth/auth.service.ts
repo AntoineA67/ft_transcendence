@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import * as randomstring from 'randomstring';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,16 @@ export class AuthService {
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
 		} catch {
-			throw new InternalServerErrorException();
+			try {
+				const userName = user.username + "-" + randomstring.generate({
+					length: 6,
+					charset: 'numeric'
+				});
+				const newUser = await this.usersService.createUser(userName, user.emails[0].value, "nopass")
+				return newUser;
+			} catch {
+				throw new InternalServerErrorException();
+			}
 		}
 	}
 
