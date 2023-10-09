@@ -1,112 +1,112 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import { socket } from '../utils/socket';
+import { useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { BlockList, FriendList } from './FriendsHelper';
+import { FriendReqList } from './FriendsHelper';
 
-function FriendList({friends} : {friends: string[]}) {
-	
-	const myMap = (item: string) => {
-		return (
-			<li key={item}>
-				{item}
-			</li>
-		)
-	}
-
-	return (
-		<ul>
-			<p style={{color: 'white'}}>FriendList</p>
-			{friends.map(myMap)}
-		</ul>
-	);
+type AddPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 }
-
-function FriendReqList({ friendReq }: { friendReq: string[] }) {
-
-	async function handleClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>, friendReqItem: string, result: boolean) {
-		e.preventDefault();
-		const url = '';
-
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({nickname: 'user', friendReqItem: friendReqItem, result: result})
-		}
-		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
-			friendReq = friendReq.filter((x) => (x != friendReqItem))
-		} catch (err: any) {
-			console.log(err);
-		}
-		
-	}
-	
-	const myMap = (item: string) => {
-		return (
-			<li key={item}>
-				{item}
-				<button className='btn btn-primary' onClick={(e) => handleClick(e, item, true)}>Accept</button>
-				<button className='btn btn-secondary' onClick={(e) => handleClick(e, item, false)}>Decline</button>
-			</li>
-		)
-	}
-
-	return (
-		<ul>
-			<p style={{color: 'white'}}>Friend request</p>
-			{friendReq.map(myMap)}
-		</ul>
-	);
-}
-
-function SendRequest() {
-	
+function AddPage({ setPage }: AddPageProp) {
 	const [nick, setNick] = useState('');
-	const [mess, setMess] = useState('mess');
+	const [mess, setMess] = useState('');
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-
-		const url = '';
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ from: 'user', to: nick })
-		}
-		try {
-			const response = await fetch(url, fetchObj)
-			if (!response.ok) throw Error('response not ok');
-			setMess('Success');
-		} catch (err: any) {
-			console.log(err);
-			setMess('Fails');
-		} finally {
+		socket.emit('sendReq', nick, (success: boolean) => {
+			success ? setMess('Success') : setMess('Fails')
 			setNick('');
-		}
+		})
 	}
 	
 	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
-			<label htmlFor='send-friend-request'>Send friend request</label>
-			<input type='text'
-				value={nick}
-				onChange={(e) => setNick(e.target.value)}
-				></input>
-			<button type="submit" className=""> send </button>
-			<div id='form-message' style={{color: 'white'}}>{mess}</div>
-		</form>
+		<div>
+			<button className='goBack' onClick={() => setPage('friendPage')}/>		
+			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
+				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
+				<input 
+					autoFocus
+					className='form-control w-100 my-2'
+					type='text'
+					value={nick}
+					onChange={(e) => setNick(e.target.value)}
+				/>
+				<button type="submit" className="btn btn-primary w-100"> send </button>
+				<div id='form-message mt-1' style={{color: 'white'}}>{mess}</div>
+			</form>
+		</div>
+	)
+}
+
+type FriendPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
+}
+function FriendPage({ setPage }: FriendPageProp) {
+	return (
+		<>
+			<div className='w-100 p-1 d-flex flex-row align-items-center' style={{background: 'black'}}>
+				<button className='block me-auto' onClick={() => setPage('blockPage')}/>
+				<h5 style={{color: 'white'}}>Friends</h5>
+				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
+			</div>
+			<FriendReqList />
+			<FriendList />
+		</>
+	)
+}
+
+type BlockPageProp = {
+	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
+}
+function BlockPage({ setPage }: BlockPageProp) {
+	return (
+		<>
+			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
+				<button 
+					className='goBack m-2' 
+					onClick={() => setPage('friendPage')}
+				/>
+				<h5 style={{color: 'white'}}>Blocks</h5>
+			</div>
+			<BlockList />
+		</>
+	)
+}
+
+function RelationPages() {
+	const [page, setPage] = useState<'friendPage' | 'blockPage' | 'addPage'>('friendPage');
+
+	return (
+		<div className='w-100'>
+			{page == 'friendPage' && <FriendPage 
+				setPage={setPage}
+			/>}
+			{page == 'blockPage' && <BlockPage 
+				setPage={setPage}
+			/>}
+			{page == 'addPage' && <AddPage setPage={setPage}/>}
+		</div>
 	)
 }
 
 export function Friends() {
-	//get frined list(avatar, nickname, status)
-	//get pending friend request 
-	const friends = ['Bird', 'Pigeon', 'Eagle', 'Woodpecker']
-	const friendRequest = ['Cat', 'Bear']
+	const location = useLocation();
+	const classname1 = location.pathname == '/friends' ? '' : 'd-none d-sm-flex';
+	const classname2 = location.pathname == '/friends' ? 'd-none d-sm-flex' : '';
 	
 	return (
-		<div style={{color: 'white'}}>
-			<SendRequest></SendRequest>
-			<FriendReqList friendReq={friendRequest}></FriendReqList>
-			<FriendList friends={friends}></FriendList>
+		<div className='container-fluid h-100' >
+			<div className='row h-100' >
+				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
+					style={{overflowY: 'auto'}} >
+					<RelationPages />
+				</div>
+				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
+					style={{overflowY: 'auto'}}>
+					<Outlet />
+				</div>
+			</div>
 		</div>
 	);
 }

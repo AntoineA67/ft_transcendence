@@ -1,0 +1,22 @@
+export type userType = {
+	id: number;
+	username: string;
+	avatar: Buffer | null | ArrayBuffer;
+	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
+}
+
+export type profileType = {
+	id: number,
+	password: string,
+	username: string,
+	avatar: null,
+	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
+	bio: string,
+	activated2FA: boolean,
+	// game history
+	// achieve
+	friend: boolean | null,   // null when the profile is user himself
+	sent: boolean | null,
+	block: boolean | null,    // do I block this person
+	blocked: boolean | null   // does this person block me
+}

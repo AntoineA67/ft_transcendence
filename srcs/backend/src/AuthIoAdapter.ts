@@ -3,7 +3,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { Socket } from 'socket.io';
 import { jwtConstants } from './auth/constants';
 import { AuthService } from './auth/auth.service';
-import { INestApplicationContext } from '@nestjs/common';
+import { INestApplicationContext, Logger } from '@nestjs/common';
 
 // @Injectable()
 export class AuthIoAdapter extends IoAdapter {
@@ -14,6 +14,8 @@ export class AuthIoAdapter extends IoAdapter {
 		this.authService = app.get(AuthService);
 	}
 
+	private logger: Logger = new Logger('IoAdapter');
+
 	createIOServer(port: number, options?: any): any {
 		const server = super.createIOServer(port, options)
 		server.use((socket: Socket, next) => {
@@ -23,6 +25,7 @@ export class AuthIoAdapter extends IoAdapter {
 			try {
 				const decode = this.authService.jwtService.verify(token);
 				socket.data.user = decode;
+				this.logger.log('decode: ', decode);
 				next();
 			} catch (err: any) {
 				next(new Error('token invalid'))

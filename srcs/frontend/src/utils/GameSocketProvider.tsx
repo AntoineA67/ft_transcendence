@@ -17,7 +17,7 @@ function connectToSocketWithToken(token: any) {
 
 export const SocketContext = createContext(null);
 
-export const SocketProvider = ({ children, store }: any) => {
+export const GameSocketProvider = ({ children, store }: any) => {
   console.log("SocketProvider")
 
   const [isConnected, setConnected] = useState(false)
@@ -73,4 +73,4 @@ export const SocketProvider = ({ children, store }: any) => {
   )
 }
 
-export const useSocket = () => useContext(SocketContext) as unknown as Socket;
+export const useGameSocket = () => useContext(SocketContext) as unknown as Socket;
