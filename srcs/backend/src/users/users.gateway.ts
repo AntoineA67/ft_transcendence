@@ -12,6 +12,7 @@ import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
+import { UserDto } from 'src/dto/UserDto';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -46,6 +47,11 @@ export class UsersGateway
 		client.broadcast.emit('offline', id);
 	}
 
+	@SubscribeMessage('getAllUsers')
+	async handleGetAllUsers(): Promise<UserDto[]> {
+		return (await this.usersService.getAllUsers());
+	}
+	
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
