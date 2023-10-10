@@ -13,7 +13,7 @@ export function FriendList() {
 		})
 	}
 	const handleFriendReqAccept = (replier: userType) => {
-		console.log('handleaccept: ', replier);
+		// console.log('handleaccept: ', replier);
 		setFriends((prev) => ([...prev, replier]));
 	}
 	

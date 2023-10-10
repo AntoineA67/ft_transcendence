@@ -8,7 +8,7 @@ type OptionsProp = {
 }
 export function Options({profile, setProfile}: OptionsProp) {
 
-	console.log('profile: ', profile);
+	// console.log('profile: ', profile);
 	if (profile.friend == null || profile == null) {
 		return (null)
 	}
@@ -43,8 +43,8 @@ export function AddOption({profile, setProfile}: optionProp) {
 			}
 		}
 		function handleSendFriendReq(recver: userType) {
-			console.log('recver: ', recver)
-			console.log('profile: ', profile)
+			// console.log('recver: ', recver)
+			// console.log('profile: ', profile)
 			if (recver.id == profile.id) {
 				setProfile((prev) => ({... prev!, sent: true}))
 			}
