@@ -48,7 +48,7 @@ export function UserProfile() {
 							{profile.bio}
 						</p>
 					</Container>
-					<Options profile={{... profile}} />
+					<Options profile={{... profile}} setProfile={setProfile} />
 					<Stat gameHistory={profile.gameHistory.map((a) => ({ ...a }))} achieve={{ ... (profile.achieve) }} />
 
 				</div>
