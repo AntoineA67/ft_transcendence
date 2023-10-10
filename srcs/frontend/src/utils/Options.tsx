@@ -62,7 +62,6 @@ export function AddOption({profile, setProfile}: optionProp) {
 		e.preventDefault();
 		if (text == 'Add') {
 			friendsSocket.emit('sendReq', profile.username);
-			// setProfile((prev) => ({... prev!, sent: true}))
 		}
 	}
 	
