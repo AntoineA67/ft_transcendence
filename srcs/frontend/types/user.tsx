@@ -1,3 +1,6 @@
+import { AchieveType } from "./Achieve";
+import { gameHistoryType } from "./gameHistoryType";
+
 export type userType = {
 	id: number;
 	username: string;
@@ -11,8 +14,8 @@ export type profileType = {
 	avatar: null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
 	bio: string,
-	// game history
-	// achieve
+	gameHistory: gameHistoryType[],
+	achieve: AchieveType,
 	friend: boolean | null,   // null when the profile is user himself
 	sent: boolean | null,
 	block: boolean | null,    // do I block this person

@@ -29,8 +29,8 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 
 	@SubscribeMessage('findAllReqs')
 	async handleFindAllReqs(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 		return (await this.friendReqService.findAllPendings(id));
 	}
 	
@@ -39,8 +39,8 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	async handleSendReq(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() nick: string): Promise<boolean> {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 		this.logger.log('id: ', id)
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
@@ -62,8 +62,8 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@ConnectedSocket() client: Socket, 
 		@MessageBody('other') otherId: number, 
 		@MessageBody('result') result: boolean): Promise<boolean> {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 		const replier: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
@@ -82,8 +82,8 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	async handleReqSent(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() otherId): Promise<boolean> {
-		// const id: number = client.data.user.id;
-		const id: number = client.client['user'].id;
+		const id: number = client.data.user.id;
+		// const id: number = client.client['user'].id;
 
 		const pendings = await this.friendReqService.getPendingReq(id, otherId);
 		if (pendings.length == 0) return (false)
