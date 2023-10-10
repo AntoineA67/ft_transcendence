@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Room, Prisma, Member, Message, Friendship, Block } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
+import { log } from 'console';
 
 type MessageWithUsername = {
 	id: number;
@@ -20,12 +21,14 @@ type ProfileTest = {
 	status: string;
 	username: string;
 	membership: MemberWithLatestMessage[];
+	pvrooms: Pvrooms[] | null;
 };
 
 type Pvrooms = {
 	roomId: number,
 	userId2: number,
 	username2: string,
+	block: boolean,
 	blocked: boolean,
 };
 
@@ -39,9 +42,9 @@ export class RoomService {
 	constructor(
 		private prisma: PrismaService,
 		private readonly usersService: UsersService,
-		private readonly blockService: BlockService
+		private readonly memberService: MemberService,
 	) { }
-
+	private logger: Logger = new Logger('RoomGateway');
 	async createRoom(data: Prisma.RoomCreateInput): Promise<Room> {
 		return this.prisma.room.create({ data });
 	}
@@ -231,7 +234,7 @@ export class RoomService {
 							user: { connect: { id: userId } },
 						},
 						{
-							admin: false,
+							admin: true,
 							ban: false,
 							owner: false,
 							user: { connect: { id: user.id } },
@@ -265,8 +268,7 @@ export class RoomService {
 			},
 		});
 		let roomTitle = room.title;
-		const memberService = new MemberService(this.prisma);
-		const memberStatus = await memberService.getMemberDatabyRoomId(userid, roomid);
+		const memberStatus = await this.memberService.getMemberDatabyRoomId(userid, roomid);
 		if (memberStatus.ban)
 			return null;
 		if (!room) {
@@ -365,6 +367,8 @@ export class RoomService {
 			return null;
 		}
 
+		const privaterooms = await this.getAllPrivateRooms(userId);
+
 		const profile: ProfileTest = {
 			bio: user.bio,
 			id: user.id,
@@ -374,6 +378,7 @@ export class RoomService {
 				member: member,
 				latestMessage: member.room.message.length > 0 ? member.room.message[0] : null,
 			})),
+			pvrooms: privaterooms,
 		};
 
 		profile.membership.sort((a, b) => {
@@ -428,12 +433,12 @@ export class RoomService {
 
 			const roomData = await Promise.all(privateRooms.map(async (room) => {
 				const userId2 = room.members[0].user.id;
-				const blocked = await this.isBlocked(userId2, userId);
 				return {
 					roomId: room.id,
 					userId2,
 					username2: room.members[0].user.username,
-					blocked,
+					block: await this.isBlocking(userId, userId2),
+					blocked: await this.isBlocked(userId2, userId),
 				};
 			}));
 
@@ -484,6 +489,7 @@ export class RoomService {
 				roomId: privateRoom.id,
 				userId2: member.userId,
 				username2: privateRoom.members[0].user.username,
+				block: await this.isBlocking(userId, member.userId),
 				blocked: await this.isBlocked(member.userId, userId),
 			};
 
@@ -501,8 +507,21 @@ export class RoomService {
 				blockedId: userId2,
 			},
 		});
+		if (!block)
+			return false;
+		return true;
+	}
 
-		return !!block;
+	async isBlocking(userId1: number, userId2: number): Promise<boolean> {
+		const block = await this.prisma.block.findFirst({
+			where: {
+				userId: userId1,
+				blockedId: userId2,
+			},
+		});
+		if (!block)
+			return false;
+		return true;
 	}
 
 	async getBlockStatus(userId: number, roomId: number): Promise<boolean> {

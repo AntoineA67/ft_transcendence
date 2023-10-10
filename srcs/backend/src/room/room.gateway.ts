@@ -23,19 +23,21 @@ type ProfileTest = {
 	status: string;
 	username: string;
 	membership: MemberWithLatestMessage[];
-  };
+	pvrooms: Pvrooms[] | null;
+};
 
-  type Pvrooms = {
+type Pvrooms = {
 	roomId: number,
 	userId2: number,
 	username2: string,
+	block: boolean,
 	blocked: boolean,
-  };
+};
 
-  type MemberWithLatestMessage = {
+type MemberWithLatestMessage = {
 	member: Member;
 	latestMessage: Message | null;
-  };
+};
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -60,7 +62,7 @@ export class RoomGateway
 	async handleDisconnect(client: Socket) {
 
 	}
-	
+
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
@@ -119,12 +121,19 @@ export class RoomGateway
 		@MessageBody() username: string,
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		console.log(client);
 		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 		if (createdRoom) {
+			const pvroomuser1 = {
+				id: createdRoom.id,
+				isChannel: false,
+				title: username,
+				private: true,
+				password: '',
+				messages: [],
+			};
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
-			this.server.to(roomName).emit('newRoom', createdRoom);
+			client.emit('newRoom', pvroomuser1);
 			return (createdRoom.id);
 		} else {
 			return (0);
@@ -134,7 +143,7 @@ export class RoomGateway
 	@SubscribeMessage('sendMessage')
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number, username: string }) {
 		const roomid = parseInt(message.roomId, 10);
-		this.logger.log('message',message);
+		this.logger.log('message', message);
 		const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
 		const roomName = "room_" + roomid.toString();
 		if (createdMessage) {
@@ -166,10 +175,10 @@ export class RoomGateway
 
 	@SubscribeMessage('getPrivateRoom')
 	async handlePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<Pvrooms | null> {
-	  const userId: number = client.data.user.id;
-	  const roomid = parseInt(roomId, 10);
-	  return await this.roomService.getPrivateRoomById(userId, roomid);
-	}	
+		const userId: number = client.data.user.id;
+		const roomid = parseInt(roomId, 10);
+		return await this.roomService.getPrivateRoomById(userId, roomid);
+	}
 
 	@SubscribeMessage('getBlockStatus')
 	async handlegetBlockStatus(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<boolean> {

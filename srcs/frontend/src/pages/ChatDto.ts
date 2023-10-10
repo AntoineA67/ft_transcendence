@@ -12,13 +12,13 @@ export type MemberWithLatestMessage = {
 	latestMessage: Message | null;
   };
 
-  export type ProfileTest = {
-	avatar: string | null;
+export type ProfileTest = {
 	bio: string;
 	id: number;
 	status: string;
 	username: string;
 	membership: MemberWithLatestMessage[];
+	pvrooms: Pvrooms[];
 };
 
 export type Member = {
@@ -52,5 +52,6 @@ export type Pvrooms = {
 	roomId: number,
 	userId2: number,
 	username2: string,
+	block: boolean,
 	blocked: boolean,
   };

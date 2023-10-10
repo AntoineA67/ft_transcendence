@@ -124,9 +124,6 @@ export function ChatBox() {
 		);
 	};
 
-	let communicate = memberstatus.ban; //TODO: ADD ban status for priv channel;
-
-
 	return (
 		<div className="h-100 d-flex flex-column">
 			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
@@ -146,22 +143,22 @@ export function ChatBox() {
 			</div>
 			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
 				<input
-					className={`p-2 flex-grow-1 ${communicate ? 'banned-text' : ''}`}
+					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
 					style={{ borderRadius: '10px' }}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
-					disabled={communicate}
-					placeholder={communicate ? 'You\'re banned/blocked...' : 'Write a message...'}
+					disabled={memberstatus.ban}
+					placeholder={memberstatus.ban ? 'You\'re banned/blocked or you\'re blocking the personn...' : 'Write a message...'}
 				/>
 				<button
 					className="send-message"
 					onClick={() => {
-						if (!communicate) {
+						if (!memberstatus.ban) {
 							handleClick();
 						}
 					}}
-					disabled={communicate}
+					disabled={memberstatus.ban}
 				>
 				</button>
 			</div>
@@ -333,16 +330,13 @@ export function ChatList() {
 				setProfile(profiletest);
 				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
 				setRooms(allRooms);
+				if (profiletest.pvrooms !== undefined)
+					setPvrooms(profiletest.pvrooms);
 			}
-		});
-		chatsSocket.emit('getallPrivateRooms', (pvrooms: any[]) => {
-			if (pvrooms)
-				setPvrooms(pvrooms);
 		});
 	}, []);
 
 	console.log('Profile', profile);
-	console.log('Block', pvrooms);
 
 	useEffect(() => {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
@@ -386,7 +380,7 @@ export function ChatList() {
 		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId == roomId);
 		if (privateroom) {
 			roomtitle = privateroom.username2;
-			if (privateroom.blocked) {
+			if (privateroom.blocked || privateroom.block) {
 				channelclass = 'chatListItemBan';
 				isBanned = true;
 			}
