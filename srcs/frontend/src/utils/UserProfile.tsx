@@ -9,17 +9,17 @@ import { Options } from "./Options";
 import { GoUp } from './GoUp'
 
 export function UserProfile() {
-	const { friendNick } = useParams();
+	const { userNick } = useParams();
 	const location = useLocation();
 	const [profile, setProfile] = useState<profileType | null>(null);
 
 
 	useEffect(() => {
-		socket.emit('Profile', friendNick, (res: profileType) => {
+		socket.emit('Profile', userNick, (res: profileType) => {
 			setProfile(res)
 			console.log('res', res)
 		})
-	}, [friendNick])
+	}, [userNick])
 
 	return (
 		<>
