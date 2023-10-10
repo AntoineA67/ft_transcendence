@@ -39,7 +39,6 @@ export function SearchBar() {
 	
 	return (
 		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' >
-			{/* <Form.Control type="text" placeholder="Search anything"/> */}
 			<div className='py-2 px-3 w-100'>
 				<input 
 					value={search} 
