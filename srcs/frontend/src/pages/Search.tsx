@@ -18,9 +18,11 @@ export function SearchBar() {
 		})
 	}, [])
 
+	useEffect(() => {})
+
 	const myMap = (item: userType) => {
 		return (
-			<li key={item.id} className=''>
+			<li key={item.id} className='p-0 m-0 w-100'>
 				<UserItem 
 					user={{... item}}
 					linkTo={`${item.username}`}/>
@@ -29,10 +31,17 @@ export function SearchBar() {
 	}
 
 	return (
-		<div className='d-flex flex-column align-items-center p-0 m-0' style={{ backgroundColor: "grey" }}>
-			<Form.Control type="text" placeholder="Search anything"/>
-			<ul style={{ listStyleType: 'none' }} className='p-0 m-0'>
-				{list.map(myMap)}
+		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' style={{ backgroundColor: "black" }}>
+			{/* <Form.Control type="text" placeholder="Search anything"/> */}
+			<input 
+				value={search} 
+				onChange={(e) => {setSearch(e.target.value)}}
+				type="text" 
+				autoFocus
+				className="form-control p-1 m-2"
+			 />
+			<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
+				{list.filter((x) => (x.username == search)).map(myMap)}
 			</ul>
 		</div>
 	);
