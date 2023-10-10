@@ -68,18 +68,21 @@ export class UsersGateway
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
 		
-		const fileType = async (file: Buffer) => {
+		const fileCheck = async (file: Buffer) => {
 			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
 			const type = await fileTypeFromBuffer(file);
-			// this.logger.log(type);
-			if (type?.ext == 'jpg' || type?.ext == 'png') {
-				// this.logger.log('pass file check');
-				return (await this.usersService.updateUser(id, {avatar: file}));
+			// if type undefined, or if file isn't image
+			if (type?.ext != 'jpg' && type?.ext != 'png') {
+				return (false);
 			}
-			return (false);
+			// if file too big
+			if (file.byteLength >= 10485760) {
+				return (false);
+			}
+			return (await this.usersService.updateUser(id, {avatar: file}));
 		};
 		// this.logger.log('newAvatar')
-		return (await fileType(file));
+		return (await fileCheck(file));
 	}
 
 	// this function cannot be done in the service, it will create circular dependency
