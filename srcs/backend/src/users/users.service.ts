@@ -130,7 +130,9 @@ export class UsersService {
 			}
 		});
 		return ({ ... profile, 
-			friend: null, block: null, blocked: null, sent: null })
+			friend: null, block: null, blocked: null, sent: null,
+			gameHistory: [], achieve: null
+		})
 	}
 
 	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
@@ -146,7 +148,8 @@ export class UsersService {
 		});
 		return ({
 			...profile,
-			friend: null, block: null, blocked: null, sent: null
+			friend: null, block: null, blocked: null, sent: null,
+			gameHistory: [], achieve: null
 		})
 	}
 

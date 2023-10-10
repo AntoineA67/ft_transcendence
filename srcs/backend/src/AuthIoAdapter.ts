@@ -25,7 +25,7 @@ export class AuthIoAdapter extends IoAdapter {
 			try {
 				const decode = this.authService.jwtService.verify(token);
 				socket.data.user = decode;
-				socket.client['user'] = decode;
+				// socket.client['user'] = decode;
 				// this.logger.log('decode: ', decode);
 				next();
 			} catch (err: any) {

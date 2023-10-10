@@ -10,6 +10,8 @@ import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
 import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
+import { PlayerService } from 'src/player/player.service';
+import { AchievementService } from 'src/achievement/achievement.service';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -19,7 +21,9 @@ export class UsersGateway
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
 		private readonly friendReqService: FriendRequestService, 
-		private readonly blockService: BlockService
+		private readonly blockService: BlockService, 
+		private readonly playerService: PlayerService,
+		private readonly achieveService: AchievementService,
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -45,7 +49,10 @@ export class UsersGateway
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (await this.usersService.getUserProfileById(id));
+		const gameHistory = await this.playerService.getHistory(id);
+		const achieve = await this.achieveService.getAchieveById(id);
+		let profile = await this.usersService.getUserProfileById(id);
+		return ({ ... profile, gameHistory, achieve });
 	}
 
 	@SubscribeMessage('UpdateProfile')
@@ -59,6 +66,7 @@ export class UsersGateway
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
 		// this.logger.log(file);
+		// need some protection here
 		return (await this.usersService.updateUser(id, {avatar: file}));
 	}
 
@@ -72,7 +80,9 @@ export class UsersGateway
 		const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
 		const block = await this.blockService.isBlocked(id, otherprofile.id);
 		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
-		return ({ ... otherprofile, friend, block, blocked, sent });
+		const gameHistory = await this.playerService.getHistory(otherprofile.id);
+		const achieve = await this.achieveService.getAchieveById(otherprofile.id);
+		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
 	}
 
 	@SubscribeMessage('Create2FA')
