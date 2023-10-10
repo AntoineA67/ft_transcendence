@@ -11,15 +11,22 @@ import { UserItem } from '../utils/UserItem';
 export function SearchBar() {
 	const [search, setSearch] = useState('');
 	const [list, setList] = useState<userType[]>([]);
+	const [temp, setTemp] = useState<userType[]>([]);
 	
 	useEffect(() => {
 		socket.emit('getAllUsers', (response: userType[]) => {
 			setList(response)
+			setTemp(response);
 		})
 	}, [])
 
-	useEffect(() => {})
-
+	useEffect(() => {
+		const myFilter = (item: userType): boolean => {
+			return (item.username.toLowerCase().includes(search.toLowerCase()))
+		}
+		setTemp(list.filter(myFilter));
+	}, [search])
+	
 	const myMap = (item: userType) => {
 		return (
 			<li key={item.id} className='p-0 m-0 w-100'>
@@ -29,9 +36,9 @@ export function SearchBar() {
 			</li>
 		)
 	}
-
+	
 	return (
-		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' style={{ backgroundColor: "black" }}>
+		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' >
 			{/* <Form.Control type="text" placeholder="Search anything"/> */}
 			<div className='py-2 px-3 w-100'>
 				<input 
@@ -44,10 +51,13 @@ export function SearchBar() {
 					style={{backgroundColor: 'grey'}}
 				/>
 			</div>
-			<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
-				{list.filter((x) => (x.username.toLowerCase().includes(search.toLowerCase())))
-					.map(myMap)}
-			</ul>
+			{temp.length ? (
+				<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
+					{temp.map(myMap)}
+				</ul>
+			) : (
+				<h5 className='p-3' style={{color: 'grey'}}>No result</h5>
+			)}
 		</div>
 	);
 }
