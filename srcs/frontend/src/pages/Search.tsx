@@ -33,15 +33,20 @@ export function SearchBar() {
 	return (
 		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' style={{ backgroundColor: "black" }}>
 			{/* <Form.Control type="text" placeholder="Search anything"/> */}
-			<input 
-				value={search} 
-				onChange={(e) => {setSearch(e.target.value)}}
-				type="text" 
-				autoFocus
-				className="form-control p-1 m-2"
-			 />
+			<div className='py-2 px-3 w-100'>
+				<input 
+					value={search} 
+					onChange={(e) => {setSearch(e.target.value)}}
+					type="text" 
+					placeholder='Search by username'
+					autoFocus
+					className="form-control w-100"
+					style={{backgroundColor: 'grey'}}
+				/>
+			</div>
 			<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
-				{list.filter((x) => (x.username == search)).map(myMap)}
+				{list.filter((x) => (x.username.toLowerCase().includes(search.toLowerCase())))
+					.map(myMap)}
 			</ul>
 		</div>
 	);

@@ -4,43 +4,46 @@ import { socket, friendsSocket } from "./socket";
 
 type OptionsProp = {
 	profile: profileType,
+	setProfile: React.Dispatch<React.SetStateAction<profileType | null>> 
 }
-export function Options(prop: OptionsProp) {
-	const [ profile, setProfile ] = useState<profileType>(prop.profile);
+export function Options({profile, setProfile}: OptionsProp) {
 
+	if (profile.friend == null || profile == null) {
+		return (null)
+	}
 	return (
 		<div className='d-flex flex-row'>
-			<AddOption  profile={profile}  setProfile={setProfile} />
-			<ChatOption profile={profile} setProfile={setProfile}/>
-			<PongOption profile={profile} setProfile={setProfile}/>
-			<BlockOption profile={profile} setProfile={setProfile} />
+			<AddOption  profile={{... profile}}  setProfile={setProfile} />
+			<ChatOption profile={{ ...profile }} setProfile={setProfile}/>
+			<PongOption profile={{ ...profile }} setProfile={setProfile}/>
+			<BlockOption profile={{ ...profile }} setProfile={setProfile} />
 		</div>
 	)
 }
 
 type optionProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType>>
+	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
 }
 
 export function AddOption({profile, setProfile}: optionProp) {
 	const [text, setText] = useState<'Add' | 'Sent' | 'Friend!'>('Add')
 	
 	useEffect(() => {
-		// define initial value for text
-		profile.sent && setText('Sent');
+		profile.sent ? setText('Sent') : setText('Add');
 		profile.friend && setText('Friend!');
+	}, [profile])
+	
+	useEffect(() => {
 		// define socket listener
 		function handleReqAccept(newFriend: userType) {
 			if (newFriend.id == profile.id) {
-				setText('Friend!')
-				setProfile((prev) => ({... prev, sent: false, friend: true }))
+				setProfile((prev) => ({... prev!, sent: false, friend: true }))			
 			}
 		}
 		function handleSendFriendReq(recver: userType) {
 			if (recver.id == profile.id) {
-				setText('Sent');
-				setProfile((prev) => ({... prev, sent: true}))
+				setProfile((prev) => ({... prev!, sent: true}))
 			}
 		}
 		friendsSocket.on('friendReqAccept', handleReqAccept);
@@ -56,7 +59,7 @@ export function AddOption({profile, setProfile}: optionProp) {
 		e.preventDefault();
 		if (text == 'Add') {
 			friendsSocket.emit('sendReq', profile.username);
-			setProfile((prev) => ({... prev, sent: true}))
+			// setProfile((prev) => ({... prev!, sent: true}))
 		}
 	}
 	
@@ -72,21 +75,18 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 	const [text, setText] = useState<'Block' | 'Unblock'>('Block');
 
 	useEffect(() => {
-		profile.block && setText('Unblock');
-		!profile.block && setText('Block');
-	}, [])
+		profile.block ? setText('Unblock') : setText('Block');
+	}, [profile])
 	
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text == 'Block') {
 			friendsSocket.emit('block', profile.id);
-			setProfile((prev) => ({ ... prev, block: true }))
-			setText('Unblock')
+			setProfile((prev) => ({ ... prev!, block: true }))
 		}
 		if (text == 'Unblock') {
 			friendsSocket.emit('unblock', profile.id);
-			setProfile((prev) => ({ ...prev, block: false }))
-			setText('Block')
+			setProfile((prev) => ({ ...prev!, block: false }))
 		}
 	}
 
@@ -103,16 +103,16 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		function handleBlock() {
-			setProfile((prev) => ({... prev, block: true}))
+			setProfile((prev) => ({... prev!, block: true}))
 		}
 		function handleBlocked() {
-			setProfile((prev) => ({... prev, blocked: true}))
+			setProfile((prev) => ({... prev!, blocked: true}))
 		}
 		function handleUnblock() {
-			setProfile((prev) => ({... prev, block: false}))
+			setProfile((prev) => ({... prev!, block: false}))
 		}
 		function handleUnblocked() {
-			setProfile((prev) => ({... prev, blocked: false}))
+			setProfile((prev) => ({... prev!, blocked: false}))
 		}
 		friendsSocket.on('block', handleBlock)
 		friendsSocket.on('blocked', handleBlocked)
@@ -129,7 +129,7 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		(profile.block || profile.blocked) ? setText('block') : setText('Chat');
-	}, [profile.block, profile.blocked])
+	}, [profile])
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
@@ -151,16 +151,16 @@ export function PongOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		function handleBlock() {
-			setProfile((prev) => ({ ...prev, block: true }))
+			setProfile((prev) => ({ ... prev!, block: true }))
 		}
 		function handleBlocked() {
-			setProfile((prev) => ({ ...prev, blocked: true }))
+			setProfile((prev) => ({ ... prev!, blocked: true }))
 		}
 		function handleUnblock() {
-			setProfile((prev) => ({ ...prev, block: false }))
+			setProfile((prev) => ({ ... prev!, block: false }))
 		}
 		function handleUnblocked() {
-			setProfile((prev) => ({ ...prev, blocked: false }))
+			setProfile((prev) => ({ ... prev!, blocked: false }))
 		}
 		friendsSocket.on('block', handleBlock)
 		friendsSocket.on('blocked', handleBlocked)
@@ -177,7 +177,7 @@ export function PongOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		(profile.block || profile.blocked) ? setText('block') : setText('Pong');
-	}, [profile.block, profile.blocked])
+	}, [profile])
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
