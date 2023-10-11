@@ -12,11 +12,12 @@ import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
+import { UserDto } from 'src/dto/UserDto';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
-
+	
 	constructor(
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
@@ -46,6 +47,11 @@ export class UsersGateway
 		client.broadcast.emit('offline', id);
 	}
 
+	@SubscribeMessage('getAllUsers')
+	async handleGetAllUsers(): Promise<UserDto[]> {
+		return (await this.usersService.getAllUsers());
+	}
+	
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
@@ -65,9 +71,22 @@ export class UsersGateway
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
-		// this.logger.log(file);
-		// need some protection here
-		return (await this.usersService.updateUser(id, {avatar: file}));
+		
+		const fileCheck = async (file: Buffer) => {
+			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
+			const type = await fileTypeFromBuffer(file);
+			// if type undefined, or if file isn't image
+			if (type?.ext != 'jpg' && type?.ext != 'png') {
+				return (false);
+			}
+			// if file too big
+			if (file.byteLength >= 10485760) {
+				return (false);
+			}
+			return (await this.usersService.updateUser(id, {avatar: file}));
+		};
+		// this.logger.log('newAvatar')
+		return (await fileCheck(file));
 	}
 
 	// this function cannot be done in the service, it will create circular dependency
@@ -92,8 +111,8 @@ export class UsersGateway
 		return (await data);
 	}
 
-	@SubscribeMessage('Verify2FA')
-	async handleVerify2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+	@SubscribeMessage('Activate2FA')
+	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
 		console.log(data);
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
 
@@ -104,12 +123,17 @@ export class UsersGateway
 		return (false);
 	}
 
-	@SubscribeMessage('Status2FA')
-	async handleStatus2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		const user = await this.usersService.getUserById(client.data.user.id);
-		console.log(user);
-		if (user.activated2FA === true)
+	@SubscribeMessage('Disable2FA')
+	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
+		console.log("Disable2FA --->", data);
+		const isValid = await this.usersService.verify2FA(client.data.user, data);
+
+		console.log("ISVALID", isValid);
+		if (isValid === true) {
+			this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
 			return (true);
+		}
 		return (false);
 	}
+
 } 

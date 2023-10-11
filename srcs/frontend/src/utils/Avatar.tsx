@@ -29,6 +29,15 @@ export function Avatar({ size, user }: avatarProp) {
 		socket.on('online', onOnline);
 		socket.on('offline', onOffline);
 		socket.on('ingame', onIngame);
+	
+		return () => {
+			socket.off('online', onOnline);
+			socket.off('offline', onOffline);
+			socket.off('ingame', onIngame);
+		};
+	}, []);
+	
+	useEffect(() => {
 		// set Avatar
 		if (!user.avatar) {
 			setAvatar(DefaultAvatar);
@@ -40,12 +49,7 @@ export function Avatar({ size, user }: avatarProp) {
 			// no need to decide file type, idk it just works
 			setAvatar(`data:image/jpeg;base64,${base64}`)
 		}
-		return () => {
-			socket.off('online', onOnline);
-			socket.off('offline', onOffline);
-			socket.off('ingame', onIngame);
-		};
-	}, []);
+	}, [user])
 
 	useEffect(() => {
 		status == 'ONLINE' && setColor('green');

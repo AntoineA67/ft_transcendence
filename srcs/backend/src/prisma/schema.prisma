@@ -36,8 +36,8 @@ model Custom {
 model User {
   id               Int          @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d")
   status           OnlineStatus    @default(ONLINE)
-  username         String          @db.VarChar @unique(sort: Asc)
-  email            String          @db.VarChar  // @default("") 
+  username         String          @db.VarChar @unique
+  email            String          @db.VarChar @unique(sort: Asc) // @default("") 
   password         String?         @db.VarChar
   u2fHash          String?         @db.VarChar
   otpHash          String?         @db.VarChar
@@ -87,7 +87,7 @@ model Message {
 model Room {
   id        Int    @default(autoincrement()) @id(map: "PK_c6d46db005d623e691b2fbcba23") 
   isChannel Boolean
-  title     String?   @db.VarChar(255)
+  title     String?   @db.VarChar(255) @unique()
   private   Boolean?  
   password  String?   @db.VarChar(100)
   message   Message[]

@@ -19,7 +19,6 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
-	//dont touch
 	async createUser(username: string, email: string, password: string) {
 		return await this.prisma.user.create({
 			data: {
@@ -70,20 +69,36 @@ export class UsersService {
 	}
 
 	//dont touch
-	async getUserByUsername(username: string) {
-		//console.log('getUserByUsername', username);
+	async getUserByEmail(email: string) {
+		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
-				username,
+				email,
 			},
 		});
 		return user;
 	}
 
-	async getUserByNick(nick: string): Promise<UserDto> {
+	async getIdByNick(email: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { email: email	}
+		});
+		if (!user) return (null);
+		return (user.id);
+	}
+
+	async getNickById(id: number) {
+		const user = await this.prisma.user.findUnique({
+			where: { id }
+		});
+		if (!user) return (null);
+		return (user.username);
+	}
+
+	async getUserBasic(id: number) {
 		return (
 			await this.prisma.user.findUnique({
-				where: { username: nick },
+				where: { id },
 				select: {
 					id: true,
 					username: true,
@@ -93,14 +108,6 @@ export class UsersService {
 			})
 		)
 	}
-
-	// async getNickById(id: number) {
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: { id }
-	// 	});
-	// 	if (!user) return (null);
-	// 	return (user.username);
-	// }
 
 	async getUserById(id: number): Promise<UserDto> {
 		return (
@@ -122,21 +129,29 @@ export class UsersService {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
-				id: true, 
-				username: true, 
-				avatar: true, 
-				bio: true, 
-				status: true
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
 			}
 		});
-		return ({ ... profile, 
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
 	}
 
 	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile =  await this.prisma.user.findUnique({
+		let profile = await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
@@ -153,9 +168,23 @@ export class UsersService {
 		})
 	}
 
+	async getUserByNick(nick: string): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { username: nick },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
+	}
+
 	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
-		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);
 		return {
 			secret,
 			otpauthUrl
@@ -166,6 +195,12 @@ export class UsersService {
 		user = await this.prisma.user.findUnique({
 			where: { id: user.id }
 		});
+		console.log('user', user);
+		console.log('token', token);
+		console.log('otp', authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}))
 		return (authenticator.verify({
 			token: token,
 			secret: user.otpHash

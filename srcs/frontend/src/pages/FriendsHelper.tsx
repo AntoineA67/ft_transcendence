@@ -13,7 +13,7 @@ export function FriendList() {
 		})
 	}
 	const handleFriendReqAccept = (replier: userType) => {
-		console.log('handleaccept: ', replier);
+		// console.log('handleaccept: ', replier);
 		setFriends((prev) => ([...prev, replier]));
 	}
 	
@@ -33,7 +33,7 @@ export function FriendList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id} className='m-0 p-0'>
-				<UserItem user={user} linkTo={user.username} />
+				<UserItem user={{... user}} linkTo={user.username} />
 			</li>
 		)
 	}
@@ -83,7 +83,7 @@ export function FriendReqList() {
 		return (
 			<li key={user.id}>
 				<ReqItem 
-					user={user} 
+					user={{... user}} 
 					linkTo={user.username} 
 					onAccept={(e: any) => handleClick(e, user.id,true)} 
 					onDecline={(e: any) => handleClick(e, user.id, false)}/>
@@ -126,7 +126,7 @@ export function BlockList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				<UserItem user={user} linkTo={user.username} />	
+				<UserItem user={{... user}} linkTo={user.username} />	
 			</li>
 		)
 	}
