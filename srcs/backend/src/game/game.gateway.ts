@@ -34,18 +34,18 @@ export class GameGateway
     }
 
     handleConnection(client: Socket, ...args: any[]) {
-        const token = client.handshake.auth.Authorization?.split(' ')[1];
-        console.log(`Received new connection with token "${token}", is it valid ? 🤔`)
+        //const token = client.handshake.auth.Authorization?.split(' ')[1];
+        //console.log(`Received new connection with token "${token}", is it valid ? 🤔`)
 
-        try {
-            const payload = this.jwtService.verify(token, { secret: jwtConstants.secret });
-            console.log('Token is valid! decoded:', payload)
-        } catch (e) {
-            console.log('Error', e)
-            client.emit('error', { message: 'Invalid token' });
-            client.disconnect();
-            return;
-        }
+        // try {
+        //     const payload = this.jwtService.verify(token, { secret: jwtConstants.secret });
+        //     console.log('Token is valid! decoded:', payload)
+        // } catch (e) {
+        //     console.log('Error', e)
+        //     client.emit('error', { message: 'Invalid token' });
+        //     client.disconnect();
+        //     return;
+        // }
         console.log(`Client successfully connected! 🆔  ${client.id}`)
         client.emit('id', client.id)
     }

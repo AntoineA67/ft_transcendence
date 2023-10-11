@@ -122,21 +122,29 @@ export class UsersService {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
-				id: true, 
-				username: true, 
-				avatar: true, 
-				bio: true, 
-				status: true
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
 			}
 		});
-		return ({ ... profile, 
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
 	}
 
 	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile =  await this.prisma.user.findUnique({
+		let profile = await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
@@ -155,7 +163,7 @@ export class UsersService {
 
 	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
-		const otpauthUrl = authenticator.keyuri(user.email, 'AUTH_APP_NAME', secret);
+		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);
 		return {
 			secret,
 			otpauthUrl
@@ -166,6 +174,12 @@ export class UsersService {
 		user = await this.prisma.user.findUnique({
 			where: { id: user.id }
 		});
+		console.log('user', user);
+		console.log('token', token);
+		console.log('otp', authenticator.verify({
+			token: token,
+			secret: user.otpHash
+		}))
 		return (authenticator.verify({
 			token: token,
 			secret: user.otpHash
