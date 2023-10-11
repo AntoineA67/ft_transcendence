@@ -51,13 +51,14 @@ export class MemberService {
 				},
 			});
 			const pvroom = await this.roomService.getPrivateRoomById(userid,roomid);
+			const banned = pvroom.block || pvroom.blocked;
 			const memberstatus = {
 				id: member.id,
 				userId: member.userId,
 				roomId: member.roomId,
 				owner: member.owner,
 				admin: member.admin,
-				ban: pvroom.blocked,
+				ban: banned,
 				mute: member.mute,
 			};
 			return memberstatus;
