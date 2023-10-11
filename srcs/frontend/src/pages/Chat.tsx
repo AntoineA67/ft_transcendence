@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom';
 import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
 import { Message, ProfileTest, Room, Memberstatus, Pvrooms } from './ChatDto';
+import { set } from 'lodash-es';
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -166,91 +167,52 @@ export function ChatBox() {
 	);
 }
 
-function MyForm({
-	label,
-	button,
-	value,
-	setValue,
-	onSubmit,
-}: {
-	label: string;
-	button: "Send" | "Join" | "Create" | "Cancel" | "Submit";
-	value: string;
-	setValue: React.Dispatch<React.SetStateAction<string>>;
-	onSubmit: () => void;
-}) {
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		onSubmit();
-	};
-	return (
-		<form className='d-flex flex-column align-items-center p-2 gap-2' onSubmit={handleSubmit}>
-			<label className='w-75' htmlFor='private-message'>
-				{label}
-			</label>
-			<input
-				value={value}
-				onChange={(e) => setValue(e.target.value)}
-				className='w-75'
-			/>
-			<button type='submit' className='btn btn-outline-secondary w-75'>
-				{button}
-			</button>
-		</form>
-	);
-}
-
 function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
 	const [nick, setNick] = useState('');
 	const [join, setJoin] = useState('');
 	const [create, setCreate] = useState('');
 	const [roomId, setRoomId] = useState('');
 	const [password, setPassword] = useState('');
-	const [isJoinDialogOpen, setJoinDialogOpen] = useState(false);
+	const [isPublic, setIsPublic] = useState(true);
+	const [createPassword, setCreatePassword] = useState('');
+
 	const navigate = useNavigate();
 
-	const JoinGroup = (roomTitle: string) => {
-		if (roomTitle.trim() !== '') {
-			setJoinDialogOpen(true);
-		}
-	};
+	const handleCreateGroup = () => {
+		if (create.trim() === '') return;
 
-	const handleSecondJoinClick = () => {
-		if (roomId.trim() === '' || join.trim() === '') {
-			alert('Please enter both Room ID and Room title. (the password is optional)');
-			return;
-		}
-		setJoinDialogOpen(false);
-		handleJoinGroup();
-	};
-
-	const handleCreateGroup = (roomTitle: string) => {
-		if (roomTitle.trim() === '')
-			return;
-		chatsSocket.emit('createChannelRoom', roomTitle, (response: number) => {
+		const password = isPublic ? '' : createPassword;
+		const roomdata = {
+			roomTitle: create,
+			isPublic: isPublic,
+			password: password,
+		};
+		chatsSocket.emit('createChannelRoom', roomdata, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
+			} else {
+				alert(`Error while creating room ${create}`);
+				setCreate('');
 			}
-			else
-				alert(`Error while creating room ${roomTitle}`);
 		});
 	}
 
-	const handlePrivateMessage = (username: string) => {
-		if (username.trim() === '')
-			return;
-		chatsSocket.emit('createPrivateRoom', username, (response: number) => {
+	const handlePrivateMessage = () => {
+		if (nick.trim() === '') return;
+		chatsSocket.emit('createPrivateRoom', nick, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
+			} else {
+				alert(`Error while creating room with ${nick}`);
+				setNick('');
 			}
-			else
-				alert(`Error while creating room with ${username}`);
 		});
 	}
 
 	const handleJoinGroup = () => {
+		if (join.trim() === '' || roomId.trim() === '') return;
 		const roomdata = {
 			roomTitle: join,
 			roomid: roomId,
@@ -272,51 +234,113 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	return (
 		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
 			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
-			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} onSubmit={() => handlePrivateMessage(nick)} />
-			{!isJoinDialogOpen && (
-				<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} onSubmit={() => JoinGroup(join)} />
-			)}
-			<MyForm label='Create a group:' button='Create' value={create} setValue={setCreate} onSubmit={() => handleCreateGroup(create)} />
 
-			{isJoinDialogOpen && (
-				<div className='join-dialog'>
-					<div className='d-flex justify-content-between'>
-						<h5>Join {join}</h5>
-						<button className='cross' onClick={() => setJoinDialogOpen(false)} />
-					</div>
-					<div className='form-group'>
-						<label htmlFor='roomID'>Room ID:</label>
-						<input
-							type='text'
-							id='roomID'
-							value={roomId}
-							onChange={(e) => setRoomId(e.target.value)}
-							className='form-control'
-						/>
-					</div>
-					<div className='form-group'>
-						<label htmlFor='password'>Password:</label>
-						<input
-							type='password'
-							id='password'
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							className='form-control'
-						/>
-					</div>
-					<div className='d-flex justify-content-between'>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={handleSecondJoinClick}>
-							Join
-						</button>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={() => setJoinDialogOpen(false)}>
-							Cancel
-						</button>
+			<form className='form-controlchat d-flex flex-column align-items-center p-2 gap-2' onSubmit={(e) => {
+				e.preventDefault();
+				handlePrivateMessage();
+			}}>
+				<label className='w-75'>Priv Message:</label>
+				<input
+					id='private-message'
+					value={nick}
+					onChange={(e) => setNick(e.target.value)}
+					className='w-75 form-control with-white-placeholder'
+					placeholder='Username'
+				/>
+				<button type='submit' className='btn btn-outline-secondary w-75' disabled={!nick.trim()}>
+					Send
+				</button>
+			</form>
+
+			<div style={{ marginBottom: '40px' }}></div>
+
+			<form className='form-controlchat d-flex flex-column align-items-center p-2 gap-2' onSubmit={(e) => {
+				e.preventDefault();
+				handleJoinGroup();
+			}}>
+				<label className='w-75'>Join Group:</label>
+				<input
+					id='groupname'
+					value={join}
+					onChange={(e) => setJoin(e.target.value)}
+					className='w-75 form-control with-white-placeholder'
+					placeholder='Group Name'
+				/>
+				<input
+					type='text'
+					id='roomID'
+					value={roomId}
+					onChange={(e) => setRoomId(e.target.value)}
+					className='w-75 form-control with-white-placeholder'
+					placeholder='Room ID'
+				/>
+				<input
+					type='password'
+					id='password'
+					value={password}
+					onChange={(e) => setPassword(e.target.value)}
+					className='w-75 form-control with-white-placeholder'
+					placeholder='Password'
+				/>
+				<button type='submit' className='btn btn-outline-secondary w-75' disabled={!roomId.trim()}>
+					Join
+				</button>
+			</form>
+
+			<div style={{ marginBottom: '40px' }}></div>
+
+			<form className='form-controlchat d-flex flex-column align-items-center p-2 gap-2' onSubmit={(e) => {
+				e.preventDefault();
+				handleCreateGroup();
+			}}>
+				<label className='d-flex flex-column align-items-center p-2 gap-2 mr-2'>Create Group:</label>
+				<div className='d-flex flex-column align-items-center form-group'>
+					<div className='custom-select'>
+						<select
+							id="isPublic"
+							value={isPublic ? "public" : "private"}
+							onChange={(e) => setIsPublic(e.target.value === "public")}
+						>
+							<option value="public">Public</option>
+							<option value="private">Private</option>
+						</select>
 					</div>
 				</div>
-			)}
+				<input
+					id='groupnamecreate'
+					value={create}
+					onChange={(e) => setCreate(e.target.value)}
+					className='w-75 form-control with-white-placeholder'
+					placeholder='Group Name'
+				/>
+				{isPublic ? (
+					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
+						Create
+					</button>
+				) : (
+					<div className='d-flex flex-column align-items-center p-2 gap-2'>
+						<input
+							type='password'
+							id='createPassword'
+							value={createPassword}
+							onChange={(e) => setCreatePassword(e.target.value)}
+							className='w-75 form-control with-white-placeholder'
+							placeholder='Password'
+						/>
+						<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
+							Create
+						</button>
+					</div>
+				)}
+			</form>
 		</div>
 	);
+
+
 }
+
+export default NewChat;
+
 
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');

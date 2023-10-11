@@ -90,7 +90,7 @@ export class RoomService {
 		return roomsWithLatestMessage;
 	}
 
-	async createChannelRoom(roomtitle: string, userId: number): Promise<Room> {
+	async createChannelRoom(roomtitle: string, isPublic: boolean, psw: string, userId: number): Promise<Room> {
 		const existingRoom = await this.prisma.room.findFirst({
 			where: {
 				title: roomtitle,
@@ -104,6 +104,8 @@ export class RoomService {
 				data: {
 					title: roomtitle,
 					isChannel: true,
+					private: !isPublic,
+					password: (psw.trim() === '' ? null : psw),
 					members: {
 						create: {
 							admin: true,
