@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
+import { Box, Text } from "@react-three/drei"
 import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
@@ -140,10 +140,8 @@ export default function Game() {
 
 	return (
 		<>
-
-
 			<div className="d-flex align-items-center justify-content-center mt-5">
-				<Card border="none" bg="dark" text="white" className="w-75 p-3 border-0">
+				<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
 					<Card.Body className="text-center">
 						<Card.Title>Player vs player</Card.Title>
 						<Card.Text>
