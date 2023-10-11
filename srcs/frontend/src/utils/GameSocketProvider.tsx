@@ -1,47 +1,31 @@
 import io, { Socket } from "socket.io-client";
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { gamesSocket } from "./socket";
 
 const hostAdress = 'localhost:3000'
 
 function connectToSocketWithToken(token: any) {
-  const options = {
-    transports: ['websocket'],
-    auth: {
-      'Authorization': `Bearer ${token}`,
-    },
-  };
-  const socket = io(`${hostAdress}/game`, options);
-
-  return socket;
+  return gamesSocket;
 }
 
 export const SocketContext = createContext(null);
 
 export const GameSocketProvider = ({ children, store }: any) => {
-  console.log("SocketProvider")
 
   const [isConnected, setConnected] = useState(false)
-
-  const socketUrl = `${hostAdress}/game`
-
   const socket: any = useRef(null)
 
   const handleOnMessage = (message: any) => {
     console.log(message)
-    // store.dispatch here
   }
 
   useEffect(() => {
-    console.log("SocketProvider useEffect")
     if (!isConnected) {
-      const token = localStorage.getItem('token')
-      console.log("SocketProvider useEffect !isConnected", token)
-      socket.current = connectToSocketWithToken(token)
+      socket.current = gamesSocket;
 
       socket.current.on('connect', () => {
-        console.info(`Successfully connected to socket at ${socketUrl}`)
         setConnected(true)
-      })
+      });
 
       socket.current.on('disconnect', () => {
         console.info(`Successfully disconnected`)
@@ -55,7 +39,6 @@ export const GameSocketProvider = ({ children, store }: any) => {
           window.location.href = '/login'
         }
       })
-
       socket.current.on('message', handleOnMessage)
     }
 

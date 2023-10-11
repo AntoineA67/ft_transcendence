@@ -8,7 +8,8 @@ const prisma = new PrismaClient()
 export class PrismaService extends PrismaClient implements OnModuleInit {
 	constructor() {
 		super({
-			log: ["error", "info", "query", "warn"],
+			log: [],
+			// log: ["error", "info", "query", "warn"],
 		});
 	}
 
