@@ -12,11 +12,13 @@ import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
 import { ProfileDto } from 'src/dto/ProfileDto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
+// import {fileTypeFromBuffer} from 'file-type';
+// const fileTypeFromBuffer = require("file-type")
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
-
+	
 	constructor(
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
@@ -65,9 +67,22 @@ export class UsersGateway
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
-		// this.logger.log(file);
-		// need some protection here
-		return (await this.usersService.updateUser(id, {avatar: file}));
+		
+		const fileCheck = async (file: Buffer) => {
+			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
+			const type = await fileTypeFromBuffer(file);
+			// if type undefined, or if file isn't image
+			if (type?.ext != 'jpg' && type?.ext != 'png') {
+				return (false);
+			}
+			// if file too big
+			if (file.byteLength >= 10485760) {
+				return (false);
+			}
+			return (await this.usersService.updateUser(id, {avatar: file}));
+		};
+		// this.logger.log('newAvatar')
+		return (await fileCheck(file));
 	}
 
 	// this function cannot be done in the service, it will create circular dependency
