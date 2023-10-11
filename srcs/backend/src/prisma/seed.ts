@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 
 async function seeding() {
 	await seedUsers();
-	await seedFriendship();
+	// await seedFriendship();
 	await seedFriendReq();
 	await seedAchieves();
 	await seedRooms();
@@ -24,13 +24,15 @@ async function seedUsers() {
 	}
 }
 
-async function seedFriendship() {
-	for (let friend of friendships ){
-		await prisma.friendship.create({
-			data: friend
-		});
-	}
-}
+// async function seedFriendship() {
+// 	for (let friend of friendships ){
+// 		await prisma.friendship.upsert({
+// 			where: {id: friend.id},
+// 			update: {},
+// 			create: friend,
+// 		});
+// 	}
+// }
 
 async function seedFriendReq() {
 	for (let req of friendReqs ){

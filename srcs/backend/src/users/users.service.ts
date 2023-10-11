@@ -19,7 +19,6 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
-	//dont touch
 	async createUser(username: string, email: string, password: string) {
 		return await this.prisma.user.create({
 			data: {
@@ -70,20 +69,36 @@ export class UsersService {
 	}
 
 	//dont touch
-	async getUserByUsername(username: string) {
-		//console.log('getUserByUsername', username);
+	async getUserByEmail(email: string) {
+		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
-				username,
+				email,
 			},
 		});
 		return user;
 	}
 
-	async getUserByNick(nick: string): Promise<UserDto> {
+	async getIdByNick(email: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { email: email	}
+		});
+		if (!user) return (null);
+		return (user.id);
+	}
+
+	async getNickById(id: number) {
+		const user = await this.prisma.user.findUnique({
+			where: { id }
+		});
+		if (!user) return (null);
+		return (user.username);
+	}
+
+	async getUserBasic(id: number) {
 		return (
 			await this.prisma.user.findUnique({
-				where: { username: nick },
+				where: { id },
 				select: {
 					id: true,
 					username: true,
@@ -93,14 +108,6 @@ export class UsersService {
 			})
 		)
 	}
-
-	// async getNickById(id: number) {
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: { id }
-	// 	});
-	// 	if (!user) return (null);
-	// 	return (user.username);
-	// }
 
 	async getUserById(id: number): Promise<UserDto> {
 		return (
@@ -159,6 +166,20 @@ export class UsersService {
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
+	}
+
+	async getUserByNick(nick: string): Promise<UserDto> {
+		return (
+			await this.prisma.user.findUnique({
+				where: { username: nick },
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			})
+		)
 	}
 
 	async generate2FASecret(user: User) {
