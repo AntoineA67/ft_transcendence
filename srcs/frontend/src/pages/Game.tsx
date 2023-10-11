@@ -5,6 +5,8 @@ import { Grid, Box, Stage, Text, Environment } from "@react-three/drei"
 import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { Card } from "react-bootstrap"
+import { Link } from "react-router-dom"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -138,19 +140,38 @@ export default function Game() {
 
 	return (
 		<>
-			{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected}>Match</button>}
-			{gameStatus === GameStatus.Matching && <>
-				<FidgetSpinner
-					visible={socket?.connected}
-					height="80"
-					width="80"
-					ariaLabel="dna-loading"
-					wrapperStyle={{}}
-					wrapperClass="dna-wrapper"
-					ballColors={['#ff0000', '#00ff00', '#0000ff']}
-					backgroundColor="#F4442E"
-				/> <button onClick={cancelMatchmaking}>Cancel</button></>
-			}
+
+
+			<div className="d-flex align-items-center justify-content-center mt-5">
+				<Card border="none" bg="dark" text="white" className="w-75 p-3 border-0">
+					<Card.Body className="text-center">
+						<Card.Title>Player vs player</Card.Title>
+						<Card.Text>
+							You are about to play a game against another player. Get ready to compete and have fun!
+						</Card.Text>
+						<Link to="/game" className="w-75 link-text">
+							{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected} className="btn btn-primary"><b>Play</b></button>}
+							{gameStatus === GameStatus.Matching && <>
+								<FidgetSpinner
+									visible={socket?.connected}
+									height="80"
+									width="80"
+									ariaLabel="dna-loading"
+									wrapperStyle={{}}
+									wrapperClass="dna-wrapper"
+									ballColors={['#ff0000', '#00ff00', '#0000ff']}
+									backgroundColor="#F4442E"
+								/>
+								<br></br>
+								<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
+							</>
+							}
+						</Link>
+					</Card.Body>
+				</Card>
+			</div>
+
+
 			{gameStatus === GameStatus.Finished && <Circles
 				height="80"
 				width="80"
