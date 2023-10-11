@@ -48,8 +48,6 @@ prod :
 	@docker compose --env-file=./build/.env -f ./srcs/compose.yaml build
 	@echo "${GREEN}> Turning up images 🎉${END}"
 	@docker compose -f ./srcs/compose.yaml up -d
-
-
 	
 down :
 	@echo "${GREEN}> Turning down images ❌${END}"

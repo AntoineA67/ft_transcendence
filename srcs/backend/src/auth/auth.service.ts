@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { stat } from 'fs';
+import * as randomstring from 'randomstring';
 
 @Injectable()
 export class AuthService {
@@ -12,21 +12,11 @@ export class AuthService {
 		public jwtService: JwtService
 	) { }
 
-	// async validateUser(username: string, pass: string): Promise<any> {
-	// 	const user = await this.usersService.findOne(username);
-	// 	if (user && user.password === pass) {
-	// 		const { password, ...result } = user;
-	// 		return result;
-	// 	}
-	// 	return null;
-	// }
-
-
 	async login(user: any) {
 		if (!user) {
 			throw new BadRequestException('Unauthenticated');
 		}
-		let userExists: any = await this.findUserByLogin(user.username);
+		let userExists: any = await this.findUserByEmail(user.emails[0].value);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
@@ -36,21 +26,27 @@ export class AuthService {
 
 	async registerUser(user: any): Promise<User> {
 		try {
-			console.log('registering user', user);
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
 		} catch {
-			throw new InternalServerErrorException();
+			try {
+				const userName = user.username + "-" + randomstring.generate({
+					length: 6,
+					charset: 'numeric'
+				});
+				const newUser = await this.usersService.createUser(userName, user.emails[0].value, "nopass")
+				return newUser;
+			} catch {
+				throw new InternalServerErrorException();
+			}
 		}
 	}
 
-	async findUserByLogin(username: string) {
-		const user = await this.usersService.getUserByUsername(username);
-
+	async findUserByEmail(email: string) {
+		const user = await this.usersService.getUserByEmail(email);
 		if (!user) {
 			return null;
 		}
-
 		return user;
 	}
 }
