@@ -7,7 +7,9 @@
 	word-wrap: break-word;
 }
 
-.messageBlue, .messagePink, .messagebanned {
+.messageBlue,
+.messagePink,
+.messagebanned {
 	border-radius: 10px;
 	padding: 5px;
 	margin-bottom: 1px;
@@ -28,9 +30,10 @@
 
 .banned-text {
 	color: #000000;
-  }
+}
 
-.userBlue, .userPink {
+.userBlue,
+.userPink {
 	display: flex;
 	align-items: center;
 	border-radius: 1px;
@@ -155,6 +158,23 @@
 .userItem {
 	margin: 0;
 	background-color: grey;
-	/* margin-bottom: 3px; */
 	padding: 10px;
+}
+
+.custom-select select {
+	border: 1px solid #ffffff;
+	border-radius: 4px;
+	background-color: transparent;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+#private-message::placeholder,
+#groupname::placeholder,
+#groupnamecreate::placeholder,
+#roomID::placeholder,
+#password::placeholder,
+#createGroup::placeholder,
+#createPassword::placeholder {
+	color: #555;
 }

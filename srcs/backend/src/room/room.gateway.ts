@@ -86,10 +86,10 @@ export class RoomGateway
 	@SubscribeMessage('createChannelRoom')
 	async handleCreateChannelRoom(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() roomTitle: string,
+		@MessageBody() data: {roomTitle: string, isPublic: boolean, password: string},
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createChannelRoom(roomTitle, userId);
+		const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
