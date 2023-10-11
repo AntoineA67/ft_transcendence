@@ -78,7 +78,7 @@ function AchieveContent({ achieve }: achieveProp) {
 		);
 	}
 
-	console.log('achieve: ', achieve)
+	// console.log('achieve: ', achieve)
 
 	return (
 		<ul className="tab-ul px-sm-1 py-5">			
