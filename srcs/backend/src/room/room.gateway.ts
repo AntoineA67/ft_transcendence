@@ -7,6 +7,7 @@ import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
+import { MemberService } from 'src/member/member.service';
 
 type MessageWithUsername = {
 	id: number;
@@ -45,6 +46,7 @@ export class RoomGateway
 	constructor(
 		private readonly roomService: RoomService,
 		private readonly messagesService: MessagesService,
+		private readonly memberService: MemberService,
 	) { }
 	private logger: Logger = new Logger('RoomGateway');
 
@@ -74,6 +76,9 @@ export class RoomGateway
 		console.log('roomId', roomId);
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
+		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
+		if (memberStatus.ban)
+			return null;
 		const roomData = await this.roomService.getRoomData(roomid, userId);
 		return roomData;
 	}
