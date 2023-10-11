@@ -1,10 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Room, Prisma, Member, Message, Friendship, Block } from '@prisma/client';
-import { MemberService } from 'src/member/member.service';
 import { UsersService } from 'src/users/users.service';
-import { BlockService } from 'src/block/block.service';
-import { log } from 'console';
 
 type MessageWithUsername = {
 	id: number;
@@ -42,7 +39,6 @@ export class RoomService {
 	constructor(
 		private prisma: PrismaService,
 		private readonly usersService: UsersService,
-		private readonly memberService: MemberService,
 	) { }
 	private logger: Logger = new Logger('RoomGateway');
 	async createRoom(data: Prisma.RoomCreateInput): Promise<Room> {
@@ -268,9 +264,6 @@ export class RoomService {
 			},
 		});
 		let roomTitle = room.title;
-		const memberStatus = await this.memberService.getMemberDatabyRoomId(userid, roomid);
-		if (memberStatus.ban)
-			return null;
 		if (!room) {
 			return { messages: [], roomTitle: '', roomChannel: true };
 		}
