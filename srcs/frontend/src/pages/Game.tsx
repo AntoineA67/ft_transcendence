@@ -71,6 +71,7 @@ export default function Game() {
 	const socket = useGameSocket();
 
 	useEffect(() => {
+		console.log('coucu');
 		socket?.on('connect', function () {
 			console.log('connect')
 		})
