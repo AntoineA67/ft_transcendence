@@ -9,23 +9,23 @@ import { Options } from "./Options";
 import { GoUp } from './GoUp'
 
 export function UserProfile() {
-	const { friendNick } = useParams();
+	const { userNick } = useParams();
 	const location = useLocation();
 	const [profile, setProfile] = useState<profileType | null>(null);
 
 
 	useEffect(() => {
-		socket.emit('Profile', friendNick, (res: profileType) => {
+		socket.emit('Profile', userNick, (res: profileType) => {
 			setProfile(res)
 			console.log('res', res)
 		})
-	}, [friendNick])
+	}, [userNick])
 
 	return (
 		<>
 			{!profile && <p style={{ color: 'white' }}>loading</p>}
 			{profile && location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search`} replace={true} />}
+				&& !profile.friend && <Navigate to={`/search/${userNick}`} replace={true} />}
 			{profile &&
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<GoUp />
@@ -48,7 +48,7 @@ export function UserProfile() {
 							{profile.bio}
 						</p>
 					</Container>
-					<Options profile={{... profile}} />
+					<Options profile={{... profile}} setProfile={setProfile} />
 					<Stat gameHistory={profile.gameHistory.map((a) => ({ ...a }))} achieve={{ ... (profile.achieve) }} />
 
 				</div>

@@ -52,9 +52,13 @@ root.render(
 				<Route element={<Protected />}>
 					<Route path="/" element={<Sidebar />}>
 						<Route index element={<Profile />} />
-						<Route path="search" element={<Search />}></Route>
+
+						<Route path="search" element={<Search />}>
+							<Route path=':userNick' element={<UserProfile />}></Route>
+						</Route>
+						
 						<Route path="friends" element={<Friends />}>
-							<Route path=':friendNick' element={<UserProfile />}></Route>
+							<Route path=':userNick' element={<UserProfile />}></Route>
 						</Route>
 						
 						<Route path="chat" element={<Chat />}>
