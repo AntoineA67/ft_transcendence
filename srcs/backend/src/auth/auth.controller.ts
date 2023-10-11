@@ -54,11 +54,9 @@ export class AuthController {
 	}
 
 	createJWT(req: any) {
-		return this.jwtService.sign({
+		let payload = {
 			id: req.user.id,
-			sub: req.user.username,
-			email: req.user.email,
-			login: req.user.username,
-		}, { expiresIn: 3600 });
+		}
+		return this.jwtService.sign(payload, { expiresIn: 3600 });
 	}
 }
