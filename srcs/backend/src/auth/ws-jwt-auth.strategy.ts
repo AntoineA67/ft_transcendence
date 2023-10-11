@@ -17,17 +17,6 @@ export class WsJwtStrategy extends PassportStrategy(Strategy, 'ws-jwt') {
 	}
 
 	async validate(payload: any) {
-		//console.log('jwt validate', payload);
-		// return payload;
-		// return this.jwtService.verify(payload);
-		// const user = await this.userService.getUserByUsername(payload.sub);
-
-		// if (!user) throw new UnauthorizedException('Please log in to continue');
-
-		// return {
-		// 	id: payload.sub,
-		// 	email: payload.email,
-		// 	login: payload.login,
-		// };
+		return payload;
 	}
 }

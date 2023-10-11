@@ -94,7 +94,10 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 	);
 }
 
-function NewAvatar() {
+type NewAvatarProp = {
+	setUpdate: React.Dispatch<React.SetStateAction<boolean>>
+}
+function NewAvatar({ setUpdate }: NewAvatarProp) {
 
 	async function autoUpload() {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
@@ -105,7 +108,7 @@ function NewAvatar() {
 			return ;
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
-			success ? console.log('success') : console.log('fail');
+			success ? (setUpdate((prev) => (!prev))) : console.log('fail');
 		})
 	}
 
@@ -129,13 +132,14 @@ function NewAvatar() {
 function Profile() {
 	const [profile, setProfile] = useState<profileType | null>(null);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
+	const [update, setUpdate] = useState<boolean>(true);
 
 	useEffect(() => {
 		socket.emit('MyProfile', (response: profileType) => {
 			setProfile(response)
-			console.log(response);
+			console.log('Myprofile: ', response);
 		})
-	}, []);
+	}, [update]);
 
 	return (
 		profile ? (
@@ -150,7 +154,7 @@ function Profile() {
 						avatar: profile.avatar,
 						status: profile.status
 					}} />
-					<NewAvatar />
+					<NewAvatar setUpdate={setUpdate}/>
 
 					{ (edit == 'nick'
 						) ? ( 

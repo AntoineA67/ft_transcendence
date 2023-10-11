@@ -10,10 +10,12 @@ export type userType = {
 
 export type profileType = {
 	id: number,
+	password: string,
 	username: string,
 	avatar: null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
 	bio: string,
+	activated2FA: boolean,
 	gameHistory: gameHistoryType[],
 	achieve: AchieveType,
 	friend: boolean | null,   // null when the profile is user himself
