@@ -140,16 +140,23 @@ export default function Game() {
 
 	return (
 		<>
-			<div className="d-flex align-items-center justify-content-center mt-5">
-				<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
-					<Card.Body className="text-center">
-						<Card.Title>Player vs player</Card.Title>
-						<Card.Text>
-							You are about to play a game against another player. Get ready to compete and have fun!
-						</Card.Text>
-						<Link to="/game" className="w-75 link-text">
-							{gameStatus === GameStatus.Idle && <button onClick={startMatchmaking} disabled={!socket?.connected} className="btn btn-primary"><b>Play</b></button>}
+			{gameStatus !== GameStatus.Started &&
+				<div className="d-flex align-items-center justify-content-center h-100">
+					<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
+						<Card.Body className="text-center">
+							{gameStatus === GameStatus.Idle && <>
+								<Card.Title>Player vs player</Card.Title>
+								<Card.Text>
+									You are about to play a game against another player. Get ready to compete and have fun!
+								</Card.Text>
+								<br></br>
+								<button onClick={startMatchmaking} disabled={!socket?.connected} className="btn btn-primary"><b>Play</b></button>
+							</>}
 							{gameStatus === GameStatus.Matching && <>
+								<Card.Title>Matchmeking in progress</Card.Title>
+								<Card.Text>
+									Looking for another player
+								</Card.Text>
 								<FidgetSpinner
 									visible={socket?.connected}
 									height="80"
@@ -161,24 +168,21 @@ export default function Game() {
 									backgroundColor="#F4442E"
 								/>
 								<br></br>
+								<br></br>
 								<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
-							</>
-							}
-						</Link>
-					</Card.Body>
-				</Card>
-			</div>
-
-
-			{gameStatus === GameStatus.Finished && <Circles
-				height="80"
-				width="80"
-				color="#4fa94d"
-				ariaLabel="circles-loading"
-				wrapperStyle={{}}
-				wrapperClass=""
-				visible={true}
-			/>}
+							</>}
+							{gameStatus === GameStatus.Finished && <>
+								<Card.Title>Game over !</Card.Title>
+								<Card.Text>
+									null
+								</Card.Text>
+								<br></br>
+								<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Replay</b></button>
+							</>}
+						</Card.Body>
+					</Card>
+				</div>
+			}
 			{gameStatus === GameStatus.Started &&
 				// <Canvas gl={{ logarithmicDepthBuffer: true }} shadows camera={{ position: [0, 0, 50], fov: 25 }}>
 				// 	<fog attach="fog" args={['black', 15, 21.5]} />
@@ -208,10 +212,6 @@ export default function Game() {
 				// 	</EffectComposer>
 				// 	<Environment background preset="sunset" blur={0.8} />
 				// </Canvas>
-
-
-
-
 				<Canvas shadows camera={{ position: [0, 0, 50], fov: 30 }}>
 					{Object.keys(clients)
 						.map((client) => {
