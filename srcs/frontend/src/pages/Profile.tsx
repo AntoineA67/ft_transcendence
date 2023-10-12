@@ -74,8 +74,8 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			console.log('profile', profile)
-			console.log('obj', obj)
+			// console.log('profile', profile)
+			console.log('success: ', success)
 			success && setProfile((prev) => (
 				prev ? ({... prev, ... obj}) : prev
 			));
