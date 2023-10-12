@@ -10,6 +10,37 @@ import { Message, ProfileTest, Room, Memberstatus, Pvrooms } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
+import { RiVolumeMuteFill, RiDeleteBin6Line, RiLogoutCircleRLine } from 'react-icons/ri';
+
+export function ChatSettings() {
+	const membersList = [
+	  { id: 1, username: 'User1', role: 'Admin' },
+	  { id: 2, username: 'User2', role: 'Member' },
+	  { id: 3, username: 'User3', role: 'Member' },
+	  { id: 4, username: 'User4', role: 'Owner' },
+	];
+  
+	return (
+	  <ul className="members-list">
+		{membersList.map((member) => (
+		  <li key={member.id} className="member">
+			<div className="member-details">
+			  <span className="member-username">{member.username}</span>
+			  <span className="member-role">{member.role}</span>
+			</div>
+			<div className="member-actions">
+			  <RiVolumeMuteFill className="mute-icon" />
+			  <RiDeleteBin6Line className="ban-icon" />
+			  <RiLogoutCircleRLine className="kick-icon" />
+			</div>
+		  </li>
+		))}
+	  </ul>
+	);
+  }
+  
+  
+
 
 export function ChatBox() {
 	const { chatId } = useParams();

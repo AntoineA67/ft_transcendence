@@ -179,7 +179,7 @@
 	color: #555;
 }
 
-/* Style du bouton membres */
+
 .members-button {
 	position: relative;
 }
@@ -202,7 +202,7 @@
 	padding: 10px;
 }
 
-/* Style de la liste des membres (ajustez selon vos besoins) */
+
 .members-panel ul {
 	list-style: none;
 	padding: 0;
@@ -210,4 +210,64 @@
 
 .members-panel li {
 	margin: 5px 0;
+}
+
+
+.members-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.member {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px 10px;
+	transition: background-color 0.2s;
+}
+
+.member-details {
+	display: flex;
+	flex-direction: column;
+	margin-right: 10px;
+}
+
+.member-username {
+	color: #ffffff;
+	font-weight: bold;
+	margin: 0;
+}
+
+.member-role {
+	color: #5bcae097;
+	margin: 0;
+}
+
+
+.member-actions {
+	display: flex;
+}
+
+.mute-icon,
+.ban-icon,
+.kick-icon {
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: color 0.2s;
+	color: #ffffff;
+}
+
+.mute-icon:hover,
+.ban-icon:hover,
+.kick-icon:hover {
+	color: #ff0000;
+}
+
+.members-list,
+.member {
+	border: none;
+	padding: 10;
+	margin: 0;
+	background-color: transparent;
 }

@@ -13,7 +13,7 @@ import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
-import { Chat, ChatBox } from './pages/Chat';
+import { Chat, ChatBox, ChatSettings } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 
 //css
@@ -63,6 +63,7 @@ root.render(
 						
 						<Route path="chat" element={<Chat />}>
 							<Route path=':chatId' element={<ChatBox />}></Route>
+							<Route path=':chatId/settings' element={<ChatSettings />}></Route>
 						</Route>
 						
 						<Route path="setting" element={<Setting />}>
