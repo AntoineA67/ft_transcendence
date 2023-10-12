@@ -7,7 +7,9 @@ import { useLocation } from 'react-router-dom';
 import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
 import { Message, ProfileTest, Room, Memberstatus, Pvrooms } from './ChatDto';
-import { set } from 'lodash-es';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCommentSlash } from '@fortawesome/free-solid-svg-icons';
+import { BsArrowUpRight } from 'react-icons/bs';
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -25,9 +27,12 @@ export function ChatBox() {
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 	const [profile, setProfile] = useState<ProfileTest>();
+	
 
 	useEffect(() => {
 		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
+			if (!data) {
+			}
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
@@ -167,7 +172,7 @@ export function ChatBox() {
 	);
 }
 
-function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
+export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"chatList" | "newChat">> }) {
 	const [nick, setNick] = useState('');
 	const [join, setJoin] = useState('');
 	const [create, setCreate] = useState('');
@@ -339,8 +344,6 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 
 }
 
-export default NewChat;
-
 
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
@@ -366,7 +369,12 @@ export function ChatList() {
 		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
 
 		const handleNewRoom = (response: Room) => {
-			setRooms((prevRooms) => [response, ...prevRooms]);
+			if (response) {
+				const roomExists = rooms.find((room) => room.id === response.id);
+				if (!roomExists) {
+					setRooms((prevRooms) => [response, ...prevRooms]);
+				}
+			}
 		};
 
 		const handleMessageSent = (newMessage: Message) => {
@@ -435,22 +443,33 @@ export function ChatList() {
 
 	return (
 		<div className='w-100 h-100 d-flex flex-column'>
-			{page === 'newChat' && <NewChat setPage={setPage} />}
-			{page === 'chatList' && (
-				<>
-					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: "" }}>
-						<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
-						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
+		  {page === 'newChat' && <NewChat setPage={setPage} />}
+		  {page === 'chatList' && (
+			<>
+			  <div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: '' }}>
+				<h4 style={{ color: 'white', margin: 'auto 0' }}>Chat</h4>
+				<div className='ms-auto'>
+				<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
+				</div>
+			  </div>
+			  <div className='ps-sm-2' style={{ overflowY: 'auto' }}>
+				{rooms.length > 0 ? (
+				  <ul className='nostyleList py-1'>
+					{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
+				  </ul>
+				) : (
+				  <div className='d-flex align-items-center justify-content-center w-100 h-100'>
+					<div className='text-center'>
+					  <BsArrowUpRight style={{ fontSize: '3rem', color: 'pink', opacity: '50%' }} />
+					  <h5 style={{ fontWeight: 'bold', fontSize: '1rem', color: 'pink', opacity: '50%' }}>Let's start by creating or joining an existing room.</h5>
 					</div>
-					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
-						<ul className='nostyleList py-1' >
-							{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
-						</ul>
-					</div>
-				</>
-			)}
+				  </div>
+				)}
+			  </div>
+			</>
+		  )}
 		</div>
-	);
+	  );
 }
 
 export function Chat() {
@@ -459,13 +478,22 @@ export function Chat() {
 	const classname2 = location.pathname === '/chat' ? 'd-none d-sm-flex' : '';
 
 	return (
-		<div className='container-fluid h-100' >
-			<div className='row h-100' >
-				<div className={`col-12 col-sm-3 p-0 m-0 h-100 ${classname1}`} >
+		<div className='container-fluid h-100'>
+			<div className='row h-100'>
+				<div className={`col-12 col-sm-3 p-0 m-0 h-100 ${classname1}`}>
 					<ChatList />
 				</div>
 				<div className={`col-12 col-sm-9 p-0 m-0 h-100 ${classname2}`}>
-					<Outlet />
+					{location.pathname.startsWith('/chat/') ? (
+						<Outlet />
+					) : (
+						<div className="d-flex align-items-center justify-content-center w-100 h-100">
+							<div className="text-center">
+								<FontAwesomeIcon icon={faCommentSlash} style={{ fontSize: '3rem', color: 'pink', opacity: '50%' }} />
+								<p style={{ fontWeight: 'bold', marginTop: '1rem', fontSize: '1rem', color: 'pink', opacity: '50%' }}>No Chat Selected</p>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

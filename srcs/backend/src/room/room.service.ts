@@ -206,11 +206,7 @@ export class RoomService {
 
 		const existingRoom = await this.findExistingPrivateRoom(userId, user.id);
 		if (existingRoom)
-			return null;
-
-		const friendship = await this.findFriendship(userId, user.id);
-		if (!friendship)
-			return null;
+			return existingRoom;
 
 		const isBlocked = await this.isBlockedBy(userId, user.id);
 		if (isBlocked)

@@ -178,3 +178,36 @@
 #createPassword::placeholder {
 	color: #555;
 }
+
+/* Style du bouton membres */
+.members-button {
+	position: relative;
+}
+
+.members-button button {
+	background: none;
+	border: none;
+	color: white;
+	cursor: pointer;
+}
+
+.members-panel {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	width: 200px;
+	padding: 10px;
+}
+
+/* Style de la liste des membres (ajustez selon vos besoins) */
+.members-panel ul {
+	list-style: none;
+	padding: 0;
+}
+
+.members-panel li {
+	margin: 5px 0;
+}
