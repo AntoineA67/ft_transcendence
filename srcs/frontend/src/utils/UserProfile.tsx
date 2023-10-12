@@ -17,7 +17,7 @@ export function UserProfile() {
 
 	useEffect(() => {
 		setLoading(true);
-		socket.emit('Profile', userNick, (res: profileType) => {
+		socket.emit('Profile', userNick, (res: profileType | null) => {
 			setProfile(res)
 			setLoading(false);
 			console.log('res', res)

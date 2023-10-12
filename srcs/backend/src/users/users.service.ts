@@ -55,12 +55,9 @@ export class UsersService {
 	}
 
 	async deleteUser(userId: number): Promise<boolean> {
-		let user: User;
 		try {
-			user = await this.prisma.user.delete({
-				where: {
-					id: userId,
-				}
+			const user = await this.prisma.user.delete({
+				where: { id: userId }
 			})
 		} catch (err: any) {
 			return (false)
@@ -95,19 +92,19 @@ export class UsersService {
 		return (user.username);
 	}
 
-	async getUserBasic(id: number) {
-		return (
-			await this.prisma.user.findUnique({
-				where: { id },
-				select: {
-					id: true,
-					username: true,
-					avatar: true,
-					status: true,
-				}
-			})
-		)
-	}
+	// async getUserBasic(id: number) {
+	// 	return (
+	// 		await this.prisma.user.findUnique({
+	// 			where: { id },
+	// 			select: {
+	// 				id: true,
+	// 				username: true,
+	// 				avatar: true,
+	// 				status: true,
+	// 			}
+	// 		})
+	// 	)
+	// }
 	
 	async getHalfProfile(id: number): Promise<ProfileDto | null>  {
 		let profile = await this.prisma.user.findUnique({
@@ -153,48 +150,48 @@ export class UsersService {
 	}
 
 	// the freind, block, blocked should be given by other services
-	async getUserProfileById(id: number): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { id },
-			select: {
-				id: true,
-				password: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-				activated2FA: true,
-			}
-		});
-		if (profile && profile.password === "nopass") {
-			profile = { ...profile, password: "nopass" };
-		} else {
-			profile = { ...profile, password: null };
-		}
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
+	// async getUserProfileById(id: number): Promise<ProfileDto | null> {
+	// 	let profile = await this.prisma.user.findUnique({
+	// 		where: { id },
+	// 		select: {
+	// 			id: true,
+	// 			password: true,
+	// 			username: true,
+	// 			avatar: true,
+	// 			bio: true,
+	// 			status: true,
+	// 			activated2FA: true,
+	// 		}
+	// 	});
+	// 	if (profile && profile.password === "nopass") {
+	// 		profile = { ...profile, password: "nopass" };
+	// 	} else {
+	// 		profile = { ...profile, password: null };
+	// 	}
+	// 	return ({
+	// 		...profile,
+	// 		friend: null, block: null, blocked: null, sent: null,
+	// 		gameHistory: [], achieve: null
+	// 	})
+	// }
 
-	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { username: nick },
-			select: {
-				id: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-			}
-		});
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
+	// async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
+	// 	let profile = await this.prisma.user.findUnique({
+	// 		where: { username: nick },
+	// 		select: {
+	// 			id: true,
+	// 			username: true,
+	// 			avatar: true,
+	// 			bio: true,
+	// 			status: true,
+	// 		}
+	// 	});
+	// 	return ({
+	// 		...profile,
+	// 		friend: null, block: null, blocked: null, sent: null,
+	// 		gameHistory: [], achieve: null
+	// 	})
+	// }
 
 	async getUserByNick(nick: string): Promise<UserDto> {
 		return (
