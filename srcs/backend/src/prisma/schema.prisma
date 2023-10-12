@@ -34,15 +34,16 @@ model Custom {
 }
 
 model User {
-  id               Int          @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d")
+  id               Int             @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique
   status           OnlineStatus    @default(ONLINE)
   username         String          @db.VarChar @unique
-  email            String          @db.VarChar @unique(sort: Asc) // @default("") 
-  password         String?         @db.VarChar
+  email            String          @db.VarChar @unique(sort: Asc)
+  password         String?         @db.VarChar // To hashPassword
   u2fHash          String?         @db.VarChar
-  otpHash          String?         @db.VarChar
+  otpHash          String?         @db.VarChar // try removing all the db.VarChar
   activated2FA     Boolean         @default(false)
-  avatar           Bytes?
+  avatar           Bytes?           // Using 42 picture profile?
+  avatar42         String?
   bio              String          @default("Nothing written yet ...")
   custom           Custom?
   achieve          Achievement?
