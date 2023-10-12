@@ -79,9 +79,9 @@ export class UsersService {
 		return user;
 	}
 
-	async getIdByNick(email: string) {
+	async getIdByNick(nick: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: email	}
+			where: { username: nick	}
 		});
 		if (!user) return (null);
 		return (user.id);
@@ -107,6 +107,34 @@ export class UsersService {
 				}
 			})
 		)
+	}
+	
+	async getHalfProfile(id: number): Promise<ProfileDto | null>  {
+		let profile = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
+			}
+		});
+		if (!profile) {
+			return (null);
+		}
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null,
+			gameHistory: [], achieve: null
+		})
 	}
 
 	async getUserById(id: number): Promise<UserDto> {

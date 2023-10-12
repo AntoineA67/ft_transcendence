@@ -7,10 +7,12 @@ import { UsersModule } from 'src/users/users.module';
 import { BlockModule } from 'src/block/block.module';
 import { BlockService } from 'src/block/block.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
+import { FriendshipModule } from 'src/friendship/friendship.module';
 
 @Module({
-	imports: [PrismaModule, UsersModule, BlockModule],
-	providers: [FriendRequestService, BlockService, FriendshipService, FriendRequestGateway],
+	imports: [PrismaModule, UsersModule, BlockModule, FriendshipModule],
+	providers: [FriendRequestService, FriendRequestGateway],
 	controllers: [FriendRequestController],
+	exports: [FriendRequestService],
 })
 export class FriendRequestModule {}
