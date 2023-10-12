@@ -49,42 +49,42 @@ root.render(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-				<Route element={<Protected />}>
-					<Route path="/" element={<Sidebar />}>
-						<Route index element={<Profile />} />
+			<Route element={<Protected />}>
+				<Route path="/" element={<Sidebar />}>
+					<Route index element={<Profile />} />
 
-						<Route path="search" element={<Search />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="friends" element={<Friends />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="chat" element={<Chat />}>
-							<Route path=':chatId' element={<ChatBox />}></Route>
-						</Route>
-						
-						<Route path="setting" element={<Setting />}>
-							<Route index element={<SettingMenu />}></Route>
-						</Route>
-						
-						<Route path="/game" element={<>
-							<GameSocketProvider>
-								<Game />
-							</GameSocketProvider>
-						</>}></Route>
+					<Route path="search" element={<Search />}>
+						<Route path=':userNick' element={<UserProfile />}></Route>
 					</Route>
+					
+					<Route path="friends" element={<Friends />}>
+						<Route path=':userNick' element={<UserProfile />}></Route>
+					</Route>
+					
+					<Route path="chat" element={<Chat />}>
+						<Route path=':chatId' element={<ChatBox />}></Route>
+					</Route>
+					
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
-						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
+					
 					<Route path="/game" element={<>
 						<GameSocketProvider>
 							<Game />
 						</GameSocketProvider>
 					</>}></Route>
 				</Route>
+				<Route path="setting" element={<Setting />}>
+					<Route index element={<SettingMenu />}></Route>
+					<Route path='2fa' element={<TwoFactorAuth />}></Route>
+				</Route>
+				<Route path="/game" element={<>
+					<GameSocketProvider>
+						<Game />
+					</GameSocketProvider>
+				</>}></Route>
+			</Route>
 			<Route path="/test-db" element={<TestDB />} />			
 		</Routes>
 	</BrowserRouter>
