@@ -9,7 +9,8 @@ import { BlockService } from 'src/block/block.service';
 
 @Module({
   imports: [PrismaModule, UsersModule, BlockModule],
-  providers: [FriendshipService, FriendshipGateway, BlockService], // Ajoutez la passerelle aux providers
+  providers: [ FriendshipService,FriendshipGateway], // Ajoutez la passerelle aux providers
   controllers: [FriendshipController],
+  exports: [FriendshipService]
 })
 export class FriendshipModule {}
