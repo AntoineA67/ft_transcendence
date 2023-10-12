@@ -59,4 +59,11 @@ export class AuthController {
 		}
 		return this.jwtService.sign(payload, { expiresIn: 3600 });
 	}
+
+	@Public()
+    @Get('42Url')
+    async get42Url() {
+        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
+        return (url);
+    }
 }

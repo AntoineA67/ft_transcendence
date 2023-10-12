@@ -15,6 +15,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { socket } from '../utils/socket';
+import axios from 'axios';
 
 
 type newUser = {
@@ -263,9 +264,14 @@ export const InputToken = ({ handleChange }: any) => {
 	);
 };
 
+	let url42 = () => {
+		return axios.get('http://localhost:4000/api/auth/42Url')
+	}
+
 export function TokenPage() {
 
-	const oauth42Url = Oauth42();
+	// const oauth42Url = Oauth42();
+	const oauth42Url = url42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -275,7 +281,13 @@ export function TokenPage() {
 		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
-			window.location.href = oauth42Url;
+			await url42()
+        .then(response_url => {
+            window.location.href = (response_url.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
 		} else {
 			setInvalidToken(true);
 		}
