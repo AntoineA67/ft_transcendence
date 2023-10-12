@@ -194,7 +194,7 @@ export class RoomService {
 	}
 
 	async createPrivateRoom(userId: number, username: string) {
-		const userprofile = await this.usersService.getUserProfileById(userId);
+		const userprofile = await this.usersService.getUserById(userId);
 		if (!userprofile)
 			return null;
 
