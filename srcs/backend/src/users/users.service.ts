@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
@@ -18,6 +18,8 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 @Injectable()
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
+
+	private logger = new Logger('userService')
 
 	async createUser(username: string, email: string, password: string) {
 		return await this.prisma.user.create({
@@ -42,16 +44,23 @@ export class UsersService {
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		let user: User;
+		//only a-z, 0-9, '-', '_', case insensitive, empty string not allowed
+		if (data.username || data.username === "") {
+			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+			let empty = data.username.match(/^(?!\s*$).+/i);
+			if (!valid || empty == null) return (false)
+		}
 		try {
-			user = await this.prisma.user.update({
-				where: { id },
-				data
-			});
+			await this.prisma.user.update({ where: { id }, data });
 		} catch (err: any) {
 			return (false);
 		}
 		return (true);
+	}
+
+	async updateNick(id: number, data: string): Promise<boolean> {
+		// refuse if string contain sth other than alphabet, number and '-'
+		return (true) 
 	}
 
 	async deleteUser(userId: number): Promise<boolean> {
