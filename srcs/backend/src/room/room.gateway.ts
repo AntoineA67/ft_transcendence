@@ -77,7 +77,7 @@ export class RoomGateway
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
-		if (memberStatus.ban)
+		if (!memberStatus || memberStatus.ban)
 			return null;
 		const roomData = await this.roomService.getRoomData(roomid, userId);
 		return roomData;
