@@ -14,6 +14,7 @@ export function SearchBar() {
 	const [temp, setTemp] = useState<userType[]>([]);
 	
 	useEffect(() => {
+		console.log('searchbar: ')
 		socket.emit('getAllUsers', (response: userType[]) => {
 			setList(response)
 			setTemp(response);
