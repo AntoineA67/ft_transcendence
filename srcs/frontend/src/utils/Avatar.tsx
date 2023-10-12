@@ -58,7 +58,13 @@ export function Avatar({ size, user }: avatarProp) {
 	}, [status])
 
 	return (
-		<div style={{position: 'relative'}}>
+		<div style={{
+			position: 'relative',
+			display: 'flex', 
+			width: `${size}px`, 
+			height: `${size}px`, 
+			// border: '1px solid red'
+		}}>
 			<span style={{
 				height: `15px`,
 				width: `15px`, 
@@ -67,14 +73,16 @@ export function Avatar({ size, user }: avatarProp) {
 				backgroundColor: color,
 				position: 'absolute',
 				left: `${size / 1.1}px`, 
+				zIndex: '3'
 			}} />	
 			<img 
 				src={avatar} 
 				style={{
-					height: `${size}px`, 
-					width: `auto`, 
-					objectFit: 'contain', 
-					clipPath: 'circle()', 
+					// minWidth: `${size}px`, 
+					width: `100%`, 
+					height: `100%`, 
+					objectFit: 'cover', 
+					clipPath: `circle(at ${size / 2}px ${size / 2}px)`, 
 				}}
 			/>			
 		</div>

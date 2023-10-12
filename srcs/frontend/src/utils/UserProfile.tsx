@@ -37,12 +37,14 @@ export function UserProfile() {
 						className="my-5 pb-sm-5 d-flex flex-column align-items-center"
 						style={{ color: "white" }}>
 
-						<Avatar size={150} user={{
-							id: profile.id,
-							username: profile.username,
-							avatar: profile.avatar,
-							status: profile.status
-						}} />
+						<div>
+							<Avatar size={150} user={{
+								id: profile.id,
+								username: profile.username,
+								avatar: profile.avatar,
+								status: profile.status
+							}} />
+						</div>
 
 						<h5 className='my-3' style={{ color: "white" }}>
 							{profile.username}
