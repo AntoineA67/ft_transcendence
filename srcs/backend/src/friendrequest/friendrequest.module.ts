@@ -5,8 +5,6 @@ import { FriendRequestGateway } from './friendrequest.gateway'; // Importez la p
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
 import { BlockModule } from 'src/block/block.module';
-import { BlockService } from 'src/block/block.service';
-import { FriendshipService } from 'src/friendship/friendship.service';
 import { FriendshipModule } from 'src/friendship/friendship.module';
 
 @Module({

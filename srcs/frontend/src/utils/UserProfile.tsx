@@ -12,18 +12,22 @@ export function UserProfile() {
 	const { userNick } = useParams();
 	const location = useLocation();
 	const [profile, setProfile] = useState<profileType | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
 
 
 	useEffect(() => {
+		setLoading(true);
 		socket.emit('Profile', userNick, (res: profileType) => {
 			setProfile(res)
+			setLoading(false);
 			console.log('res', res)
 		})
 	}, [userNick])
 
 	return (
 		<>
-			{!profile && <p style={{ color: 'white' }}>loading</p>}
+			{!loading && !profile && <p style={{ color: 'white' }}>User not found</p>}
+			{!profile && loading && <p style={{ color: 'white' }}>loading</p>}
 			{profile && location.pathname.startsWith('/friends/')
 				&& !profile.friend && <Navigate to={`/search/${userNick}`} replace={true} />}
 			{profile &&

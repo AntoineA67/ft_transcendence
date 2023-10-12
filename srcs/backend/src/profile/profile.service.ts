@@ -9,19 +9,10 @@ import { BlockService } from 'src/block/block.service';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
 
-// const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
-// export type User = Prisma.UserGetPayload<typeof user>
-
-// const game = Prisma.validator<Prisma.GameDefaultArgs>()({})
-// export type Game = Prisma.GameGetPayload<typeof game>
-
-// const player = Prisma.validator<Prisma.PlayerDefaultArgs>()({})
-// export type Player = Prisma.PlayerGetPayload<typeof player>
 
 @Injectable()
 export class ProfileService {
 	constructor(
-		// private readonly prisma: PrismaService,
 		private readonly usersService: UsersService, 
 		private readonly friendService: FriendshipService, 
 		private readonly friendReqService: FriendRequestService, 
