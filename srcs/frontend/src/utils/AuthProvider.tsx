@@ -51,6 +51,7 @@ export function Protected() {
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
+		console.log('token: ', token)
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
 		chatsSocket.auth = { token: token };

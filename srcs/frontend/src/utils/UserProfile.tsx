@@ -25,6 +25,10 @@ export function UserProfile() {
 	// 	})
 	// }, [userNick])
 
+	useEffect(() => {
+		console.log('loadProfile: ', loadProfile);
+	}, [])
+
 	return (
 		<>
 			{/* {!loading && !profile && <p style={{ color: 'white' }}>User not found</p>} */}

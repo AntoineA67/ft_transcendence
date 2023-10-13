@@ -37,20 +37,19 @@ axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loadProfile({ params }: LoaderFunctionArgs) {
 	// need to be done with fetch
-	
-	// let profile = null;
-	// await socket.emit('Profile', params.userNick, (response: profileType) => {
-	// 	console.log('userNick: ', params.userNick)
-	// 	profile = response;
-	// 	console.log('res: ', response)
-	// })
-	// console.log('profile: ', profile)
-	// if (!profile) {
-	// 	console.log('loader throw');
-	// 	throw new Error('User not found');
-	// }
-	// return (profile);
-
+	const nick = params.userNick;
+	const url = `http://localhost:3000/profile/${nick}`;
+	const token = localStorage.getItem('token') || null;
+	console.log('token: ', token)
+	const option = {
+		method: 'GET', 
+		headers: {
+			'Authorization': `Bearer ${token}`,
+			'Content-Type': 'application/json',
+		}
+	}
+	return await (fetch(url, option));
+	throw new Error('loadProfile');
 }
 
 // const root = ReactDOM.createRoot(
@@ -73,7 +72,9 @@ const router = createBrowserRouter(
 
 			<Route element={<Protected />}>
 				<Route path="/" element={<Sidebar />}>
-					<Route index element={<Profile />} />
+					<Route index 
+						element={<Profile />} 
+					/>
 
 					<Route path="search" element={<Search />}>
 						<Route 

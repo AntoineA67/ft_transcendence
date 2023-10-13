@@ -6,20 +6,21 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express'
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProfileService } from './profile.service';
+import { Request } from '@nestjs/common';
 
 @Controller('profile')
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) { }
 
-	@Get()
-	async getMyProfile() {
-		return await (this.profileService.getUserProfileById(1, 1));
+	// @UseGuards(JwtAuthGuard)
+	@Get('me')
+	async getMyProfile(@Request() req) {
+		return await (this.profileService.getUserProfileById(req.user.id , req.user.id));
 	}
-
-
-
-	@Get(':nick')
-	async getProfile(@Param('nick') nick: string) {
 	
+	// @UseGuards(JwtAuthGuard)
+	@Get(':nick')
+	async getProfile(@Request() req, @Param() params: any) {
+		return await (this.profileService.getUserProfileByNick(req.user.id, params.nick))
 	}
 }
