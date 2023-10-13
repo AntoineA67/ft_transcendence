@@ -148,7 +148,7 @@ export function Signup() {
 								<Form.Check required type="checkbox" label="I accept terms and conditions" />
 							</Form.Group>
 
-							<button type="submit" className="btn btn-secondary w-100" >
+							<button type="submit" className="btn btn-secondary w-100">
 								Sign up
 							</button>
 						</Form>
