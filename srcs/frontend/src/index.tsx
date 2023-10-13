@@ -65,7 +65,7 @@ root.render(
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
 					</Route>
-
+					
 					<Route path="/game" element={<Game />}></Route>
 				</Route>
 				<Route path="setting" element={<Setting />}>

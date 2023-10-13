@@ -69,12 +69,12 @@ export default function Game() {
 	// const socket = useGameSocket();
 
 	useEffect(() => {
-		gamesSocket?.on('connect', function () {
-			console.log('connect')
-		})
-		gamesSocket?.on('disconnect', function (message: any) {
-			console.log('disconnect ' + message)
-		})
+		// gamesSocket?.on('connect', function () {
+		// 	console.log('connect')
+		// })
+		// gamesSocket?.on('disconnect', function (message: any) {
+		// 	console.log('disconnect ' + message)
+		// })
 
 		gamesSocket?.on('id', (newId: any) => {
 			setId(newId)
@@ -99,7 +99,7 @@ export default function Game() {
 			setGameStatus(GameStatus.Finished);
 		})
 		return () => {
-			gamesSocket?.disconnect();
+			// gamesSocket?.disconnect();
 		}
 	}, [gamesSocket])
 	const sendPressed = (key: string, pressed: boolean) => {
