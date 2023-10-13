@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Prisma } from '@prisma/client';
 import { PlayerService } from 'src/player/player.service';
-import { AchieveDto } from 'src/dto/AchieveDto';
+import { AchieveDto } from 'src/dto/achieve.dto';
 
 @Injectable()
 export class AchievementService {

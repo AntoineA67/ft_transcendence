@@ -17,7 +17,7 @@ model Game {
 }
 
 model Player {
-  id     Int      @default(autoincrement()) @id(map: "PK_b5c4d0f9ae826735c474b188ef5")
+  id     Int         @default(autoincrement()) @id(map: "PK_b5c4d0f9ae826735c474b188ef5")
   win    Boolean?
   game   Game        @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
   gameId Int
@@ -26,11 +26,11 @@ model Player {
 }
 
 model Custom {
-  id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+  id     Int       @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
   ball   Int       @default(0)
   padel  Int       @default(0)
   user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
-  userId Int    @unique()
+  userId Int       @unique()
 }
 
 model User {

@@ -49,4 +49,11 @@ export class AuthService {
 		}
 		return user;
 	}
+
+	createJWT(req: any) {
+		let payload = {
+			id: req.user.id,
+		}
+		return this.jwtService.sign(payload, { expiresIn: 3600 });
+	}
 }

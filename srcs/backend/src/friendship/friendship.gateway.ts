@@ -4,7 +4,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 import { FriendshipService } from './friendship.service';
 import { SubscribeMessage, MessageBody } from '@nestjs/websockets';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true, namespace: 'friends' })

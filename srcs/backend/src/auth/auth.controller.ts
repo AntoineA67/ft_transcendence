@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { Public } from './public.decorator';
@@ -8,9 +8,28 @@ import { Logger } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
-	constructor(private readonly usersService: UsersService, private readonly authService: AuthService, public jwtService: JwtService) { }
+	constructor(
+		private readonly usersService: UsersService, 
+		private readonly authService: AuthService, 
+		public jwtService: JwtService
+		
+		) { }
 
 	private logger = new Logger('auth');
+
+	// @Public()
+    // @Post('signup')
+    // async signup(@Body() dto: AuthDto, @Res() res: Response) {
+    //     return this.authService.signup(dto, res);
+    // }
+
+    // @Public()
+    // @Post('signin') // delete async, has to signin and cannot do anything else
+    // async signin(@Body() dto: AuthDto, @Res() res: Response, @Req() req: Request) {
+    //     console.log("Request ===", req.user);
+    //     return this.authService.signin(dto, res);
+    // }
+
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
@@ -22,17 +41,17 @@ export class AuthController {
 		// if 2fa is activated and user have not send token
 		if (!req.query._2fa && req.user.activated2FA) {
 			response = { id: req.user.id, _2fa: true };
-			// if 2fa is activated and user have send token
+		// if 2fa is activated and user have send token
 		} else if (req.query._2fa && req.user.activated2FA) {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
-				response = this.createJWT(req);
+				response = this.authService.createJWT(req);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 			// no 2fa
 		} else {
-			response = this.createJWT(req);
+			response = this.authService.createJWT(req);
 		}
 		res.status(HttpStatus.OK).json(response);
 	}
@@ -53,12 +72,8 @@ export class AuthController {
 		}
 	}
 
-	createJWT(req: any) {
-		let payload = {
-			id: req.user.id,
-		}
-		return this.jwtService.sign(payload, { expiresIn: 3600 });
-	}
+
+	// >> In auth.service
 
 	@Public()
     @Get('42Url')

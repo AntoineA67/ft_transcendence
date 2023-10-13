@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { FriendRequestService } from './friendrequest.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({ cors: true, namespace: 'friends' })
