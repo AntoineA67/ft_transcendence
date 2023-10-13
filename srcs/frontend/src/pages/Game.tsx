@@ -2,11 +2,9 @@ import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Box, Text } from "@react-three/drei"
-import { useGameSocket } from "../utils/GameSocketProvider"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Card } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import { gamesSocket } from '../utils/socket';
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -68,26 +66,27 @@ export default function Game() {
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	const socket = useGameSocket();
+	// const socket = useGameSocket();
 
 	useEffect(() => {
-		console.log('coucu');
-		socket?.on('connect', function () {
+		gamesSocket?.on('connect', function () {
 			console.log('connect')
 		})
-		socket?.on('disconnect', function (message: any) {
+		gamesSocket?.on('disconnect', function (message: any) {
 			console.log('disconnect ' + message)
 		})
 
-		socket?.on('id', (newId: any) => {
+		gamesSocket?.on('id', (newId: any) => {
 			setId(newId)
 			console.log('id: ', id)
 		})
-		socket?.on('startGame', (newId: any) => {
+		gamesSocket?.on('startGame', (newId: any) => {
+			console.log('startGame: ', newId)
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
 		})
-		socket?.on('clients', (newClients: any) => {
+		gamesSocket?.on('clients', (newClients: any) => {
+			console.log('clients: ', newClients);
 			setClients(newClients.clients)
 			// clients.current = newClients.clients
 			if (newClients.ball) {
@@ -95,18 +94,18 @@ export default function Game() {
 				// ball.current = newClients.ball
 			}
 		})
-		socket?.on('gameOver', (winner: any) => {
+		gamesSocket?.on('gameOver', (winner: any) => {
 			console.log('Game Over! Winner: ', winner);
 			setGameStatus(GameStatus.Finished);
 		})
 		return () => {
-			socket?.disconnect();
+			gamesSocket?.disconnect();
 		}
-	}, [socket])
+	}, [gamesSocket])
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
-		socket?.emit("keyPresses", keysPressed.current);
+		gamesSocket?.emit("keyPresses", keysPressed.current);
 		// console.log("sendPressed", keysPressed.current)
 	}
 	const onkeydown = (event: KeyboardEvent) => {
@@ -130,12 +129,12 @@ export default function Game() {
 	}, [gameStatus])
 	const startMatchmaking = () => {
 		if (gameStatus !== GameStatus.Idle) return
-		socket?.emit('match');
+		gamesSocket?.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
 	const cancelMatchmaking = () => {
 		if (gameStatus !== GameStatus.Matching) return
-		socket?.emit('cancel');
+		gamesSocket?.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
 
@@ -151,7 +150,7 @@ export default function Game() {
 									You are about to play a game against another player. Get ready to compete and have fun!
 								</Card.Text>
 								<br></br>
-								<button onClick={startMatchmaking} disabled={!socket?.connected} className="btn btn-primary"><b>Play</b></button>
+								<button onClick={startMatchmaking} disabled={!gamesSocket?.connected} className="btn btn-primary"><b>Play</b></button>
 							</>}
 							{gameStatus === GameStatus.Matching && <>
 								<Card.Title>Matchmeking in progress</Card.Title>
@@ -159,7 +158,7 @@ export default function Game() {
 									Looking for another player
 								</Card.Text>
 								<FidgetSpinner
-									visible={socket?.connected}
+									visible={gamesSocket?.connected}
 									height="80"
 									width="80"
 									ariaLabel="dna-loading"

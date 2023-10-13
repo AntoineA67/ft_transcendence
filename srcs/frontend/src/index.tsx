@@ -4,10 +4,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // import router from './router';
 
 //import component
-import TestDB from './pages/TestDB';
 import { Login, Signin, Signup, LandingPage, TokenPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
-import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
@@ -27,7 +25,6 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { GameSocketProvider } from './utils/GameSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -49,43 +46,33 @@ root.render(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-				<Route element={<Protected />}>
-					<Route path="/" element={<Sidebar />}>
-						<Route index element={<Profile />} />
+			<Route element={<Protected />}>
+				<Route path="/" element={<Sidebar />}>
+					<Route index element={<Profile />} />
 
-						<Route path="search" element={<Search />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="friends" element={<Friends />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="chat" element={<Chat />}>
-							<Route path=':chatId' element={<ChatBox />}></Route>
-						</Route>
-						
-						<Route path="setting" element={<Setting />}>
-							<Route index element={<SettingMenu />}></Route>
-						</Route>
-						
-						<Route path="/game" element={<>
-							<GameSocketProvider>
-								<Game />
-							</GameSocketProvider>
-						</>}></Route>
+					<Route path="search" element={<Search />}>
+						<Route path=':userNick' element={<UserProfile />}></Route>
 					</Route>
+
+					<Route path="friends" element={<Friends />}>
+						<Route path=':userNick' element={<UserProfile />}></Route>
+					</Route>
+
+					<Route path="chat" element={<Chat />}>
+						<Route path=':chatId' element={<ChatBox />}></Route>
+					</Route>
+
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
-						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
-					<Route path="/game" element={<>
-						<GameSocketProvider>
-							<Game />
-						</GameSocketProvider>
-					</>}></Route>
+
+					<Route path="/game" element={<Game />}></Route>
 				</Route>
-			<Route path="/test-db" element={<TestDB />} />			
+				<Route path="setting" element={<Setting />}>
+					<Route index element={<SettingMenu />}></Route>
+					<Route path='2fa' element={<TwoFactorAuth />}></Route>
+				</Route>
+			</Route>
 		</Routes>
 	</BrowserRouter>
 );
