@@ -2,7 +2,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 import { BlockService } from './block.service';
 import { UsersService } from 'src/users/users.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 import { Logger } from '@nestjs/common';
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class BlockGateway {

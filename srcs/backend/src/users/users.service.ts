@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
-import { UserDto } from 'src/dto/UserDto';
-import { ProfileDto } from 'src/dto/ProfileDto';
+import { UserDto } from 'src/dto/user.dto';
+import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})

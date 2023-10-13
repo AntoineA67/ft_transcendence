@@ -265,7 +265,7 @@ export const InputToken = ({ handleChange }: any) => {
 };
 
 	let url42 = () => {
-		return axios.get('http://localhost:4000/api/auth/42Url')
+		return axios.get('http://localhost:3000/api/auth/42Url')
 	}
 
 export function TokenPage() {

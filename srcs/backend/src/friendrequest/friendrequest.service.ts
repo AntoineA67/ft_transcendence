@@ -4,7 +4,7 @@ import { Prisma, ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 
 // const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
 // export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>

@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 
 // const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
 // export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
