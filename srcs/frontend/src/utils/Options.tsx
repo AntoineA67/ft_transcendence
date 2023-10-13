@@ -4,7 +4,7 @@ import { socket, friendsSocket } from "./socket";
 
 type OptionsProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>> 
+	setProfile: React.Dispatch<React.SetStateAction<profileType>> 
 }
 export function Options({profile, setProfile}: OptionsProp) {
 
@@ -24,7 +24,7 @@ export function Options({profile, setProfile}: OptionsProp) {
 
 type optionProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>
 }
 
 export function AddOption({profile, setProfile}: optionProp) {
@@ -46,7 +46,7 @@ export function AddOption({profile, setProfile}: optionProp) {
 			// console.log('recver: ', recver)
 			// console.log('profile: ', profile)
 			if (recver.id == profile.id) {
-				setProfile((prev) => ({... prev!, sent: true}))
+				setProfile((prev) => ({... prev, sent: true}))
 			}
 		}
 		friendsSocket.on('friendReqAccept', handleReqAccept);
@@ -84,11 +84,11 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 		e.preventDefault();
 		if (text == 'Block') {
 			friendsSocket.emit('block', profile.id);
-			setProfile((prev) => ({ ... prev!, block: true }))
+			setProfile((prev) => ({ ... prev, block: true }))
 		}
 		if (text == 'Unblock') {
 			friendsSocket.emit('unblock', profile.id);
-			setProfile((prev) => ({ ...prev!, block: false }))
+			setProfile((prev) => ({ ...prev, block: false }))
 		}
 	}
 
@@ -105,16 +105,16 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		function handleBlock() {
-			setProfile((prev) => ({... prev!, block: true}))
+			setProfile((prev) => ({... prev, block: true}))
 		}
 		function handleBlocked() {
-			setProfile((prev) => ({... prev!, blocked: true}))
+			setProfile((prev) => ({... prev, blocked: true}))
 		}
 		function handleUnblock() {
-			setProfile((prev) => ({... prev!, block: false}))
+			setProfile((prev) => ({... prev, block: false}))
 		}
 		function handleUnblocked() {
-			setProfile((prev) => ({... prev!, blocked: false}))
+			setProfile((prev) => ({... prev, blocked: false}))
 		}
 		friendsSocket.on('block', handleBlock)
 		friendsSocket.on('blocked', handleBlocked)
@@ -153,16 +153,16 @@ export function PongOption({ profile, setProfile }: optionProp) {
 
 	useEffect(() => {
 		function handleBlock() {
-			setProfile((prev) => ({ ... prev!, block: true }))
+			setProfile((prev) => ({ ... prev, block: true }))
 		}
 		function handleBlocked() {
-			setProfile((prev) => ({ ... prev!, blocked: true }))
+			setProfile((prev) => ({ ... prev, blocked: true }))
 		}
 		function handleUnblock() {
-			setProfile((prev) => ({ ... prev!, block: false }))
+			setProfile((prev) => ({ ... prev, block: false }))
 		}
 		function handleUnblocked() {
-			setProfile((prev) => ({ ... prev!, blocked: false }))
+			setProfile((prev) => ({ ... prev, blocked: false }))
 		}
 		friendsSocket.on('block', handleBlock)
 		friendsSocket.on('blocked', handleBlocked)

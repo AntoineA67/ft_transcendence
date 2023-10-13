@@ -1,7 +1,7 @@
 import { profileType } from "../../types/user";
 import { Avatar } from "./Avatar";
 import Stat from "../pages/Stat";
-import { Navigate, useLocation, useParams } from "react-router-dom";
+import { Navigate, useLocation, useParams, useLoaderData } from "react-router-dom";
 import Container from 'react-bootstrap/Container';
 import { useEffect, useState } from "react";
 import { socket } from "./socket";
@@ -9,27 +9,28 @@ import { Options } from "./Options";
 import { GoUp } from './GoUp'
 
 export function UserProfile() {
-	const { userNick } = useParams();
+	// const { userNick } = useParams();
 	const location = useLocation();
-	const [profile, setProfile] = useState<profileType | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
+	const loadProfile = useLoaderData() as profileType;
+	const [profile, setProfile] = useState<profileType>(loadProfile);
+	// const [loading, setLoading] = useState<boolean>(true);
 
 
-	useEffect(() => {
-		setLoading(true);
-		socket.emit('Profile', userNick, (res: profileType | null) => {
-			setProfile(res)
-			setLoading(false);
-			console.log('res', res)
-		})
-	}, [userNick])
+	// useEffect(() => {
+	// 	setLoading(true);
+	// 	socket.emit('Profile', userNick, (res: profileType | null) => {
+	// 		setProfile(res)
+	// 		setLoading(false);
+	// 		console.log('res', res)
+	// 	})
+	// }, [userNick])
 
 	return (
 		<>
-			{!loading && !profile && <p style={{ color: 'white' }}>User not found</p>}
-			{!profile && loading && <p style={{ color: 'white' }}>loading</p>}
+			{/* {!loading && !profile && <p style={{ color: 'white' }}>User not found</p>} */}
+			{/* {!profile && loading && <p style={{ color: 'white' }}>loading</p>} */}
 			{profile && location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search/${userNick}`} replace={true} />}
+				&& !profile.friend && <Navigate to={`/search/${profile.username}`} replace={true} />}
 			{profile &&
 				<div className='w-100 h-100 d-flex flex-column align-items-center'>
 					<GoUp />
