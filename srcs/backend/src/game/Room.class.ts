@@ -18,7 +18,6 @@ export default class Room {
 		this.startGame();
 	}
 
-
 	public leave(id: string) {
 		if (this.players[id]) {
 			delete this.players[id];

@@ -13,9 +13,10 @@ export class GamesService {
   private clients: Record<string, string> = {};
   private rooms: Record<string, Room> = {};
 
-  addToQueue(client: Socket, wss: Server) {
-    this.matchmakingQueue.push(client);
-    console.log('matchmakingQueue', this.matchmakingQueue.map((client) => client.id));
+  addToQueue(socket: Socket, wss: Server) {
+    console.log(socket.data);
+    this.matchmakingQueue.push(socket);
+    // console.log('matchmakingQueue', this.matchmakingQueue.map((socket) => socket.id));
     this.tryMatchPlayers(wss);
   }
 

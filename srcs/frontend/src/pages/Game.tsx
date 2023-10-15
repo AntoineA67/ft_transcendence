@@ -78,7 +78,6 @@ export default function Game() {
 
 		gamesSocket?.on('id', (newId: any) => {
 			setId(newId)
-			console.log('id: ', id)
 		})
 		gamesSocket?.on('startGame', (newId: any) => {
 			console.log('startGame: ', newId)
@@ -86,7 +85,6 @@ export default function Game() {
 			console.log('Game Started!')
 		})
 		gamesSocket?.on('clients', (newClients: any) => {
-			console.log('clients: ', newClients);
 			setClients(newClients.clients)
 			// clients.current = newClients.clients
 			if (newClients.ball) {
@@ -99,7 +97,6 @@ export default function Game() {
 			setGameStatus(GameStatus.Finished);
 		})
 		return () => {
-			// gamesSocket?.disconnect();
 		}
 	}, [gamesSocket])
 	const sendPressed = (key: string, pressed: boolean) => {
@@ -128,7 +125,7 @@ export default function Game() {
 		}
 	}, [gameStatus])
 	const startMatchmaking = () => {
-		if (gameStatus !== GameStatus.Idle) return
+		if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
 		gamesSocket?.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
@@ -177,7 +174,7 @@ export default function Game() {
 									null
 								</Card.Text>
 								<br></br>
-								<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Replay</b></button>
+								<button onClick={startMatchmaking} className="btn btn-primary"><b>Replay</b></button>
 							</>}
 						</Card.Body>
 					</Card>
