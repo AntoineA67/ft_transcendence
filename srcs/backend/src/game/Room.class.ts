@@ -1,20 +1,22 @@
 import { Server } from 'socket.io';
 import Player from './Player.class';
 import Ball from './Ball.class';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export default class Room {
 	private players: { [id: string]: Player } = {};
 	private ball: Ball | null = null;
 	private interval: NodeJS.Timeout | null = null;
+	private prisma: PrismaService = new PrismaService();
 
-	constructor(private readonly roomId: string, private readonly wss: Server, public firstPlayerId: string, public secondPlayerId: string) {
-		this.players[firstPlayerId] = new Player(firstPlayerId, false);
-		this.players[secondPlayerId] = new Player(secondPlayerId, true);
+	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
+
+		this.players[player1.id] = new Player(player1.id, player1.data.user.id, false);
+		this.players[player2.id] = new Player(player2.id, player2.data.user.id, true);
 
 		Object.keys(this.players).forEach((id) => {
 			this.wss.to(id).emit('start', roomId);
 		});
-
 		this.startGame();
 	}
 
@@ -41,19 +43,52 @@ export default class Room {
 		}, 1000 / 60);
 	}
 
-	private updateGameTick() {
+	private async updateGameTick() {
 		if (!this.ball) return;
 		for (const client of Object.values(this.players)) {
 			client.update();
 		}
 		const winner = this.ball.update(this.players);
+		let loser;
 		if (winner) {
 			this.ball = null;
 			clearInterval(this.interval!);
 			this.interval = null;
-			this.wss.to(this.roomId).emit('gameOver', { winner: winner });
+			for (const playerId in this.players) {
+				if (playerId !== winner) {
+					loser = playerId;
+					break;
+				}
+			}
+			this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
+			let game;
+			try {
+				game = this.prisma.game.create({
+					data: {
+						finish: true,
+						score: `${this.players[winner].score}:${this.players[loser].score}`
+					}
+				});
+				this.prisma.player.create({
+					data: {
+						win: true,
+						gameId: game.id,
+						userId: Number(this.players[winner].id)
+					}
+				});
+				this.prisma.player.create({
+					data: {
+						win: false,
+						gameId: game.id,
+						userId: Number(this.players[loser].id)
+					}
+				});
+			} catch {
+			}
+
 		}
 	}
+
 	public handleKey(client: string, data: { up: boolean, down: boolean, time: number }) {
 		this.players[client].handleKeysPresses(data);
 	}

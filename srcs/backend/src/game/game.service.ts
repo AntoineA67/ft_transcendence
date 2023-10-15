@@ -14,9 +14,13 @@ export class GamesService {
   private rooms: Record<string, Room> = {};
 
   addToQueue(socket: Socket, wss: Server) {
-    console.log(socket.data);
+    for (let i = 0; i < this.matchmakingQueue.length; i++) {
+      if (this.matchmakingQueue[i].data.user.id === socket.data.user.id) {
+        console.log('already in queue')
+        return;
+      }
+    }
     this.matchmakingQueue.push(socket);
-    // console.log('matchmakingQueue', this.matchmakingQueue.map((socket) => socket.id));
     this.tryMatchPlayers(wss);
   }
 
@@ -63,7 +67,8 @@ export class GamesService {
 
       console.log('player1', player1.id)
       console.log('player2', player2.id)
-      this.rooms[roomId] = new Room(roomId, wss, player1.id, player2.id);
+
+      this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
   }
 
@@ -86,7 +91,6 @@ export class GamesService {
       data: {
         start_date: new Date(Date.now()).toISOString(),
       }
-
     });
   }
 }
