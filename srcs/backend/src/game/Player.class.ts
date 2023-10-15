@@ -4,9 +4,11 @@ export default class Player {
 	static halfPaddleHeight: number = .1;
 	public xDistance: number;
 	public score: number = 0;
+	public userId: number = 0;
 
-	constructor(public id: string, public invertedSide: boolean = false, public y: number = .5, private direction: number = 0) {
+	constructor(public id: string, userId: number, public invertedSide: boolean = false, public y: number = .5, private direction: number = 0) {
 		this.xDistance = invertedSide ? 1 - Player.distanceFromWall : Player.distanceFromWall;
+		this.userId = userId;
 	}
 
 	handleKeysPresses({ up, down, time }: { up: boolean, down: boolean, time: number }) {

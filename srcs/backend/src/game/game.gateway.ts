@@ -28,12 +28,12 @@ export class GameGateway
         this.logger.log('Initialized');
     }
 
-    handleDisconnect(client: Socket) {
-        this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
-        this.gamesService.disconnect(client);
+    handleDisconnect(socket: Socket) {
+        this.logger.log(`Player Disconnected: ${socket.id} from ${socket.rooms}`);
+        this.gamesService.disconnect(socket);
     }
 
-    handleConnection(client: Socket, ...args: any[]) {
+    handleConnection(socket: Socket, ...args: any[]) {
         //const token = client.handshake.auth.Authorization?.split(' ')[1];
         //console.log(`Received new connection with token "${token}", is it valid ? 🤔`)
 
@@ -46,25 +46,25 @@ export class GameGateway
         //     client.disconnect();
         //     return;
         // }
-        console.log(`Client successfully connected! 🆔  ${client.id}`)
-        client.emit('id', client.id)
+        console.log(`Client successfully connected! 🆔  ${socket.id}`)
+        socket.emit('id', socket.id)
     }
 
     @SubscribeMessage('match')
-    async handleMatch(client: Socket, payload: string): Promise<void> {
-        if (!this.gamesService.isInQueue(client)) {
-            this.gamesService.addToQueue(client, this.wss);
+    async handleMatch(socket: Socket, payload: string): Promise<void> {
+        if (!this.gamesService.isInQueue(socket)) {
+            this.gamesService.addToQueue(socket, this.wss);
         }
     }
 
     @SubscribeMessage('cancel')
-    async handleLeave(client: Socket, payload: string): Promise<void> {
-        this.gamesService.disconnect(client);
+    async handleLeave(socket: Socket, payload: string): Promise<void> {
+        this.gamesService.disconnect(socket);
     }
 
     @SubscribeMessage('keyPresses')
-    async handleKeyPresses(client: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
-        this.gamesService.handleKeysPresses(client.id, payload);
+    async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
+        this.gamesService.handleKeysPresses(socket.id, payload);
     }
 }
 
