@@ -22,6 +22,7 @@ export class AuthController {
 	@Public()
     @Post('signup')
     async signup(@Body() dto: AuthDto, @Res() res: Response) {
+		this.logger.log("coucou", dto);
         return this.authService.signup(dto, res);
     }
 
