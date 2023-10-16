@@ -75,7 +75,7 @@ export class AuthService {
 	  async signToken(
 		  userId: number,
 		  res: Response
-	  ): Promise<void> {
+	  	): Promise<void> {
 		  const payload = {
 			  sub: userId,
 		  };
@@ -88,34 +88,27 @@ export class AuthService {
 			  },
 		  );
   
-		  // Generate a refresh token
-		  const refreshToken = await this.createRefreshToken(userId);
-		  console.log('refresh token = ');
-		  console.log(refreshToken);
-		  console.log('token = ');
-		  console.log(token);
-  
-		  // Save refresh token in an HttpOnly cookie
-		  res.cookie('refreshToken', refreshToken, {
-			  httpOnly: true,
-			  secure: true, // set it to false if you're not using HTTPS
-			  sameSite: 'none',
-			  maxAge: 1000 * 60 * 60 * 24 * 30 * 30  // 30 days in milliseconds
-		  });
-  
-		  // Existing JWT token cookie
-		  res.cookie('token', token, {
-			  httpOnly: true,
-			  secure: true,
-			  sameSite: 'none',
-			  maxAge: 1000 * 60 * 15 // 15 minutes in milliseconds
-		  });
-  
-		  res.status(200).send({ message: 'Authentication successful' });
-		  // return {
-		  //     access_token: token
-		  // }
+		const refreshToken = await this.createRefreshToken(userId);
+		console.log('refresh token = ');
+		console.log(refreshToken);
+		console.log('token = ');
+		console.log(token);
+
+		// Return the tokens in the response body
+		res.status(200).send({
+			message: 'Authentication successful',
+			accessToken: token,
+			refreshToken: refreshToken
+		});
+
 	  }
+
+	  createJWT(req: any) {
+		let payload = {
+			id: req.user.id,
+		}
+		return this.jwtService.sign(payload, { expiresIn: 3600 });
+	}
 	
 	async login(user: any) {
 		if (!user) {
@@ -153,13 +146,6 @@ export class AuthService {
 			return null;
 		}
 		return user;
-	}
-
-	createJWT(req: any) {
-		let payload = {
-			id: req.user.id,
-		}
-		return this.jwtService.sign(payload, { expiresIn: 3600 });
 	}
 
 	async createRefreshToken(userId: number): Promise<string> {

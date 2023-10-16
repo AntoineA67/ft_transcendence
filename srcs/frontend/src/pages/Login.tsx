@@ -60,12 +60,31 @@ export function Login() {
 		let data;
 		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
 		) : ('http://localhost:3000/auth/login');
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ 'user': user })
+		let fetchObj = null;
+		if ('email' in user)
+		{
+			fetchObj = {
+				method: 'POST',
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					username: user.username,
+					email: user.email,
+					password: user.password,
+				 })
+			}
 		}
-
+		else
+		{
+			fetchObj = {
+				method: 'POST',
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					username: user.username,
+					password: user.password,
+				 })
+			}
+		}
+		// console.log("FETCH OBJ:", fetchObj);
 		try {
 			let response = await fetch(url, fetchObj)
 			if (!response.ok) { throw Error('response not ok'); }
