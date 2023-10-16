@@ -18,9 +18,9 @@ import { UserProfile } from './utils/UserProfile';
 
 //css
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './styles/customButton.css';
-// import './styles/customForm.css';
 import './styles/index.css';
+import './styles/iconButton.css';
+import './styles/customButton.css';
 
 import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
