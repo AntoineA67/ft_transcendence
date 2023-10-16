@@ -1,4 +1,5 @@
 import '../styles/index.css'
+import '../styles/iconButton.css';
 
 import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
