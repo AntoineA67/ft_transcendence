@@ -38,7 +38,7 @@ export class AuthService {
 					hashPassword,
 				},
 			});
-			return this.signToken(user.id, user.username, res);
+			return this.signToken(user.id, res);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -62,7 +62,7 @@ export class AuthService {
 		  if (!passwordMatch)
 			  throw new ForbiddenException('Incorrect password',);
 		  // send back the token
-		  return this.signToken(user.id, user.username, res);
+		  return this.signToken(user.id, res);
 	  }
   
 	  async validateUser(dto: AuthDto): Promise <any> {
@@ -74,7 +74,6 @@ export class AuthService {
   
 	  async signToken(
 		  userId: number,
-		  username: string,
 		  res: Response
 	  ): Promise<void> {
 		  const payload = {
