@@ -205,6 +205,23 @@ export class UsersService {
 		)
 	}
 
+	async getUserByUsername(username: string): Promise<User> {
+		try {
+            const user = await this.prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+        if (!user) {
+            throw new NotFoundException(`User not found with id ${username}`);
+        }
+        return user;
+        } catch (error) {
+            console.error(`Error fetching user with username ${username}`, error);
+            throw error;
+        }
+	}
+
 	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
 		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);

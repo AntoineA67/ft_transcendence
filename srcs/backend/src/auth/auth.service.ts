@@ -6,7 +6,8 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
-import { AuthDto } from '../dto';
+import { SigninDto } from '../dto';
+import { SignupDto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 
@@ -28,7 +29,7 @@ export class AuthService {
     }
 
 
-	async signup(dto: AuthDto, res: Response) {
+	async signup(dto: SignupDto, res: Response) {
 		const hashPassword = await argon.hash(dto.password);
 		try {
 			const user = await this.prisma.user.create({
@@ -50,9 +51,9 @@ export class AuthService {
 		}
 	  }
   
-	  async signin(dto: AuthDto, res: Response) {
+	  async signin(dto: SigninDto, res: Response) {
 		  // find user with email
-		  const user = await this.usersService.getUserByEmail(dto.email);
+		  const user = await this.usersService.getUserByUsername(dto.username);
 		  // if user not found throw exception
 		  if (!user)
 			  throw new ForbiddenException('Username not found',);
@@ -65,8 +66,8 @@ export class AuthService {
 		  return this.signToken(user.id, res);
 	  }
   
-	  async validateUser(dto: AuthDto): Promise <any> {
-		const user = await this.usersService.getUserByEmail(dto.email);
+	  async validateUser(email: string): Promise <any> {
+		const user = await this.usersService.getUserByEmail(email);
 		if (!user)
 		  throw new UnauthorizedException();      
 		return user;
