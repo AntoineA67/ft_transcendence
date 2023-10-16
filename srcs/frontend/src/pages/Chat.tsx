@@ -6,41 +6,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, ProfileTest, Room, Memberstatus, Pvrooms } from './ChatDto';
+import { Message, ProfileTest, Room, Member, Pvrooms } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { RiVolumeMuteFill, RiDeleteBin6Line, RiLogoutCircleRLine } from 'react-icons/ri';
-
-export function ChatSettings() {
-	const membersList = [
-	  { id: 1, username: 'User1', role: 'Admin' },
-	  { id: 2, username: 'User2', role: 'Member' },
-	  { id: 3, username: 'User3', role: 'Member' },
-	  { id: 4, username: 'User4', role: 'Owner' },
-	];
-  
-	return (
-	  <ul className="members-list">
-		{membersList.map((member) => (
-		  <li key={member.id} className="member">
-			<div className="member-details">
-			  <span className="member-username">{member.username}</span>
-			  <span className="member-role">{member.role}</span>
-			</div>
-			<div className="member-actions">
-			  <RiVolumeMuteFill className="mute-icon" />
-			  <RiDeleteBin6Line className="ban-icon" />
-			  <RiLogoutCircleRLine className="kick-icon" />
-			</div>
-		  </li>
-		))}
-	  </ul>
-	);
-  }
-  
-  
-
+import { BsThreeDots } from "react-icons/bs";
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -49,24 +20,23 @@ export function ChatBox() {
 	const [roomTitle, setroomTitle] = useState<string>('');
 	const [loading, setLoading] = useState<boolean>(true);
 	const [roomChannel, setRoomChannel] = useState<boolean>(true);
-	const [memberstatus, setMemberstatus] = useState<Memberstatus>({
-		owner: false,
-		admin: false,
-		ban: false,
-		mute: null,
-	});
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
 	const [profile, setProfile] = useState<ProfileTest>();
-	
+	const [showSettings, setShowSettings] = useState(false);
+	const [memberstatus, setMemberstatus] = useState<Member>();
+	const [membersList, setMemberList] = useState<Member[]>([]);
 
 	useEffect(() => {
-		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean }) => {
+		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
 			if (!data) {
+				navigate('/chat');
 			}
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
+			setMemberstatus(data.memberStatus);
+			setMemberList(data.members);
 			setLoading(false);
 		});
 
@@ -76,9 +46,6 @@ export function ChatBox() {
 			}
 		});
 
-		chatsSocket.emit('getMemberDatabyRoomId', chatId, (data: Memberstatus) => {
-			setMemberstatus(data);
-		});
 		function fc(newMessage: Message) {
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		}
@@ -87,6 +54,8 @@ export function ChatBox() {
 			chatsSocket.off('messageSent', fc);
 		};
 	}, [chatId]);
+
+	console.log('MemberList', membersList);
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -114,6 +83,10 @@ export function ChatBox() {
 		}
 	};
 
+	const handleSettings = () => {
+		setShowSettings(!showSettings);
+	};
+
 	const handleSendMessage = () => {
 		if (profile === undefined)
 			return;
@@ -130,7 +103,7 @@ export function ChatBox() {
 		setMess('');
 	};
 
-	const myMap = (message: Message, profile: ProfileTest, member: Memberstatus, roomChannel: boolean) => {
+	const myMap = (message: Message, profile: ProfileTest, member: Member | undefined, roomChannel: boolean) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
@@ -140,8 +113,11 @@ export function ChatBox() {
 		});
 
 		let role = '';
+		if (member === undefined) {
+			role = 'Member - ';
+		}
 
-		if (roomChannel) {
+		if (roomChannel === true && member !== undefined) {
 			role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
 			role += ' - ';
 		}
@@ -162,43 +138,68 @@ export function ChatBox() {
 	};
 
 	return (
-		<div className="h-100 d-flex flex-column">
-			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
+		<div className="h-100 d-flex">
+			<div className="chat-content flex-grow-1">
+				<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
 				<Link to="..">
 					<button className="goBack"></button>
 				</Link>
-				<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+					<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+					<button onClick={handleSettings} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+				</div>
+				<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
+					<ul
+						ref={messagesEndRef}
+						className="nostyleList d-flex flex-column"
+						style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
+					>
+						{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
+					</ul>
+				</div>
+				<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+					<input
+						className={`p-2 flex-grow-1 ${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
+						style={{ borderRadius: '10px' }}
+						value={mess}
+						onChange={(e) => setMess(e.target.value)}
+						onKeyDown={handleKeyDown}
+						disabled={memberstatus ? (memberstatus.ban) : true}
+						placeholder={memberstatus ? (memberstatus.ban ? 'You\'re banned/blocked or you\'re blocking the person...' : 'Write a message...') : ''}
+					/>
+					<button
+						className="send-message"
+						onClick={() => {
+							if (memberstatus && !memberstatus.ban) {
+								handleClick();
+							}
+						}}
+						disabled={memberstatus && memberstatus.ban}
+					>
+					</button>
+				</div>
 			</div>
-			<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
-				<ul
-					ref={messagesEndRef}
-					className="nostyleList d-flex flex-column"
-					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
-				>
-					{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
+			{showSettings && (
+				<ul className="members-list">
+					{[
+						...membersList.filter((member) => member.owner || member.admin),
+						...membersList.filter((member) => !member.owner && !member.admin),
+					].map((member) => (
+						<li key={member.id} className="member">
+							<div className="member-details">
+								<span className="member-username">{member.username}</span>
+								<span className="member-role">
+									{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
+								</span>
+							</div>
+							<div className="member-actions">
+								<RiVolumeMuteFill className="mute-icon" />
+								<RiDeleteBin6Line className="ban-icon" />
+								<RiLogoutCircleRLine className="kick-icon" />
+							</div>
+						</li>
+					))}
 				</ul>
-			</div>
-			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
-				<input
-					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
-					style={{ borderRadius: '10px' }}
-					value={mess}
-					onChange={(e) => setMess(e.target.value)}
-					onKeyDown={handleKeyDown}
-					disabled={memberstatus.ban}
-					placeholder={memberstatus.ban ? 'You\'re banned/blocked or you\'re blocking the personn...' : 'Write a message...'}
-				/>
-				<button
-					className="send-message"
-					onClick={() => {
-						if (!memberstatus.ban) {
-							handleClick();
-						}
-					}}
-					disabled={memberstatus.ban}
-				>
-				</button>
-			</div>
+			)}
 		</div>
 	);
 }
@@ -474,33 +475,33 @@ export function ChatList() {
 
 	return (
 		<div className='w-100 h-100 d-flex flex-column'>
-		  {page === 'newChat' && <NewChat setPage={setPage} />}
-		  {page === 'chatList' && (
-			<>
-			  <div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: '' }}>
-				<h4 style={{ color: 'white', margin: 'auto 0' }}>Chat</h4>
-				<div className='ms-auto'>
-				<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
-				</div>
-			  </div>
-			  <div className='ps-sm-2' style={{ overflowY: 'auto' }}>
-				{rooms.length > 0 ? (
-				  <ul className='nostyleList py-1'>
-					{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
-				  </ul>
-				) : (
-				  <div className='d-flex align-items-center justify-content-center w-100 h-100'>
-					<div className='text-center'>
-					  <BsArrowUpRight style={{ fontSize: '3rem', color: 'pink', opacity: '50%' }} />
-					  <h5 style={{ fontWeight: 'bold', fontSize: '1rem', color: 'pink', opacity: '50%' }}>Let's start by creating or joining an existing room.</h5>
+			{page === 'newChat' && <NewChat setPage={setPage} />}
+			{page === 'chatList' && (
+				<>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: '' }}>
+						<h4 style={{ color: 'white', margin: 'auto 0' }}>Chat</h4>
+						<div className='ms-auto'>
+							<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
+						</div>
 					</div>
-				  </div>
-				)}
-			  </div>
-			</>
-		  )}
+					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
+						{rooms.length > 0 ? (
+							<ul className='nostyleList py-1'>
+								{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
+							</ul>
+						) : (
+							<div className='d-flex align-items-center justify-content-center w-100 h-100'>
+								<div className='text-center'>
+									<BsArrowUpRight style={{ fontSize: '3rem', color: 'pink', opacity: '50%' }} />
+									<h5 style={{ fontWeight: 'bold', fontSize: '1rem', color: 'pink', opacity: '50%' }}>Let's start by creating or joining an existing room.</h5>
+								</div>
+							</div>
+						)}
+					</div>
+				</>
+			)}
 		</div>
-	  );
+	);
 }
 
 export function Chat() {
