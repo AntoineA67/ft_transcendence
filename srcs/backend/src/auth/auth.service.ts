@@ -79,7 +79,6 @@ export class AuthService {
 	  ): Promise<void> {
 		  const payload = {
 			  sub: userId,
-			  username,
 		  };
 		  const secret = this.JWT_SECRET;
 		  const token = await this.jwt.signAsync(
