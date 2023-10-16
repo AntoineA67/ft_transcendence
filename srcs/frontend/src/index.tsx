@@ -39,7 +39,9 @@ async function loadProfile({ params }: LoaderFunctionArgs) {
 	// need to be done with fetch
 	const nick = params.userNick;
 	const url = `http://localhost:3000/profile/${nick}`;
-	const token = localStorage.getItem('token') || null;
+	const data = localStorage.getItem('token');
+	if (!data) { throw new Error('no token') }
+	const token = JSON.parse(data);
 	console.log('token: ', token)
 	const option = {
 		method: 'GET', 
@@ -48,8 +50,11 @@ async function loadProfile({ params }: LoaderFunctionArgs) {
 			'Content-Type': 'application/json',
 		}
 	}
-	return await (fetch(url, option));
-	throw new Error('loadProfile');
+	try {
+		return await (fetch(url, option));
+	} catch (err: any) {
+		throw new Error('loadProfile');
+	}
 }
 
 // const root = ReactDOM.createRoot(

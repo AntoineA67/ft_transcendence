@@ -19,11 +19,14 @@ export class AuthIoAdapter extends IoAdapter {
 	createIOServer(port: number, options?: any): any {
 		const server = super.createIOServer(port, options)
 		
-		const middleware = (socket: Socket, next) => {
+		const middleware = async (socket: Socket, next) => {
 			const token = socket.handshake?.auth?.token;
 			if (!token) { next(new Error('no token')); }
 			try {
-				const decode = this.authService.jwtService.verify(token);
+				const decode = await this.authService.jwtService.verifyAsync(
+					token, 
+					{ secret: jwtConstants.secret }
+				);
 				socket.data.user = decode;
 				// socket.client['user'] = decode;
 				// this.logger.log('decode: ', decode);

@@ -27,7 +27,7 @@ export function CallBack42() {
 				setStatus('2fa');
 				return;
 			}
-			localStorage.setItem('token', data);
+			localStorage.setItem('token', JSON.stringify(data));
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log('response: ', response)
@@ -50,7 +50,12 @@ export function Protected() {
 	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
 
 	useEffect(() => {
-		const token = localStorage.getItem('token');
+		const tokenData = localStorage.getItem('token');
+		if (!tokenData) {
+			setStatus('error');
+			return ;
+		}
+		const token = JSON.parse(tokenData)
 		console.log('token: ', token)
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
@@ -60,6 +65,7 @@ export function Protected() {
 		friendsSocket.connect();
 		chatsSocket.connect();
 		gamesSocket.connect();
+		
 		//socket io regitsre event
 		function onConnect() {
 			setStatus('connect')

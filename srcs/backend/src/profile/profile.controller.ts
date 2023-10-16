@@ -7,6 +7,7 @@ import { Express } from 'express'
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ProfileService } from './profile.service';
 import { Request } from '@nestjs/common';
+import { Public } from 'src/auth/public.decorator';
 
 @Controller('profile')
 export class ProfileController {
@@ -19,6 +20,7 @@ export class ProfileController {
 	}
 	
 	// @UseGuards(JwtAuthGuard)
+	@Public()
 	@Get(':nick')
 	async getProfile(@Request() req, @Param() params: any) {
 		return await (this.profileService.getUserProfileByNick(req.user.id, params.nick))
