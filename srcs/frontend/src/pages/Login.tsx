@@ -59,7 +59,7 @@ export function Login() {
 		e.preventDefault();
 		let data;
 		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
-		) : ('http://localhost:3000/auth/login');
+		) : ('http://localhost:3000/auth/signin');
 		let fetchObj = null;
 		if ('email' in user)
 		{

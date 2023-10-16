@@ -6,7 +6,9 @@ import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { AuthDto } from '../dto';
+import { SigninDto } from '../dto';
+import { SignupDto } from '../dto';
+
 
 @Controller('auth')
 export class AuthController {
@@ -21,14 +23,14 @@ export class AuthController {
 
 	@Public()
     @Post('signup')
-    async signup(@Body() dto: AuthDto, @Res() res: Response) {
+    async signup(@Body() dto: SignupDto, @Res() res: Response) {
 		this.logger.log("coucou", dto);
         return this.authService.signup(dto, res);
     }
 
     @Public()
     @Post('signin') // delete async, has to signin and cannot do anything else
-    async signin(@Body() dto: AuthDto, @Res() res: Response, @Req() req: Request) {
+    async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
         console.log("Request ===", req.user);
         return this.authService.signin(dto, res);
     }
