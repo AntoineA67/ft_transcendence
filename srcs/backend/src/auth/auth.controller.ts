@@ -1,34 +1,36 @@
-import { Controller, Get, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
+import { AuthDto } from '../dto';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
 		private readonly usersService: UsersService, 
-		private readonly authService: AuthService, 
+		private readonly authService: AuthService,
 		public jwtService: JwtService
 		
 		) { }
 
 	private logger = new Logger('auth');
 
-	// @Public()
-    // @Post('signup')
-    // async signup(@Body() dto: AuthDto, @Res() res: Response) {
-    //     return this.authService.signup(dto, res);
-    // }
+	@Public()
+    @Post('signup')
+    async signup(@Body() dto: AuthDto, @Res() res: Response) {
+        return this.authService.signup(dto, res);
+    }
 
-    // @Public()
-    // @Post('signin') // delete async, has to signin and cannot do anything else
-    // async signin(@Body() dto: AuthDto, @Res() res: Response, @Req() req: Request) {
-    //     console.log("Request ===", req.user);
-    //     return this.authService.signin(dto, res);
-    // }
+    @Public()
+    @Post('signin') // delete async, has to signin and cannot do anything else
+    async signin(@Body() dto: AuthDto, @Res() res: Response, @Req() req: Request) {
+        console.log("Request ===", req.user);
+        return this.authService.signin(dto, res);
+    }
 
 
 	@UseGuards(FortyTwoAuthGuard)
@@ -71,9 +73,6 @@ export class AuthController {
 			res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'error' });
 		}
 	}
-
-
-	// >> In auth.service
 
 	@Public()
     @Get('42Url')
