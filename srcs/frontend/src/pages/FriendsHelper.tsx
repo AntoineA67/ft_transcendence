@@ -1,3 +1,5 @@
+import '../styles/index.css'
+
 import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
 import { friendsSocket } from "../utils/socket";

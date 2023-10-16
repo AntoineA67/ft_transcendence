@@ -5,6 +5,7 @@ import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
 import { gameHistoryType } from '../../types/gameHistoryType'; 
+import '../styles/index.css'
 
 import '../styles/Stat.css';
 import { AchieveType } from '../../types/Achieve';

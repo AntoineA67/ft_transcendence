@@ -30,7 +30,32 @@ a:hover {
 }
 
 label {
+	color: whitesmoke;
+}
+
+input {
+	background-color: transparent;
+	border: 1px solid grey;
+	border-radius: 0.5rem;
 	color: white;
-	border: 1px solid red;
+	padding: 0.5rem;
+}
+
+input:focus {
+	border: 2px solid white;
+}
+
+button {
+	background-repeat: no-repeat;
+	background-position: center;
+	background-color: transparent;
+	background-size: contain;
+	width: 40px;
+	height: 40px;
+	border: none;
+	border-radius: 50%;
+	display: inline-block;
+	padding: 0;
+	margin: 0;	
 }
 
