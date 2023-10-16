@@ -57,12 +57,20 @@ export class PlayerService {
 		return (history.length);
 	}
 
+  async createPlayer(data: any): Promise<Player> {
+    return this.prisma.player.create({ data });
+  }
 
-
-
-//   async createPlayer(data: Prisma.PlayerCreateInput): Promise<Player> {
-//     return this.prisma.player.create({ data });
-//   }
+  async updatePlayer(id: number, data: any): Promise<Player | null> {
+    const existingPlayer = await this.prisma.player.findUnique({ where: { id } });
+	if (!existingPlayer) {
+	  throw new NotFoundException(`Player with ID ${id} not found`);
+	}
+	return this.prisma.player.update({
+	  where: { id },
+	  data,
+	});
+  }
 
 //   async getPlayerById(id: number): Promise<Player> {
 //     const player = await this.prisma.player.findUnique({
