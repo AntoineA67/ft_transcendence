@@ -2,12 +2,17 @@ import { Server } from 'socket.io';
 import Player from './Player.class';
 import Ball from './Ball.class';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { GamesService } from './game.service';
+import { PlayerService } from 'src/player/player.service';
 
 export default class Room {
+	private prisma: PrismaService = new PrismaService();
+	private gameService: GamesService = new GamesService(this.prisma);
+	private playerService: PlayerService = new PlayerService(this.prisma);
 	private players: { [id: string]: Player } = {};
 	private ball: Ball | null = null;
 	private interval: NodeJS.Timeout | null = null;
-	private prisma: PrismaService = new PrismaService();
+	private gameId: number = 0;
 
 	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
 
@@ -34,9 +39,17 @@ export default class Room {
 		return Object.keys(this.players).length === 0;
 	}
 
-	public startGame() {
+	public async startGame() {
 		this.ball = new Ball();
 		this.wss.to(this.roomId).emit('startGame');
+
+		// save game in database
+		const newGame = await this.gameService.create({});
+		this.gameId = newGame.id;
+
+		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: this.players[Object.keys(this.players)[0]].userId });
+		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: this.players[Object.keys(this.players)[1]].userId });
+
 		this.interval = setInterval(() => {
 			this.updateGameTick();
 			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
@@ -61,31 +74,10 @@ export default class Room {
 				}
 			}
 			this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
-			let game;
-			try {
-				game = this.prisma.game.create({
-					data: {
-						finish: true,
-						score: `${this.players[winner].score}:${this.players[loser].score}`
-					}
-				});
-				this.prisma.player.create({
-					data: {
-						win: true,
-						gameId: game.id,
-						userId: Number(this.players[winner].id)
-					}
-				});
-				this.prisma.player.create({
-					data: {
-						win: false,
-						gameId: game.id,
-						userId: Number(this.players[loser].id)
-					}
-				});
-			} catch {
-			}
 
+			this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
+			this.playerService.updatePlayer(this.players[winner].userId, { win: true });
+			this.playerService.updatePlayer(this.players[loser].userId, { win: false });
 		}
 	}
 

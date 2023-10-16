@@ -27,6 +27,7 @@ export class GamesService {
   isInQueue(client: Socket) {
     return this.matchmakingQueue.includes(client);
   }
+
   disconnect(client: Socket) {
     const roomId = this.clients[client.id];
     if (roomId) {
@@ -73,9 +74,7 @@ export class GamesService {
   }
 
   async findAll(): Promise<any> {
-    const games = await this.prisma.game.findMany()
-    console.log("oui", games)
-    return games;
+    return await this.prisma.game.findMany();
   }
 
   // async find(
@@ -93,4 +92,14 @@ export class GamesService {
       }
     });
   }
+
+  // update
+  async update(id: number, data: Prisma.GameUpdateInput): Promise<Game> {
+    return await this.prisma.game.update({
+      where: { id },
+      data,
+    });
+  }
+
+
 }
