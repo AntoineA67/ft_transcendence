@@ -72,16 +72,22 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('getRoomData')
-	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean }> {
-		console.log('roomId', roomId);
-		const userId: number = client.data.user.id;
-		const roomid = parseInt(roomId, 10);
-		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
-		if (!memberStatus || memberStatus.ban)
-			return null;
-		const roomData = await this.roomService.getRoomData(roomid, userId);
-		return roomData;
+	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }> {
+	  console.log('roomId', roomId);
+	  const userId: number = client.data.user.id;
+	  const roomid = parseInt(roomId, 10);
+	  const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
+	  const members = await this.memberService.getMembersByRoomId(roomid);
+	  if (!memberStatus || memberStatus.ban)
+		return null;
+	  const roomData = await this.roomService.getRoomData(roomid, userId);
+	  return {
+		...roomData,
+		members,
+		memberStatus,
+	  };
 	}
+	
 
 	@SubscribeMessage('createChannelRoom')
 	async handleCreateChannelRoom(
