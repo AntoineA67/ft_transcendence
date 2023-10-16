@@ -38,7 +38,7 @@ model User {
   status           OnlineStatus    @default(ONLINE)
   username         String          @db.VarChar @unique
   email            String          @db.VarChar @unique(sort: Asc)
-  password         String?         @db.VarChar // To hashPassword
+  hashPassword     String?         @db.VarChar // To hashPassword
   u2fHash          String?         @db.VarChar
   otpHash          String?         @db.VarChar // try removing all the db.VarChar
   activated2FA     Boolean         @default(false)
@@ -48,7 +48,7 @@ model User {
   custom           Custom?
   achieve          Achievement?
   gameHistory      Player[]
-  membership       Member[] 
+  membership       Member[]
   message          Message[]
   friend           Friendship[]
   sendFriendReq    FriendRequest[] @relation("sendFriendReq")

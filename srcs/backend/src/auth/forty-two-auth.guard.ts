@@ -4,7 +4,6 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
-
 @Injectable()
 export class FortyTwoAuthGuard extends AuthGuard('42') {
 	constructor(private reflector: Reflector) {
@@ -21,7 +20,6 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 			return true;
 		}
 		//console.log("canActivate token", cont);
-		
 		return super.canActivate(context);
 	}
 }

@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UserDto } from 'src/dto/user.dto';
 import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
+import * as argon from 'argon2';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -19,14 +20,36 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
+	// async createUser(username: string, email: string, password: string) {
+	// 	return await this.prisma.user.create({
+	// 		data: {
+	// 			username,
+	// 			email,
+	// 			password
+	// 		},
+	// 	});
+	// }
+
 	async createUser(username: string, email: string, password: string) {
-		return await this.prisma.user.create({
-			data: {
-				username,
-				email,
-				password
-			},
-		});
+		const hashPassword = await argon.hash(password);
+		try {
+			const user = await this.prisma.user.create({
+				data: {
+					username: username,
+					email: email,
+					hashPassword: hashPassword,
+				},
+			});
+			return user;
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				console.log(error)
+				if (error.code === 'P2002') {
+					throw new ForbiddenException('Credentials taken');
+				}
+			}
+			throw error;
+		}
 	}
 
 	async getAllUsers(): Promise<UserDto[]> {
@@ -130,7 +153,7 @@ export class UsersService {
 			where: { id },
 			select: {
 				id: true,
-				password: true,
+				hashPassword: true,
 				username: true,
 				avatar: true,
 				bio: true,
@@ -138,10 +161,10 @@ export class UsersService {
 				activated2FA: true,
 			}
 		});
-		if (profile && profile.password === "nopass") {
-			profile = { ...profile, password: "nopass" };
+		if (profile && profile.hashPassword === "nopass") {
+			profile = { ...profile, hashPassword: "nopass" };
 		} else {
-			profile = { ...profile, password: null };
+			profile = { ...profile, hashPassword: null };
 		}
 		return ({
 			...profile,
