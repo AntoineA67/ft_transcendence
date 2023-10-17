@@ -1,6 +1,3 @@
-import '../styles/ProfileSetting.css';
-import '../styles/Chat.css';
-import '../styles/index.css'
 
 import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";

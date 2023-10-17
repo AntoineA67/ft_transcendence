@@ -1,4 +1,3 @@
-import '../styles/ProfileSetting.css';
 import Container from 'react-bootstrap/Container';
 import { Link, Outlet, useLocation } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
