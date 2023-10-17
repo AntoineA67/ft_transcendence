@@ -314,6 +314,54 @@ export class RoomService {
 		return room;
 	}
 
+	async changeRoomTitle(userId: number, roomid: number, newTitle: string): Promise<boolean> {
+		const member = await this.prisma.member.findUnique({
+			where: {
+				id: roomid,
+				userId: userId,
+				OR: [
+					{
+						owner: true,
+					},
+					{
+						admin: true
+					}
+				]
+			},
+		});
+
+		if (!member) {
+			return false;
+		}
+
+		const userRooms = await this.prisma.room.findMany({
+			where: {
+				members: {
+					some: {
+						userId: userId,
+					}
+				},
+				title: newTitle,
+			},
+		});
+
+		if (userRooms.length > 0) {
+			return false;
+		}
+
+		const updatedRoom = await this.prisma.room.update({
+			where: { id: roomid },
+			data: { title: newTitle },
+		});
+
+		if (updatedRoom) {
+			return true;
+		}
+
+		return false;
+	}
+
+
 	async updateRoom(id: number, data: Prisma.RoomUpdateInput): Promise<Room | null> {
 		const existingRoom = await this.prisma.room.findUnique({ where: { id } });
 		if (!existingRoom) {
@@ -526,5 +574,149 @@ export class RoomService {
 		return !!blockedRoom;
 	}
 
+	async userLeaveChannel(userid: number, roomid: number, usertoKickid: number): Promise<boolean> {
+		const user = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomid,
+				userId: userid,
+			},
+		});
+
+		const userToKick = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomid,
+				userId: usertoKickid,
+			},
+		});
+
+		this.logger.log(user, userToKick, userid, usertoKickid);
+		if (!user || !userToKick || (userToKick.owner && userid !== usertoKickid) ||
+			(!user.admin && !user.owner && userid !== usertoKickid) || user.ban) {
+			return false;
+		}
+
+		await this.prisma.member.delete({
+			where: {
+				id: userToKick.id
+			},
+		});
+
+		return true;
+	}
+
+	async banMember(userId: number, roomId: number, memberId: number, action: boolean): Promise<boolean> {
+		const member = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomId,
+				userId: userId,
+				ban: false,
+				admin: true,
+			},
+		});
+
+		const memberToBan = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomId,
+				userId: memberId,
+			},
+		});
+
+		if (!member || !memberToBan || memberToBan.owner) {
+			return false;
+		}
+
+		await this.prisma.member.update({
+			where: {
+				id: memberToBan.id,
+			},
+			data: {
+				ban: !action,
+			},
+		});
+
+		return true;
+	}
+
+	async muteMember(userId: number, roomId: number, memberId: number, duration: number): Promise<boolean> {
+		const member = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomId,
+				userId: userId,
+			},
+		});
+
+		const memberToMute = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomId,
+				userId: memberId,
+			},
+		});
+		this.logger.log(member, memberToMute);
+		if (!member || !memberToMute || member.ban || memberToMute.ban
+			|| !member.admin || (member.owner && !memberToMute.owner)) {
+			return false;
+		}
+
+		await this.prisma.member.update({
+			where: {
+				id: memberToMute.id,
+			},
+			data: {
+				mute: new Date(Date.now() + duration * 1000),
+			},
+		});
+
+		return true;
+	}
+
+	async inviteUser(userId: number, roomId: number, username: string): Promise<boolean> {
+		const user = await this.prisma.member.findFirst({
+			where: {
+				roomId,
+				userId,
+				OR: [
+					{
+						owner: true,
+					},
+					{
+						admin: true,
+					},
+				],
+			},
+		});
+
+		if (!user) {
+			return false;
+		}
+		const userToInvite = await this.prisma.user.findFirst({
+			where: {
+				username,
+			},
+		});
+
+		if (!userToInvite) {
+			return false;
+		}
+
+		const isMember = await this.prisma.member.findFirst({
+			where: {
+				roomId,
+				userId: userToInvite.id,
+			},
+		});
+
+		if (isMember) {
+			return false;
+		}
+
+		await this.prisma.member.create({
+			data: {
+				roomId,
+				userId: userToInvite.id,
+			},
+		});
+
+		return true;
+	}
 
 }
