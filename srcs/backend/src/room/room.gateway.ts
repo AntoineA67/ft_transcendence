@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
+import { subscribe } from 'diagnostics_channel';
 
 type MessageWithUsername = {
 	id: number;
@@ -73,7 +74,6 @@ export class RoomGateway
 
 	@SubscribeMessage('getRoomData')
 	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }> {
-	  console.log('roomId', roomId);
 	  const userId: number = client.data.user.id;
 	  const roomid = parseInt(roomId, 10);
 	  const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
@@ -155,6 +155,9 @@ export class RoomGateway
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number, username: string }) {
 		const roomid = parseInt(message.roomId, 10);
 		this.logger.log('message', message);
+		const user = await this.memberService.getMemberDatabyRoomId(message.userid, roomid);
+		if (user.ban || (user.mute !== null && new Date(user.mute) > new Date()))
+			return ;
 		const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
 		const roomName = "room_" + roomid.toString();
 		if (createdMessage) {
@@ -196,5 +199,86 @@ export class RoomGateway
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
 		return await this.roomService.getBlockStatus(userId, roomid);
+	}
+
+	@SubscribeMessage('changeRoomTitle')
+	async handlechangeRoomTitle(@ConnectedSocket() client: Socket, @MessageBody() content: {roomId: string, roomtitle: string} ): Promise<boolean> {
+		const userId: number = client.data.user.id;
+		const roomid = parseInt(content.roomId, 10);
+		const bool = await this.roomService.changeRoomTitle(userId, roomid, content.roomtitle);
+		if (bool) {
+			const response = {
+				roomid: roomid,
+				roomtitle: content.roomtitle,
+			}
+			client.emit('newRoomTitle', response);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('UserLeaveChannel')
+	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: {usertoKick: number, roomId: string} ): Promise<boolean> {
+		const userid: number = client.data.user.id;
+		const roomid = parseInt(content.roomId, 10);
+		const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
+		if (bool) {
+			const leavechan = {
+				userid: content.usertoKick,
+				roomId: roomid
+			}
+			client.emit('UserLeaveChannel', leavechan);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('muteMember')
+	async handleMuteMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, duration: number }): Promise<boolean> {
+	  const userId: number = client.data.user.id;
+	  const roomId = parseInt(content.roomId, 10);
+	this.logger.log(userId, roomId, content.memberId, content.duration);
+	  const bool = await this.roomService.muteMember(userId, roomId, content.memberId, content.duration);
+	this.logger.log(bool);
+	  if (bool) {
+		const muteInfo = {
+		  userId: content.memberId,
+		  roomId: roomId,
+		  duration: content.duration,
+		};
+
+		client.emit('muteMember', muteInfo);
+		return true;
+	  }
+	  return false;
+	}
+
+	@SubscribeMessage('banMember')
+	async handleBanMember(@ConnectedSocket() client: Socket, @MessageBody() content: {memberId: number, roomId: string, action: boolean}): Promise<boolean> {
+	  const userid: number = client.data.user.id;
+	  const roomid = parseInt(content.roomId, 10);
+	  
+	  const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
+		if (bool) {
+			const leavechan = {
+				userid: content.memberId,
+				roomId: roomid
+			}
+			client.emit('banMember', leavechan);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('inviteUser')
+	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: {username: string, roomId: string}): Promise<boolean> {
+	  const userid: number = client.data.user.id;
+	  const roomid = parseInt(content.roomId, 10);
+	  
+	  const bool = await this.roomService.inviteUser(userid, roomid, content.username);
+		if (bool) {
+			return true;
+		}
+		return false;
 	}
 }
