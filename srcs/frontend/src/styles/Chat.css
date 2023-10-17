@@ -96,8 +96,17 @@
 	padding: 20px;
 	background-color: #f5f5f5;
 	border-radius: 8px;
+	height: 100%;
+	width: 100%;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
+
+.chat-container {
+	display: flex;
+	flex-direction: column;
+	background-color: transparent;
+}
+
 
 .chat-header {
 	font-size: 24px;
@@ -175,6 +184,7 @@
 #roomID::placeholder,
 #password::placeholder,
 #createGroup::placeholder,
+#roomTitleInput,
 #createPassword::placeholder {
 	color: #555;
 }
@@ -229,19 +239,21 @@
 
 .member-details {
 	display: flex;
-	flex-direction: column;
+	align-items: center;
+	padding: 8px;
+	border-radius: 8px;
 	margin-right: 10px;
 }
 
 .member-username {
-	color: #ffffff;
 	font-weight: bold;
-	margin: 0;
+	color: #ffffff;
+	margin-right: 4px;
 }
 
 .member-role {
-	color: #5bcae097;
-	margin: 0;
+	font-size: 14px;
+	color: #ff8ae8;
 }
 
 
@@ -283,3 +295,14 @@
 	outline: none;
 	margin-right: 50px;
 }
+
+.action-button {
+	background: transparent;
+	color: white;
+	border-radius: 5px;
+	padding: 5px 10px;
+	margin: 0 5px;
+	cursor: pointer;
+	width: auto;
+  }
+  

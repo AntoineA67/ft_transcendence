@@ -31,6 +31,7 @@ export type Member = {
 	admin: boolean;
 	ban: boolean;
 	mute: Date | null;
+	muteduration: number;
 };
 
 export type Room = {
