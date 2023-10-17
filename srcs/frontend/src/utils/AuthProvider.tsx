@@ -1,5 +1,5 @@
-import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect} from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 
@@ -39,9 +39,9 @@ export function CallBack42() {
 
 	return (
 		<>
-			{status == '2fa' && <Navigate to='/login/2fa' replace />}
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
-			{status == 'done' && <Navigate to='/' replace />}
+			{status === '2fa' && <Navigate to='/login/2fa' replace />}
+			{status === 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			{status === 'done' && <Navigate to='/' replace />}
 		</>
 	);
 }
@@ -85,9 +85,9 @@ export function Protected() {
 
 	return (
 		<>
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
-			{status == 'connect' && <Outlet />}
-			{status == 'error' && <Navigate to="/login" replace />}
+			{status === 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			{status === 'connect' && <Outlet />}
+			{status === 'error' && <Navigate to="/login" replace />}
 		</>
 	);
 }

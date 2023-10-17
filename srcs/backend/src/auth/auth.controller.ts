@@ -31,7 +31,6 @@ export class AuthController {
     @Public()
     @Post('signin') // delete async, has to signin and cannot do anything else
     async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-        console.log("Request ===", req.user);
         return this.authService.signin(dto, res);
     }
 
@@ -51,12 +50,14 @@ export class AuthController {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
 				response = this.authService.createJWT(req);
+				// response = await this.authService.signToken(req.user.id, res);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 			// no 2fa
 		} else {
 			response = this.authService.createJWT(req);
+			// response = await this.authService.signToken(req.user.id, res);
 		}
 		res.status(HttpStatus.OK).json(response);
 	}
@@ -82,5 +83,11 @@ export class AuthController {
     async get42Url() {
         const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
         return (url);
+    }
+
+	@Get('checkTokenValidity')
+    async checkTokenValidity(@Req() req: Request, @Res() res: Response) {
+        console.log("passing by checkTokenValidity");
+        return this.authService.checkTokenValidity(req, res);
     }
 }

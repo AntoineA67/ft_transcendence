@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TestDB from './pages/TestDB';
 import { Login, Signin, Signup, LandingPage, TokenPage } from './pages/Login';
 import Sidebar from './pages/Sidebar'
-import { Home } from './pages/Home';
+// import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
@@ -28,6 +28,9 @@ import { Guest } from './utils/Guest';
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 import { GameSocketProvider } from './utils/GameSocketProvider';
+
+import useTokenExpired from './hooks/useTokenExpired';
+
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');

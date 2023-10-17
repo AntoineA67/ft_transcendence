@@ -10,6 +10,7 @@ import { SigninDto } from '../dto';
 import { SignupDto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -115,7 +116,7 @@ export class AuthService {
 		if (!user) {
 			throw new BadRequestException('Unauthenticated');
 		}
-		let userExists: any = await this.findUserByEmail(user.emails[0].value);
+		let userExists: any = await this.usersService.getUserByEmail(user.emails[0].value);
 
 		if (!userExists) {
 			userExists = await this.registerUser(user);
@@ -141,14 +142,6 @@ export class AuthService {
 		}
 	}
 
-	async findUserByEmail(email: string) {
-		const user = await this.usersService.getUserByEmail(email);
-		if (!user) {
-			return null;
-		}
-		return user;
-	}
-
 	async createRefreshToken(userId: number): Promise<string> {
         const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
 
@@ -156,7 +149,6 @@ export class AuthService {
 
         expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
 
-        // Save refreshToken to database along with userId
         await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
@@ -164,7 +156,44 @@ export class AuthService {
                 expiresAt: expiration
             }
         });
-
         return refreshToken;
+    }
+
+	async checkTokenValidity(req: Request, res: Response) {
+        // Extract the token from the Authorization header
+		const authHeader = req.headers.authorization;
+		const token = authHeader && authHeader.split(' ')[1];
+
+        console.log("passing by checktokenvalidity");
+        if (!token)
+            return res.status(401).json({ valid: false, message: "Token Missing" });
+
+        try {
+            jwt.verify(token, this.JWT_SECRET);
+            return res.status(200).json({ valid: true, message: "Token is valid" });
+        } catch (error) {
+            return res.status(401).json({ valid: false, message: "Invalid Token" });
+        }
+    }
+
+	signout(req: Request, res: Response): Response {
+        // Invalidate the refresh token to make the signout more secure
+        // Extract the refresh token from the body or header
+        const refreshToken = req.body.refreshToken;
+
+        if (!refreshToken) {
+            return res.status(401).json({ message: "Refresh token is missing" });
+        }
+
+        // Remove the refresh token from the database to invalidate it
+        try {
+            this.prisma.refreshToken.delete({
+                where: { token: refreshToken }
+            });
+            return res.status(200).send({ message: 'Signed out successfully' });
+        } catch (error) {
+            console.error(error); 
+            return res.status(500).send({ message: "An error occurred" });
+        }
     }
 }
