@@ -1,4 +1,7 @@
 
+.btn {
+	height: 50px;
+}
 
 /* customized bs button */
 /* have to use with <button>, <Button> component doesn't work */

@@ -101,18 +101,20 @@
 .leftArrow {
 	background: url(../assets/leftArrow.svg) no-repeat;
 	background-position: center;
-	background-color: rgb(83, 83, 83);
-	width: 50px;
-	height: 50px;
-	border: none;
 	border-radius: 50%;
-	display: inline-block;
+	/* background-color: rgb(83, 83, 83); */
+	/* width: 50px; */
+	/* height: 50px; */
+	/* border: none; */
+	/* display: inline-block; */
 }
 
 .leftArrow:hover {
 	background-color: grey;
 	transition: all 0.3s;
 }
+
+/* use left arrow instead */
 .cross {
 	background: url(../assets/cross.svg) no-repeat;
 	background-position: center;
@@ -129,6 +131,7 @@
 	transition: all 0.3s;
 }
 
+/* use left arrow instead */
 .goBack {
 	background: url(../assets/leftArrow.svg) no-repeat;
 	background-position: center;
@@ -146,7 +149,7 @@
 	filter: brightness(3);
 	transition: all 0.3s;
 }
-
+/* 
 .search {
 	background: url(../assets/leftArrow.svg) no-repeat;
 	background-position: center;
@@ -162,7 +165,7 @@
 .search:hover {
 	filter: brightness(3);
 	transition: all 0.3s;
-}
+} */
 
 .add {
 	background: url(../assets/add.svg) no-repeat;
@@ -183,44 +186,44 @@
 .send-message {
 	background: url(../assets/sendMessage.svg) no-repeat;
 	background-position: center;
-	background-color: transparent;
-	width: 30px;
+	/* background-color: transparent; */
+	/* width: 30px;
 	height: 30px;
 	border: none;
 	border-radius: 50%;
-	cursor: pointer;
+	cursor: pointer; */
 }
 
-.send-message:hover {
+/* .send-message:hover {
 	filter: brightness(3);
 	transition: all 0.3s;
-}
+} */
 
 .new-chat {
 	background: url(../assets/newChat.svg) no-repeat;
 	background-position: center;
-	background-color: transparent;
+	/* background-color: transparent;
 	width: 30px;
 	height: 30px;
 	border: none;
 	border-radius: 50%;
-	cursor: pointer;
+	cursor: pointer; */
 }
 
-.new-chat:hover {
+/* .new-chat:hover {
 	filter: brightness(3);
 	transition: all 0.3s;
-}
+} */
 
 .edit-pen {
 	background: url(../assets/EditPen.svg) no-repeat;
 	background-position: center;
-	background-color: transparent;
+	/* background-color: transparent;
 	width: 20px;
 	height: 20px;
 	border: none;
 	border-radius: 50%;
-	display: inline;
+	display: inline; */
 }
 
 .edit-pen:hover {
@@ -231,12 +234,12 @@
 .ok {
 	background: url(../assets/ok.svg) no-repeat;
 	background-position: center;
-	background-color: transparent;
+	/* background-color: transparent;
 	width: 20px;
 	height: 20px;
 	border: none;
 	border-radius: 50%;
-	display: inline;
+	display: inline; */
 }
 
 .ok:hover {
@@ -247,11 +250,11 @@
 .setting {
 	background: url(../assets/setting.svg) no-repeat;
 	background-position: center;
-	background-color: transparent;
+	/* background-color: transparent;
 	width: 30px;
 	height: 30px;
 	border: none;
-	border-radius: 50%;
+	border-radius: 50%; */
 }
 
 .setting:hover {
