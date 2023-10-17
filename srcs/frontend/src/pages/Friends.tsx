@@ -24,7 +24,7 @@ function AddPage({ setPage }: AddPageProp) {
 	
 	return (
 		<div>
-			<button className='goBack' onClick={() => setPage('friendPage')}/>		
+			<button className='leftArrow m-2' onClick={() => setPage('friendPage')}/>		
 			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
 				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
 				<input 
@@ -66,7 +66,7 @@ function BlockPage({ setPage }: BlockPageProp) {
 		<>
 			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
 				<button 
-					className='goBack m-2' 
+					className='leftArrow m-2' 
 					onClick={() => setPage('friendPage')}
 				/>
 				<h5 style={{color: 'white'}}>Blocks</h5>
