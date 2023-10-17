@@ -89,7 +89,6 @@ export class MemberService {
 				membersList.push(memberStatus);
 			}
 		  }
-		Logger.log(membersList);
 		return membersList;
 	}
 
