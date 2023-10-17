@@ -108,7 +108,7 @@ export function Signup() {
 			<Container>
 				<Row className="justify-content-center">
 					<Col sm="6" lg="4" >
-						<Link to={'..'} style={{ display: "inline-block" }}>
+						<Link to="..">
 							<button className="leftArrow my-4"></button>
 						</Link>
 						<Form className="w-100" onSubmit={(e) => (

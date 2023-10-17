@@ -20,7 +20,7 @@ import { Alert } from 'react-bootstrap';
 export function Title({ title }: { title: string }) {
 	return (
 		<div className='d-flex w-100 align-items-center' style={{ backgroundColor: "black" }}>
-			<Link to=".."><button className='goBack'></button></Link>
+			<Link to=".."><button className='leftArrow m-2'></button></Link>
 			<h4 style={{ color: "white", margin: "auto 0" }}>{title}</h4>
 		</div>
 	);

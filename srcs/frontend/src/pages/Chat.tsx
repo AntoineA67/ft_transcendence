@@ -130,7 +130,7 @@ export function ChatBox() {
 		<div className="h-100 d-flex flex-column">
 			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
 				<Link to="..">
-					<button className="goBack"></button>
+					<button className="leftArrow m-2"></button>
 				</Link>
 				<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
 			</div>
@@ -273,7 +273,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 
 	return (
 		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
-			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
+			<button className='leftArrow' onClick={() => setPage('chatList')} />
 			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} onSubmit={() => handlePrivateMessage(nick)} />
 			{!isJoinDialogOpen && (
 				<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} onSubmit={() => JoinGroup(join)} />
@@ -284,7 +284,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 				<div className='join-dialog'>
 					<div className='d-flex justify-content-between'>
 						<h5>Join {join}</h5>
-						<button className='cross' onClick={() => setJoinDialogOpen(false)} />
+						<button className='leftArrow' onClick={() => setJoinDialogOpen(false)} />
 					</div>
 					<div className='form-group'>
 						<label htmlFor='roomID'>Room ID:</label>
