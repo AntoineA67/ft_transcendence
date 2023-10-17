@@ -1,4 +1,3 @@
-// import '../styles/App.css';
 import '../styles/Profile.css';
 import '../styles/index.css'
 
