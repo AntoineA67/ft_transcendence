@@ -10,7 +10,7 @@ import { Message, ProfileTest, Room, Member, Pvrooms } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
-import { RiVolumeMuteFill, RiDeleteBin6Line, RiLogoutCircleRLine } from 'react-icons/ri';
+import { RiVolumeMuteFill, RiDeleteBin6Line, RiLogoutCircleRLine, RiCloseLine } from 'react-icons/ri';
 import { BsThreeDots } from "react-icons/bs";
 
 export function ChatBox() {
@@ -26,6 +26,10 @@ export function ChatBox() {
 	const [showSettings, setShowSettings] = useState(false);
 	const [memberstatus, setMemberstatus] = useState<Member>();
 	const [membersList, setMemberList] = useState<Member[]>([]);
+	const [newRoomTitle, setNewRoomTitle] = useState<string>('');
+	const [newRoomTitleSuccess, setnewRoomTitleSuccess] = useState<boolean>();
+	const [inviteUsername, setInviteUsername] = useState<string>('');
+	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
 
 	useEffect(() => {
 		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
@@ -37,6 +41,9 @@ export function ChatBox() {
 			setRoomChannel(data.roomChannel);
 			setMemberstatus(data.memberStatus);
 			setMemberList(data.members);
+			setnewRoomTitleSuccess(undefined);
+			setinviteUsernameSuccess(undefined);
+			setShowSettings(false);
 			setLoading(false);
 		});
 
@@ -45,17 +52,40 @@ export function ChatBox() {
 				setProfile(profiletest);
 			}
 		});
-
-		function fc(newMessage: Message) {
-			setMessages((prevMessages) => [...prevMessages, newMessage]);
-		}
-		chatsSocket.on('messageSent', fc);
-		return () => {
-			chatsSocket.off('messageSent', fc);
-		};
 	}, [chatId]);
 
-	console.log('MemberList', membersList);
+	useEffect(() => {
+		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
+
+		const handleUserLeaveChannel = (response: { userId: number, roomId: number }) => {
+			if (response) {
+				setMemberList((prevMembersList) =>
+					prevMembersList.filter((member) => member.userId !== response.userId)
+				);
+			} else {
+				console.error('Failed to leave the channel');
+			}
+		};
+
+		const handlenewmess = (newMessage: Message) => {
+			setMessages((prevMessages) => [...prevMessages, newMessage]);
+		};
+
+		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
+		socketListeners.push({ event: 'messageSent', handler: handlenewmess });
+
+		socketListeners.forEach(({ event, handler }) => {
+			chatsSocket.on(event, handler);
+		});
+
+		return () => {
+			socketListeners.forEach(({ event, handler }) => {
+				chatsSocket.off(event, handler);
+			});
+		};
+	}, [messages, membersList]);
+
+
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -75,16 +105,46 @@ export function ChatBox() {
 		if (messagesEndRef.current) {
 			messagesEndRef.current.scrollIntoView({ block: "end", inline: "nearest" });
 		}
-	}, [messages]);
+	}, [messages, showSettings]);
+
+	const handleChangeRoomTitle = () => {
+		if (newRoomTitle && newRoomTitle.trim() !== '') {
+			chatsSocket.emit('changeRoomTitle', {
+				roomId: chatId,
+				roomtitle: newRoomTitle
+			}, (response: boolean) => {
+				if (response) {
+					setroomTitle(newRoomTitle);
+					setnewRoomTitleSuccess(true);
+				}
+				else
+					setnewRoomTitleSuccess(false);
+			})
+		}
+		setNewRoomTitle('');
+	}
+
+	const handleInviteUser = () => {
+		if (inviteUsername && inviteUsername.trim() !== '') {
+			chatsSocket.emit('inviteUser', {
+				roomId: chatId,
+				username: inviteUsername,
+			}, (response: boolean) => {
+				if (response) {
+					setinviteUsernameSuccess(true);
+				} else {
+					setinviteUsernameSuccess(false);
+				}
+			});
+		}
+		setInviteUsername('');
+	};
+
 
 	const handleClick = () => {
 		if (mess.trim()) {
 			handleSendMessage();
 		}
-	};
-
-	const handleSettings = () => {
-		setShowSettings(!showSettings);
 	};
 
 	const handleSendMessage = () => {
@@ -101,6 +161,44 @@ export function ChatBox() {
 			}
 		});
 		setMess('');
+	};
+
+	const handleLeaveChannel = (usertoKick: number) => {
+		if (profile === undefined)
+			return;
+		chatsSocket.emit('UserLeaveChannel', {
+			usertoKick: usertoKick,
+			roomId: chatId,
+		}, (response: boolean) => {
+			if (response && profile.id === usertoKick) {
+				navigate('/chat');
+			}
+		});
+	}
+
+	const handleMuteDurationChange = (memberid: number, time: number) => {
+		if (!memberid || time === undefined)
+			return;
+		chatsSocket.emit('muteMember', {
+			memberId: memberid,
+			duration: time,
+			roomId: chatId
+		});
+	};
+
+	const handleToggleBan = (memberid: number, actions: boolean) => {
+		chatsSocket.emit('banMember', {
+			memberId: memberid,
+			roomId: chatId,
+			action: actions,
+		});
+	};
+
+	const handleKick = (memberid: number) => {
+		chatsSocket.emit('UserLeaveChannel', {
+			usertoKick: memberid,
+			roomId: chatId
+		});
 	};
 
 	const myMap = (message: Message, profile: ProfileTest, member: Member | undefined, roomChannel: boolean) => {
@@ -138,67 +236,135 @@ export function ChatBox() {
 	};
 
 	return (
-		<div className="h-100 d-flex">
-			<div className="chat-content flex-grow-1">
+		<div className="h-100 d-flex flex-column">
+			<div className="chat-container">
 				<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
-				<Link to="..">
-					<button className="goBack"></button>
-				</Link>
+					<Link to="..">
+						<button className="goBack"></button>
+					</Link>
 					<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
-					<button onClick={handleSettings} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
 				</div>
-				<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
-					<ul
-						ref={messagesEndRef}
-						className="nostyleList d-flex flex-column"
-						style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
-					>
-						{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
-					</ul>
-				</div>
-				<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
-					<input
-						className={`p-2 flex-grow-1 ${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
-						style={{ borderRadius: '10px' }}
-						value={mess}
-						onChange={(e) => setMess(e.target.value)}
-						onKeyDown={handleKeyDown}
-						disabled={memberstatus ? (memberstatus.ban) : true}
-						placeholder={memberstatus ? (memberstatus.ban ? 'You\'re banned/blocked or you\'re blocking the person...' : 'Write a message...') : ''}
-					/>
-					<button
-						className="send-message"
-						onClick={() => {
-							if (memberstatus && !memberstatus.ban) {
-								handleClick();
+				{!showSettings && (
+					<div className="p-5" style={{ overflowY: 'auto', flex: '1' }}>
+						<ul
+							ref={messagesEndRef}
+							className="nostyleList d-flex flex-column"
+							style={{ color: 'white' }}
+						>
+							{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
+						</ul>
+					</div>
+				)}
+				{!showSettings && (
+					<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+						<input
+							className={`p-2 flex-grow-1 ${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
+							style={{ borderRadius: '10px' }}
+							value={mess}
+							onChange={(e) => setMess(e.target.value)}
+							onKeyDown={handleKeyDown}
+							disabled={
+								memberstatus
+									? memberstatus.ban || (memberstatus.mute !== null && new Date(memberstatus.mute) > new Date())
+									: true
 							}
-						}}
-						disabled={memberstatus && memberstatus.ban}
-					>
-					</button>
-				</div>
+							placeholder={
+								memberstatus
+									? memberstatus.ban
+										? 'You\'re banned/blocked or you\'re blocking the person...'
+										: memberstatus.mute !== null && new Date(memberstatus.mute) > new Date()
+											? 'You are muted...'
+											: 'Write a message...'
+									: ''
+							}
+						/>
+						<button
+							className="send-message"
+							onClick={() => {
+								if (memberstatus && !memberstatus.ban) {
+									handleClick();
+								}
+							}}
+							disabled={memberstatus && memberstatus.ban}
+						>
+						</button>
+					</div>
+				)}
 			</div>
 			{showSettings && (
-				<ul className="members-list">
-					{[
-						...membersList.filter((member) => member.owner || member.admin),
-						...membersList.filter((member) => !member.owner && !member.admin),
-					].map((member) => (
-						<li key={member.id} className="member">
-							<div className="member-details">
-								<span className="member-username">{member.username}</span>
-								<span className="member-role">
-									{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
-								</span>
-							</div>
-							<div className="member-actions">
-								<RiVolumeMuteFill className="mute-icon" />
-								<RiDeleteBin6Line className="ban-icon" />
-								<RiLogoutCircleRLine className="kick-icon" />
-							</div>
-						</li>
-					))}
-				</ul>
+				<div className="w-100 h-100 d-flex flex-column">
+					<div className="align-items-center d-flex flex-column">
+						{memberstatus?.admin && roomChannel && (
+							<>
+								<input
+									id="roomTitleInput"
+									className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+									type="text"
+									placeholder="New Room name"
+									value={newRoomTitle}
+									onChange={(e) => setNewRoomTitle(e.target.value)}
+									style={{ color: 'white' }}
+									disabled={!memberstatus?.admin}
+								/>
+								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
+								<input
+									id="inviteUserInput"
+									className={`w-50 form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
+									type="text"
+									placeholder="Invite user by username"
+									value={inviteUsername}
+									onChange={(e) => setInviteUsername(e.target.value)}
+									style={{ color: 'white' }}
+								/>
+								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
+							</>
+						)}
+						{profile && <button className="leave-channel-button" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+					</div>
+					<ul className="members-list">
+						{membersList
+							.filter((member) => member.userId !== profile?.id)
+							.map((member) => (
+								<li key={member.id} className="member">
+									<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
+										<div className="member-details">
+											<span className="member-username">{member.username}</span>
+											<span className="member-role">
+												{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
+											</span>
+										</div>
+									</Link>
+									<div className="member-actions">
+										<button
+											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date()? 'action-disabled' : ''}`}
+											onClick={() => handleMuteDurationChange(member.userId, 0)}
+										>
+											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
+										</button>
+										<select
+											defaultValue={member.muteduration}
+											onChange={(e) => handleMuteDurationChange(member.userId, parseInt(e.target.value))}
+										>
+											<option value="">Time</option>
+											<option value="300">5 min</option>
+											<option value="600">10 min</option>
+											<option value="3600">1 h</option>
+											<option value="7200">2 h</option>
+											<option value="86400">24 h</option>
+										</select>
+										<button
+											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
+											onClick={() => handleToggleBan(member.userId, member.ban)}
+										>
+											{member.ban ? 'Unban' : 'Ban'}
+										</button>
+										<button className="action-button" onClick={() => handleKick(member.userId)}>Kick</button>
+									</div>
+								</li>
+							))}
+					</ul>
+				</div>
 			)}
 		</div>
 	);
@@ -398,7 +564,7 @@ export function ChatList() {
 	console.log('Profile', profile);
 
 	useEffect(() => {
-		const socketListeners: { event: string, handler: (response: any) => void }[] = [];
+		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
 
 		const handleNewRoom = (response: Room) => {
 			if (response) {
@@ -406,6 +572,19 @@ export function ChatList() {
 				if (!roomExists) {
 					setRooms((prevRooms) => [response, ...prevRooms]);
 				}
+			}
+		};
+
+		const handlenewRoomTitle = (response: { roomid: number; roomtitle: string }) => {
+			if (response) {
+				setRooms((prevRooms) =>
+					prevRooms.map((room) => {
+						if (room.id === response.roomid) {
+							room.title = response.roomtitle;
+						}
+						return room;
+					})
+				);
 			}
 		};
 
@@ -418,8 +597,15 @@ export function ChatList() {
 			}
 		};
 
+		const handleUserLeaveChannel = (response: { userId: number, roomId: number }) => {
+			const { roomId, userId } = response;
+			setRooms((prevRooms) => prevRooms.filter((room) => room.id !== roomId));
+		};
+
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
+		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
+		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
@@ -431,6 +617,7 @@ export function ChatList() {
 			});
 		};
 	}, [rooms]);
+
 
 	const myMap = (room: Room, pvrooms: Pvrooms[], profile: ProfileTest) => {
 		let channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
