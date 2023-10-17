@@ -1,6 +1,4 @@
-import '../styles/Login.css'
-import '../styles/index.css'
-import '../styles/iconButton.css';
+// import '../styles/Login.css'
 
 import githubLogo from '../assets/github.svg';
 import fortytwologo from '../assets/fortytwologo.svg';
