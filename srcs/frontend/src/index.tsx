@@ -16,12 +16,13 @@ import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 
-//css
+//bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
+// css
 import './styles/index.css';
 import './styles/iconButton.css';
-import './styles/Login.css'
+import './styles/Chat.css';
 
 
 import { CallBack42, Protected } from './utils/AuthProvider';

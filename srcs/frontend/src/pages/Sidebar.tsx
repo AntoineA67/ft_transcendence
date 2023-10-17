@@ -1,6 +1,3 @@
-import '../styles/Sidebar.css';
-import '../styles/index.css';
-
 import { useState, useEffect } from 'react';
 
 import Game from '../assets/Game.svg';
