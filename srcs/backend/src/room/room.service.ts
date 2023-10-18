@@ -1,38 +1,8 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Room, Prisma, Member, Message, Friendship, Block } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Room, Prisma, User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
-
-type MessageWithUsername = {
-	id: number;
-	message: string;
-	send_date: Date;
-	userId: number;
-	roomId: number;
-	username: string;
-};
-
-type ProfileTest = {
-	bio: string;
-	id: number;
-	status: string;
-	username: string;
-	membership: MemberWithLatestMessage[];
-	pvrooms: Pvrooms[] | null;
-};
-
-type Pvrooms = {
-	roomId: number,
-	userId2: number,
-	username2: string,
-	block: boolean,
-	blocked: boolean,
-};
-
-type MemberWithLatestMessage = {
-	member: Member;
-	latestMessage: Message | null;
-};
+import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
 
 @Injectable()
 export class RoomService {
@@ -41,12 +11,53 @@ export class RoomService {
 		private readonly usersService: UsersService,
 	) { }
 	private logger: Logger = new Logger('RoomGateway');
+	
 	async createRoom(data: Prisma.RoomCreateInput): Promise<Room> {
 		return this.prisma.room.create({ data });
 	}
 
 	async getAllRooms(): Promise<Room[]> {
 		return this.prisma.room.findMany();
+	}
+
+	async getMemberDatabyUsername(username: string): Promise<User | null> {
+		const user = await this.prisma.user.findUnique({
+			where: {
+				username: username,
+			},
+		});
+
+		if (!user) {
+			return null;
+		}
+
+		return user;
+	}
+
+	async getMemberDatabyId(id: number): Promise<User | null> {
+		const user = await this.prisma.user.findUnique({
+			where: {
+				id: id,
+			},
+		});
+
+		if (!user) {
+			return null;
+		}
+
+		return user;
+	}
+
+	async getRoomDataById (roomid: number): Promise<Room | null> {
+		const room = await this.prisma.room.findUnique({
+			where: {
+				id: roomid,
+			},
+		});
+		if (!room) {
+			return null;
+		}
+		return room;
 	}
 
 	// TODO : check how to change this (found on prisma.io), maybe there are too many operations to sort...
@@ -315,9 +326,9 @@ export class RoomService {
 	}
 
 	async changeRoomTitle(userId: number, roomid: number, newTitle: string): Promise<boolean> {
-		const member = await this.prisma.member.findUnique({
+		const member = await this.prisma.member.findFirst({
 			where: {
-				id: roomid,
+				roomId: roomid,
 				userId: userId,
 				OR: [
 					{
@@ -329,11 +340,11 @@ export class RoomService {
 				]
 			},
 		});
+		this.logger.log(userId, roomid, newTitle)
 
 		if (!member) {
 			return false;
 		}
-
 		const userRooms = await this.prisma.room.findMany({
 			where: {
 				members: {
@@ -441,51 +452,46 @@ export class RoomService {
 
 
 	async getAllPrivateRooms(userId: number): Promise<Pvrooms[]> {
-		try {
-			const privateRooms = await this.prisma.room.findMany({
-				where: {
-					isChannel: false,
-					members: {
-						some: {
-							userId: userId,
-						},
+		const privateRooms = await this.prisma.room.findMany({
+			where: {
+				isChannel: false,
+				members: {
+					some: {
+						userId: userId,
 					},
 				},
-				include: {
-					members: {
-						where: {
-							NOT: [
-								{ userId: userId }, // Exclude the user making the request
-							],
-						},
-						include: {
-							user: {
-								select: {
-									id: true,
-									username: true,
-								},
+			},
+			include: {
+				members: {
+					where: {
+						NOT: [
+							{ userId: userId }, // Exclude the user making the request
+						],
+					},
+					include: {
+						user: {
+							select: {
+								id: true,
+								username: true,
 							},
 						},
 					},
 				},
-			});
+			},
+		});
 
-			const roomData = await Promise.all(privateRooms.map(async (room) => {
-				const userId2 = room.members[0].user.id;
-				return {
-					roomId: room.id,
-					userId2,
-					username2: room.members[0].user.username,
-					block: await this.isBlocking(userId, userId2),
-					blocked: await this.isBlocked(userId2, userId),
-				};
-			}));
+		const roomData = await Promise.all(privateRooms.map(async (room) => {
+			const userId2 = room.members[0].user.id;
+			return {
+				roomId: room.id,
+				userId2,
+				username2: room.members[0].user.username,
+				block: await this.isBlocking(userId, userId2),
+				blocked: await this.isBlocked(userId2, userId),
+			};
+		}));
 
-			return roomData;
-		} catch (error) {
-			console.error('Error in getPrivateRooms:', error);
-			throw error;
-		}
+		return roomData;
 	}
 
 	async getPrivateRoomById(userId: number, roomId: number): Promise<Pvrooms | null> {
@@ -579,8 +585,20 @@ export class RoomService {
 			where: {
 				roomId: roomid,
 				userId: userid,
+				ban: false,
 			},
 		});
+
+		const room = await this.prisma.room.findFirst({
+			where: {
+				id: roomid,
+				isChannel: true,
+			},
+		});
+
+		if (!room) {
+			return false;
+		}
 
 		const userToKick = await this.prisma.member.findFirst({
 			where: {
@@ -589,9 +607,8 @@ export class RoomService {
 			},
 		});
 
-		this.logger.log(user, userToKick, userid, usertoKickid);
-		if (!user || !userToKick || (userToKick.owner && userid !== usertoKickid) ||
-			(!user.admin && !user.owner && userid !== usertoKickid) || user.ban) {
+		if (!user || !userToKick || (userToKick.owner && !user.owner) ||
+			(!user.admin && !user.owner && userid !== usertoKickid)) {
 			return false;
 		}
 
@@ -610,7 +627,6 @@ export class RoomService {
 				roomId: roomId,
 				userId: userId,
 				ban: false,
-				admin: true,
 			},
 		});
 
@@ -621,7 +637,39 @@ export class RoomService {
 			},
 		});
 
-		if (!member || !memberToBan || memberToBan.owner) {
+		const room = await this.prisma.room.findFirst({
+			where: {
+				id: roomId,
+			},
+		});
+
+		if (!room.isChannel) {
+			const blockstatus = await this.prisma.block.findFirst({
+				where: {
+					userId: userId,
+					blockedId: memberId,
+				},
+			});
+			if (blockstatus) {
+				await this.prisma.block.delete({
+					where: {
+						id: blockstatus.id,
+					},
+				});
+			}
+			else {
+				await this.prisma.block.create({
+					data: {
+						userId: userId,
+						blockedId: memberId,
+					},
+				});
+			}
+			return true;
+		}
+
+		if (!member || !memberToBan || memberToBan.owner ||
+			(!member.admin && !member.owner && (memberToBan.admin || memberToBan.owner))) {
 			return false;
 		}
 
@@ -642,6 +690,7 @@ export class RoomService {
 			where: {
 				roomId: roomId,
 				userId: userId,
+				ban: false
 			},
 		});
 
@@ -652,8 +701,8 @@ export class RoomService {
 			},
 		});
 		this.logger.log(member, memberToMute);
-		if (!member || !memberToMute || member.ban || memberToMute.ban
-			|| !member.admin || (member.owner && !memberToMute.owner)) {
+		if (!member || !memberToMute || memberToMute.ban
+			|| !member.admin || (!member.owner && memberToMute.owner)) {
 			return false;
 		}
 
@@ -719,4 +768,89 @@ export class RoomService {
 		return true;
 	}
 
+	async changeRole(userid: number, roomId: number, memberId: number, owner: boolean, admin: boolean): Promise<boolean> {
+		const user = await this.prisma.member.findFirst({
+			where: {
+				roomId,
+				userId: userid,
+			},
+		});
+
+		const membertochange = await this.prisma.member.findFirst({
+			where: {
+				roomId,
+				userId: memberId,
+			},
+		});
+
+		if (!user || (!user.owner && !user.admin)) {
+			return false;
+		}
+
+		if (user.owner && owner) {
+			await this.prisma.member.update({
+				where: {
+					id: user.id,
+				},
+				data: {
+					owner: false,
+					admin: true,
+				},
+			});
+
+			await this.prisma.member.update({
+				where: {
+					id: membertochange.id,
+				},
+				data: {
+					owner: true,
+					admin: false,
+					ban: false,
+					mute: null,
+				},
+			});
+
+			return true;
+		}
+
+		await this.prisma.member.update({
+			where: {
+				id: membertochange.id
+			},
+			data: {
+				admin,
+			},
+		});
+
+		return true;
+	}
+
+	async changePassword(userid: number, roomId: number, password: string): Promise<boolean> {
+		const user = await this.prisma.member.findFirst({
+			where: {
+				roomId,
+				userId: userid,
+				owner: true,
+			},
+		});
+
+		if (!user) {
+			return false;
+		}
+
+		if (password.trim() === '') {
+			password = null;
+		}
+
+		await this.prisma.room.update({
+			where: {
+				id: roomId,
+			},
+			data: {
+				password,
+			},
+		});
+
+		return true;
+	}
 }

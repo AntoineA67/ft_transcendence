@@ -4,13 +4,12 @@ import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { chatsSocket } from '../utils/socket';
+import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
 import { Message, ProfileTest, Room, Member, Pvrooms } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCommentSlash } from '@fortawesome/free-solid-svg-icons';
+import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
-import { RiVolumeMuteFill, RiDeleteBin6Line, RiLogoutCircleRLine, RiCloseLine } from 'react-icons/ri';
 import { BsThreeDots } from "react-icons/bs";
 
 export function ChatBox() {
@@ -30,6 +29,7 @@ export function ChatBox() {
 	const [newRoomTitleSuccess, setnewRoomTitleSuccess] = useState<boolean>();
 	const [inviteUsername, setInviteUsername] = useState<string>('');
 	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
+	const [newPassword, setNewPassword] = useState<string>('');
 
 	useEffect(() => {
 		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
@@ -45,6 +45,7 @@ export function ChatBox() {
 			setinviteUsernameSuccess(undefined);
 			setShowSettings(false);
 			setLoading(false);
+			setMess('');
 		});
 
 		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
@@ -57,22 +58,60 @@ export function ChatBox() {
 	useEffect(() => {
 		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
 
-		const handleUserLeaveChannel = (response: { userId: number, roomId: number }) => {
+		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
 			if (response) {
 				setMemberList((prevMembersList) =>
-					prevMembersList.filter((member) => member.userId !== response.userId)
+					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
+
 			} else {
 				console.error('Failed to leave the channel');
 			}
 		};
 
 		const handlenewmess = (newMessage: Message) => {
+			if (chatId && newMessage.roomId !== parseInt(chatId, 10))
+				return;
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
+		};
+
+		const handlenewMember = (newMember: Member) => {
+			if (chatId && newMember.roomId !== parseInt(chatId, 10))
+				return;
+			setMemberList((prevMembersList) => [...prevMembersList, newMember]);
+		}
+
+		const handlenewRoomTitle = (response: { roomid: number; roomtitle: string }) => {
+			if (response) {
+				setroomTitle(response.roomtitle);
+			}
+		};
+
+		const handlenewmemberStatus = (response: Member) => {
+			if (response) {
+				setMemberstatus(response);
+			}
+		};
+
+		const handlenewmemberListStatus = (response: Member) => {
+			if (response) {
+				setMemberList((prevMembersList) =>
+					prevMembersList.map((member) => {
+						if (member.userId === response.userId && response.userId !== profile?.id) {
+							member = response;
+						}
+						return member;
+					})
+				);
+			}
 		};
 
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
 		socketListeners.push({ event: 'messageSent', handler: handlenewmess });
+		socketListeners.push({ event: 'newMember', handler: handlenewMember });
+		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
+		socketListeners.push({ event: 'newmemberStatus', handler: handlenewmemberStatus });
+		socketListeners.push({ event: 'newmemberListStatus', handler: handlenewmemberListStatus });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
@@ -140,7 +179,6 @@ export function ChatBox() {
 		setInviteUsername('');
 	};
 
-
 	const handleClick = () => {
 		if (mess.trim()) {
 			handleSendMessage();
@@ -150,6 +188,10 @@ export function ChatBox() {
 	const handleSendMessage = () => {
 		if (profile === undefined)
 			return;
+		if (mess.length > 10000) {
+			alert('Message too long');
+			return;
+		}
 		chatsSocket.emit('sendMessage', {
 			content: mess,
 			roomId: chatId,
@@ -176,9 +218,11 @@ export function ChatBox() {
 		});
 	}
 
-	const handleMuteDurationChange = (memberid: number, time: number) => {
-		if (!memberid || time === undefined)
+	const handleMuteDurationChange = (memberid: number, time: number, bool: boolean | null) => {
+		if (!memberid || (time === undefined && (bool === null || !bool)))
 			return;
+		if (bool && bool == true)
+			time = 0;
 		chatsSocket.emit('muteMember', {
 			memberId: memberid,
 			duration: time,
@@ -201,24 +245,47 @@ export function ChatBox() {
 		});
 	};
 
-	const myMap = (message: Message, profile: ProfileTest, member: Member | undefined, roomChannel: boolean) => {
+	const handleRoleChange = (memberid: number, role: string) => {
+		chatsSocket.emit('changeRole', {
+			memberId: memberid,
+			roomid: chatId,
+			owner: role === 'Owner' ? true : false,
+			admin: role === 'Admin' ? true : false,
+		});
+	}
+
+	const handleChangePassword = () => {
+		if (newPassword && newPassword.trim() !== '') {
+			chatsSocket.emit('changePassword', {
+				roomId: chatId,
+				password: newPassword
+			}, (response: boolean) => {
+				if (response) {
+					setNewPassword('');
+				}
+			})
+		}
+	}
+
+	const handleDeletePassword = () => {
+		chatsSocket.emit('changePassword', {
+			roomId: chatId,
+			password: ''
+		}, (response: boolean) => {
+			if (response) {
+				setNewPassword('');
+			}
+		})
+	}
+
+	const myMap = (message: Message, profile: ProfileTest) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
 			hour: '2-digit',
 			minute: '2-digit',
-			second: '2-digit'
+			second: '2-digit',
 		});
-
-		let role = '';
-		if (member === undefined) {
-			role = 'Member - ';
-		}
-
-		if (roomChannel === true && member !== undefined) {
-			role = member.owner ? 'Owner' : member.admin ? 'Admin' : member.ban ? 'Banned' : 'Member';
-			role += ' - ';
-		}
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
@@ -226,14 +293,23 @@ export function ChatBox() {
 
 		return (
 			<div className="message-container" key={message.id}>
-				<strong className={`message ${classuser}`}>
-					{message.username} - {role}
-					{formattedTime}
-				</strong>
+				<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+					<strong className={`message ${classuser}`}>
+						{message.userId !== profile.id && (
+							<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+								<span style={{ marginRight: '20px' }}>
+									<FontAwesomeIcon icon={faPlay} />
+								</span>
+							</Link>
+						)}
+						{message.username}
+					</strong>
+				</Link>
 				<div className={`message ${classname}`}>{message.message}</div>
 			</div>
 		);
 	};
+
 
 	return (
 		<div className="h-100 d-flex flex-column">
@@ -252,7 +328,7 @@ export function ChatBox() {
 							className="nostyleList d-flex flex-column"
 							style={{ color: 'white' }}
 						>
-							{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
+							{profile !== undefined ? messages.map((message) => myMap(message, profile)) : null}
 						</ul>
 					</div>
 				)}
@@ -304,10 +380,23 @@ export function ChatBox() {
 									placeholder="New Room name"
 									value={newRoomTitle}
 									onChange={(e) => setNewRoomTitle(e.target.value)}
-									style={{ color: 'white' }}
+									style={{ background: 'white', color: 'black' }}
 									disabled={!memberstatus?.admin}
 								/>
-								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
+								<button className='btn btn-outline-secondary  ml-2' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
+								{memberstatus?.owner && (
+									<input
+										id="roomTitleInput"
+										className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+										type="text"
+										placeholder="New Password"
+										value={newPassword}
+										onChange={(e) => setNewPassword(e.target.value)}
+										style={{ background: 'white', color: 'black' }}
+										disabled={!memberstatus?.owner}
+									/>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
 								<input
 									id="inviteUserInput"
 									className={`w-50 form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
@@ -315,12 +404,12 @@ export function ChatBox() {
 									placeholder="Invite user by username"
 									value={inviteUsername}
 									onChange={(e) => setInviteUsername(e.target.value)}
-									style={{ color: 'white' }}
+									style={{ background: 'white', color: 'black' }}
 								/>
 								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
-						{profile && <button className="leave-channel-button" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+						{roomChannel && roomTitle && profile && <button className="btn btn-outline-secondary w-20 ml-2" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
 					</div>
 					<ul className="members-list">
 						{membersList
@@ -336,30 +425,40 @@ export function ChatBox() {
 										</div>
 									</Link>
 									<div className="member-actions">
-										<button
-											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date()? 'action-disabled' : ''}`}
-											onClick={() => handleMuteDurationChange(member.userId, 0)}
+										{roomChannel && <select
+											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
+											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
+										>
+											<option value="Owner">Owner</option>
+											<option value="Admin">Admin</option>
+											<option value="Member">Member</option>
+										</select>}
+										{roomChannel && <button
+											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date() ? 'action-disabled' : ''}`}
+											onClick={() => handleMuteDurationChange(member.userId, member.muteduration, member.mute && new Date(member.mute) > new Date())}
 										>
 											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
-										</button>
-										<select
-											defaultValue={member.muteduration}
-											onChange={(e) => handleMuteDurationChange(member.userId, parseInt(e.target.value))}
-										>
-											<option value="">Time</option>
-											<option value="300">5 min</option>
-											<option value="600">10 min</option>
-											<option value="3600">1 h</option>
-											<option value="7200">2 h</option>
-											<option value="86400">24 h</option>
-										</select>
+										</button>}
+										{roomChannel && (!member.mute || new Date(member.mute) < new Date()) && (
+											<select
+												defaultValue={member.muteduration}
+												onChange={(e) => member.muteduration = parseInt(e.target.value)}
+											>
+												<option value="">Time</option>
+												<option value="300">5 min</option>
+												<option value="600">10 min</option>
+												<option value="3600">1 h</option>
+												<option value="7200">2 h</option>
+												<option value="86400">24 h</option>
+											</select>
+										)}
 										<button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
 											onClick={() => handleToggleBan(member.userId, member.ban)}
 										>
-											{member.ban ? 'Unban' : 'Ban'}
+											{roomChannel ? (member.ban ? 'Unban' : 'Ban') : (member.ban ? 'Unblock' : 'Block')}
 										</button>
-										<button className="action-button" onClick={() => handleKick(member.userId)}>Kick</button>
+										{roomChannel && <button className="action-button" onClick={() => handleKick(member.userId)}>Kick</button>}
 									</div>
 								</li>
 							))}
@@ -597,9 +696,10 @@ export function ChatList() {
 			}
 		};
 
-		const handleUserLeaveChannel = (response: { userId: number, roomId: number }) => {
-			const { roomId, userId } = response;
-			setRooms((prevRooms) => prevRooms.filter((room) => room.id !== roomId));
+		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
+			if (response && response.userid === profile?.id) {
+				setRooms((prevRooms) => prevRooms.filter((room) => room.id !== response.roomId));
+			}
 		};
 
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });

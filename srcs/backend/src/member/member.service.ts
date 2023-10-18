@@ -15,9 +15,9 @@ export class MemberService {
 	}
 
 	async getMemberById(id: number): Promise<Member> {
-		const member = await this.prisma.member.findUnique({
+		const member = await this.prisma.member.findFirst({
 			where: {
-				id,
+				userId: id,
 			},
 		});
 		if (!member) {
