@@ -13,3 +13,10 @@
 	margin-bottom: 0.3rem;
 	border-radius: 0.7rem;
 }
+
+.win-rate {
+	color: white;
+	position: relative;
+	bottom: 110px;
+	left: 5px;
+}
