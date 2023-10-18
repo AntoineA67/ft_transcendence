@@ -131,8 +131,7 @@ export function ChatBox() {
 				</Link>
 				<h4 className='white-text ms-2'>{roomTitle}</h4>
 			</div>
-			<div className="p-5 flex-grow overflow-y-auto"
-				style={{border: '1px solid green'}}>
+			<div className="p-5 flex-grow overflow-y-auto">
 				<ul
 					ref={messagesEndRef}
 					className="d-flex flex-column"
@@ -140,8 +139,7 @@ export function ChatBox() {
 					{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
 				</ul>
 			</div>
-			<div className="mt-auto p-3 d-flex align-items-center"
-				style={{border: '1px solid red'}}>
+			<div className="mt-auto p-3 d-flex align-items-center">
 				<input
 					className={`flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
 					value={mess}
@@ -269,8 +267,10 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	}
 
 	return (
-		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
-			<button className='leftArrow' onClick={() => setPage('chatList')} />
+		<div className='h-100 d-flex flex-column p-1 pb-5 white-text overflow-y-auto'>
+			<div>
+				<button className='leftArrow' onClick={() => setPage('chatList')} />
+			</div>
 			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} onSubmit={() => handlePrivateMessage(nick)} />
 			{!isJoinDialogOpen && (
 				<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} onSubmit={() => JoinGroup(join)} />
@@ -278,7 +278,7 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 			<MyForm label='Create a group:' button='Create' value={create} setValue={setCreate} onSubmit={() => handleCreateGroup(create)} />
 
 			{isJoinDialogOpen && (
-				<div className='join-dialog'>
+				<div>
 					<div className='d-flex justify-content-between'>
 						<h5>Join {join}</h5>
 						<button className='leftArrow' onClick={() => setJoinDialogOpen(false)} />
@@ -290,7 +290,6 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 							id='roomID'
 							value={roomId}
 							onChange={(e) => setRoomId(e.target.value)}
-							className='form-control'
 						/>
 					</div>
 					<div className='form-group'>
@@ -300,14 +299,13 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 							id='password'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className='form-control'
 						/>
 					</div>
 					<div className='d-flex justify-content-between'>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={handleSecondJoinClick}>
+						<button type='submit' className='btn btn-outline-secondary' onClick={handleSecondJoinClick}>
 							Join
 						</button>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={() => setJoinDialogOpen(false)}>
+						<button type='submit' className='btn btn-outline-secondary' onClick={() => setJoinDialogOpen(false)}>
 							Cancel
 						</button>
 					</div>
@@ -413,11 +411,11 @@ export function ChatList() {
 			{page === 'newChat' && <NewChat setPage={setPage} />}
 			{page === 'chatList' && (
 				<>
-					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: "" }}>
-						<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5 bg-black'>
+						<h4 className='white-text mx-auto my-0'>Chat</h4>
 						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
-					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
+					<div className='ps-sm-2 overflow-y-auto'>
 						<ul className='py-1' >
 							{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
 						</ul>
