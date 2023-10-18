@@ -1,6 +1,7 @@
 
 .btn {
 	height: 50px;
+	min-width: 50px;
 }
 
 /* customized bs button */
