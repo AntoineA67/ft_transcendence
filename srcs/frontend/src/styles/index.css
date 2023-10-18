@@ -109,3 +109,17 @@ button {
 	bottom: 30px;
 	right: 20px;
 }
+
+/* edit profile */
+.edit-text-area {
+	background: transparent;
+	outline: none;
+	border: none;
+	color: #fff;
+}
+
+.new-avatar-pos {
+	position: relative;
+	bottom: 40px;
+	left: 50px;
+}

@@ -1,4 +1,4 @@
-import '../styles/index.css'
+// import '../styles/index.css'
 
 import { profileType } from "../../types/user";
 import { Avatar } from "./Avatar";

@@ -1,5 +1,5 @@
-import '../styles/iconButton.css';
-import '../styles/index.css'
+// import '../styles/iconButton.css';
+// import '../styles/index.css'
 import { Avatar } from './Avatar';
 import { userType } from '../../types/user';
 import { Link } from 'react-router-dom';

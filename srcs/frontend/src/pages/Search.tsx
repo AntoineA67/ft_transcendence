@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { userType } from '../../types/user';
 import { socket } from '../utils/socket';
 import { UserItem } from '../utils/UserItem';
-import '../styles/index.css';
+// import '../styles/index.css';
 
 export function SearchBar() {
 	const [search, setSearch] = useState('');
