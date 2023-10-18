@@ -53,7 +53,7 @@ const refreshToken = async (): Promise<string | null> => {
     }
 }
 
-const useTokenExpired = (token: string, setToken: React.Dispatch<React.SetStateAction<string>>) => {
+const useTokenExpired = (token: string, setToken: (newToken: string) => void) => {
     const [tokenExpired, setTokenExpired] = useState<boolean | null>(null);
 
     useEffect(() => {
