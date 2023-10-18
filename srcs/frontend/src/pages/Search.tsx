@@ -46,12 +46,11 @@ export function SearchBar() {
 					type="text" 
 					placeholder='Search by username'
 					autoFocus
-					className="form-control w-100"
-					style={{backgroundColor: 'grey'}}
+					className="w-100 bg-grey"
 				/>
 			</div>
 			{temp.length ? (
-				<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
+				<ul className='p-0 m-0 w-100 pb-5 mb-5'>
 					{temp.map(myMap)}
 				</ul>
 			) : (
@@ -69,12 +68,10 @@ export function Search() {
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
-					style={{ overflowY: 'auto' }} >
+				<div className={`overflow-y-auto col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}>
 					<SearchBar />
 				</div>
-				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
-					style={{ overflowY: 'auto' }}>
+				<div className={`overflow-y-auto col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}>
 					<Outlet />
 				</div>
 			</div>
