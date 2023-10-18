@@ -66,6 +66,13 @@ button {
 }
 
 /* SHARE CSS */
+.userItem {
+	margin: 0;
+	background-color: grey;
+	padding: 10px;
+}
+
+/* SHARE CSS - TEXT AND BACKGROUD */
 .greyout {
 	filter: brightness(0.4);
 }

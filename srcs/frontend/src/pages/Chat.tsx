@@ -114,36 +114,36 @@ export function ChatBox() {
 
 		return (
 			<div className="message-container" key={message.id}>
-				<strong className={`message ${classuser}`}>
+				<strong className={`${classuser}`}>
 					{message.username} - {role}
 					{formattedTime}
 				</strong>
-				<div className={`message ${classname}`}>{message.message}</div>
+				<div className={`${classname}`}>{message.message}</div>
 			</div>
 		);
 	};
 
 	return (
 		<div className="h-100 d-flex flex-column">
-			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
+			<div className="d-flex w-100 align-items-center p-1">
 				<Link to="..">
 					<button className="leftArrow m-2"></button>
 				</Link>
-				<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+				<h4 className='white-text ms-2'>{roomTitle}</h4>
 			</div>
-			<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
+			<div className="p-5 flex-grow overflow-y-auto"
+				style={{border: '1px solid green'}}>
 				<ul
 					ref={messagesEndRef}
-					className="nostyleList d-flex flex-column"
-					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
+					className="d-flex flex-column"
 				>
 					{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
 				</ul>
 			</div>
-			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+			<div className="mt-auto p-3 d-flex align-items-center"
+				style={{border: '1px solid red'}}>
 				<input
-					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
-					style={{ borderRadius: '10px' }}
+					className={`flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
@@ -418,7 +418,7 @@ export function ChatList() {
 						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
 					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
-						<ul className='nostyleList py-1' >
+						<ul className='py-1' >
 							{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
 						</ul>
 					</div>
