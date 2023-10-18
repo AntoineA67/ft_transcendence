@@ -46,7 +46,7 @@ export function SearchBar() {
 					type="text" 
 					placeholder='Search by username'
 					autoFocus
-					className="w-100 bg-grey"
+					className="w-100"
 				/>
 			</div>
 			{temp.length ? (
