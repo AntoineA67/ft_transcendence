@@ -19,6 +19,13 @@ img { display: block; }
 	overflow: auto;
 } */
 
+ul, ol {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+	color: white;
+}
+
 a {
 	color: inherit;
 	text-decoration: none !important;
@@ -59,9 +66,35 @@ button {
 }
 
 /* SHARE CSS */
+.greyout {
+	filter: brightness(0.4);
+}
 
 .bg-black {
 	background-color: black;
+}
+
+.bg-trans {
+	background-color: transparent;
+}
+.bg-grey {
+	background-color: #5a5a5a;
+}
+
+.magenta-text {
+	color: #fa34c3;
+}
+
+.cyan-text {
+	color: #34fafa;
+}
+
+.grey-text {
+	color: grey;
+}
+
+.white-text {
+	color: white;
 }
 
 /* color filter for sidebar */
