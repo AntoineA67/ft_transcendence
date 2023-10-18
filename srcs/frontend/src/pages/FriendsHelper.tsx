@@ -42,7 +42,7 @@ export function FriendList() {
 	}
 	return (
 		(friends.length == 0) ? (
-			<h5 style={{color: 'grey'}}>Empty</h5>
+			<h5 className='grey-text'>Empty</h5>
 		) : (
 			<ul className='p-0 m-0'>
 				{friends.map(myMap)}
@@ -136,7 +136,7 @@ export function BlockList() {
 
 	return (
 		(blocks.length == 0) ? (
-			<h5 style={{ color: 'grey' }}>Empty</h5>
+			<h5 className='grey-text m-1'>Empty</h5>
 		) : (
 			<ul className='p-0'>
 				{blocks.map(myMap)}
