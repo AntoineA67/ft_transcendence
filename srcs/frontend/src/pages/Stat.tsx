@@ -1,11 +1,6 @@
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
-import Winner from '../assets/winner.svg';
 import { gameHistoryType } from '../../types/gameHistoryType'; 
-
 import { AchieveType } from '../../types/Achieve';
 
 type statProp = {
@@ -21,7 +16,6 @@ type achieveProp = {
 	achieve: AchieveType
 }
 
-// 'more' fetch more data on click, data will be put in a useState
 function HistoryContent({ gameHistory }: gameHistoryProp) {
 
 	const dateStr = (input: any): string => {
@@ -33,8 +27,6 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 		day = day.length > 1 ? day : '0' + day;
 		return month + '/' + day + '/' + year;
 	}
-
-	// console.log(gameHistory);
 
 	const listItem = (x: gameHistoryType, index: number) => {
 		const bgGrey = index % 2 ? 'bg-grey' : '';
@@ -51,18 +43,14 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	
 	return (
 		(gameHistory.length == 0) ? ( 
-			<div className='pb-5 mb-5'>
-				<p className='mx-auto p-3 grey-text'>Empty</p>
-			</div>
+			<h3 className='p-3 grey-text pb-5'>Empty</h3>
 		) : (
-			<ul className="m-auto pb-5 px-1">
+			<ul className="p-1 pb-5">
 				{gameHistory.map(listItem)}
 			</ul>
 		)
 	);
 }
-
-
 
 function AchieveContent({ achieve }: achieveProp) {
 	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
@@ -80,8 +68,6 @@ function AchieveContent({ achieve }: achieveProp) {
 		);
 	}
 
-	// console.log('achieve: ', achieve)
-
 	return (
 		<ul className="m-auto pb-5 px-1">			
 			{achieveList.map(myMap)}
@@ -95,10 +81,7 @@ type pieProp = {
 }
 
 function PieChart({ win, lose }: pieProp) {
-	// const [win, setWin] = useState(gameHistory.filter((x) => (x.win)).length)
-	// const [lose, setLose] = useState(gameHistory.filter((x) => (!x.win)).length)
-	
-	// must fix it if total is zero, rate is 0 or 100
+
 	function gradientDoghnut(win: number, lose: number) {
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 		const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D || null;
@@ -107,7 +90,6 @@ function PieChart({ win, lose }: pieProp) {
 		const yc = 100;
 		const r = 60;
 		let total: number = win + lose;
-		// const winRate: string = ((win / total) * 100).toFixed(1);
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
 		// if total == 0 , draw a grey circle
@@ -151,11 +133,9 @@ function PieChart({ win, lose }: pieProp) {
 			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
-			// console.log(start, start + deg);
 			start += deg;
 		}
 	}
-	
 	
 	useEffect(() => {
 		gradientDoghnut(win, lose);
@@ -244,7 +224,5 @@ export default function Stat({gameHistory, achieve} : statProp) {
 				</div>
 			</Container>
 		</>
-
 	);
-	
 }
