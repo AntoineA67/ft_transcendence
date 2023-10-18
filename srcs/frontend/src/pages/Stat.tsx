@@ -146,7 +146,7 @@ function PieChart({ win, lose }: pieProp) {
 			<div className='row justify-content-center'>
 				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
-					<h5 style={{color: 'white', position: 'relative', bottom: '110px', left: '5px'}}> 
+					<h5 className='win-rate'> 
 						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'} 
 					</h5>
 				</div>
@@ -182,7 +182,6 @@ export default function Stat({gameHistory, achieve} : statProp) {
 
 	return (
 		<>
-			{/* <PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} /> */}
 			<PieChart win={gameHistory.filter((x) => (x.win)).length} lose={gameHistory.filter((x) => (!x.win)).length} />
 			<Container>
 				{/* title: small screan */}
