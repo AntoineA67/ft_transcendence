@@ -97,6 +97,10 @@ button {
 	color: white;
 }
 
+.red-text {
+	color: red;
+}
+
 /* color filter for sidebar */
 .magenta {
 	filter: invert(63%) sepia(100%) saturate(6290%) hue-rotate(296deg) brightness(102%) contrast(96%);	
