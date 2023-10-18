@@ -148,3 +148,23 @@ button {
 	bottom: 40px;
 	left: 50px;
 }
+
+/* AVATAR */
+.user-status {
+	position: absolute;
+	right: -4px;
+	top: -3px;
+	height: 1rem;
+	width: 1rem;
+	border: 3px solid white;
+	border-radius: 50%;
+	z-index: 3;
+}
+
+.user-avatar {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+	clip-path: circle();
+}
+/* 	clipPath: `circle(at ${size / 2}px ${size / 2}px)`,  */
