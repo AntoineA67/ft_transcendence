@@ -22,14 +22,17 @@ import './styles/customButton.css';
 import './styles/customForm.css';
 import './styles/index.css';
 
-import { CallBack42, Protected } from './utils/AuthProvider';
+// import { CallBack42, Protected } from './utils/AuthProvider';
+import { CallBack42} from './utils/AuthProvider';
+
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 import { GameSocketProvider } from './utils/GameSocketProvider';
 
-import useTokenExpired from './hooks/useTokenExpired';
+// import { useTokenExpired } from './hooks/useTokenExpired';
+import ProtectedRoute from './utils/ProtectedRoutes';
 
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
@@ -39,59 +42,48 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
 root.render(
-	<BrowserRouter>
-		<Routes>
-			<Route element={<Guest />}>
-				<Route path="/login" element={<Login />}>
-					<Route index element={<LandingPage />}></Route>
-					<Route path="signin" element={<Signin />}></Route>
-					<Route path="signup" element={<Signup />}></Route>
-					<Route path="2fa" element={<TokenPage />}></Route>
-				</Route>
-			</Route>
+    <BrowserRouter>
+        <Routes>
+            {/* Unprotected routes */}
+            <Route element={<Guest />}>
+                <Route path="/login" element={<Login />}>
+                    <Route index element={<LandingPage />} />
+                    <Route path="signin" element={<Signin />} />
+                    <Route path="signup" element={<Signup />} />
+                    <Route path="2fa" element={<TokenPage />} />
+                </Route>
+            </Route>
 
-			<Route path='/42/callback' element={<CallBack42 />} />
+            <Route path='/42/callback' element={<CallBack42 />} />
 
-				<Route element={<Protected />}>
-					<Route path="/" element={<Sidebar />}>
-						<Route index element={<Profile />} />
-
-						<Route path="search" element={<Search />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="friends" element={<Friends />}>
-							<Route path=':userNick' element={<UserProfile />}></Route>
-						</Route>
-						
-						<Route path="chat" element={<Chat />}>
-							<Route path=':chatId' element={<ChatBox />}></Route>
-						</Route>
-						
-						<Route path="setting" element={<Setting />}>
-							<Route index element={<SettingMenu />}></Route>
-						</Route>
-						
-						<Route path="/game" element={<>
-							<GameSocketProvider>
-								<Game />
-							</GameSocketProvider>
-						</>}></Route>
-					</Route>
-					<Route path="setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-						<Route path='2fa' element={<TwoFactorAuth />}></Route>
-					</Route>
-					<Route path="/game" element={<>
-						<GameSocketProvider>
-							<Game />
-						</GameSocketProvider>
-					</>}></Route>
-				</Route>
-			<Route path="/test-db" element={<TestDB />} />			
-		</Routes>
-	</BrowserRouter>
+            {/* Protected routes */}
+            <ProtectedRoute path="/" element={<Sidebar />}>
+                <Route index element={<Profile />} />
+                <ProtectedRoute path="search" element={<Search />}>
+                    <Route path=':userNick' element={<UserProfile />} />
+                </ProtectedRoute>
+                <ProtectedRoute path="friends" element={<Friends />}>
+                    <Route path=':userNick' element={<UserProfile />} />
+                </ProtectedRoute>
+                <ProtectedRoute path="chat" element={<Chat />}>
+                    <Route path=':chatId' element={<ChatBox />} />
+                </ProtectedRoute>
+                <ProtectedRoute path="setting" element={<Setting />}>
+                    <Route index element={<SettingMenu />} />
+                    <ProtectedRoute path='2fa' element={<TwoFactorAuth />} />
+                </ProtectedRoute>
+                <ProtectedRoute path="/game">
+                    <GameSocketProvider>
+                        <Game />
+                    </GameSocketProvider>
+                </ProtectedRoute>
+            </ProtectedRoute>
+            <ProtectedRoute path="/test-db" element={<TestDB />} />
+        </Routes>
+    </BrowserRouter>
 );
+
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
