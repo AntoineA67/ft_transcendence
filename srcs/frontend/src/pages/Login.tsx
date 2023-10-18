@@ -291,7 +291,7 @@ export const InputToken = ({ handleChange }: any) => {
 export function TokenPage() {
 
 	// const oauth42Url = Oauth42();
-	const oauth42Url = url42();
+	// const oauth42Url = url42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -354,7 +354,7 @@ export function LandingPage() {
 	const oauth42Url = Oauth42();
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
-	useEffect(() => {3
+	useEffect(() => {
 		localStorage.removeItem('_2fa');
 	}, []);
 
