@@ -55,7 +55,7 @@ export function SearchBar() {
 					{temp.map(myMap)}
 				</ul>
 			) : (
-				<h5 className='p-3' style={{color: 'grey'}}>No result</h5>
+				<h5 className='p-3 grey-text'>No result</h5>
 			)}
 		</div>
 	);

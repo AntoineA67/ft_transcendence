@@ -5,9 +5,7 @@ import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
 import Winner from '../assets/winner.svg';
 import { gameHistoryType } from '../../types/gameHistoryType'; 
-import '../styles/index.css'
 
-import '../styles/Stat.css';
 import { AchieveType } from '../../types/Achieve';
 
 type statProp = {
@@ -39,11 +37,11 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	// console.log(gameHistory);
 
 	const listItem = (x: gameHistoryType, index: number) => {
-		const classname = index % 2 ? 'history-item':'history-item-transparent';
-		const color = x.win ? 'text-magenta' : 'text-cyan';
+		const bgGrey = index % 2 ? 'bg-grey' : '';
+		const color = x.win ? 'magenta-text' : 'cyan-text';
 		return (
 			<li key={x.playerId}
-				className={`${classname} d-flex flex-wrap`}>
+				className={`stat-list-item d-flex flex-wrap ${bgGrey}`}>
 				<div>{dateStr(x.date)}</div>
 				<div className='ms-auto me-3'> {x.against} </div>
 				<div className={color}> {x.score} </div>
@@ -54,10 +52,10 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	return (
 		(gameHistory.length == 0) ? ( 
 			<div className='pb-5 mb-5'>
-				<p className='mx-auto p-3'  style={{color: 'grey'}}>Empty</p>
+				<p className='mx-auto p-3 grey-text'>Empty</p>
 			</div>
 		) : (
-			<ul className="tab-ul px-sm-1 py-5">
+			<ul className="m-auto pb-5 px-1">
 				{gameHistory.map(listItem)}
 			</ul>
 		)
@@ -70,10 +68,13 @@ function AchieveContent({ achieve }: achieveProp) {
 	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
 
 	const myMap = (x: string, index: number) => {
-		const classname = index % 2 ? 'history-item' : 'history-item-transparent';
-		const color = (achieve[x as keyof (typeof achieve)]) ? 'white' : 'grey';
+		const bgGrey = index % 2 ? 'bg-grey' : '';
+		const color = (achieve[x as keyof (typeof achieve)]) ? '' : 'grey-text';
 		return (
-			<li key={`${achieve.userId}_${x}`} className={`${classname} d-flex flex-wrap`} style={{color}}>
+			<li 
+				key={`${achieve.userId}_${x}`} 
+				className={`${bgGrey} d-flex flex-wrap stat-list-item ${color}`} 
+			>
 				{x}
 			</li>
 		);
@@ -82,7 +83,7 @@ function AchieveContent({ achieve }: achieveProp) {
 	// console.log('achieve: ', achieve)
 
 	return (
-		<ul className="tab-ul px-sm-1 py-5">			
+		<ul className="m-auto pb-5 px-1">			
 			{achieveList.map(myMap)}
 		</ul>
 	);
@@ -169,11 +170,10 @@ function PieChart({ win, lose }: pieProp) {
 						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'} 
 					</h5>
 				</div>
-				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
-					<h5 style={{color: 'white'}}> 
+				<div className='col-sm-4 d-flex white-text justify-content-center align-items-center'>
+					<h5> 
 						Win: {win}<br />
 						Lose: {lose} <br />
-						{/* Rate: {(win + lose == 0) ? ('NA') : (win / (win + lose)).toFixed(2) + '%'} */}
 					</h5>
 				</div>
 			</div>
@@ -188,8 +188,8 @@ export default function Stat({gameHistory, achieve} : statProp) {
 		let history = document.getElementById('history');
 		let achieve = document.getElementById('achieve');
 		if (!history || !achieve) return ;
-		history.classList.toggle("tab-greyout");
-		achieve.classList.toggle("tab-greyout");
+		history.classList.toggle("greyout");
+		achieve.classList.toggle("greyout");
 		
 		let historyContent = document.getElementById('history-content');
 		let achieveContent = document.getElementById('achieve-content');
@@ -208,7 +208,7 @@ export default function Stat({gameHistory, achieve} : statProp) {
 				{/* title: small screan */}
 				<div className="row d-sm-none">
 					<div className="col-6">
-						<h5 className="tab-main-color tab-greyout" id="history"
+						<h5 className="tab-main-color greyout" id="history"
 							onClick={(e) => (setShow('history'))}>
 							History
 						</h5>
