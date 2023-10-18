@@ -94,7 +94,7 @@ export function ChatBox() {
 
 	const myMap = (message: Message, profile: ProfileTest, member: Memberstatus, roomChannel: boolean) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
-		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
+		const classuser = message.userId === profile.id ? 'ms-auto' : 'me-auto';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
 			hour: '2-digit',
 			minute: '2-digit',
@@ -113,13 +113,13 @@ export function ChatBox() {
 		}
 
 		return (
-			<div className="message-container" key={message.id}>
-				<strong className={`${classuser}`}>
+			<li className="message-container" key={message.id}>
+				<strong className={`user-header ${classuser}`}>
 					{message.username} - {role}
 					{formattedTime}
 				</strong>
 				<div className={`${classname}`}>{message.message}</div>
-			</div>
+			</li>
 		);
 	};
 

@@ -1,54 +1,34 @@
 .message-container {
 	display: flex;
 	flex-direction: column;
-	max-width: 75%;
-	margin-bottom: 5px;
-	height: auto;
+	margin-bottom: 0.5rem;
 	word-wrap: break-word;
 }
 
 .messageBlue, .messagePink, .messagebanned {
 	border-radius: 0.7rem;
 	padding: 0.5rem;
-	margin-bottom: 1px;
 	max-width: 75%;
 }
 
 .messageBlue {
 	border: 1px solid blue;
 	margin-left: auto;
-	text-align: right;
 }
 
 .messagePink {
 	border: 1px solid pink;
 	margin-right: auto;
-	text-align: left;
 }
 
 .banned-text {
 	color: #000000;
 }
 
-.userBlue, .userPink {
-	display: flex;
-	align-items: center;
-	border-radius: 1px;
-	padding: 5px;
-	max-width: 75%;
+.user-header {
+	padding: 0.3rem;
 	font-style: italic;
 	font-size: smaller;
-	margin-bottom: 5px;
-}
-
-.userBlue {
-	margin-left: auto;
-	text-align: right;
-}
-
-.userPink {
-	margin-right: auto;
-	text-align: left;
 }
 
 .chatListItemButton {
