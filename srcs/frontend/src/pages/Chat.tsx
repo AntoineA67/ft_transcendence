@@ -389,8 +389,8 @@ export function ChatList() {
 			<li key={roomtitle}>
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
-					className={`link-text ${isBanned ? "banned-link" : ""}`}
-					style={{ color: 'white', pointerEvents: isBanned ? "none" : "auto" }}
+					className={`white-text ${isBanned ? "banned-link" : ""}`}
+					style={{pointerEvents: isBanned ? "none" : "auto" }}
 				>
 					<div className={`chatListItemButton ${channelclass}`}>
 						<span
