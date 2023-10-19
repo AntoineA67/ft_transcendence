@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
@@ -18,6 +18,8 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 @Injectable()
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
+
+	private logger = new Logger('userService')
 
 	async createUser(username: string, email: string, password: string) {
 		return await this.prisma.user.create({
@@ -42,25 +44,29 @@ export class UsersService {
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		let user: User;
+		//only a-z, 0-9, '-', '_', case insensitive, empty string not allowed
+		if (data.username || data.username === "") {
+			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+			let empty = data.username.match(/^(?!\s*$).+/i);
+			if (!valid || empty == null) return (false)
+		}
 		try {
-			user = await this.prisma.user.update({
-				where: { id },
-				data
-			});
+			await this.prisma.user.update({ where: { id }, data });
 		} catch (err: any) {
 			return (false);
 		}
 		return (true);
 	}
 
+	async updateNick(id: number, data: string): Promise<boolean> {
+		// refuse if string contain sth other than alphabet, number and '-'
+		return (true) 
+	}
+
 	async deleteUser(userId: number): Promise<boolean> {
-		let user: User;
 		try {
-			user = await this.prisma.user.delete({
-				where: {
-					id: userId,
-				}
+			const user = await this.prisma.user.delete({
+				where: { id: userId }
 			})
 		} catch (err: any) {
 			return (false)
@@ -79,9 +85,9 @@ export class UsersService {
 		return user;
 	}
 
-	async getIdByNick(email: string) {
+	async getIdByNick(nick: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: email	}
+			where: { username: nick	}
 		});
 		if (!user) return (null);
 		return (user.id);
@@ -95,18 +101,46 @@ export class UsersService {
 		return (user.username);
 	}
 
-	async getUserBasic(id: number) {
-		return (
-			await this.prisma.user.findUnique({
-				where: { id },
-				select: {
-					id: true,
-					username: true,
-					avatar: true,
-					status: true,
-				}
-			})
-		)
+	// async getUserBasic(id: number) {
+	// 	return (
+	// 		await this.prisma.user.findUnique({
+	// 			where: { id },
+	// 			select: {
+	// 				id: true,
+	// 				username: true,
+	// 				avatar: true,
+	// 				status: true,
+	// 			}
+	// 		})
+	// 	)
+	// }
+	
+	async getHalfProfile(id: number): Promise<ProfileDto | null>  {
+		let profile = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				password: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
+			}
+		});
+		if (!profile) {
+			return (null);
+		}
+		if (profile && profile.password === "nopass") {
+			profile = { ...profile, password: "nopass" };
+		} else {
+			profile = { ...profile, password: null };
+		}
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null,
+			gameHistory: [], achieve: null
+		})
 	}
 
 	async getUserById(id: number): Promise<UserDto> {
@@ -125,48 +159,48 @@ export class UsersService {
 	}
 
 	// the freind, block, blocked should be given by other services
-	async getUserProfileById(id: number): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { id },
-			select: {
-				id: true,
-				password: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-				activated2FA: true,
-			}
-		});
-		if (profile && profile.password === "nopass") {
-			profile = { ...profile, password: "nopass" };
-		} else {
-			profile = { ...profile, password: null };
-		}
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
+	// async getUserProfileById(id: number): Promise<ProfileDto | null> {
+	// 	let profile = await this.prisma.user.findUnique({
+	// 		where: { id },
+	// 		select: {
+	// 			id: true,
+	// 			password: true,
+	// 			username: true,
+	// 			avatar: true,
+	// 			bio: true,
+	// 			status: true,
+	// 			activated2FA: true,
+	// 		}
+	// 	});
+	// 	if (profile && profile.password === "nopass") {
+	// 		profile = { ...profile, password: "nopass" };
+	// 	} else {
+	// 		profile = { ...profile, password: null };
+	// 	}
+	// 	return ({
+	// 		...profile,
+	// 		friend: null, block: null, blocked: null, sent: null,
+	// 		gameHistory: [], achieve: null
+	// 	})
+	// }
 
-	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { username: nick },
-			select: {
-				id: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-			}
-		});
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
+	// async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
+	// 	let profile = await this.prisma.user.findUnique({
+	// 		where: { username: nick },
+	// 		select: {
+	// 			id: true,
+	// 			username: true,
+	// 			avatar: true,
+	// 			bio: true,
+	// 			status: true,
+	// 		}
+	// 	});
+	// 	return ({
+	// 		...profile,
+	// 		friend: null, block: null, blocked: null, sent: null,
+	// 		gameHistory: [], achieve: null
+	// 	})
+	// }
 
 	async getUserByNick(nick: string): Promise<UserDto> {
 		return (

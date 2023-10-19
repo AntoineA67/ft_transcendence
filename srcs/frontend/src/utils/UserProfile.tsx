@@ -13,11 +13,14 @@ export function UserProfile() {
 	const { userNick } = useParams();
 	const location = useLocation();
 	const [profile, setProfile] = useState<profileType | null>(null);
+	const [loading, setLoading] = useState<boolean>(true);
 
 
 	useEffect(() => {
-		socket.emit('Profile', userNick, (res: profileType) => {
+		setLoading(true);
+		socket.emit('Profile', userNick, (res: profileType | null) => {
 			setProfile(res)
+			setLoading(false);
 			console.log('res', res)
 		})
 	}, [userNick])
@@ -33,12 +36,14 @@ export function UserProfile() {
 					<div
 						className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">
 
-						<Avatar size={150} user={{
-							id: profile.id,
-							username: profile.username,
-							avatar: profile.avatar,
-							status: profile.status
-						}} />
+						<div>
+							<Avatar size={150} user={{
+								id: profile.id,
+								username: profile.username,
+								avatar: profile.avatar,
+								status: profile.status
+							}} />
+						</div>
 
 						<h5 className='my-3 white-text'>
 							{profile.username}

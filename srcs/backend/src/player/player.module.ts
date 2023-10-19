@@ -8,5 +8,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
   imports: [PrismaModule],
   providers: [PlayerService, PlayerGateway],
   controllers: [PlayerController],
+  exports: [PlayerService]
 })
 export class PlayerModule {}

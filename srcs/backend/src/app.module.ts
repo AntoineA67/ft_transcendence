@@ -21,6 +21,7 @@ import { FriendshipModule } from './friendship/friendship.module';
 import { MemberModule } from './member/member.module';
 import { PlayerModule } from './player/player.module';
 import { RoomModule } from './room/room.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { RoomModule } from './room/room.module';
     MemberModule,
     PlayerModule,
     RoomModule,
+	ProfileModule,
     DevtoolsModule.register({
       port: 3001,
       http: process.env.NODE_ENV !== 'production',
