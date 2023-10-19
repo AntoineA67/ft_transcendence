@@ -38,14 +38,18 @@ a:hover {
 
 label {
 	color: whitesmoke;
+	display: block;
+	margin-bottom: 0.5rem;
 }
 
 input {
+	display: block;
 	background: transparent;
 	border: 1px solid grey;
 	border-radius: 0.5rem;
 	color: white;
 	padding: 0.5rem;
+	width: 100%;
 }
 
 input:focus {
