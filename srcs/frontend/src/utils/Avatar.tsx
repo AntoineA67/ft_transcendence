@@ -58,25 +58,15 @@ export function Avatar({ size, user }: avatarProp) {
 	}, [status])
 
 	return (
-		<div style={{position: 'relative'}}>
-			<span style={{
-				height: `15px`,
-				width: `15px`, 
-				borderRadius: '50%',
-				border: '2px solid white',
-				backgroundColor: color,
-				position: 'absolute',
-				left: `${size / 1.1}px`, 
-			}} />	
-			<img 
-				src={avatar} 
-				style={{
-					height: `${size}px`, 
-					width: `auto`, 
-					objectFit: 'contain', 
-					clipPath: 'circle()', 
-				}}
-			/>			
+		<div 
+			className='position-relative'
+			style={{width: `${size}px`, height: `${size}px`}}
+		>
+			<img src={avatar} className='user-avatar'/>
+			<span 
+				className='user-status' 
+				style={{ backgroundColor: color }} 
+			/>	
 		</div>
 	)
 }

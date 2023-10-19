@@ -68,7 +68,7 @@ export function AddOption({profile, setProfile}: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='addOption' onClick={handleClick}/>
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
@@ -95,7 +95,7 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='blockOption' onClick={handleClick} />
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
@@ -143,7 +143,7 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='chatOption' onClick={handleClick} />
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
@@ -191,7 +191,7 @@ export function PongOption({ profile, setProfile }: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='pongOption' onClick={handleClick} />
-			<p style={{ color: '#be2693'}}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
