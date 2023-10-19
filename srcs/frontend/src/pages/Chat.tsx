@@ -1,5 +1,4 @@
-import '../styles/ProfileSetting.css';
-import '../styles/Chat.css';
+
 import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
@@ -95,7 +94,7 @@ export function ChatBox() {
 
 	const myMap = (message: Message, profile: ProfileTest, member: Memberstatus, roomChannel: boolean) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
-		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
+		const classuser = message.userId === profile.id ? 'ms-auto' : 'me-auto';
 		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
 			hour: '2-digit',
 			minute: '2-digit',
@@ -114,37 +113,35 @@ export function ChatBox() {
 		}
 
 		return (
-			<div className="message-container" key={message.id}>
-				<strong className={`message ${classuser}`}>
+			<li className="message-container" key={message.id}>
+				<strong className={`user-header ${classuser}`}>
 					{message.username} - {role}
 					{formattedTime}
 				</strong>
-				<div className={`message ${classname}`}>{message.message}</div>
-			</div>
+				<div className={`${classname}`}>{message.message}</div>
+			</li>
 		);
 	};
 
 	return (
 		<div className="h-100 d-flex flex-column">
-			<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
+			<div className="d-flex w-100 align-items-center p-1">
 				<Link to="..">
-					<button className="goBack"></button>
+					<button className="leftArrow m-2"></button>
 				</Link>
-				<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
+				<h4 className='white-text ms-2'>{roomTitle}</h4>
 			</div>
-			<div className="p-5 flex-grow" style={{ overflowY: 'auto' }}>
+			<div className="p-5 flex-grow overflow-y-auto">
 				<ul
 					ref={messagesEndRef}
-					className="nostyleList d-flex flex-column"
-					style={{ color: 'white', minHeight: 'calc(100vh - 100px)' }}
+					className="d-flex flex-column"
 				>
 					{profile !== undefined ? messages.map((message) => myMap(message, profile, memberstatus, roomChannel)) : null}
 				</ul>
 			</div>
-			<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+			<div className="mt-auto p-3 d-flex align-items-center">
 				<input
-					className={`p-2 flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
-					style={{ borderRadius: '10px' }}
+					className={`flex-grow-1 ${memberstatus.ban ? 'banned-text' : ''}`}
 					value={mess}
 					onChange={(e) => setMess(e.target.value)}
 					onKeyDown={handleKeyDown}
@@ -185,10 +182,11 @@ function MyForm({
 	};
 	return (
 		<form className='d-flex flex-column align-items-center p-2 gap-2' onSubmit={handleSubmit}>
-			<label className='w-75' htmlFor='private-message'>
+			<label className='w-75' htmlFor={label}>
 				{label}
 			</label>
 			<input
+				id={label}
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
 				className='w-75'
@@ -270,8 +268,10 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 	}
 
 	return (
-		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
-			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
+		<div className='h-100 d-flex flex-column p-1 pb-5 white-text overflow-y-auto'>
+			<div>
+				<button className='leftArrow' onClick={() => setPage('chatList')} />
+			</div>
 			<MyForm label='Private message to:' button='Send' value={nick} setValue={setNick} onSubmit={() => handlePrivateMessage(nick)} />
 			{!isJoinDialogOpen && (
 				<MyForm label='Join a group:' button='Join' value={join} setValue={setJoin} onSubmit={() => JoinGroup(join)} />
@@ -279,10 +279,10 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 			<MyForm label='Create a group:' button='Create' value={create} setValue={setCreate} onSubmit={() => handleCreateGroup(create)} />
 
 			{isJoinDialogOpen && (
-				<div className='join-dialog'>
+				<div>
 					<div className='d-flex justify-content-between'>
 						<h5>Join {join}</h5>
-						<button className='cross' onClick={() => setJoinDialogOpen(false)} />
+						<button className='leftArrow' onClick={() => setJoinDialogOpen(false)} />
 					</div>
 					<div className='form-group'>
 						<label htmlFor='roomID'>Room ID:</label>
@@ -291,7 +291,6 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 							id='roomID'
 							value={roomId}
 							onChange={(e) => setRoomId(e.target.value)}
-							className='form-control'
 						/>
 					</div>
 					<div className='form-group'>
@@ -301,14 +300,13 @@ function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAction<"ch
 							id='password'
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							className='form-control'
 						/>
 					</div>
 					<div className='d-flex justify-content-between'>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={handleSecondJoinClick}>
+						<button type='submit' className='btn btn-outline-secondary' onClick={handleSecondJoinClick}>
 							Join
 						</button>
-						<button type='submit' className='btn btn-outline-secondary w-45' onClick={() => setJoinDialogOpen(false)}>
+						<button type='submit' className='btn btn-outline-secondary' onClick={() => setJoinDialogOpen(false)}>
 							Cancel
 						</button>
 					</div>
@@ -392,8 +390,8 @@ export function ChatList() {
 			<li key={roomtitle}>
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
-					className={`link-text ${isBanned ? "banned-link" : ""}`}
-					style={{ color: 'white', pointerEvents: isBanned ? "none" : "auto" }}
+					className={`white-text ${isBanned ? "banned-link" : ""}`}
+					style={{pointerEvents: isBanned ? "none" : "auto" }}
 				>
 					<div className={`chatListItemButton ${channelclass}`}>
 						<span
@@ -414,12 +412,12 @@ export function ChatList() {
 			{page === 'newChat' && <NewChat setPage={setPage} />}
 			{page === 'chatList' && (
 				<>
-					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: "" }}>
-						<h4 style={{ color: "white", margin: "auto 0" }}>Chat</h4>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5 bg-black'>
+						<h4 className='white-text mx-auto my-0'>Chat</h4>
 						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
-					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
-						<ul className='nostyleList py-1' >
+					<div className='ps-sm-2 overflow-y-auto'>
+						<ul className='py-1' >
 							{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
 						</ul>
 					</div>

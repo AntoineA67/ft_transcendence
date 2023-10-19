@@ -40,7 +40,7 @@ export function CallBack42() {
 	return (
 		<>
 			{status == '2fa' && <Navigate to='/login/2fa' replace />}
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			{status == 'loading' && <p className='white-text'> loading ... </p>}
 			{status == 'done' && <Navigate to='/' replace />}
 		</>
 	);
@@ -85,7 +85,7 @@ export function Protected() {
 
 	return (
 		<>
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			{status == 'loading' && <p className='white-text'> loading ... </p>}
 			{status == 'connect' && <Outlet />}
 			{status == 'error' && <Navigate to="/login" replace />}
 		</>

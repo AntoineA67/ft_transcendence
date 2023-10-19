@@ -1,3 +1,5 @@
+// import '../styles/index.css'
+
 import {useEffect, useState} from 'react';
 import { friendsSocket } from '../utils/socket';
 import { useLocation } from 'react-router-dom';
@@ -22,18 +24,18 @@ function AddPage({ setPage }: AddPageProp) {
 	
 	return (
 		<div>
-			<button className='goBack' onClick={() => setPage('friendPage')}/>		
+			<button className='leftArrow m-2' onClick={() => setPage('friendPage')}/>		
 			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
-				<label htmlFor='send-friend-request' className="form-label" >Send friend request</label>
+				<label htmlFor='send-friend-request'>Send friend request</label>
 				<input 
 					autoFocus
-					className='form-control w-100 my-2'
+					className='w-100 my-2'
 					type='text'
 					value={nick}
 					onChange={(e) => setNick(e.target.value)}
 				/>
 				<button type="submit" className="btn btn-primary w-100"> send </button>
-				<div id='form-message mt-1' style={{color: 'white'}}>{mess}</div>
+				<div id='form-message mt-1' className='white-text'>{mess}</div>
 			</form>
 		</div>
 	)
@@ -45,9 +47,9 @@ type FriendPageProp = {
 function FriendPage({ setPage }: FriendPageProp) {
 	return (
 		<>
-			<div className='w-100 p-1 d-flex flex-row align-items-center' style={{background: 'black'}}>
+			<div className='w-100 p-1 d-flex flex-row align-items-center bg-black'>
 				<button className='block me-auto' onClick={() => setPage('blockPage')}/>
-				<h5 style={{color: 'white'}}>Friends</h5>
+				<h5 className='white-text'>Friends</h5>
 				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
 			</div>
 			<FriendReqList />
@@ -62,12 +64,12 @@ type BlockPageProp = {
 function BlockPage({ setPage }: BlockPageProp) {
 	return (
 		<>
-			<div className='d-flex flex-row align-items-center' style={{backgroundColor: 'black'}}>
+			<div className='d-flex flex-row align-items-center bg-black'>
 				<button 
-					className='goBack m-2' 
+					className='leftArrow m-2' 
 					onClick={() => setPage('friendPage')}
 				/>
-				<h5 style={{color: 'white'}}>Blocks</h5>
+				<h5 className='white-text'>Blocks</h5>
 			</div>
 			<BlockList />
 		</>
@@ -98,12 +100,10 @@ export function Friends() {
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
-					style={{overflowY: 'auto'}} >
+				<div className={`overflow-y-auto col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}>
 					<RelationPages />
 				</div>
-				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
-					style={{overflowY: 'auto'}}>
+				<div className={`overflow-y-auto col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}>
 					<Outlet />
 				</div>
 			</div>

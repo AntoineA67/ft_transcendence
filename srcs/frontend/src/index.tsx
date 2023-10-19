@@ -16,11 +16,15 @@ import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 
-//css
+//bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
-import './styles/customForm.css';
+// css
 import './styles/index.css';
+import './styles/iconButton.css';
+import './styles/Chat.css';
+import './styles/Stat.css';
+
 
 import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
@@ -39,7 +43,7 @@ root.render(
 	<BrowserRouter>
 		<Routes>
 			<Route element={<Guest />}>
-				<Route path="/login" element={<Login />}>
+				<Route path="login" element={<Login />}>
 					<Route index element={<LandingPage />}></Route>
 					<Route path="signin" element={<Signin />}></Route>
 					<Route path="signup" element={<Signup />}></Route>
