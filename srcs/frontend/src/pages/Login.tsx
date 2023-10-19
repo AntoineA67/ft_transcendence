@@ -8,10 +8,6 @@ import { useState, useEffect, useContext } from 'react';
 import { Outlet, useOutletContext, Link, Navigate } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import { socket } from '../utils/socket';
-
 
 type newUser = {
 	username: string,
@@ -103,8 +99,9 @@ export function Signup() {
 
 	return (
 		<div className='container'>
-			<Row className="justify-content-center">
-				<Col sm="6" lg="4" >
+			<div className="row justify-content-center">
+				<div className='col-sm-6 col-lg-4'>
+					{/* sm="6" lg="4" */}
 					<Link to="..">
 						<button className="leftArrow my-4"></button>
 					</Link>
@@ -151,8 +148,8 @@ export function Signup() {
 							Sign up
 						</button>
 					</form>
-				</Col>
-			</Row>
+				</div>
+			</div>
 		</div>
 	)
 }
@@ -169,8 +166,9 @@ export function Signin() {
 
 	return (
 		<div className='container'>
-			<Row className="justify-content-center">
-				<Col sm="6" lg="4" >
+			<div className="row justify-content-center">
+				<div className='col-sm-6 col-lg-4'>
+					{/* sm="6" lg="4" */}
 					<Link to='..'>
 						<button className="leftArrow my-4"></button>
 					</Link>
@@ -214,8 +212,8 @@ export function Signin() {
 					<button className="btn btn-invisible w-100">
 						Forget password
 					</button>
-				</Col>
-			</Row>
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -281,8 +279,9 @@ export function TokenPage() {
 
 	return (
 		<div className='container' >
-			<Row className="justify-content-center">
-				<Col sm="6" lg="6" >
+			<div className="row justify-content-center">
+				<div className='col-sm-6 col-lg-6' >
+					{/*  sm="6" lg="6" */}
 
 					<div className='white-text m-0 mt-4' > {/* style={{ color: "white", margin: "60px 0 0 0" }} */}
 						<h2>Two-factor authentication</h2>
@@ -307,8 +306,8 @@ export function TokenPage() {
 						<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0' disabled={invalidToken === true}>Login</button>
 					</form>
 
-				</Col>
-			</Row>
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -325,8 +324,8 @@ export function LandingPage() {
 	return (
 		<>
 			<div className="conatiner text-center">
-				<Row className=" justify-content-center h-100">
-					<Col sm="6" lg="6">
+				<div className="row justify-content-center h-100">
+					<div className='col-sm-6 col-lg-6'>
 						<div className="h-75 d-flex flex-column justify-content-evenly ">
 							<div className="w-75 align-self-center mt-5">
 								<h1 className='magenta-text mt-5'><b>Ping Pang Pong</b></h1>
@@ -347,8 +346,8 @@ export function LandingPage() {
 								</a>
 							</div>
 						</div>
-					</Col>
-				</Row>
+					</div>
+				</div>
 			</div>
 			<footer className="d-flex flex-column align-items-center grey-text py-3">
 				Projet de fin de tronc-commun de l’école 42
