@@ -1,5 +1,3 @@
-import '../styles/ProfileSetting.css';
-import Container from 'react-bootstrap/Container';
 import { Link, Outlet, useLocation } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { Button } from 'react-bootstrap';
@@ -7,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { userType } from '../../types/user';
 import { socket } from '../utils/socket';
 import { UserItem } from '../utils/UserItem';
+// import '../styles/index.css';
 
 export function SearchBar() {
 	const [search, setSearch] = useState('');
@@ -14,6 +13,7 @@ export function SearchBar() {
 	const [temp, setTemp] = useState<userType[]>([]);
 	
 	useEffect(() => {
+		console.log('searchbar: ')
 		socket.emit('getAllUsers', (response: userType[]) => {
 			setList(response)
 			setTemp(response);
@@ -46,16 +46,15 @@ export function SearchBar() {
 					type="text" 
 					placeholder='Search by username'
 					autoFocus
-					className="form-control w-100"
-					style={{backgroundColor: 'grey'}}
+					className="w-100"
 				/>
 			</div>
 			{temp.length ? (
-				<ul style={{ listStyleType: 'none' }} className='p-0 m-0 w-100 pb-5 mb-5'>
+				<ul className='p-0 m-0 w-100 pb-5 mb-5'>
 					{temp.map(myMap)}
 				</ul>
 			) : (
-				<h5 className='p-3' style={{color: 'grey'}}>No result</h5>
+				<h5 className='p-3 grey-text'>No result</h5>
 			)}
 		</div>
 	);
@@ -69,12 +68,10 @@ export function Search() {
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
-				<div className={`col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}
-					style={{ overflowY: 'auto' }} >
+				<div className={`overflow-y-auto col-12 col-sm-4 p-0 m-0 h-100 ${classname1}`}>
 					<SearchBar />
 				</div>
-				<div className={`col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}
-					style={{ overflowY: 'auto' }}>
+				<div className={`overflow-y-auto col-12 col-sm-8 p-0 m-0 h-100 ${classname2}`}>
 					<Outlet />
 				</div>
 			</div>

@@ -1,5 +1,4 @@
 import logo from '../assets/logo.svg';
-import '../styles/App.css';
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useGameSocket } from '../utils/GameSocketProvider';

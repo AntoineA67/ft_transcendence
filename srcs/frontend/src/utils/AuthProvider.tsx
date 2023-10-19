@@ -2,6 +2,8 @@ import React, { useState, useEffect} from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -41,11 +43,16 @@ export function CallBack42() {
 
 	return (
 		<>
-			{status === '2fa' && <Navigate to='/login/2fa' replace />}
-			{status === 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
-			{status === 'done' && <Navigate to='/' replace />}
+		  {status === '2fa' && <Navigate to='/login/2fa' replace />}
+		  {status === 'loading' && (
+			<div style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
+			  <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '0.5rem' }} />
+			  Loading...
+			</div>
+		  )}
+		  {status === 'done' && <Navigate to='/' replace />}
 		</>
-	);
+	  );
 }
 
 export function Protected() {
@@ -87,9 +94,9 @@ export function Protected() {
 
 	return (
 		<>
-			{status === 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
-			{status === 'connect' && <Outlet />}
-			{status === 'error' && <Navigate to="/login" replace />}
+			{status == 'loading' && <p className='white-text'> loading ... </p>}
+			{status == 'connect' && <Outlet />}
+			{status == 'error' && <Navigate to="/login" replace />}
 		</>
 	);
 }
