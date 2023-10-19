@@ -110,45 +110,49 @@ export function Signup() {
 						<Link to="..">
 							<button className="leftArrow my-4"></button>
 						</Link>
-						<Form className="w-100" onSubmit={(e) => (
+						<form className="w-100" onSubmit={(e) => (
 							handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
 							<h3 className='white-text'>New Account!</h3>
 
-							<Form.Group className="my-4" controlId="nickname">
-								<Form.Label>Nickname</Form.Label>
-								<Form.Control required type="text" placeholder="nickname"
+							<div className="mt-4">
+								<label htmlFor='nickname'>Nickname</label>
+								<input id='nickname' required type="text" placeholder="nickname"
 									value={nick} onChange={(e) => { setNick(e.target.value) }} />
-							</Form.Group>
+							</div>
 
-							<Form.Group className="mb-4" controlId="email address">
-								<Form.Label>Email address</Form.Label>
-								<Form.Control required type="email" placeholder="email"
+							<div className="mt-4">
+								<label htmlFor='email'>Email address</label>
+								<input id='email' required type="email" placeholder="email"
 									value={email} onChange={(e) => { setEmail(e.target.value) }} />
-							</Form.Group>
+							</div>
 
-							<Form.Group className="mb-4" controlId="password">
-								<Form.Label>Password</Form.Label>
-								<Form.Control required type="password" placeholder="password"
+							<div className="mt-4">
+								<label htmlFor='password'>Password</label>
+								<input id='password' required type="password" placeholder="password"
 									value={pass} onChange={(e) => { setPass(e.target.value) }} />
 								<div className="d-flex justify-content-end">
 									<img
 										id="eye"
 										src={eyeopen}
 										onClick={togglePassword}
-										className="ms-5 togglePassword" />
+										className="togglePassword" />
 								</div>
-							</Form.Group>
+							</div>
 							<div id='error-message' className='white-text'>
 								{err}
 							</div>
-							<Form.Group className="mb-4" controlId="accept terms">
-								<Form.Check required type="checkbox" label="I accept terms and conditions" />
-							</Form.Group>
+	
+							<div className="mt-4">
+								<input required type="checkbox" id="accept-terms" className='d-inline w-auto'/>
+								<label htmlFor="accept-terms" className='d-inline ms-3'>
+									I accept terms and conditions
+								</label>
+							</div>
 
-							<button type="submit" className="btn btn-secondary w-100" >
+							<button type="submit" className="btn btn-secondary w-100 mt-4" >
 								Sign up
 							</button>
-						</Form>
+						</form>
 					</Col>
 				</Row>
 			</Container>
@@ -174,41 +178,43 @@ export function Signin() {
 						<Link to='..'>
 							<button className="leftArrow my-4"></button>
 						</Link>
-						<Form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
+						<form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
 							<h3 className='white-text'>Welcome back!</h3>
 
-							<Form.Group className="my-4" controlId="nickname">
-								<Form.Label>Nickname</Form.Label>
-								<Form.Control required type="text" placeholder="nickname"
+							<div className="mt-4">
+								<label htmlFor='email'>Email</label>
+								<input id='email' required type="text" placeholder="email"
 									value={nick} onChange={(e) => setNick(e.target.value)} />
-							</Form.Group>
+							</div>
 
-							<Form.Group className="mb-4" controlId="password">
-								<Form.Label>Password</Form.Label>
-								<Form.Control required type="password" placeholder="password"
+							<div className="mt-4">
+								<label htmlFor='password'>Password</label>
+								<input id='password' required type="password" placeholder="password"
 									value={pass} onChange={(e) => setPass(e.target.value)} />
 								<div className="d-flex justify-content-end">
 									<img
 										id="eye"
 										src={eyeopen}
 										onClick={togglePassword}
-										className="ms-5 togglePassword" />
+										className="togglePassword" />
 								</div>
-							</Form.Group>
-							<div id='error-message' className='white-text'>
-								{err}
 							</div>
-
-							<Form.Group className="mb-4" controlId="remember me">
-								<Form.Check type="checkbox" label="Remember me"
+							
+							<div className="mt-4">
+								<input type="checkbox" id="remember me" className='d-inline w-auto'
 									checked={check == 'true'}
 									onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
-							</Form.Group>
+								<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
+							</div>
+							
+							<div id='error-message' className='red-text mt-4'>
+								{err}
+							</div>
 
 							<button type="submit" className="btn btn-primary w-100">
 								Login
 							</button>
-						</Form>
+						</form>
 						<button className="btn btn-invisible w-100">
 							Forget password
 						</button>

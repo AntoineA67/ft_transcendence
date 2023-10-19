@@ -182,27 +182,31 @@ export function SettingMenu() {
 	};
 
 	return (
-		<Container fluid className='px-0 h-75'>
+		<div className='container-fluid px-0 h-75'>
 			<Title title="Setting" />
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >  {/* style={{ minHeight: '400px' }} */}
-				<Form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
-					<Form.Group controlId="currentPassword" >
-						<Form.Label>Confirm password</Form.Label>
-						<Form.Control type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
-					<Form.Group controlId="newPassword" >
-						<Form.Label>New password</Form.Label>
-						<Form.Control type="password" placeholder="New password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
-					<Form.Group controlId="confirmPassword" >
-						<Form.Label>Confirm password</Form.Label>
-						<Form.Control type="password" placeholder="Password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
+				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+					<div>
+						<label htmlFor='current-password'>Current password</label>
+						<input id='current-password' type="password" placeholder="Current password" 
+							disabled={profile?.password === 'nopass'} />
+					</div>
+					<div>
+						<label htmlFor='new-password'>New password</label>
+						<input id='new-password' type="password" placeholder="New password" 
+							disabled={profile?.password === 'nopass'} />
+					</div>
+					<div>
+						<label htmlFor='confirm-password'>Confirm password</label>
+						<input id='confirm-password' type="password" placeholder="Password" 
+							disabled={profile?.password === 'nopass'} />
+					</div>
 					{profile?.password === 'nopass' && (
 						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
 					)}
 					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
-				</Form>
+				</form>
+				
 				<hr />
 				<Form.Check
 					type="switch"
@@ -219,7 +223,7 @@ export function SettingMenu() {
 				}} className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
 
 			</Stack>
-		</Container>
+		</div>
 	);
 }
 

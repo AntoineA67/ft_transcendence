@@ -182,10 +182,11 @@ function MyForm({
 	};
 	return (
 		<form className='d-flex flex-column align-items-center p-2 gap-2' onSubmit={handleSubmit}>
-			<label className='w-75' htmlFor='private-message'>
+			<label className='w-75' htmlFor={label}>
 				{label}
 			</label>
 			<input
+				id={label}
 				value={value}
 				onChange={(e) => setValue(e.target.value)}
 				className='w-75'
