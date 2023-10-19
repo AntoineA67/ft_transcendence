@@ -105,9 +105,10 @@ const router = createBrowserRouter(
 );
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-	<React.StrictMode>
+	// with strict mode, fetch fails. I don't know why
+	// <React.StrictMode>
 		<RouterProvider router={router} />
-	</React.StrictMode>
+	// </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
