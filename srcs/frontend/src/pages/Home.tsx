@@ -1,4 +1,3 @@
-import '../styles/App.css';
 import { useState, useEffect } from 'react';
 import React from 'react';
 import { Button, Card} from 'react-bootstrap';
@@ -13,7 +12,7 @@ export function Home() {
 					<Card.Text>
 					You are about to play a game against another player. Get ready to compete and have fun!
 					</Card.Text>
-					<Link to="/game" className="w-75 link-text">
+					<Link to="/game" className="w-75">
 						<button className="btn btn-primary"><b>Play</b></button>
 					</Link>
 				</Card.Body>

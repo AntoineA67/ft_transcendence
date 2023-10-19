@@ -1,5 +1,4 @@
-import '../styles/ProfileSetting.css';
-import '../styles/Chat.css';
+
 import { Link, Outlet } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
@@ -280,63 +279,64 @@ export function ChatBox() {
 
 	const myMap = (message: Message, profile: ProfileTest) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
-		const classuser = message.userId === profile.id ? 'userBlue' : 'userPink';
-		const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
-			hour: '2-digit',
-			minute: '2-digit',
-			second: '2-digit',
-		});
+		const classuser = message.userId === profile.id ? 'justify-content-end' : 'justify-content-start';
+		// const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
+		// 	hour: '2-digit',
+		// 	minute: '2-digit',
+		// 	second: '2-digit',
+		// });
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
 		}
 
 		return (
-			<div className="message-container" key={message.id}>
-				<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
-					<strong className={`message ${classuser}`}>
-						{message.userId !== profile.id && (
-							<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
-								<span style={{ marginRight: '20px' }}>
-									<FontAwesomeIcon icon={faPlay} />
-								</span>
-							</Link>
-						)}
-						{message.username}
-					</strong>
-				</Link>
-				<div className={`message ${classname}`}>{message.message}</div>
-			</div>
+			<li className="message-container" key={message.id}>
+				<div className={`d-flex ${classuser}`}>
+					<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+						<strong className='user-header'>
+							{message.userId !== profile.id && (
+								<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+									<span style={{ marginRight: '20px' }}>
+										<FontAwesomeIcon icon={faPlay} />
+									</span>
+								</Link>
+							)}
+							{message.username}
+						</strong>
+					</Link>
+				</div>
+				<div className={`${classname}`}>{message.message}</div>
+			</li>
 		);
 	};
 
 
 	return (
-		<div className="h-100 d-flex flex-column">
-			<div className="chat-container">
-				<div className="d-flex w-100 align-items-center p-1 ps-sm-5" style={{ backgroundColor: '' }}>
+		<div className="h-100 d-flex flex-column pb-5 pb-sm-0">
+			<div className="chat-container d-flex h-100" style={{border: '1px solid yellow'}}>
+				<div className="d-flex w-100 align-items-center p-1">
 					<Link to="..">
-						<button className="goBack"></button>
+						<button className="leftArrow m-2"></button>
 					</Link>
-					<h4 style={{ color: 'white', margin: 'auto 0' }}>{roomTitle}</h4>
-					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+					<h4 className='white-text ms-2'>{roomTitle}</h4>
+					<button  onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
-					<div className="p-5" style={{ overflowY: 'auto', flex: '1' }}>
+					<div style={{border: '1px solid purple'}} className="p-5 flex-grow-2 overflow-y-auto">
 						<ul
 							ref={messagesEndRef}
-							className="nostyleList d-flex flex-column"
-							style={{ color: 'white' }}
+							className="d-flex flex-column"
 						>
 							{profile !== undefined ? messages.map((message) => myMap(message, profile)) : null}
 						</ul>
 					</div>
 				)}
 				{!showSettings && (
-					<div className="mb-5 mb-sm-0 p-3  d-flex align-items-center">
+					<div className="mt-auto p-3 d-flex align-items-center">
 						<input
-							className={`p-2 flex-grow-1 ${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
-							style={{ borderRadius: '10px' }}
+							className={`${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
+							// style={{ borderRadius: '10px' }}
 							value={mess}
 							onChange={(e) => setMess(e.target.value)}
 							onKeyDown={handleKeyDown}
@@ -369,7 +369,7 @@ export function ChatBox() {
 				)}
 			</div>
 			{showSettings && (
-				<div className="w-100 h-100 d-flex flex-column">
+				<div className="w-100 h-100 d-flex flex-column" style={{border: '1px solid red'}}>
 					<div className="align-items-center d-flex flex-column">
 						{memberstatus?.admin && roomChannel && (
 							<>
@@ -534,8 +534,8 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	}
 
 	return (
-		<div className='w-100 h-100 d-flex flex-column p-1 pb-5 pb-sm-0 m-0' style={{ color: 'white', overflowY: 'auto' }}>
-			<button className='cross ms-auto' onClick={() => setPage('chatList')} />
+		<div className='h-100 d-flex flex-column p-1 pb-5 white-text overflow-y-auto'>
+			<button className='leftArrow' onClick={() => setPage('chatList')} />
 
 			<form className='form-controlchat d-flex flex-column align-items-center p-2 gap-2' onSubmit={(e) => {
 				e.preventDefault();
@@ -629,7 +629,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 							className='w-75 form-control with-white-placeholder'
 							placeholder='Password'
 						/>
-						<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
+						<button type='submit' className='btn btn-outline-secondary' disabled={!create.trim()}>
 							Create
 						</button>
 					</div>
@@ -743,8 +743,8 @@ export function ChatList() {
 			<li key={roomtitle}>
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
-					className={`link-text ${isBanned ? "banned-link" : ""}`}
-					style={{ color: 'white', pointerEvents: isBanned ? "none" : "auto" }}
+					className={`white-text ${isBanned ? "banned-link" : ""}`}
+					style={{pointerEvents: isBanned ? "none" : "auto" }}
 				>
 					<div className={`chatListItemButton ${channelclass}`}>
 						<span
@@ -765,13 +765,11 @@ export function ChatList() {
 			{page === 'newChat' && <NewChat setPage={setPage} />}
 			{page === 'chatList' && (
 				<>
-					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5' style={{ backgroundColor: '' }}>
-						<h4 style={{ color: 'white', margin: 'auto 0' }}>Chat</h4>
-						<div className='ms-auto'>
-							<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
-						</div>
+					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5 bg-black'>
+						<h4 className='white-text mx-auto my-0'>Chat</h4>
+						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
-					<div className='ps-sm-2' style={{ overflowY: 'auto' }}>
+					<div className='ps-sm-2 overflow-y-auto'>
 						{rooms.length > 0 ? (
 							<ul className='nostyleList py-1'>
 								{(profile !== undefined && pvrooms !== undefined) ? rooms.map((room) => myMap(room, pvrooms, profile)) : null}
