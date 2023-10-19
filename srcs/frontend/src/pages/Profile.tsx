@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import Container from 'react-bootstrap/Container';
 import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
@@ -135,7 +134,7 @@ function Profile() {
 	return (
 		profile ? (
 			<>
-				<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+				<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
 					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
 					<Avatar size={100} user={{
@@ -157,7 +156,7 @@ function Profile() {
 							<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
 						) : (
 							<Text type='bio' profile={profile} setEdit={setEdit} />)}
-				</Container>
+				</div>
 				<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
 			</>
 		) : (
