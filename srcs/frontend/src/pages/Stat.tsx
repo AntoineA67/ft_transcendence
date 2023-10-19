@@ -1,4 +1,3 @@
-import Container from 'react-bootstrap/Container';
 import { useState, useEffect } from 'react';
 import { gameHistoryType } from '../../types/gameHistoryType'; 
 import { AchieveType } from '../../types/Achieve';
@@ -142,7 +141,7 @@ function PieChart({ win, lose }: pieProp) {
 	}, [win, lose]);
 	
 	return (
-		<Container className='my-5'>
+		<div className='container my-5'>
 			<div className='row justify-content-center'>
 				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
@@ -157,7 +156,7 @@ function PieChart({ win, lose }: pieProp) {
 					</h5>
 				</div>
 			</div>
-		</Container>
+		</div>
 	);
 }
 
@@ -183,7 +182,7 @@ export default function Stat({gameHistory, achieve} : statProp) {
 	return (
 		<>
 			<PieChart win={gameHistory.filter((x) => (x.win)).length} lose={gameHistory.filter((x) => (!x.win)).length} />
-			<Container>
+			<div className='container'>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
 					<div className="col-6">
@@ -221,7 +220,7 @@ export default function Stat({gameHistory, achieve} : statProp) {
 						<AchieveContent achieve={{... achieve}} />	
 					</div>
 				</div>
-			</Container>
+			</div>
 		</>
 	);
 }

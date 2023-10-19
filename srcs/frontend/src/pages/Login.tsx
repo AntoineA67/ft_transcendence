@@ -8,7 +8,6 @@ import { useState, useEffect, useContext } from 'react';
 import { Outlet, useOutletContext, Link, Navigate } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import { socket } from '../utils/socket';
@@ -103,59 +102,57 @@ export function Signup() {
 	const [err, setErr] = useState('');
 
 	return (
-		<div>
-			<Container>
-				<Row className="justify-content-center">
-					<Col sm="6" lg="4" >
-						<Link to="..">
-							<button className="leftArrow my-4"></button>
-						</Link>
-						<form className="w-100" onSubmit={(e) => (
-							handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
-							<h3 className='white-text'>New Account!</h3>
+		<div className='container'>
+			<Row className="justify-content-center">
+				<Col sm="6" lg="4" >
+					<Link to="..">
+						<button className="leftArrow my-4"></button>
+					</Link>
+					<form className="w-100" onSubmit={(e) => (
+						handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
+						<h3 className='white-text'>New Account!</h3>
 
-							<div className="mt-4">
-								<label htmlFor='nickname'>Nickname</label>
-								<input id='nickname' required type="text" placeholder="nickname"
-									value={nick} onChange={(e) => { setNick(e.target.value) }} />
-							</div>
+						<div className="mt-4">
+							<label htmlFor='nickname'>Nickname</label>
+							<input id='nickname' required type="text" placeholder="nickname"
+								value={nick} onChange={(e) => { setNick(e.target.value) }} />
+						</div>
 
-							<div className="mt-4">
-								<label htmlFor='email'>Email address</label>
-								<input id='email' required type="email" placeholder="email"
-									value={email} onChange={(e) => { setEmail(e.target.value) }} />
-							</div>
+						<div className="mt-4">
+							<label htmlFor='email'>Email address</label>
+							<input id='email' required type="email" placeholder="email"
+								value={email} onChange={(e) => { setEmail(e.target.value) }} />
+						</div>
 
-							<div className="mt-4">
-								<label htmlFor='password'>Password</label>
-								<input id='password' required type="password" placeholder="password"
-									value={pass} onChange={(e) => { setPass(e.target.value) }} />
-								<div className="d-flex justify-content-end">
-									<img
-										id="eye"
-										src={eyeopen}
-										onClick={togglePassword}
-										className="togglePassword" />
-								</div>
+						<div className="mt-4">
+							<label htmlFor='password'>Password</label>
+							<input id='password' required type="password" placeholder="password"
+								value={pass} onChange={(e) => { setPass(e.target.value) }} />
+							<div className="d-flex justify-content-end">
+								<img
+									id="eye"
+									src={eyeopen}
+									onClick={togglePassword}
+									className="togglePassword" />
 							</div>
-							<div id='error-message' className='white-text'>
-								{err}
-							</div>
-	
-							<div className="mt-4">
-								<input required type="checkbox" id="accept-terms" className='d-inline w-auto'/>
-								<label htmlFor="accept-terms" className='d-inline ms-3'>
-									I accept terms and conditions
-								</label>
-							</div>
+						</div>
+						<div id='error-message' className='white-text'>
+							{err}
+						</div>
 
-							<button type="submit" className="btn btn-secondary w-100 mt-4" >
-								Sign up
-							</button>
-						</form>
-					</Col>
-				</Row>
-			</Container>
+						<div className="mt-4">
+							<input required type="checkbox" id="accept-terms" className='d-inline w-auto'/>
+							<label htmlFor="accept-terms" className='d-inline ms-3'>
+								I accept terms and conditions
+							</label>
+						</div>
+
+						<button type="submit" className="btn btn-secondary w-100 mt-4" >
+							Sign up
+						</button>
+					</form>
+				</Col>
+			</Row>
 		</div>
 	)
 }
@@ -171,56 +168,54 @@ export function Signin() {
 	const [err, setErr] = useState('');
 
 	return (
-		<div >
-			<Container >
-				<Row className="justify-content-center">
-					<Col sm="6" lg="4" >
-						<Link to='..'>
-							<button className="leftArrow my-4"></button>
-						</Link>
-						<form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
-							<h3 className='white-text'>Welcome back!</h3>
+		<div className='container'>
+			<Row className="justify-content-center">
+				<Col sm="6" lg="4" >
+					<Link to='..'>
+						<button className="leftArrow my-4"></button>
+					</Link>
+					<form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
+						<h3 className='white-text'>Welcome back!</h3>
 
-							<div className="mt-4">
-								<label htmlFor='email'>Email</label>
-								<input id='email' required type="text" placeholder="email"
-									value={nick} onChange={(e) => setNick(e.target.value)} />
-							</div>
+						<div className="mt-4">
+							<label htmlFor='email'>Email</label>
+							<input id='email' required type="text" placeholder="email"
+								value={nick} onChange={(e) => setNick(e.target.value)} />
+						</div>
 
-							<div className="mt-4">
-								<label htmlFor='password'>Password</label>
-								<input id='password' required type="password" placeholder="password"
-									value={pass} onChange={(e) => setPass(e.target.value)} />
-								<div className="d-flex justify-content-end">
-									<img
-										id="eye"
-										src={eyeopen}
-										onClick={togglePassword}
-										className="togglePassword" />
-								</div>
+						<div className="mt-4">
+							<label htmlFor='password'>Password</label>
+							<input id='password' required type="password" placeholder="password"
+								value={pass} onChange={(e) => setPass(e.target.value)} />
+							<div className="d-flex justify-content-end">
+								<img
+									id="eye"
+									src={eyeopen}
+									onClick={togglePassword}
+									className="togglePassword" />
 							</div>
-							
-							<div className="mt-4">
-								<input type="checkbox" id="remember me" className='d-inline w-auto'
-									checked={check == 'true'}
-									onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
-								<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
-							</div>
-							
-							<div id='error-message' className='red-text mt-4'>
-								{err}
-							</div>
+						</div>
+						
+						<div className="mt-4">
+							<input type="checkbox" id="remember me" className='d-inline w-auto'
+								checked={check == 'true'}
+								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
+							<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
+						</div>
+						
+						<div id='error-message' className='red-text mt-4'>
+							{err}
+						</div>
 
-							<button type="submit" className="btn btn-primary w-100">
-								Login
-							</button>
-						</form>
-						<button className="btn btn-invisible w-100">
-							Forget password
+						<button type="submit" className="btn btn-primary w-100">
+							Login
 						</button>
-					</Col>
-				</Row>
-			</Container>
+					</form>
+					<button className="btn btn-invisible w-100">
+						Forget password
+					</button>
+				</Col>
+			</Row>
 		</div>
 	);
 }
@@ -285,37 +280,35 @@ export function TokenPage() {
 	}
 
 	return (
-		<div>
-			<Container >
-				<Row className="justify-content-center">
-					<Col sm="6" lg="6" >
+		<div className='container' >
+			<Row className="justify-content-center">
+				<Col sm="6" lg="6" >
 
-						<div className='white-text m-0 mt-4' > {/* style={{ color: "white", margin: "60px 0 0 0" }} */}
-							<h2>Two-factor authentication</h2>
-							<p>
-								Enter the 6-digit code from your 2FA app to pass two-factor authentication.
-							</p>
-						</div>
-						<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
-							<InputToken
-								handleChange={(token: any) => {
-									setToken(token);
-									setInvalidToken(false);
-								}}
-							/>
-							<br></br>
-							{invalidToken === true && (
-								<>
-									<div className='red-text text-center'>Your token is invalid, please try again !</div>
-									<br></br>
-								</>
-							)}
-							<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0' disabled={invalidToken === true}>Login</button>
-						</form>
+					<div className='white-text m-0 mt-4' > {/* style={{ color: "white", margin: "60px 0 0 0" }} */}
+						<h2>Two-factor authentication</h2>
+						<p>
+							Enter the 6-digit code from your 2FA app to pass two-factor authentication.
+						</p>
+					</div>
+					<form className="d-flex flex-column" onSubmit={(e) => { e.preventDefault(); sendToken(); }}>
+						<InputToken
+							handleChange={(token: any) => {
+								setToken(token);
+								setInvalidToken(false);
+							}}
+						/>
+						<br></br>
+						{invalidToken === true && (
+							<>
+								<div className='red-text text-center'>Your token is invalid, please try again !</div>
+								<br></br>
+							</>
+						)}
+						<button className='btn btn-primary w-100 mt-auto mb-5 mb-sm-0' disabled={invalidToken === true}>Login</button>
+					</form>
 
-					</Col>
-				</Row>
-			</Container>
+				</Col>
+			</Row>
 		</div>
 	);
 }
@@ -331,7 +324,7 @@ export function LandingPage() {
 
 	return (
 		<>
-			<Container className="text-center">
+			<div className="conatiner text-center">
 				<Row className=" justify-content-center h-100">
 					<Col sm="6" lg="6">
 						<div className="h-75 d-flex flex-column justify-content-evenly ">
@@ -356,7 +349,7 @@ export function LandingPage() {
 						</div>
 					</Col>
 				</Row>
-			</Container>
+			</div>
 			<footer className="d-flex flex-column align-items-center grey-text py-3">
 				Projet de fin de tronc-commun de l’école 42
 				<a href={github}><img src={githubLogo} /></a>

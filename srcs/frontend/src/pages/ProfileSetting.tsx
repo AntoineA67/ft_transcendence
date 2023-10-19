@@ -188,8 +188,7 @@ export function SettingMenu() {
 				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
 					<div>
 						<label htmlFor='current-password'>Current password</label>
-						<input id='current-password' type="password" placeholder="Current password" 
-							disabled={profile?.password === 'nopass'} />
+						<input id='current-password' type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
 					</div>
 					<div>
 						<label htmlFor='new-password'>New password</label>
