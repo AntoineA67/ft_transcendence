@@ -1,12 +1,5 @@
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Stack from 'react-bootstrap/Stack';
 import { useState, useEffect } from 'react';
-import Winner from '../assets/winner.svg';
 import { gameHistoryType } from '../../types/gameHistoryType'; 
-
-import '../styles/Stat.css';
 import { AchieveType } from '../../types/Achieve';
 
 type statProp = {
@@ -22,7 +15,6 @@ type achieveProp = {
 	achieve: AchieveType
 }
 
-// 'more' fetch more data on click, data will be put in a useState
 function HistoryContent({ gameHistory }: gameHistoryProp) {
 
 	const dateStr = (input: any): string => {
@@ -35,14 +27,12 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 		return month + '/' + day + '/' + year;
 	}
 
-	// console.log(gameHistory);
-
 	const listItem = (x: gameHistoryType, index: number) => {
-		const classname = index % 2 ? 'history-item':'history-item-transparent';
-		const color = x.win ? 'text-magenta' : 'text-cyan';
+		const bgGrey = index % 2 ? 'bg-grey' : '';
+		const color = x.win ? 'magenta-text' : 'cyan-text';
 		return (
 			<li key={x.playerId}
-				className={`${classname} d-flex flex-wrap`}>
+				className={`stat-list-item d-flex flex-wrap ${bgGrey}`}>
 				<div>{dateStr(x.date)}</div>
 				<div className='ms-auto me-3'> {x.against} </div>
 				<div className={color}> {x.score} </div>
@@ -52,36 +42,33 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	
 	return (
 		(gameHistory.length == 0) ? ( 
-			<div className='pb-5 mb-5'>
-				<p className='mx-auto p-3'  style={{color: 'grey'}}>Empty</p>
-			</div>
+			<h3 className='p-3 grey-text pb-5'>Empty</h3>
 		) : (
-			<ul className="tab-ul px-sm-1 py-5">
+			<ul className="p-1 pb-5">
 				{gameHistory.map(listItem)}
 			</ul>
 		)
 	);
 }
 
-
-
 function AchieveContent({ achieve }: achieveProp) {
 	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
 
 	const myMap = (x: string, index: number) => {
-		const classname = index % 2 ? 'history-item' : 'history-item-transparent';
-		const color = (achieve[x as keyof (typeof achieve)]) ? 'white' : 'grey';
+		const bgGrey = index % 2 ? 'bg-grey' : '';
+		const color = (achieve[x as keyof (typeof achieve)]) ? '' : 'grey-text';
 		return (
-			<li key={`${achieve.userId}_${x}`} className={`${classname} d-flex flex-wrap`} style={{color}}>
+			<li 
+				key={`${achieve.userId}_${x}`} 
+				className={`${bgGrey} d-flex flex-wrap stat-list-item ${color}`} 
+			>
 				{x}
 			</li>
 		);
 	}
 
-	// console.log('achieve: ', achieve)
-
 	return (
-		<ul className="tab-ul px-sm-1 py-5">			
+		<ul className="m-auto pb-5 px-1">			
 			{achieveList.map(myMap)}
 		</ul>
 	);
@@ -93,10 +80,7 @@ type pieProp = {
 }
 
 function PieChart({ win, lose }: pieProp) {
-	// const [win, setWin] = useState(gameHistory.filter((x) => (x.win)).length)
-	// const [lose, setLose] = useState(gameHistory.filter((x) => (!x.win)).length)
-	
-	// must fix it if total is zero, rate is 0 or 100
+
 	function gradientDoghnut(win: number, lose: number) {
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 		const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D || null;
@@ -105,7 +89,6 @@ function PieChart({ win, lose }: pieProp) {
 		const yc = 100;
 		const r = 60;
 		let total: number = win + lose;
-		// const winRate: string = ((win / total) * 100).toFixed(1);
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
 		// if total == 0 , draw a grey circle
@@ -149,34 +132,31 @@ function PieChart({ win, lose }: pieProp) {
 			ctx.arc(xc, yc, r, start, start + deg, false);
 			ctx.lineWidth = 10;
 			ctx.stroke();
-			// console.log(start, start + deg);
 			start += deg;
 		}
 	}
-	
 	
 	useEffect(() => {
 		gradientDoghnut(win, lose);
 	}, [win, lose]);
 	
 	return (
-		<Container className='my-5'>
+		<div className='container my-5'>
 			<div className='row justify-content-center'>
 				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200'/>
-					<h5 style={{color: 'white', position: 'relative', bottom: '110px', left: '5px'}}> 
+					<h5 className='win-rate'> 
 						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'} 
 					</h5>
 				</div>
-				<div className='col-sm-4 d-flex justify-content-center align-items-center'>
-					<h5 style={{color: 'white'}}> 
+				<div className='col-sm-4 d-flex white-text justify-content-center align-items-center'>
+					<h5> 
 						Win: {win}<br />
 						Lose: {lose} <br />
-						{/* Rate: {(win + lose == 0) ? ('NA') : (win / (win + lose)).toFixed(2) + '%'} */}
 					</h5>
 				</div>
 			</div>
-		</Container>
+		</div>
 	);
 }
 
@@ -187,8 +167,8 @@ export default function Stat({gameHistory, achieve} : statProp) {
 		let history = document.getElementById('history');
 		let achieve = document.getElementById('achieve');
 		if (!history || !achieve) return ;
-		history.classList.toggle("tab-greyout");
-		achieve.classList.toggle("tab-greyout");
+		history.classList.toggle("greyout");
+		achieve.classList.toggle("greyout");
 		
 		let historyContent = document.getElementById('history-content');
 		let achieveContent = document.getElementById('achieve-content');
@@ -201,13 +181,12 @@ export default function Stat({gameHistory, achieve} : statProp) {
 
 	return (
 		<>
-			{/* <PieChart gameHistory={gameHistory.map((a) => ({ ... a }))} /> */}
 			<PieChart win={gameHistory.filter((x) => (x.win)).length} lose={gameHistory.filter((x) => (!x.win)).length} />
-			<Container>
+			<div className='container'>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
 					<div className="col-6">
-						<h5 className="tab-main-color tab-greyout" id="history"
+						<h5 className="tab-main-color greyout" id="history"
 							onClick={(e) => (setShow('history'))}>
 							History
 						</h5>
@@ -241,9 +220,7 @@ export default function Stat({gameHistory, achieve} : statProp) {
 						<AchieveContent achieve={{... achieve}} />	
 					</div>
 				</div>
-			</Container>
+			</div>
 		</>
-
 	);
-	
 }

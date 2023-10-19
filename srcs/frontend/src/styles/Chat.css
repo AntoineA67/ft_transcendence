@@ -1,38 +1,210 @@
+.message-container {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 0.5rem;
+	word-wrap: break-word;
+}
+
+.messageBlue, .messagePink, .messagebanned {
+	border-radius: 0.7rem;
+	padding: 0.5rem;
+	max-width: 75%;
+}
+
 .messageBlue {
 	border: 1px solid blue;
-	border-radius: 10px;
 	margin-left: auto;
-	padding: 15px;
-	margin-bottom: 10px;
-	max-width: 75%;
 }
 
 .messagePink {
 	border: 1px solid pink;
-	border-radius: 10px;
 	margin-right: auto;
-	padding: 15px;
-	margin-bottom: 10px;
-	max-width: 75%;
 }
 
-.nostyleList {
-	list-style-type: none;
-	text-decoration: none;
+.banned-text {
+	color: #000000;
+}
+
+.user-header {
+	padding: 0.3rem;
+	font-style: italic;
+	font-size: smaller;
+}
+
+.chatListItemButton {
+	margin: 0;
+	margin-bottom: 3px;
+	padding: 20px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	border-radius: 10px;
+	cursor: pointer;
+	text-align: center;
+	transition: border-color 0.2s ease;
+	border: 2px solid transparent;
+}
+
+.chatListItemChannel {
+	background-color: rgb(44, 109, 170);
+}
+
+.chatListItemPrivate {
+	background-color: rgb(245, 93, 237);
+}
+
+.chatListItemBan {
+	background-color: #777;
+}
+
+.chatListItemButton:hover {
+	border-color: #ffffff;
+}
+
+/* merge  */
+.chat-container {
+	margin: 0 auto;
+	padding: 10px;
+	/* height: 100%; */
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	background-color: transparent;
+	min-height: 0;
+}
+
+.custom-select select {
+	border: 1px solid #ffffff;
+	border-radius: 4px;
+	background-color: transparent;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+#private-message::placeholder,
+#groupname::placeholder,
+#groupnamecreate::placeholder,
+#roomID::placeholder,
+#password::placeholder,
+#createGroup::placeholder,
+#roomTitleInput,
+#createPassword::placeholder {
+	color: #555;
+}
+
+
+.members-button {
+	position: relative;
+}
+
+.members-button button {
+	background: none;
+	border: none;
+	color: white;
+	cursor: pointer;
+}
+
+.members-panel {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	width: 200px;
+	padding: 10px;
+}
+
+
+.members-panel ul {
+	list-style: none;
+	padding: 0;
+}
+
+.members-panel li {
+	margin: 5px 0;
+}
+
+
+.members-list {
+	list-style: none;
 	padding: 0;
 	margin: 0;
 }
 
-.chatListItem {
-	margin: 0;
-	background-color: grey;
-	margin-bottom: 3px;
-	padding: 20px;
+.member {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px 10px;
+	transition: background-color 0.2s;
 }
 
-.userItem {
-	margin: 0;
-	background-color: grey;
-	/* margin-bottom: 3px; */
-	padding: 10px;
+.member-details {
+	display: flex;
+	align-items: center;
+	padding: 8px;
+	border-radius: 8px;
+	margin-right: 10px;
 }
+
+.member-username {
+	font-weight: bold;
+	color: #ffffff;
+	margin-right: 4px;
+}
+
+.member-role {
+	font-size: 14px;
+	color: #ff8ae8;
+}
+
+
+.member-actions {
+	display: flex;
+}
+
+.mute-icon,
+.ban-icon,
+.kick-icon {
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: color 0.2s;
+	color: #ffffff;
+}
+
+.mute-icon:hover,
+.ban-icon:hover,
+.kick-icon:hover {
+	color: #ff0000;
+}
+
+.members-list,
+.member {
+	border: none;
+	padding: 10;
+	margin: 0;
+	background-color: transparent;
+}
+
+.settings-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	width: 50px;
+	font-size: 20px;
+	color: white;
+	outline: none;
+	margin-right: 50px;
+}
+
+.action-button {
+	background: transparent;
+	color: white;
+	border-radius: 5px;
+	padding: 5px 10px;
+	margin: 0 5px;
+	cursor: pointer;
+	width: auto;
+  }
+  

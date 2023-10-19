@@ -1,19 +1,9 @@
-import '../styles/App.css';
-import '../styles/Profile.css';
-
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import { socket } from '../utils/socket';
 import Stat from './Stat';
-
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Stack from 'react-bootstrap/Stack';
-import { arrayBuffer } from 'stream/consumers';
-import { profileType } from '../../types/user';
+import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
-
+import { profileType } from '../../types/user';
 
 type textProp = {
 	type: 'nick' | 'bio',
@@ -29,11 +19,11 @@ function Text({ type, profile, setEdit }: textProp) {
 	return (
 		<>
 			{type == 'nick' ? (
-				<h5 style={{ color: "white"}} className={classname}>
+				<h5 className={`${classname} white-text`}>
 					{profile.username}
 				</h5>
 			) : (
-				<p style={{ color: "white" }} className={classname}>
+				<p className={`${classname} white-text`}>
 					{profile.bio}
 				</p>
 			)}
@@ -76,8 +66,8 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			console.log('profile', profile)
-			console.log('obj', obj)
+			// console.log('profile', profile)
+			console.log('success: ', success)
 			success && setProfile((prev) => (
 				prev ? ({... prev, ... obj}) : prev
 			));
@@ -116,7 +106,7 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 
 	return (
 		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
-			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "50px" }}>
+			<label htmlFor="new-avatar" className='add new-avatar-pos'>
 				<input 
 					className='d-none' 
 					id="new-avatar" 
@@ -163,34 +153,35 @@ function Profile() {
 	return (
 		profile ? (
 			<>
-				<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" 
-					style={{ color: "white"}}>			
+				<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
 					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 				
-					<Avatar size={100} user={{
-						id: profile.id, 
-						username: profile.username, 
-						avatar: profile.avatar,
-						status: profile.status
-					}} />
+					<div>
+						<Avatar size={150} user={{
+							id: profile.id, 
+							username: profile.username, 
+							avatar: profile.avatar,
+							status: profile.status
+						}} />
+					</div>
 					<NewAvatar setUpdate={setUpdate}/>
 
 					{ (edit == 'nick'
 						) ? ( 
-							<EditText type={'nick'} profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+							<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
 						) : (
-							<Text type={'nick'} profile={profile} setEdit={setEdit} /> )}
+							<Text type='nick' profile={profile} setEdit={setEdit} /> )}
 					
 					 { (edit == 'bio'
 					 	) ? (
-							<EditText type={'bio'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
+							<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
 						) : (
-							<Text type={'bio'} profile={profile} setEdit={setEdit} />)}
-				</Container>
+							<Text type='bio' profile={profile} setEdit={setEdit} />)}
+				</div>
 				<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
 			</>
 		) : (
-			<p style={{color: 'white'}}>loading</p>
+			<p className='white-text'>loading</p>
 		)
 	);
 }
