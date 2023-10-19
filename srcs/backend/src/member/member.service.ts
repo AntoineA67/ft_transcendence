@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Member, Prisma } from '@prisma/client';
 import { RoomService } from 'src/room/room.service';
@@ -15,9 +15,9 @@ export class MemberService {
 	}
 
 	async getMemberById(id: number): Promise<Member> {
-		const member = await this.prisma.member.findUnique({
+		const member = await this.prisma.member.findFirst({
 			where: {
-				id,
+				userId: id,
 			},
 		});
 		if (!member) {
@@ -26,43 +26,70 @@ export class MemberService {
 		return member;
 	}
 
-	async getMemberDatabyRoomId(userid: number, roomid: number): Promise<Member> {
+	async getMemberDatabyRoomId(userid: number, roomid: number): Promise<any | null> {
 		const room = await this.prisma.room.findUnique({
+		  where: {
+			id: roomid,
+		  },
+		});
+	  
+		if (!room) {
+		  return null;
+		}
+	  
+		let pvroom: any | undefined;
+	  
+		if (!room.isChannel) {
+		  pvroom = await this.roomService.getPrivateRoomById(userid, roomid);
+		}
+	  
+		const member = await this.prisma.member.findFirst({
+		  where: {
+			userId: userid,
+			roomId: roomid,
+		  },
+		  include: {
+			user: true,
+		  },
+		});
+	  
+		if (!member) {
+		  return null;
+		}
+	  
+		const memberstatus = {
+		  id: member.id,
+		  userId: member.userId,
+		  username: member.user.username,
+		  roomId: member.roomId,
+		  owner: member.owner,
+		  admin: member.admin,
+		  ban: room.isChannel ? member.ban : pvroom?.block || pvroom?.blocked,
+		  mute: member.mute,
+		};
+	  
+		return memberstatus;
+	  }
+	  
+	  
+
+	async getMembersByRoomId(roomid: number): Promise<any[]> {
+		const members = await this.prisma.member.findMany({
 			where: {
-				id: roomid,
+				roomId: roomid,
 			},
 		});
-		if (!room) {
+		if (!members) {
 			return null;
 		}
-		if (room.isChannel) {
-			return await this.prisma.member.findFirst({
-				where: {
-					userId: userid,
-					roomId: roomid,
-				},
-			});
-		}
-		else {
-			let member = await this.prisma.member.findFirst({
-				where: {
-					userId: userid,
-					roomId: roomid,
-				},
-			});
-			const pvroom = await this.roomService.getPrivateRoomById(userid,roomid);
-			const banned = pvroom.block || pvroom.blocked;
-			const memberstatus = {
-				id: member.id,
-				userId: member.userId,
-				roomId: member.roomId,
-				owner: member.owner,
-				admin: member.admin,
-				ban: banned,
-				mute: member.mute,
-			};
-			return memberstatus;
-		}
+		const membersList = [];
+		for (const member of members) {
+			const memberStatus = await this.getMemberDatabyRoomId(member.userId, roomid);
+			if (memberStatus) {
+				membersList.push(memberStatus);
+			}
+		  }
+		return membersList;
 	}
 
 	async getAllMembers(): Promise<Member[]> {
