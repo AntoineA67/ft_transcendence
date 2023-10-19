@@ -2,11 +2,11 @@
 // import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { jwtConstants } from './constants';
+import { jwtConstants } from '../constants';
 import { Strategy } from 'passport-42';
 import passport from 'passport';
-import { User, UsersService } from '../users/users.service';
-import { AuthService } from './auth.service';
+import { User, UsersService } from '../../users/users.service';
+import { AuthService } from '../auth.service';
 
 
 // var FortyTwoStrategy = require('passport-42').Strategy;

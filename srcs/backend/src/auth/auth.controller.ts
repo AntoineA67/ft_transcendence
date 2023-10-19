@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
+import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
 import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
@@ -49,16 +49,17 @@ export class AuthController {
 		} else if (req.query._2fa && req.user.activated2FA) {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
-				response = this.authService.createJWT(req);
+				response = await this.authService.createJWT(req);
 				// response = await this.authService.signToken(req.user.id, res);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 			// no 2fa
 		} else {
-			response = this.authService.createJWT(req);
+			response = await this.authService.createJWT(req);
 			// response = await this.authService.signToken(req.user.id, res);
 		}
+		console.log ("RESPONSE=", response);
 		res.status(HttpStatus.OK).json(response);
 	}
 

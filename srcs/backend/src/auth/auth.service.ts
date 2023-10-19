@@ -102,14 +102,27 @@ export class AuthService {
 			accessToken: token,
 			refreshToken: refreshToken
 		});
-
 	  }
 
-	  createJWT(req: any) {
+	async createJWT(req: any) {
 		let payload = {
 			id: req.user.id,
+			email: req.user.email,
 		}
-		return this.jwtService.sign(payload, { expiresIn: 3600 });
+		const secret = this.JWT_SECRET;
+		// return this.jwtService.sign(
+		const token = this.jwtService.sign(
+			payload, 
+			{ 
+				expiresIn: '15m',
+				secret: secret,
+			});
+		const refreshToken = await this.createRefreshToken(req.user.id);
+		return {
+			message: 'Authentication successful',
+			accessToken: token,
+			refreshToken: refreshToken
+		};
 	}
 	
 	async login(user: any) {

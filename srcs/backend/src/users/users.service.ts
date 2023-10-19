@@ -213,7 +213,7 @@ export class UsersService {
             },
         });
         if (!user) {
-            throw new NotFoundException(`User not found with id ${username}`);
+            throw new NotFoundException(`User not found with username ${username}`);
         }
         return user;
         } catch (error) {
