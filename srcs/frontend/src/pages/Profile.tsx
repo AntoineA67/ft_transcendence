@@ -11,6 +11,8 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
+
+
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
 	
@@ -125,6 +127,23 @@ function Profile() {
 	const [update, setUpdate] = useState<boolean>(true);
 
 	useEffect(() => {
+		const token = localStorage.getItem('token');
+		let url =  'http://localhost:3000/users/me';
+		console.log("TOKEN IN profile", token);
+		let fetchObj =
+		{
+			method: 'GET',
+			headers: { 
+				'Authorization': `Bearer ${token}`,
+				"Content-Type": "application/json" },
+			}
+		try {
+			fetch(url, fetchObj);
+		}
+		catch (error) {
+			console.log("shit");
+		} 
+		
 		socket.emit('MyProfile', (response: profileType) => {
 			setProfile(response)
 			console.log('Myprofile: ', response);

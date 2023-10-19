@@ -17,7 +17,7 @@ model Game {
 }
 
 model Player {
-  id     Int      @default(autoincrement()) @id(map: "PK_b5c4d0f9ae826735c474b188ef5")
+  id     Int         @default(autoincrement()) @id(map: "PK_b5c4d0f9ae826735c474b188ef5")
   win    Boolean?
   game   Game        @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
   gameId Int
@@ -26,34 +26,37 @@ model Player {
 }
 
 model Custom {
-  id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+  id     Int       @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
   ball   Int       @default(0)
   padel  Int       @default(0)
   user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
-  userId Int    @unique()
+  userId Int       @unique()
 }
 
 model User {
-  id               Int          @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d")
+  id               Int             @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique
   status           OnlineStatus    @default(ONLINE)
   username         String          @db.VarChar @unique
-  email            String          @db.VarChar @unique(sort: Asc) // @default("") 
-  password         String?         @db.VarChar
+  email            String          @db.VarChar @unique(sort: Asc)
+  hashPassword     String?         @db.VarChar // To hashPassword
   u2fHash          String?         @db.VarChar
-  otpHash          String?         @db.VarChar
+  otpHash          String?         @db.VarChar // try removing all the db.VarChar
   activated2FA     Boolean         @default(false)
-  avatar           Bytes?
+  avatar           Bytes?           // Using 42 picture profile?
+  avatar42         String?
   bio              String          @default("Nothing written yet ...")
   custom           Custom?
   achieve          Achievement?
   gameHistory      Player[]
-  membership       Member[] 
+  membership       Member[]
   message          Message[]
   friend           Friendship[]
   sendFriendReq    FriendRequest[] @relation("sendFriendReq")
   recvFriendReq    FriendRequest[] @relation("recvFriendReq")
   block            Block[]         @relation("block")
   blocked          Block[]         @relation("blocked")
+
+  refreshToken     RefreshToken[]
 }
 
 enum OnlineStatus {
@@ -132,4 +135,19 @@ model Block {
   userId    Int
   blocked   User    @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
   blockedId Int
+}
+
+model RefreshToken {
+  id          Int      @id @default(autoincrement())
+  token       String   @unique
+  
+  // This field is the scalar that will store the foreign key
+  userId      Int
+      
+  // This field is the relation field that lets you fetch the actual User object. 
+  // The fields and references arguments define how the relationship is mapped.
+  user        User     @relation(fields: [userId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime 
 }
