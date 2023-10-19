@@ -8,37 +8,8 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
-
-type MessageWithUsername = {
-	id: number;
-	message: string;
-	send_date: Date;
-	userId: number;
-	roomId: number;
-	username: string;
-};
-
-type ProfileTest = {
-	bio: string;
-	id: number;
-	status: string;
-	username: string;
-	membership: MemberWithLatestMessage[];
-	pvrooms: Pvrooms[] | null;
-};
-
-type Pvrooms = {
-	roomId: number,
-	userId2: number,
-	username2: string,
-	block: boolean,
-	blocked: boolean,
-};
-
-type MemberWithLatestMessage = {
-	member: Member;
-	latestMessage: Message | null;
-};
+import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import { get } from 'http';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -50,20 +21,28 @@ export class RoomGateway
 	) { }
 	private logger: Logger = new Logger('RoomGateway');
 
+	private clients: Record<string, Socket> = {};
+
 	@WebSocketServer()
 	server: Server;
 
 	async handleConnection(client: Socket) {
 		const previousRooms = await this.GetAllRoomsByUserid(client);
+
 		for (let i = 0; i < previousRooms.length; i += 1) {
 			const roomName = "room_" + previousRooms[i].id.toString();
 			client.join(roomName);
 		}
+
+		this.clients[client.data.user.id.toString()] = client;
 	}
 
 	async handleDisconnect(client: Socket) {
-
+		if (this.clients[client.data.user.id.toString()]) {
+			delete this.clients[client.data.user.id.toString()];
+		}
 	}
+
 
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
@@ -72,28 +51,32 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('getRoomData')
-	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean }> {
-		console.log('roomId', roomId);
+	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }> {
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
-		if (memberStatus.ban)
+		const members = await this.memberService.getMembersByRoomId(roomid);
+		if (!memberStatus || memberStatus.ban)
 			return null;
 		const roomData = await this.roomService.getRoomData(roomid, userId);
-		return roomData;
+		return {
+			...roomData,
+			members,
+			memberStatus,
+		};
 	}
 
 	@SubscribeMessage('createChannelRoom')
 	async handleCreateChannelRoom(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() roomTitle: string,
+		@MessageBody() data: { roomTitle: string, isPublic: boolean, password: string },
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createChannelRoom(roomTitle, userId);
+		const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
-			this.server.to(roomName).emit('newRoom', createdRoom);
+			client.emit('newRoom', createdRoom);
 			return (createdRoom.id);
 		} else {
 			return (0);
@@ -127,6 +110,7 @@ export class RoomGateway
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
 		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
+
 		if (createdRoom) {
 			const pvroomuser1 = {
 				id: createdRoom.id,
@@ -139,16 +123,40 @@ export class RoomGateway
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
 			client.emit('newRoom', pvroomuser1);
-			return (createdRoom.id);
+			
+			const user1 = await this.roomService.getMemberDatabyId(userId);
+			const user2 = await this.roomService.getMemberDatabyUsername(username);
+			if (user2) {
+				const socketUser2 = this.clients[user2.id.toString()];
+				if (socketUser2) {
+					const pvroomuser2 = {
+						id: createdRoom.id,
+						isChannel: false,
+						title: user1.username,
+						private: true,
+						password: '',
+						messages: [],
+					};
+					const roomNameUser2 = "room_" + createdRoom.id.toString();
+					socketUser2.join(roomNameUser2);
+					socketUser2.emit('newRoom', pvroomuser2);
+				}
+			}
+
+			return createdRoom.id;
 		} else {
-			return (0);
+			return 0;
 		}
 	}
+
 
 	@SubscribeMessage('sendMessage')
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number, username: string }) {
 		const roomid = parseInt(message.roomId, 10);
 		this.logger.log('message', message);
+		const user = await this.memberService.getMemberDatabyRoomId(message.userid, roomid);
+		if (user.ban || (user.mute !== null && new Date(user.mute) > new Date()))
+			return;
 		const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
 		const roomName = "room_" + roomid.toString();
 		if (createdMessage) {
@@ -190,5 +198,162 @@ export class RoomGateway
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
 		return await this.roomService.getBlockStatus(userId, roomid);
+	}
+
+	@SubscribeMessage('changeRoomTitle')
+	async handlechangeRoomTitle(@ConnectedSocket() client: Socket, @MessageBody() content: { roomId: string, roomtitle: string }): Promise<boolean> {
+		const userId: number = client.data.user.id;
+		const roomid = parseInt(content.roomId, 10);
+		const bool = await this.roomService.changeRoomTitle(userId, roomid, content.roomtitle);
+		this.logger.log(bool);
+		if (bool) {
+			const response = {
+				roomid: roomid,
+				roomtitle: content.roomtitle,
+			};
+
+			const roomName = "room_" + roomid.toString();
+			this.server.to(roomName).emit('newRoomTitle', response);
+
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('UserLeaveChannel')
+	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: { usertoKick: number, roomId: string }): Promise<boolean> {
+	  const userid: number = client.data.user.id;
+	  const roomid = parseInt(content.roomId, 10);
+	  const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
+	  this.logger.log(bool);
+	
+	  if (bool) {
+		const leavechan = {
+		  userid: content.usertoKick,
+		  roomId: roomid
+		}
+
+		const roomName = "room_" + roomid.toString();
+		this.server.to(roomName).emit('UserLeaveChannel', leavechan);
+		client.leave("room_" + roomid.toString());
+	
+		return true;
+	  }
+	  return false;
+	}
+
+	@SubscribeMessage('muteMember')
+	async handleMuteMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, duration: number }): Promise<boolean> {
+		const userId: number = client.data.user.id;
+		const roomId = parseInt(content.roomId, 10);
+		const bool = await this.roomService.muteMember(userId, roomId, content.memberId, content.duration);
+		this.logger.log(bool);
+		if (bool) {
+			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
+			const roomName = "room_" + roomId.toString();
+			const member = await this.memberService.getMemberById(content.memberId);
+			const SocketInvite = this.clients[usertomute.id.toString()];
+			const membertosend = {
+				...member,
+				username: usertomute.username,
+			};
+			this.server.to(roomName).emit('newmemberListStatus', membertosend);
+			SocketInvite.emit('newmemberStatus', membertosend);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('banMember')
+	async handleBanMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, action: boolean }): Promise<boolean> {
+		const userid: number = client.data.user.id;
+		const roomid = parseInt(content.roomId, 10);
+
+		const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
+		this.logger.log(bool);
+		if (bool) {
+			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
+			const roomName = "room_" + roomid.toString();
+			const member = await this.memberService.getMemberById(content.memberId);
+			const SocketInvite = this.clients[usertomute.id.toString()];
+			if (content.action)
+				client.leave("room_" + roomid.toString());
+			else
+				client.join("room_" + roomid.toString());
+			const membertosend = {
+				...member,
+				username: usertomute.username,
+			};
+			this.server.to(roomName).emit('newmemberListStatus', membertosend);
+			SocketInvite.emit('newmemberStatus', membertosend);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('inviteUser')
+	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<boolean> {
+		const userid: number = client.data.user.id;
+		const roomid = parseInt(content.roomId, 10);
+
+		const bool = await this.roomService.inviteUser(userid, roomid, content.username);
+		const usertoadd = await this.roomService.getMemberDatabyUsername(content.username);
+
+		this.logger.log(bool);
+
+		if (bool) {
+			const roomName = "room_" + roomid.toString();
+			const room = await this.roomService.getRoomDataById(roomid);
+			const SocketInvite = this.clients[usertoadd.id.toString()];
+			SocketInvite.join(roomName);
+			const member = await this.memberService.getMemberById(usertoadd.id);
+			const membertosend = {
+				...member,
+				username: usertoadd.username,
+			};
+			this.server.to(roomName).emit('newMember', membertosend);
+
+			SocketInvite.emit('newRoom', room);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('changeRole')
+	async handlechangeRole(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomid: string, owner: boolean, admin: boolean }): Promise<boolean> {
+		const userid: number = client.data.user.id;
+		const roomId = parseInt(content.roomid, 10);
+
+		const bool = await this.roomService.changeRole(userid, roomId, content.memberId, content.owner, content.admin);
+		this.logger.log(bool);
+
+		if (bool) {
+			const usertochangerole = await this.roomService.getMemberDatabyId(content.memberId);
+			const roomName = "room_" + roomId.toString();
+			const member = await this.memberService.getMemberById(content.memberId);
+			const SocketInvite = this.clients[usertochangerole.id.toString()];
+			const membertosend = {
+				...member,
+				username: usertochangerole.username,
+			};
+			this.server.to(roomName).emit('newmemberListStatus', membertosend);
+			SocketInvite.emit('newmemberStatus', membertosend);
+			return true;
+		}
+		return false;
+	}
+
+	@SubscribeMessage('changePassword')
+	async handlechangePassword(@ConnectedSocket() client: Socket, @MessageBody() content: { roomId: string, password: string }): Promise<boolean> {
+		const userid: number = client.data.user.id;
+		const roomId = parseInt(content.roomId, 10);
+
+		const bool = await this.roomService.changePassword(userid, roomId, content.password);
+		this.logger.log(bool);
+
+		if (bool) {
+			return true;
+		}
+		return false;
 	}
 }
