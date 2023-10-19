@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import useTokenExpired from "../hooks/useTokenExpired";
-// import SkeletonLoader from "../tools/SkeletonLoader";
+import SkeletonLoader from "./SkeletonLoader";
 
 /**
  * This interface defines the expected props for the ProtectedRoute component.
@@ -27,10 +27,7 @@ const MIN_LOADING_TIME = 2000;
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     // Using a custom hook to check whether the token has expired or not.
-    const updateToken = (newToken: string) => {
-                localStorage.setItem('accessToken', newToken);
-            }
-    const tokenExpired = useTokenExpired(localStorage.accessToken, updateToken);
+    const tokenExpired = useTokenExpired();
     // State to manage the visibility of the skeleton loader.
     const [showLoader, setShowLoader] = useState(true);
 
@@ -39,7 +36,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         // even if the token status is determined quickly.
         const loadingTimeout = setTimeout(() => {
             setShowLoader(false);
-            console.log("passing by first useEffect\n");
+            // console.log("passing by first useEffect\n");
         }, MIN_LOADING_TIME);
 
         // Cleanup function: Clears the timer if the component is unmounted to prevent potential issues.
@@ -47,9 +44,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     }, []);
 
     // If the loader state is active, render the SkeletonLoader.
-    // if (showLoader || tokenExpired == null) {
-    //     return <SkeletonLoader />;
-    // }
+    if (showLoader || tokenExpired == null) {
+        return <SkeletonLoader />;
+    }
 
     // If the token has expired, redirect the user to the sign-in page.
     if (tokenExpired) {
@@ -60,27 +57,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     return <>{children}</>;
 }
 
-
 export default ProtectedRoute;
-// import useTokenExpired from "../hooks/useTokenExpired";
-// import { Route, Navigate } from 'react-router-dom';
-
-// function ProtectedRoute(props: any) {
-//     const updateToken = (newToken: string) => {
-//         localStorage.setItem('accessToken', newToken);
-//     }
-
-//     const tokenExpired = useTokenExpired(localStorage.accessToken, updateToken);
-
-//     if (tokenExpired === null) {
-//         return <p>Checking token...</p>;
-//     }
-
-//     if (tokenExpired) {
-//         return <Navigate to="/login" />;
-//     }
-
-//     return <Route {...props} />;
-// }
-
-// export default ProtectedRoute;
