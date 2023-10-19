@@ -24,12 +24,14 @@ export type ProfileTest = {
 export type Member = {
 	id: number;
 	userId: number;
+	username: string;
 	roomId: number;
 	room: Room;
 	owner: boolean;
 	admin: boolean;
 	ban: boolean;
 	mute: Date | null;
+	muteduration: number;
 };
 
 export type Room = {
@@ -40,13 +42,6 @@ export type Room = {
     password: string;
 	messages: Message[];
 }
-
-export type Memberstatus = {
-    owner: boolean;
-    admin: boolean;
-    ban: boolean;
-    mute: Date | null;
-};
 
 export type Pvrooms = {
 	roomId: number,

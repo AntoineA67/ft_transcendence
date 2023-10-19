@@ -1,20 +1,10 @@
-# minimal color codes
-# END=$'\x1b[0m
-# REV=$'\x1b[7m
-# GREY=$'\x1b[30m
-# RED=$'\x1b[31m
-# GREEN=$'\x1b[32m
-# CYAN=$'\x1b[36m
-# WHITE=$'\x1b[37m
-
 GREEN=\033[0;32m
 RED=\033[0;31m
 BLUE=\033[0;34m
 END=\033[0m
 RETRIES=60
 
-
-NAME = inception
+NAME = ft_transcendance
 
 all : $(NAME)
 
@@ -22,9 +12,9 @@ $(NAME) : dev
 
 dev :
 	@echo "${GREEN}> Image building 🎉${END}"
-	@docker compose --env-file ./srcs/.env -f ./srcs/compose.yaml build
+	@docker compose --env-file ./srcs/.env -f ./srcs/docker-compose.yml build
 	@echo "${GREEN}> Turning up images 🎉${END}"
-	@docker compose -f ./srcs/compose.yaml up -d
+	@docker compose -f ./srcs/docker-compose.yml up -d
 	@sleep 5
 	@success=false; \
 	for i in $$(seq 1 ${RETRIES}); do \
@@ -45,17 +35,17 @@ dev :
 
 prod :
 	@echo "${GREEN}> Image building 🎉${END}"
-	@docker compose --env-file=./build/.env -f ./srcs/compose.yaml build
+	@docker compose --env-file=./build/.env -f ./srcs/docker-compose.yml build
 	@echo "${GREEN}> Turning up images 🎉${END}"
-	@docker compose -f ./srcs/compose.yaml up -d
+	@docker compose -f ./srcs/docker-compose.yml up -d
 	
 down :
 	@echo "${GREEN}> Turning down images ❌${END}"
-	@docker compose -f ./srcs/compose.yaml down; \
+	@docker compose -f ./srcs/docker-compose.yml down; \
 
 down-volume: down
 	@echo "${GREEN}> Deleting all volumes 🧹${END}"
-	@docker compose -f ./srcs/compose.yaml down -v; \
+	@docker compose -f ./srcs/docker-compose.yml down -v; \
 
 re:
 	@make down
