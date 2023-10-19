@@ -1,5 +1,5 @@
-import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect} from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,7 +29,9 @@ export function CallBack42() {
 				setStatus('2fa');
 				return;
 			}
-			localStorage.setItem('token', data);
+			// check where to store access token and refresh token elsewhere
+			localStorage.setItem('token', data.accessToken);
+			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log('response: ', response)

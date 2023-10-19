@@ -4,8 +4,8 @@ import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
-import { useState, useEffect, useContext } from 'react';
-import { Outlet, useOutletContext, Link, Navigate } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { Outlet, useOutletContext, Link } from "react-router-dom";
 
 import Form from 'react-bootstrap/Form';
 
@@ -25,17 +25,19 @@ type loginContext = {
 	togglePassword: () => void,
 }
 
+// const SignIn: React.FC = () => {
 export function Login() {
 
 	const saveToken = (data: any, user: newUser | login) => {
 		const checkbox = document.getElementById("remember me") as HTMLInputElement;
 
 		if (checkbox && checkbox.checked) {
-			localStorage.setItem('token', data.token);
+			localStorage.setItem('token', data.accessToken);
+			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.setItem('nick', user.username);
-
 		} else {
-			sessionStorage.setItem('token', data.token);
+			sessionStorage.setItem('token', data.accessToken);
+			sessionStorage.setItem('refreshToken', data.refreshToken);
 			sessionStorage.setItem('nick', user.username);
 		}
 	}
@@ -50,13 +52,31 @@ export function Login() {
 		e.preventDefault();
 		let data;
 		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
-		) : ('http://localhost:3000/auth/login');
-		const fetchObj = {
-			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ 'user': user })
+		) : ('http://localhost:3000/auth/signin');
+		let fetchObj = null;
+		if ('email' in user)
+		{
+			fetchObj = {
+				method: 'POST',
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					username: user.username,
+					email: user.email,
+					password: user.password,
+				 })
+			}
 		}
-
+		else
+		{
+			fetchObj = {
+				method: 'POST',
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					username: user.username,
+					password: user.password,
+				 })
+			}
+		}
 		try {
 			let response = await fetch(url, fetchObj)
 			if (!response.ok) { throw Error('response not ok'); }
@@ -66,7 +86,7 @@ export function Login() {
 			console.log(err);
 		} finally {
 			('error' in data) && dealError(data, setErr);
-			('token' in data) && saveToken(data, user);
+			('accessToken' in data) && saveToken(data, user);
 		}
 	}
 
@@ -259,19 +279,30 @@ export const InputToken = ({ handleChange }: any) => {
 	);
 };
 
+	let url42 = () => {
+		return axios.get('http://localhost:3000/api/auth/42Url')
+	}
+
 export function TokenPage() {
 
-	const oauth42Url = Oauth42();
+	// const oauth42Url = Oauth42();
+	// const oauth42Url = url42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	async function sendToken() {
-		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived: _2fa.actived }));
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, actived: _2fa.actived })); // set access token and refresh token
 		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
-			window.location.href = oauth42Url;
+			await url42()
+        .then(response_url => {
+            window.location.href = (response_url.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
 		} else {
 			setInvalidToken(true);
 		}

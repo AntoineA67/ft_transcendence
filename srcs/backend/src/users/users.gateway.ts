@@ -9,10 +9,10 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
 import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
-import { ProfileDto } from 'src/dto/ProfileDto';
+import { ProfileDto } from 'src/dto/profile.dto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway

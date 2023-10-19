@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
-import { FortyTwoAuthGuard } from 'src/auth/forty-two-auth.guard';
-import { WsJwtGuard } from 'src/auth/ws-auth.guard';
+import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
+// import { WsJwtGuard } from 'src/auth/ws-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/constants';
