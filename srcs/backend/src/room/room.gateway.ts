@@ -9,7 +9,6 @@ import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
-import { get } from 'http';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -285,7 +284,11 @@ export class RoomGateway
 				username: usertomute.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
-			SocketInvite.emit('newmemberStatus', membertosend);
+
+			if (SocketInvite) {
+				SocketInvite.emit('newmemberStatus', membertosend);
+				SocketInvite.leave(roomName);
+			}
 			return true;
 		}
 		return false;
@@ -305,15 +308,16 @@ export class RoomGateway
 			const roomName = "room_" + roomid.toString();
 			const room = await this.roomService.getRoomDataById(roomid);
 			const SocketInvite = this.clients[usertoadd.id.toString()];
-			SocketInvite.join(roomName);
+			if (SocketInvite) {
+				SocketInvite.join(roomName);
+				SocketInvite.emit('newRoom', room);
+			}
 			const member = await this.memberService.getMemberById(usertoadd.id);
 			const membertosend = {
 				...member,
 				username: usertoadd.username,
 			};
 			this.server.to(roomName).emit('newMember', membertosend);
-
-			SocketInvite.emit('newRoom', room);
 			return true;
 		}
 		return false;

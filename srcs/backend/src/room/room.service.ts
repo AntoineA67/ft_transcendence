@@ -418,6 +418,11 @@ export class RoomService {
 		}
 
 		const privaterooms = await this.getAllPrivateRooms(userId);
+		const blocksbyuserId = await this.prisma.block.findMany({
+			where: {
+				userId: userId,
+			},
+		});
 
 		const profile: ProfileTest = {
 			bio: user.bio,
@@ -429,6 +434,7 @@ export class RoomService {
 				latestMessage: member.room.message.length > 0 ? member.room.message[0] : null,
 			})),
 			pvrooms: privaterooms,
+			blocks: blocksbyuserId,
 		};
 
 		profile.membership.sort((a, b) => {
