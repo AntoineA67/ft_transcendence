@@ -45,15 +45,7 @@ export function ChatBox() {
 				navigate('/chat');
 			}
 			setroomTitle(data.roomTitle);
-			const messwithoutblock = data.messages.filter((message) => {
-				if (message.userId === profile?.id)
-					return true;
-				const block = blocks.find((block) => block.blockedid === message.userId);
-				if (block)
-					return false;
-				return true;
-			});
-			setMessages(messwithoutblock);
+			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
 			setMemberstatus(data.memberStatus);
 			setMemberList(data.members);
@@ -80,7 +72,8 @@ const socketListeners: { event: string; handler: (response: any) => void }[] = [
 
 		const handlenewmess = (newMessage: Message) => {
 			if ((chatId && newMessage.roomId !== parseInt(chatId, 10))) return;
-			if (newMessage.userId === blocks.find((block) => block.blockedid === newMessage.userId)?.blockedid) return;
+			const block = blocks.find((block) => block.blockedId === newMessage.userId);
+			if (block) return;
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		};
 
@@ -354,8 +347,9 @@ const socketListeners: { event: string; handler: (response: any) => void }[] = [
 							}
 							placeholder={
 								memberstatus
-									? memberstatus.ban
-										? 'You\'re banned/blocked or you\'re blocking the person...'
+									? (memberstatus.ban && roomChannel)
+										? 'You\'re banned...'
+										// : (memberstatus. && roomChannel)
 										: memberstatus.mute !== null && new Date(memberstatus.mute) > new Date()
 											? 'You are muted...'
 											: 'Write a message...'
@@ -698,7 +692,7 @@ export function ChatList() {
 
 		const handleMessageSent = (newMessage: Message) => {
 			const newRooms = [...rooms];
-			if (newMessage.userId === blocks.find((block) => block.blockedid === newMessage.userId)?.blockedid) return;
+			if (newMessage.userId === blocks.find((block) => block.blockedId === newMessage.userId)?.blockedId) return;
 			const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
@@ -741,7 +735,7 @@ export function ChatList() {
 		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId == roomId);
 		if (privateroom) {
 			roomtitle = privateroom.username2;
-			if (privateroom.blocked || privateroom.block) {
+			if (privateroom.blocked) {
 				channelclass = 'chatListItemBan';
 				isBanned = true;
 			}

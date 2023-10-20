@@ -10,7 +10,7 @@ export type Message = {
 export type Block = {
 	id: number,
 	userId: number,
-	blockedid: number,
+	blockedId: number,
 };
 
 export type MemberWithLatestMessage = {
