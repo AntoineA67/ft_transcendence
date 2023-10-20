@@ -36,7 +36,7 @@ model Custom {
 model User {
   id               Int             @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique
   status           OnlineStatus    @default(ONLINE)
-  username         String          @db.VarChar @unique
+  username         String          @db.VarChar @unique // @autoincrement?
   email            String          @db.VarChar @unique(sort: Asc)
   hashPassword     String?         @db.VarChar // To hashPassword
   u2fHash          String?         @db.VarChar
