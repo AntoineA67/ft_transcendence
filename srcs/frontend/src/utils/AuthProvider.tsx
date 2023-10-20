@@ -30,7 +30,7 @@ export function CallBack42() {
 				return;
 			}
 			// check where to store access token and refresh token elsewhere
-			localStorage.setItem('token', data.accessToken);
+			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {

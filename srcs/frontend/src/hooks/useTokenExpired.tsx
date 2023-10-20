@@ -28,7 +28,7 @@ const isTokenExpired = async (): Promise<boolean> => {
             return false;
         } else {
             // If not OK, then there's an issue with the token. Throw an error.
-            throw new Error(`Error status ${response.status}`);
+            throw new Error(`Something is wrong with your token ${response.status}`);
         }
 
     } catch (error: any) {
@@ -65,7 +65,6 @@ const useTokenExpired = () => {
                 setTokenExpired(true);
             }
         }
-
         // Initiate the token check.
         checkToken();
     }, []);
