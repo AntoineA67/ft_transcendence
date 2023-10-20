@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, ProfileTest, Room, Member, Pvrooms } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
+import { set } from "lodash-es";
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -20,7 +21,7 @@ export function ChatBox() {
 	const [roomChannel, setRoomChannel] = useState<boolean>(true);
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
-	const [profile, setProfile] = useState<ProfileTest>();
+	const [profile, setProfile] = useState<Profile>();
 	const [showSettings, setShowSettings] = useState(false);
 	const [memberstatus, setMemberstatus] = useState<Member>();
 	const [membersList, setMemberList] = useState<Member[]>([]);
@@ -29,14 +30,30 @@ export function ChatBox() {
 	const [inviteUsername, setInviteUsername] = useState<string>('');
 	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
 	const [newPassword, setNewPassword] = useState<string>('');
+	const [blocks, setBlocks] = useState<Block[]>([]);
 
 	useEffect(() => {
-		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
+		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
+			if (profile) {
+				setProfile(profile);
+				setBlocks(profile.blocks);
+			}
+		});
+
+		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member}) => {
 			if (!data) {
 				navigate('/chat');
 			}
 			setroomTitle(data.roomTitle);
-			setMessages(data.messages);
+			const messwithoutblock = data.messages.filter((message) => {
+				if (message.userId === profile?.id)
+					return true;
+				const block = blocks.find((block) => block.blockedid === message.userId);
+				if (block)
+					return false;
+				return true;
+			});
+			setMessages(messwithoutblock);
 			setRoomChannel(data.roomChannel);
 			setMemberstatus(data.memberStatus);
 			setMemberList(data.members);
@@ -46,37 +63,29 @@ export function ChatBox() {
 			setLoading(false);
 			setMess('');
 		});
-
-		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
-			if (profiletest) {
-				setProfile(profiletest);
-			}
-		});
 	}, [chatId]);
 
 	useEffect(() => {
-		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
+const socketListeners: { event: string; handler: (response: any) => void }[] = [];
 
 		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
 			if (response) {
 				setMemberList((prevMembersList) =>
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
-
 			} else {
 				console.error('Failed to leave the channel');
 			}
 		};
 
 		const handlenewmess = (newMessage: Message) => {
-			if (chatId && newMessage.roomId !== parseInt(chatId, 10))
-				return;
+			if ((chatId && newMessage.roomId !== parseInt(chatId, 10))) return;
+			if (newMessage.userId === blocks.find((block) => block.blockedid === newMessage.userId)?.blockedid) return;
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		};
 
 		const handlenewMember = (newMember: Member) => {
-			if (chatId && newMember.roomId !== parseInt(chatId, 10))
-				return;
+			if (chatId && newMember.roomId !== parseInt(chatId, 10)) return;
 			setMemberList((prevMembersList) => [...prevMembersList, newMember]);
 		}
 
@@ -122,8 +131,6 @@ export function ChatBox() {
 			});
 		};
 	}, [messages, membersList]);
-
-
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -277,7 +284,7 @@ export function ChatBox() {
 		})
 	}
 
-	const myMap = (message: Message, profile: ProfileTest) => {
+	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'justify-content-end' : 'justify-content-start';
 		// const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
@@ -314,16 +321,16 @@ export function ChatBox() {
 
 	return (
 		<div className="h-100 d-flex flex-column pb-5 pb-sm-0">
-			<div className="chat-container d-flex h-100" style={{border: '1px solid yellow'}}>
+			<div className="chat-container d-flex h-100" style={{ border: '1px solid yellow' }}>
 				<div className="d-flex w-100 align-items-center p-1">
 					<Link to="..">
 						<button className="leftArrow m-2"></button>
 					</Link>
 					<h4 className='white-text ms-2'>{roomTitle}</h4>
-					<button  onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
-					<div style={{border: '1px solid purple'}} className="p-5 flex-grow-2 overflow-y-auto">
+					<div style={{ border: '1px solid purple' }} className="p-5 flex-grow-2 overflow-y-auto">
 						<ul
 							ref={messagesEndRef}
 							className="d-flex flex-column"
@@ -369,7 +376,7 @@ export function ChatBox() {
 				)}
 			</div>
 			{showSettings && (
-				<div className="w-100 h-100 d-flex flex-column" style={{border: '1px solid red'}}>
+				<div className="w-100 h-100 d-flex flex-column" style={{ border: '1px solid red' }}>
 					<div className="align-items-center d-flex flex-column">
 						{memberstatus?.admin && roomChannel && (
 							<>
@@ -645,17 +652,19 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
 	const [rooms, setRooms] = useState<Room[]>([]);
-	const [profile, setProfile] = useState<ProfileTest>();
+	const [profile, setProfile] = useState<Profile>();
 	const [pvrooms, setPvrooms] = useState<Pvrooms[]>();
+	const [blocks, setBlocks] = useState<Block[]>([]);
 
 	useEffect(() => {
-		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
-			if (profiletest) {
-				setProfile(profiletest);
-				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
+		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
+			if (profile) {
+				setProfile(profile);
+				setBlocks(profile.blocks);
+				const allRooms: Room[] = profile.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
 				setRooms(allRooms);
-				if (profiletest.pvrooms !== undefined)
-					setPvrooms(profiletest.pvrooms);
+				if (profile.pvrooms !== undefined)
+					setPvrooms(profile.pvrooms);
 			}
 		});
 	}, []);
@@ -689,6 +698,7 @@ export function ChatList() {
 
 		const handleMessageSent = (newMessage: Message) => {
 			const newRooms = [...rooms];
+			if (newMessage.userId === blocks.find((block) => block.blockedid === newMessage.userId)?.blockedid) return;
 			const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
@@ -719,7 +729,7 @@ export function ChatList() {
 	}, [rooms]);
 
 
-	const myMap = (room: Room, pvrooms: Pvrooms[], profile: ProfileTest) => {
+	const myMap = (room: Room, pvrooms: Pvrooms[], profile: Profile) => {
 		let channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
 		const roomId = room.id;
 		let roomtitle;
@@ -744,7 +754,7 @@ export function ChatList() {
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
 					className={`white-text ${isBanned ? "banned-link" : ""}`}
-					style={{pointerEvents: isBanned ? "none" : "auto" }}
+					style={{ pointerEvents: isBanned ? "none" : "auto" }}
 				>
 					<div className={`chatListItemButton ${channelclass}`}>
 						<span
