@@ -31,21 +31,26 @@ export class AuthController {
     @Public()
     @Post('signin') // delete async, has to signin and cannot do anything else
     async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-        return this.authService.signin(dto, res);
+        return this.authService.signin(dto, res, req);
     }
 
+	@Public()
+    @Post('signout') 
+    async signout(@Req() req: Request, @Res() res: Response) {
+        return this.authService.signout(req, res);
+    }
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		let response;
-		
+
 		this.logger.log('/42/callback');
 
-		// if 2fa is activated and user have not send token
+		// if 2fa is activated and user have not sent token
 		if (!req.query._2fa && req.user.activated2FA) {
 			response = { id: req.user.id, _2fa: true };
-		// if 2fa is activated and user have send token
+		// if 2fa is activated and user have sent token
 		} else if (req.query._2fa && req.user.activated2FA) {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
