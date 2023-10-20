@@ -31,6 +31,7 @@ export class AuthService {
 
 
 	async signup(dto: SignupDto, res: Response) {
+		//verify if user exists 
 		const hashPassword = await argon.hash(dto.password);
 		try {
 			const user = await this.prisma.user.create({
@@ -110,7 +111,7 @@ export class AuthService {
 		// Return the tokens in the response body
 		res.status(200).send({
 			message: 'Authentication successful',
-			accessToken: token,
+			token: token,
 			refreshToken: refreshToken
 		});
 	  }
@@ -131,7 +132,7 @@ export class AuthService {
 		const refreshToken = await this.createRefreshToken(req.user.id);
 		return {
 			message: 'Authentication successful',
-			accessToken: token,
+			token: token,
 			refreshToken: refreshToken
 		};
 	}
