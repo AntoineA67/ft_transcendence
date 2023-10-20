@@ -65,7 +65,17 @@ export class UsersService {
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
+		if (data.username || data.username === "") {
+			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+            let empty = data.username.match(/^(?!\s*$).+/i);
+            if (!valid || empty == null) return (false)
+        }
 		let user: User;
+		if (data.password)
+		{
+			const hashPassword = await argon.hash(data.password);
+			data.password = hashPassword;
+		}
 		try {
 			user = await this.prisma.user.update({
 				where: { id },
@@ -102,9 +112,9 @@ export class UsersService {
 		return user;
 	}
 
-	async getIdByNick(email: string) {
+	async getIdByNick(username: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: email	}
+			where: { username: username	}
 		});
 		if (!user) return (null);
 		return (user.id);

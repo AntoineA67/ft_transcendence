@@ -15,7 +15,7 @@ type newUser = {
 }
 
 type login = {
-	username: string,
+	email: string,
 	password: string
 }
 
@@ -28,17 +28,10 @@ type loginContext = {
 export function Login() {
 
 	const saveToken = (data: any, user: newUser | login) => {
-		const checkbox = document.getElementById("remember me") as HTMLInputElement;
-
-		if (checkbox && checkbox.checked) {
-			localStorage.setItem('token', data.accessToken);
+		console.log("savetoken ===", data);
+			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
-			localStorage.setItem('nick', user.username);
-		} else {
-			sessionStorage.setItem('token', data.accessToken);
-			sessionStorage.setItem('refreshToken', data.refreshToken);
-			sessionStorage.setItem('nick', user.username);
-		}
+			localStorage.setItem('email', user.email);
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
@@ -50,42 +43,22 @@ export function Login() {
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
 		let data;
-		let url = ('email' in user) ? ('http://localhost:3000/auth/signup'
+		let url = ('username' in user) ? ('http://localhost:3000/auth/signup'
 		) : ('http://localhost:3000/auth/signin');
-		let fetchObj = null;
-		if ('email' in user)
-		{
-			fetchObj = {
-				method: 'POST',
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
-					username: user.username,
-					email: user.email,
-					password: user.password,
-				 })
-			}
-		}
-		else
-		{
-			fetchObj = {
-				method: 'POST',
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
-					username: user.username,
-					password: user.password,
-				 })
-			}
+		const fetchObj = {
+			method: 'POST',
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(user),
 		}
 		try {
 			let response = await fetch(url, fetchObj)
 			if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			console.log(data);
+			console.log("fetch function LOGIN == ", data);
+			('error' in data) && dealError(data, setErr);
+			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
 			console.log(err);
-		} finally {
-			('error' in data) && dealError(data, setErr);
-			('accessToken' in data) && saveToken(data, user);
 		}
 	}
 
@@ -178,7 +151,7 @@ export function Signup() {
 export function Signin() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
-	const [nick, setNick] = useState<string>('');
+	const [email, setEmail] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
 	const [check, setCheck] = useState<string>('true');
 	const [err, setErr] = useState('');
@@ -191,13 +164,13 @@ export function Signin() {
 					<Link to='..'>
 						<button className="leftArrow my-4"></button>
 					</Link>
-					<form className="w-100" onSubmit={(e) => (handleSubmit(e, { username: nick, password: pass }, setErr))}>
+					<form className="w-100" onSubmit={(e) => (handleSubmit(e, { email: email, password: pass }, setErr))}>
 						<h3 className='white-text'>Welcome back!</h3>
 
 						<div className="mt-4">
 							<label htmlFor='email'>Email</label>
 							<input id='email' required type="text" placeholder="email"
-								value={nick} onChange={(e) => setNick(e.target.value)} />
+								value={email} onChange={(e) => setEmail(e.target.value)} />
 						</div>
 
 						<div className="mt-4">

@@ -126,24 +126,7 @@ function Profile() {
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 	const [update, setUpdate] = useState<boolean>(true);
 
-	useEffect(() => {
-		const token = localStorage.getItem('token');
-		let url =  'http://localhost:3000/users/me';
-		console.log("TOKEN IN profile", token);
-		let fetchObj =
-		{
-			method: 'GET',
-			headers: { 
-				'Authorization': `Bearer ${token}`,
-				"Content-Type": "application/json" },
-			}
-		try {
-			fetch(url, fetchObj);
-		}
-		catch (error) {
-			console.log("shit");
-		} 
-		
+	useEffect(() => {	
 		socket.emit('MyProfile', (response: profileType) => {
 			setProfile(response)
 			console.log('Myprofile: ', response);
