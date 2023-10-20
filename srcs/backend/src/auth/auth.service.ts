@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -52,20 +52,31 @@ export class AuthService {
 		}
 	  }
   
-	  async signin(dto: SigninDto, res: Response) {
-		  // find user with email
-		  const user = await this.usersService.getUserByUsername(dto.username);
-		  // if user not found throw exception
-		  if (!user)
-			  throw new ForbiddenException('Username not found',);
-		  // compare password
-		  const passwordMatch = await argon.verify(user.hashPassword, dto.password,);
-		  // if password wrong throw exception
-		  if (!passwordMatch)
-			  throw new ForbiddenException('Incorrect password',);
-		  // send back the token
-		  return this.signToken(user.id, res);
-	  }
+	async signin(dto: SigninDto, res: Response, @Req() req) {
+		// find user with email
+		const user = await this.usersService.getUserByUsername(dto.username);
+		// if user not found throw exception
+		if (!user)
+			throw new NotFoundException('Username not found',);
+		// compare password
+		const passwordMatch = await argon.verify(user.hashPassword, dto.password,);
+		// if password wrong throw exception
+		if (!passwordMatch)
+			throw new ForbiddenException('Incorrect password',);
+		if (req.query._2fa && req.user.activated2FA)
+		{
+			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+			if (_2faValid) {
+				return this.signToken(user.id, res);
+				// response = await this.authService.signToken(req.user.id, res);
+			} else {
+				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+			}
+			// no 2fa
+		} 
+		// send the token
+		return this.signToken(user.id, res);
+	}
   
 	  async validateUser(email: string): Promise <any> {
 		const user = await this.usersService.getUserByEmail(email);
