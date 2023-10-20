@@ -56,7 +56,7 @@ export class MemberService {
 		if (!member) {
 		  return null;
 		}
-	  
+	//   TODO retirer ici ban for privateroom
 		const memberstatus = {
 		  id: member.id,
 		  userId: member.userId,

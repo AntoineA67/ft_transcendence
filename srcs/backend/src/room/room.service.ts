@@ -276,6 +276,13 @@ export class RoomService {
 		if (!room) {
 			return { messages: [], roomTitle: '', roomChannel: true };
 		}
+
+		const blocksbyuserId = await this.prisma.block.findMany({
+			where: {
+				userId: userid,
+			},
+		});
+
 		const messagesWithUsername = room.message.map((message) => ({
 			id: message.id,
 			message: message.message,
@@ -285,12 +292,21 @@ export class RoomService {
 			username: message.user ? message.user.username || 'user deleted' : 'user deleted',
 		}));
 
+		const messwithoutblock = messagesWithUsername.filter((message) => {
+			if (message.userId === userid)
+				return true;
+			const block = blocksbyuserId.find((block) => block.blockedId === message.userId);
+			if (block)
+				return false;
+			return true;
+		});
+
 		if (!room.isChannel) {
 			const privchan = await this.getPrivateRoomById(userid, roomid);
 			roomTitle = privchan.username2;
 		}
 
-		return { messages: messagesWithUsername, roomTitle, roomChannel: room.isChannel };
+		return { messages: messwithoutblock, roomTitle, roomChannel: room.isChannel };
 	}
 
 	async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<Room> {
