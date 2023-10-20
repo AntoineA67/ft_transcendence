@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 // Constants
-const API_CHECK_TOKEN_VALIDITY = 'http://localhost:4000/api/auth/checkTokenValidity';
+const API_CHECK_TOKEN_VALIDITY = 'http://localhost:3000/auth/checkTokenValidity';
 const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
 
 /**
