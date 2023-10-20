@@ -1,8 +1,13 @@
+import {    
+    IsNotEmpty, 
+    IsString, 
+    IsEmail,
+ } from "class-validator";
 
 export class UpdateUserDto {
-	username?: string;
-	hashPassword?: string;
-	bio?: string;
+	@IsNotEmpty() @IsString() username?: string;
+	@IsNotEmpty() @IsString() password?: string;
+	@IsString() bio?: string;
 	avatar?: Buffer;
 	status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
 	otpHash?: string;
