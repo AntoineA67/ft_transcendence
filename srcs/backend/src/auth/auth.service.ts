@@ -31,21 +31,31 @@ export class AuthService {
 
 
 	async signup(dto: SignupDto, res: Response) {
-		//verify if user exists 
+		//verify if user exists
 		const hashPassword = await argon.hash(dto.password);
 		try {
-			const user = await this.prisma.user.create({
-				data: {
-					email: dto.email,
-					username: dto.username,
-					hashPassword,
-				},
-			});
-			return this.signToken(user.id, res);
-		} catch (error) {
-			if (error instanceof Prisma.PrismaClientKnownRequestError) {
-				console.log(error)
-				if (error.code === 'P2002') {
+			// const existingUser = await this.prisma.user.findUnique({
+			// 	where: {
+			// 		username: dto.username,
+			// 	},
+			// });
+			// if (existingUser)
+			// {
+				// 	return new BadRequestException('Username alredy taken');
+				// }
+				const user = await this.prisma.user.create({
+					data: {
+						email: dto.email,
+						username: dto.username,
+						hashPassword,
+					},
+				});
+				return this.signToken(user.id, res);
+			} catch (error) {
+				if (error instanceof Prisma.PrismaClientKnownRequestError) {
+					console.log(error)
+					if (error.code === 'P2002') {
+						console.log("error hereeee");
 					throw new ForbiddenException('Credentials taken');
 				}
 			}
@@ -55,10 +65,10 @@ export class AuthService {
   
 	async signin(dto: SigninDto, res: Response, @Req() req) {
 		// find user with email
-		const user = await this.usersService.getUserByUsername(dto.username);
+		const user = await this.usersService.getUserByEmail(dto.email);
 		// if user not found throw exception
 		if (!user)
-			throw new NotFoundException('Username not found',);
+			throw new NotFoundException('User not found',);
 		// compare password
 		const passwordMatch = await argon.verify(user.hashPassword, dto.password,);
 		// if password wrong throw exception

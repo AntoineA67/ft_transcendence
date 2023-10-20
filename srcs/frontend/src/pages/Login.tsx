@@ -52,9 +52,10 @@ export function Login() {
 		}
 		try {
 			let response = await fetch(url, fetchObj)
-			if (!response.ok) { throw Error('response not ok'); }
+			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			console.log("fetch function LOGIN == ", data);
+			console.log("data===", data);
+			console.log("coucouuu", data.error);
 			('error' in data) && dealError(data, setErr);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
