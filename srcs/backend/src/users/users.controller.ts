@@ -18,4 +18,6 @@ export class UsersController {
         console.log(req.user);
         return req.user;
     }
+
+	
 }

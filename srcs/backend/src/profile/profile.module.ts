@@ -7,6 +7,7 @@ import { PlayerModule } from 'src/player/player.module';
 import { UsersModule } from 'src/users/users.module';
 import { ProfileGateway } from './profile.gateway';
 import { ProfileService } from './profile.service';
+import { ProfileController } from './profile.controller';
 
 @Module({
 	imports: [
@@ -17,7 +18,7 @@ import { ProfileService } from './profile.service';
 		PlayerModule, 
 		AchievementModule
 	],
-  	providers: [ProfileService, ProfileGateway],
+  	providers: [ProfileService, ProfileGateway, ProfileController],
   	exports: [ProfileService],
 })
 export class ProfileModule { }
