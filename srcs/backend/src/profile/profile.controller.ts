@@ -13,7 +13,7 @@ export class ProfileController {
 		const id = req.user.id;
 		const profile = await this.profileService.getUserProfileById(id, id)
 		if (!profile) {
-			return ({ error: `user ${nick} not found` })
+			return ({ error: `user not found` })
 		}
 		return (profile);
 	}
