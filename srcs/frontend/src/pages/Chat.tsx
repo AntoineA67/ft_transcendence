@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
-import { set } from "lodash-es";
+import { act } from "react-dom/test-utils";
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -40,7 +40,7 @@ export function ChatBox() {
 			}
 		});
 
-		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member}) => {
+		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
 			if (!data) {
 				navigate('/chat');
 			}
@@ -54,11 +54,12 @@ export function ChatBox() {
 			setShowSettings(false);
 			setLoading(false);
 			setMess('');
+			console.log('data', data);
 		});
 	}, [chatId]);
 
 	useEffect(() => {
-const socketListeners: { event: string; handler: (response: any) => void }[] = [];
+		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
 
 		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
 			if (response) {
@@ -229,13 +230,20 @@ const socketListeners: { event: string; handler: (response: any) => void }[] = [
 		});
 	};
 
-	const handleToggleBan = (memberid: number, actions: boolean) => {
+	const handleBan = (memberid: number, actions: boolean) => {
 		chatsSocket.emit('banMember', {
 			memberId: memberid,
 			roomId: chatId,
 			action: actions,
 		});
 	};
+
+	const handleBlock = (memberid: number, actions: boolean) => {
+		chatsSocket.emit('blockUser', {
+			memberId: memberid,
+			action: actions,
+		});
+	}
 
 	const handleKick = (memberid: number) => {
 		chatsSocket.emit('UserLeaveChannel', {
@@ -453,13 +461,33 @@ const socketListeners: { event: string; handler: (response: any) => void }[] = [
 												<option value="86400">24 h</option>
 											</select>
 										)}
-										<button
+										{roomChannel && <button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
-											onClick={() => handleToggleBan(member.userId, member.ban)}
+											onClick={() => handleBan(member.userId, member.ban)}
 										>
-											{roomChannel ? (member.ban ? 'Unban' : 'Ban') : (member.ban ? 'Unblock' : 'Block')}
+											{member.ban ? 'Unban' : 'Ban'}
+										</button>}
+										<button
+											className="action-button"
+											onClick={() => {
+												const block = blocks.find((block) => block.blockedId === member.userId);
+												handleBlock(
+													member.userId,
+													block ? true : false
+												)
+											}
+											}
+										>
+											{blocks.find((block) => block.blockedId === member.userId)
+												? 'Unblock'
+												: 'Block'}
 										</button>
-										{roomChannel && <button className="action-button" onClick={() => handleKick(member.userId)}>Kick</button>}
+										{roomChannel && (memberstatus?.owner || memberstatus?.admin) && <button
+											className="action-button"
+											onClick={() => handleKick(member.userId)}
+										>
+											Kick
+										</button>}
 									</div>
 								</li>
 							))}

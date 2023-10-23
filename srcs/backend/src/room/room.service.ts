@@ -11,7 +11,7 @@ export class RoomService {
 		private readonly usersService: UsersService,
 	) { }
 	private logger: Logger = new Logger('RoomGateway');
-	
+
 	async createRoom(data: Prisma.RoomCreateInput): Promise<Room> {
 		return this.prisma.room.create({ data });
 	}
@@ -48,7 +48,7 @@ export class RoomService {
 		return user;
 	}
 
-	async getRoomDataById (roomid: number): Promise<Room | null> {
+	async getRoomDataById(roomid: number): Promise<Room | null> {
 		const room = await this.prisma.room.findUnique({
 			where: {
 				id: roomid,
@@ -643,6 +643,62 @@ export class RoomService {
 		return true;
 	}
 
+	async blockUser(userId: number, blockedId: number, action: boolean): Promise<boolean> {
+			const existingBlock = await this.prisma.block.findFirst({
+				where: {
+					userId: userId,
+					blockedId: blockedId,
+				},
+			});
+			Logger.log(existingBlock);
+			Logger.log(action);
+			if (action) {
+				if (existingBlock) {
+					await this.prisma.block.delete({
+						where: {
+							id: existingBlock.id,
+						},
+					});
+				}
+			} else {
+				if (!existingBlock) {
+					await this.prisma.block.create({
+						data: {
+							userId: userId,
+							blockedId: blockedId,
+						},
+					});
+				}
+			}
+			return true;
+	}
+
+	async getPrivateRoomBet2users(userId1: number, userId2: number): Promise<Room | null> {
+		const room = await this.prisma.room.findFirst({
+			where: {
+				isChannel: false,
+				members: {
+					some: {
+						userId: userId1,
+					},
+				},
+				AND: [
+					{
+						members: {
+							some: {
+								userId: userId2,
+							},
+						},
+					},
+				],
+			},
+		});
+		if (!room) {
+			return null;
+		}
+		return room;
+	}
+
 	async banMember(userId: number, roomId: number, memberId: number, action: boolean): Promise<boolean> {
 		const member = await this.prisma.member.findFirst({
 			where: {
@@ -658,37 +714,6 @@ export class RoomService {
 				userId: memberId,
 			},
 		});
-
-		const room = await this.prisma.room.findFirst({
-			where: {
-				id: roomId,
-			},
-		});
-
-		if (!room.isChannel) {
-			const blockstatus = await this.prisma.block.findFirst({
-				where: {
-					userId: userId,
-					blockedId: memberId,
-				},
-			});
-			if (blockstatus) {
-				await this.prisma.block.delete({
-					where: {
-						id: blockstatus.id,
-					},
-				});
-			}
-			else {
-				await this.prisma.block.create({
-					data: {
-						userId: userId,
-						blockedId: memberId,
-					},
-				});
-			}
-			return true;
-		}
 
 		if (!member || !memberToBan || memberToBan.owner ||
 			(!member.admin && !member.owner && (memberToBan.admin || memberToBan.owner))) {
