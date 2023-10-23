@@ -21,6 +21,7 @@ import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
+import { DefaultErrorPage } from './pages/DefaultErrorPage';
 
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -80,7 +81,7 @@ const router = createBrowserRouter(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />}>
+			<Route element={<Protected />} errorElement={<DefaultErrorPage />}>
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
@@ -144,66 +145,3 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
-
-// const root = ReactDOM.createRoot(
-// 	document.getElementById('root') as HTMLElement
-// );
-// root.render(
-// 	<BrowserRouter>
-// 		<Routes>
-// 			<Route element={<Guest />}>
-// 				<Route path="/login" element={<Login />}>
-// 					<Route index element={<LandingPage />}></Route>
-// 					<Route path="signin" element={<Signin />}></Route>
-// 					<Route path="signup" element={<Signup />}></Route>
-// 					<Route path="2fa" element={<TokenPage />}></Route>
-// 				</Route>
-// 			</Route>
-
-// 			<Route path='/42/callback' element={<CallBack42 />} />
-
-// 			<Route element={<Protected />}>
-// 				<Route path="/" element={<Sidebar />}>
-// 					<Route index element={<Profile />} />
-
-// 					<Route path="search" element={<Search />}>
-// 						<Route path=':userNick' element={<UserProfile />}></Route>
-// 					</Route>
-					
-// 					<Route path="friends" element={<Friends />}>
-// 						<Route path=':userNick' element={<UserProfile />}></Route>
-// 					</Route>
-					
-// 					<Route path="chat" element={<Chat />}>
-// 						<Route path=':chatId' element={<ChatBox />}></Route>
-// 					</Route>
-					
-// 					<Route path="setting" element={<Setting />}>
-// 						<Route index element={<SettingMenu />}></Route>
-// 					</Route>
-					
-// 					<Route path="/game" element={<>
-// 						<GameSocketProvider>
-// 							<Game />
-// 						</GameSocketProvider>
-// 					</>}></Route>
-// 				</Route>
-// 				<Route path="setting" element={<Setting />}>
-// 					<Route index element={<SettingMenu />}></Route>
-// 					<Route path='2fa' element={<TwoFactorAuth />}></Route>
-// 				</Route>
-// 				<Route path="/game" element={<>
-// 					<GameSocketProvider>
-// 						<Game />
-// 					</GameSocketProvider>
-// 				</>}></Route>
-// 			</Route>
-// 			<Route path="/test-db" element={<TestDB />} />			
-// 		</Routes>
-// 	</BrowserRouter>
-// );
-
-// // If you want to start measuring performance in your app, pass a function
-// // to log results (for example: reportWebVitals(console.log))
-// // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-// reportWebVitals();
