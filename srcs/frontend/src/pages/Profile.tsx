@@ -11,8 +11,6 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-
-
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
 	
@@ -95,8 +93,8 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
 		const file = input.files ? input.files[0] : null;
 		if (!file) return ;
-		if (file.size >= 10485760) {
-			console.log('file size limit: 10MB');
+		if (file.size >= 1048576) {
+			console.log('file size limit: 1MB');
 			return ;
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
@@ -135,38 +133,34 @@ function Profile() {
 	// }, [update]);
 
 	return (
-		profile ? (
-			<>
-				<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
-					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
-				
-					<div>
-						<Avatar size={150} user={{
-							id: profile.id, 
-							username: profile.username, 
-							avatar: profile.avatar,
-							status: profile.status
-						}} />
-					</div>
-					<NewAvatar setUpdate={setUpdate}/>
-
-					{ (edit == 'nick'
-						) ? ( 
-							<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
-						) : (
-							<Text type='nick' profile={profile} setEdit={setEdit} /> )}
-					
-					 { (edit == 'bio'
-					 	) ? (
-							<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
-						) : (
-							<Text type='bio' profile={profile} setEdit={setEdit} />)}
+		<>
+			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+			
+				<div>
+					<Avatar size={150} user={{
+						id: profile.id, 
+						username: profile.username, 
+						avatar: profile.avatar,
+						status: profile.status
+					}} />
 				</div>
-				<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
-			</>
-		) : (
-			<p className='white-text'>loading</p>
-		)
+				<NewAvatar setUpdate={setUpdate}/>
+
+				{ (edit == 'nick'
+					) ? ( 
+						<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+					) : (
+						<Text type='nick' profile={profile} setEdit={setEdit} /> )}
+				
+					{ (edit == 'bio'
+					) ? (
+						<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
+					) : (
+						<Text type='bio' profile={profile} setEdit={setEdit} />)}
+			</div>
+			<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
+		</>
 	);
 }
 
