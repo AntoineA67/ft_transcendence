@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
@@ -35,7 +35,7 @@ function Text({ type, profile, setEdit }: textProp) {
 type editTextProp = {
 	type: 'nick' | 'bio',
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>,
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
@@ -55,7 +55,7 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 	async function handleSubmit(
 		e: React.FormEvent<HTMLFormElement>, 
 		type: string, profile: profileType, 
-		setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+		setProfile: React.Dispatch<React.SetStateAction<profileType>>
 	) {
 		const content = (type == 'nick') ? profile.username : profile.bio;
 		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
@@ -122,16 +122,17 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 }
 
 function Profile() {
-	const [profile, setProfile] = useState<profileType | null>(null);
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 	const [update, setUpdate] = useState<boolean>(true);
+	// const profile: profileType = useLoaderData() as profileType;
 
-	useEffect(() => {	
-		socket.emit('MyProfile', (response: profileType) => {
-			setProfile(response)
-			console.log('Myprofile: ', response);
-		})
-	}, [update]);
+	// useEffect(() => {	
+	// 	socket.emit('MyProfile', (response: profileType) => {
+	// 		setProfile(response)
+	// 		console.log('Myprofile: ', response);
+	// 	})
+	// }, [update]);
 
 	return (
 		profile ? (
