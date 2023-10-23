@@ -59,7 +59,8 @@ export class AuthService {
 				hashPassword,
 			},
 		});
-		return this.signToken(user.id, res);
+		// return this.signToken(user.id, res);
+		return this.createJWT(user.id, user.email);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -109,7 +110,8 @@ export class AuthService {
 		// 	// no 2fa
 		// } 
 		// send the token
-		return this.signToken(user.id, res);
+		// return this.signToken(user.id, res);
+		return this.createJWT(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -119,42 +121,43 @@ export class AuthService {
 		return user;
 	  }
   
-	  async signToken(
-		  userId: number,
-		//   email: email,
-		  res: Response
-	  	): Promise<void> {
-		  const payload = {
-			  sub: userId,
-		  };
-		  const secret = this.JWT_SECRET;
-		  const token = await this.jwt.signAsync(
-			  payload,
-			  {
-				  expiresIn: '15m',
-				  secret: secret,
-			  },
-		  );
+	//   async signToken(
+	// 	  userId: number,
+	// 	//   email: string,
+	// 	  res: Response
+	//   	): Promise<void> {
+	// 	  const payload = {
+	// 		  sub: userId,
+	// 	  };
+	// 	  const secret = this.JWT_SECRET;
+	// 	  const token = await this.jwt.signAsync(
+	// 		  payload,
+	// 		  {
+	// 			  expiresIn: '15m',
+	// 			  secret: secret,
+	// 		  },
+	// 	  );
   
-		const refreshToken = await this.createRefreshToken(userId);
-		console.log('refresh token = ');
-		console.log(refreshToken);
-		console.log('token = ');
-		console.log(token);
+	// 	const refreshToken = await this.createRefreshToken(userId);
+	// 	console.log('refresh token = ');
+	// 	console.log(refreshToken);
+	// 	console.log('token = ');
+	// 	console.log(token);
 
-		// Return the tokens in the response body
-		res.status(200).send({
-			message: 'Authentication successful',
-			token: token,
-			refreshToken: refreshToken
-		});
-	  }
+	// 	// Return the tokens in the response body
+	// 	res.status(200).send({
+	// 		message: 'Authentication successful',
+	// 		token: token,
+	// 		refreshToken: refreshToken
+	// 	});
+	//   }
 
-	async createJWT(req: any) {
+	async createJWT(userId: number, userEmail: string,) {
 		let payload = {
-			id: req.user.id,
-			email: req.user.email,
+			id: userId,
+			email: userEmail,
 		}
+		
 		const secret = this.JWT_SECRET;
 		// return this.jwtService.sign(
 		const token = this.jwtService.sign(
@@ -163,7 +166,7 @@ export class AuthService {
 				expiresIn: '15m',
 				secret: secret,
 			});
-		const refreshToken = await this.createRefreshToken(req.user.id);
+		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
 			token: token,
