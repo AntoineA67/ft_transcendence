@@ -6,7 +6,7 @@ import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { SigninDto } from '../dto';
+import { Signin42Dto, SigninDto } from '../dto';
 import { SignupDto } from '../dto';
 
 
@@ -47,29 +47,32 @@ export class AuthController {
 	@Get('/42/callback')
 	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
-		let response;
+		// let response;
 
-		this.logger.log('/42/callback');
-		// if 2fa is activated and user have not sent token
-		if (!req.query._2fa && req.user.activated2FA) {
-			response = { id: req.user.id, _2fa: true };
-		// if 2fa is activated and user have sent token
-		} else if (req.query._2fa && req.user.activated2FA) {
-			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-			if (_2faValid) {
-				// response = await this.authService.signJwtTokens(req);
-				response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-				// response = await this.authService.signToken(req.user.id, res);
-			} else {
-				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-			}
-			// no 2fa
-		} else {
-			response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-			// response = await this.authService.signToken(req.user.id, res);
+		// this.logger.log('/42/callback');
+		// // if 2fa is activated and user have not sent token
+		// if (!req.query._2fa && req.user.activated2FA) {
+		// 	response = { id: req.user.id, _2fa: true };
+		// // if 2fa is activated and user have sent token
+		// } else if (req.query._2fa && req.user.activated2FA) {
+		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+		// 	if (_2faValid) {
+		// 		response = await this.authService.signJwtTokens(req.user.id, req.user.email);
+		// 	} else {
+		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+		// 	}
+		// 	// no 2fa
+		// } else 
+		// 	response = await this.authService.signJwtTokens(req.user.id, req.user.email);
+		// res.status(HttpStatus.OK).json(response);
+		const dto: Signin42Dto = {
+			id: req.user.id,
+			email: req.user.email,
+			token2FA: req.query._2fa,
+			activated2FA: req.user.activated2FA,
+			user: req.user,
 		}
-		console.log ("RESPONSE=", response);
-		res.status(HttpStatus.OK).json(response);
+		return this.authService.signin42(dto, res, req);
 	}
 
 	@Public()
