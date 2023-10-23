@@ -25,13 +25,16 @@ export class AuthController {
     @Post('signup')
     async signup(@Body() dto: SignupDto, @Res() res: Response) {
 		this.logger.log("coucou", dto);
-        return this.authService.signup(dto, res);
+		let response = await this.authService.signup(dto, res);
+        res.status(HttpStatus.OK).json(response);
     }
 
     @Public()
     @Post('signin') // delete async, has to signin and cannot do anything else
     async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-        return this.authService.signin(dto, res, req);
+		let response = await this.authService.signin(dto, res, req);
+        res.status(HttpStatus.OK).json(response);
+        // return this.authService.signin(dto, res, req);
     }
 
 	@Public()
@@ -42,11 +45,12 @@ export class AuthController {
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
+	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		let response;
 
 		this.logger.log('/42/callback');
-
+		console.log("createJwt");
 		// if 2fa is activated and user have not sent token
 		if (!req.query._2fa && req.user.activated2FA) {
 			response = { id: req.user.id, _2fa: true };
@@ -54,14 +58,15 @@ export class AuthController {
 		} else if (req.query._2fa && req.user.activated2FA) {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
-				response = await this.authService.createJWT(req);
+				// response = await this.authService.createJWT(req);
+				response = await this.authService.createJWT(req.user.id, req.user.email);
 				// response = await this.authService.signToken(req.user.id, res);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 			// no 2fa
 		} else {
-			response = await this.authService.createJWT(req);
+			response = await this.authService.createJWT(req.user.id, req.user.email);
 			// response = await this.authService.signToken(req.user.id, res);
 		}
 		console.log ("RESPONSE=", response);
