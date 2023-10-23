@@ -50,7 +50,6 @@ export class AuthController {
 		let response;
 
 		this.logger.log('/42/callback');
-		console.log("createJwt");
 		// if 2fa is activated and user have not sent token
 		if (!req.query._2fa && req.user.activated2FA) {
 			response = { id: req.user.id, _2fa: true };
@@ -58,15 +57,15 @@ export class AuthController {
 		} else if (req.query._2fa && req.user.activated2FA) {
 			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
 			if (_2faValid) {
-				// response = await this.authService.createJWT(req);
-				response = await this.authService.createJWT(req.user.id, req.user.email);
+				// response = await this.authService.signJwtTokens(req);
+				response = await this.authService.signJwtTokens(req.user.id, req.user.email);
 				// response = await this.authService.signToken(req.user.id, res);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 			// no 2fa
 		} else {
-			response = await this.authService.createJWT(req.user.id, req.user.email);
+			response = await this.authService.signJwtTokens(req.user.id, req.user.email);
 			// response = await this.authService.signToken(req.user.id, res);
 		}
 		console.log ("RESPONSE=", response);
