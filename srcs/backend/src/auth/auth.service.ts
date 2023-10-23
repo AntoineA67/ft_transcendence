@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req} from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
@@ -8,6 +8,7 @@ import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
 import { SigninDto } from '../dto';
 import { SignupDto } from '../dto';
+import { Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -89,8 +90,8 @@ export class AuthService {
 		// 	response = { id: req.user.id, _2fa: true };
 		// // if 2fa is activated and user have sent token
 		// } else if (req.query._2fa && req.user.activated2FA) {
-		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2faValid) {
+		// 	const _2FAValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+		// 	if (_2FAValid) {
 		// 		return this.signToken(user.id, res);
 		// 		// response = await this.authService.signToken(req.user.id, res);
 		// 	} else {
@@ -99,8 +100,8 @@ export class AuthService {
 		// }
 		// if (req.query._2fa && req.user.activated2FA)
 		// {
-		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2faValid) {
+		// 	const _2FAValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+		// 	if (_2FAValid) {
 		// 		// return this.signToken(user.id, res);
 		// 		// response = await this.authService.signToken(req.user.id, res);
 		// 	} else {
@@ -119,6 +120,30 @@ export class AuthService {
 		  throw new UnauthorizedException();      
 		return user;
 	  }
+
+	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+		// if 2fa is activated and user have not sent token
+		let response;
+		if (!dto.token2FA && dto.activated2FA) {
+			response = {
+				id: dto.id,
+				_2fa: true
+			};
+		// if 2fa is activated and user have sent token
+		} else if (dto.token2FA && dto.activated2FA) {
+			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
+			if (_2FAValid) {
+				response = await this.signJwtTokens(req.user.id, req.user.email);
+			} else {
+				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+			}
+		// no 2fa
+		} else 
+			response = await this.signJwtTokens(req.user.id, req.user.email);
+		// console.log(response);
+		res.status(HttpStatus.OK).json(response);
+		// return response;
+	}
 
 	async signJwtTokens(userId: number, userEmail: string,) {
 		let payload = {
