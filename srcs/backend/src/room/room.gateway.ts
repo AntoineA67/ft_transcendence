@@ -9,6 +9,7 @@ import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import { subscribe } from 'diagnostics_channel';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -271,17 +272,17 @@ export class RoomGateway
 		const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
 		this.logger.log(bool);
 		if (bool) {
-			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
+			const usertoban = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomid.toString();
 			const member = await this.memberService.getMemberById(content.memberId);
-			const SocketInvite = this.clients[usertomute.id.toString()];
+			const SocketInvite = this.clients[usertoban.id.toString()];
 			if (content.action)
 				client.leave("room_" + roomid.toString());
 			else
 				client.join("room_" + roomid.toString());
 			const membertosend = {
 				...member,
-				username: usertomute.username,
+				username: usertoban.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
 
@@ -293,6 +294,32 @@ export class RoomGateway
 		}
 		return false;
 	}
+
+	@SubscribeMessage('blockUser')
+	async handleBlockUser(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, action: boolean }): Promise<boolean> {
+		const userid: number = client.data.user.id;
+
+		const bool = await this.roomService.blockUser(userid, content.memberId, content.action);
+		this.logger.log(bool);
+		const privateroomusermember = await this.roomService.getPrivateRoomBet2users(userid, content.memberId);
+		if (bool) {
+			const usertoblock = await this.roomService.getMemberDatabyId(content.memberId);
+			const SocketInvite = this.clients[usertoblock.id.toString()];
+			if (SocketInvite) {
+				SocketInvite.emit('newblockStatus', content.action);
+			}
+			if (privateroomusermember) {
+				const roomName = "room_" + privateroomusermember.id.toString();
+				if (content.action)
+					client.leave(roomName);
+				else
+					client.join(roomName);
+			}
+			return true;
+		}
+		return false;
+	}
+
 
 	@SubscribeMessage('inviteUser')
 	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<boolean> {

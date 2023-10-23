@@ -8,7 +8,7 @@ export class MemberService {
 	constructor(
 		private prisma: PrismaService,
 		private roomService: RoomService,
-		) { }
+	) { }
 
 	async createMember(data: Prisma.MemberCreateInput): Promise<Member> {
 		return this.prisma.member.create({ data });
@@ -28,50 +28,43 @@ export class MemberService {
 
 	async getMemberDatabyRoomId(userid: number, roomid: number): Promise<any | null> {
 		const room = await this.prisma.room.findUnique({
-		  where: {
-			id: roomid,
-		  },
+			where: {
+				id: roomid,
+			},
 		});
-	  
+
 		if (!room) {
-		  return null;
+			return null;
 		}
-	  
-		let pvroom: any | undefined;
-	  
-		if (!room.isChannel) {
-		  pvroom = await this.roomService.getPrivateRoomById(userid, roomid);
-		}
-	  
+
 		const member = await this.prisma.member.findFirst({
-		  where: {
-			userId: userid,
-			roomId: roomid,
-		  },
-		  include: {
-			user: true,
-		  },
+			where: {
+				userId: userid,
+				roomId: roomid,
+			},
+			include: {
+				user: true,
+			},
 		});
-	  
+
 		if (!member) {
-		  return null;
+			return null;
 		}
-	//   TODO retirer ici ban for privateroom
+
 		const memberstatus = {
-		  id: member.id,
-		  userId: member.userId,
-		  username: member.user.username,
-		  roomId: member.roomId,
-		  owner: member.owner,
-		  admin: member.admin,
-		  ban: room.isChannel ? member.ban : pvroom?.block || pvroom?.blocked,
-		  mute: member.mute,
+			id: member.id,
+			userId: member.userId,
+			username: member.user.username,
+			roomId: member.roomId,
+			owner: member.owner,
+			admin: member.admin,
+			ban: member.ban,
+			mute: member.mute,
 		};
-	  
+
 		return memberstatus;
-	  }
-	  
-	  
+	}
+
 
 	async getMembersByRoomId(roomid: number): Promise<any[]> {
 		const members = await this.prisma.member.findMany({
@@ -88,7 +81,7 @@ export class MemberService {
 			if (memberStatus) {
 				membersList.push(memberStatus);
 			}
-		  }
+		}
 		return membersList;
 	}
 
