@@ -11,6 +11,7 @@ import { SignupDto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import { EphemeralKeyInfo } from 'tls';
 
 @Injectable()
 export class AuthService {
@@ -31,35 +32,43 @@ export class AuthService {
 
 
 	async signup(dto: SignupDto, res: Response) {
-		//verify if user exists
-		const hashPassword = await argon.hash(dto.password);
+		const existingEmail = await this.prisma.user.findUnique({
+			where: {
+				email: dto.email,
+			},
+		});
+		if (existingEmail)
+		{
+			throw new BadRequestException('This email is already used');
+		}
+		const existingUsername = await this.prisma.user.findUnique({
+			where: {
+				username: dto.username,
+			},
+		});
+		if (existingUsername)
+		{
+			throw new BadRequestException('Username taken');
+		}
 		try {
-			// const existingUser = await this.prisma.user.findUnique({
-			// 	where: {
-			// 		username: dto.username,
-			// 	},
-			// });
-			// if (existingUser)
-			// {
-				// 	return new BadRequestException('Username alredy taken');
-				// }
-				const user = await this.prisma.user.create({
-					data: {
-						email: dto.email,
-						username: dto.username,
-						hashPassword,
-					},
-				});
-				return this.signToken(user.id, res);
-			} catch (error) {
-				if (error instanceof Prisma.PrismaClientKnownRequestError) {
-					console.log(error)
-					if (error.code === 'P2002') {
-						console.log("error hereeee");
-					throw new ForbiddenException('Credentials taken');
-				}
+		const hashPassword = await argon.hash(dto.password);
+		const user = await this.prisma.user.create({
+			data: {
+				email: dto.email,
+				username: dto.username,
+				hashPassword,
+			},
+		});
+		return this.signToken(user.id, res);
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				console.log(error)
+				if (error.code === 'P2002') {
+					console.log("error hereeee");
+				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
 			}
-			throw error;
+		}
+		throw error;
 		}
 	  }
   
@@ -74,17 +83,31 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		if (req.query._2fa && req.user.activated2FA)
-		{
-			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-			if (_2faValid) {
-				return this.signToken(user.id, res);
-				// response = await this.authService.signToken(req.user.id, res);
-			} else {
-				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-			}
-			// no 2fa
-		} 
+		// if 2fa is activated and user have not sent token
+		// let response;
+		// if (!req.query._2fa && req.user.activated2FA) {
+		// 	response = { id: req.user.id, _2fa: true };
+		// // if 2fa is activated and user have sent token
+		// } else if (req.query._2fa && req.user.activated2FA) {
+		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+		// 	if (_2faValid) {
+		// 		return this.signToken(user.id, res);
+		// 		// response = await this.authService.signToken(req.user.id, res);
+		// 	} else {
+		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+		// 	}
+		// }
+		// if (req.query._2fa && req.user.activated2FA)
+		// {
+		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
+		// 	if (_2faValid) {
+		// 		// return this.signToken(user.id, res);
+		// 		// response = await this.authService.signToken(req.user.id, res);
+		// 	} else {
+		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+		// 	}
+		// 	// no 2fa
+		// } 
 		// send the token
 		return this.signToken(user.id, res);
 	}
@@ -98,6 +121,7 @@ export class AuthService {
   
 	  async signToken(
 		  userId: number,
+		//   email: email,
 		  res: Response
 	  	): Promise<void> {
 		  const payload = {
