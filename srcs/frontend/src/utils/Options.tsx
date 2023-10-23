@@ -4,7 +4,7 @@ import { socket, friendsSocket } from "./socket";
 
 type OptionsProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>> 
+	setProfile: React.Dispatch<React.SetStateAction<profileType>> 
 }
 export function Options({profile, setProfile}: OptionsProp) {
 
@@ -24,7 +24,7 @@ export function Options({profile, setProfile}: OptionsProp) {
 
 type optionProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>
 }
 
 export function AddOption({profile, setProfile}: optionProp) {

@@ -62,6 +62,7 @@ async function loader(route: string, param?: string) {
 		console.log('err in loader: ', res);
 		throw new Response(res.statusText, {status: res.status})
 	}
+	console.log('react router loader');
 	return (res.json());
 }
 
@@ -97,7 +98,8 @@ const router = createBrowserRouter(
 					<Route path="friends" element={<Friends />}>
 						<Route 
 							path=':userNick' 
-							element={<UserProfile />} 
+							element={<UserProfile />}
+							loader={({ params }) => (loader('profile', params.userNick))}
 						/>
 					</Route>
 					
