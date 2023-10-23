@@ -59,8 +59,7 @@ export class AuthService {
 				hashPassword,
 			},
 		});
-		// return this.signToken(user.id, res);
-		return this.createJWT(user.id, user.email);
+		return this.signJwtTokens(user.id, user.email);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -111,7 +110,7 @@ export class AuthService {
 		// } 
 		// send the token
 		// return this.signToken(user.id, res);
-		return this.createJWT(user.id, user.email);
+		return this.signJwtTokens(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -120,46 +119,14 @@ export class AuthService {
 		  throw new UnauthorizedException();      
 		return user;
 	  }
-  
-	//   async signToken(
-	// 	  userId: number,
-	// 	//   email: string,
-	// 	  res: Response
-	//   	): Promise<void> {
-	// 	  const payload = {
-	// 		  sub: userId,
-	// 	  };
-	// 	  const secret = this.JWT_SECRET;
-	// 	  const token = await this.jwt.signAsync(
-	// 		  payload,
-	// 		  {
-	// 			  expiresIn: '15m',
-	// 			  secret: secret,
-	// 		  },
-	// 	  );
-  
-	// 	const refreshToken = await this.createRefreshToken(userId);
-	// 	console.log('refresh token = ');
-	// 	console.log(refreshToken);
-	// 	console.log('token = ');
-	// 	console.log(token);
 
-	// 	// Return the tokens in the response body
-	// 	res.status(200).send({
-	// 		message: 'Authentication successful',
-	// 		token: token,
-	// 		refreshToken: refreshToken
-	// 	});
-	//   }
-
-	async createJWT(userId: number, userEmail: string,) {
+	async signJwtTokens(userId: number, userEmail: string,) {
 		let payload = {
 			id: userId,
 			email: userEmail,
 		}
 		
 		const secret = this.JWT_SECRET;
-		// return this.jwtService.sign(
 		const token = this.jwtService.sign(
 			payload, 
 			{ 
