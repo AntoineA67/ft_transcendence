@@ -18,7 +18,8 @@ import { ProfileController } from './profile.controller';
 		PlayerModule, 
 		AchievementModule
 	],
-  	providers: [ProfileService, ProfileGateway, ProfileController],
+  	providers: [ProfileService, ProfileGateway],
+	controllers: [ProfileController],
   	exports: [ProfileService],
 })
 export class ProfileModule { }
