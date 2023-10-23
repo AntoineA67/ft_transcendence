@@ -3,7 +3,9 @@ import ReactDOM from 'react-dom/client';
 import {
 	createBrowserRouter,
 	createRoutesFromElements,
-	Route, RouterProvider
+	Route,
+	RouterProvider,
+	LoaderFunctionArgs
  } from 'react-router-dom';
 // import router from './router';
 import React from 'react';
@@ -40,6 +42,17 @@ import { GameSocketProvider } from './utils/GameSocketProvider';
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
+async function loader(route: string, param?: string) {
+	const baseUrl = 'http://localhost:3000/';
+	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
+	const res = await fetch(fetchUrl);
+	if (res.status != 200 && res.status != 201) {
+		console.log('err in loader: ', res);
+		throw new Response(res.statusText, {status: res.status})
+	}
+	return (res.json());
+}
+
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<>	
@@ -58,12 +71,14 @@ const router = createBrowserRouter(
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
+						loader={() => (loader('profile', 'me'))}
 					/>
 
 					<Route path="search" element={<Search />}>
 						<Route 
 							path=':userNick' 
 							element={<UserProfile />}
+							loader={({params}) => (loader('profile', params.userNick))}
 						/>
 					</Route>
 					

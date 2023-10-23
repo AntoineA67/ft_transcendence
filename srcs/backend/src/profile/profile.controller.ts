@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards, Param } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
@@ -13,7 +13,7 @@ export class ProfileController {
 		const id = req.user.id;
 		const profile = await this.profileService.getUserProfileById(id, id)
 		if (!profile) {
-			return ({ error: `user not found` })
+			throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 		}
 		return (profile);
 	}
@@ -24,7 +24,7 @@ export class ProfileController {
 		const id = req.user.id;
 		const profile = await this.profileService.getUserProfileByNick(id, nick);
 		if (!profile) {
-			return ({ error: `user ${nick} not found` })
+			throw new HttpException(`User ${nick} not found`, HttpStatus.NOT_FOUND);
 		}
 		return (profile);
 	}
