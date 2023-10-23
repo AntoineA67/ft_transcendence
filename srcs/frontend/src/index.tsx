@@ -43,10 +43,22 @@ axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string) {
-	const baseUrl = 'http://localhost:3000/';
+	const token = localStorage.getItem('token') || null;
+	const baseUrl = 'http://127.0.0.1:3000/';
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
-	const res = await fetch(fetchUrl);
+	const fetchObj = {
+		method: 'GET',
+		headers: {
+			'Authorization': `Bearer ${token}`,
+			// 'Content-Type': 'application/json',
+		}
+	}
+	if (!token) {
+		throw new Response('Unauthorized', {status: 401});
+	}
+	const res = await fetch(fetchUrl, fetchObj);
 	if (res.status != 200 && res.status != 201) {
+		console.log('fetch: ', fetchUrl);
 		console.log('err in loader: ', res);
 		throw new Response(res.statusText, {status: res.status})
 	}
