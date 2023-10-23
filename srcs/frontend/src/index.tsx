@@ -87,7 +87,7 @@ const router = createBrowserRouter(
 						loader={() => (loader('profile', 'me'))}
 					/>
 
-					<Route path="search" element={<Search />}>
+					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route 
 							path=':userNick' 
 							element={<UserProfile />}

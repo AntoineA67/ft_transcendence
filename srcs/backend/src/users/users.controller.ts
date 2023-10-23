@@ -19,5 +19,10 @@ export class UsersController {
         return req.user;
     }
 
+	@UseGuards(JwtAuthGuard)
+	@Get('all')
+	async getAll(@Req() req: Request) {
+		return await this.usersService.getAllUsers();
+	}
 	
 }

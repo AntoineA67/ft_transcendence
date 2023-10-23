@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useLoaderData } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { Button } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
@@ -8,17 +8,18 @@ import { UserItem } from '../utils/UserItem';
 // import '../styles/index.css';
 
 export function SearchBar() {
+	const users = useLoaderData() as userType[];
 	const [search, setSearch] = useState('');
-	const [list, setList] = useState<userType[]>([]);
-	const [temp, setTemp] = useState<userType[]>([]);
+	const [list, setList] = useState(users);
+	const [temp, setTemp] = useState(users);
 	
-	useEffect(() => {
-		console.log('searchbar: ')
-		socket.emit('getAllUsers', (response: userType[]) => {
-			setList(response)
-			setTemp(response);
-		})
-	}, [])
+	// useEffect(() => {
+	// 	console.log('searchbar: ')
+	// 	socket.emit('getAllUsers', (response: userType[]) => {
+	// 		setList(response)
+	// 		setTemp(response);
+	// 	})
+	// }, [])
 
 	useEffect(() => {
 		const myFilter = (item: userType): boolean => {
