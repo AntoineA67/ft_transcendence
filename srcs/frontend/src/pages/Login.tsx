@@ -149,6 +149,9 @@ export function Signup() {
 
 /* sign in page */
 
+// import { useSearchParams } from "react-router-dom";
+
+
 export function Signin() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
 
@@ -156,7 +159,37 @@ export function Signin() {
 	const [pass, setPass] = useState<string>('');
 	const [check, setCheck] = useState<string>('true');
 	const [err, setErr] = useState('');
+	// const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
+	// let [searchParams] = useSearchParams();
+	// const state = searchParams.get('state') || null;
+	// const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
+	// if (!state) return;
+	
+	// let response;
+
+	// try {
+		// if (_2fa?.actived === true) {
+		// 	response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
+		// } else {
+	// 		response = fetch(`http://localhost:3000/auth/signin`);
+	// 	// }
+	// 	// const data = await response.json();
+	// 	console.log('data: ', data)
+	// 	if (data._2fa) {
+	// 		localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
+	// 		setStatus('2fa');
+	// 		return;
+	// 	}
+	// 	localStorage.setItem('token', data.token);
+	// 	localStorage.setItem('refreshToken', data.refreshToken);
+	// 	localStorage.removeItem('_2fa');
+	// } catch (err: any) {
+	// 	console.log('response: ', response)
+	// 	console.log(err.message)
+	// }
+	// setStatus('done');
+	
 	return (
 		<div className='container'>
 			<div className="row justify-content-center">

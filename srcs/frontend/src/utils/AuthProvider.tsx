@@ -29,7 +29,6 @@ export function CallBack42() {
 				setStatus('2fa');
 				return;
 			}
-			// check where to store access token and refresh token elsewhere
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.removeItem('_2fa');
