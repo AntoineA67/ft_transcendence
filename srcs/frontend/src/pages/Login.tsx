@@ -4,7 +4,7 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
 import { useState, useEffect } from 'react';
-import { Outlet, useOutletContext, Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
 
@@ -19,10 +19,10 @@ type login = {
 	password: string
 }
 
-type loginContext = {
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
-	togglePassword: () => void,
-}
+// type loginContext = {
+// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
+// 	togglePassword: () => void,
+// }
 
 // const SignIn: React.FC = () => {
 export function Login() {
@@ -54,8 +54,8 @@ export function Login() {
 			let response = await fetch(url, fetchObj)
 			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			console.log("data===", data);
-			console.log("coucouuu", data.error);
+			// console.log("data===", data);
+			// console.log("coucouuu", data.error);
 			('error' in data) && dealError(data, setErr);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
@@ -122,9 +122,7 @@ export const InputToken = ({ handleChange }: any) => {
 };
 
 let url42 = () => {
-	const url42 = axios.get('http://localhost:3000/api/auth/42Url')
-	return url42;
-	// return axios.get('http://localhost:3000/api/auth/42Url')
+	return axios.get('http://localhost:3000/api/auth/42Url')
 }
 
 export function TokenPage() {

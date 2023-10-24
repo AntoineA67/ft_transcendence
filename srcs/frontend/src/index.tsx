@@ -10,8 +10,8 @@ import React from 'react';
 //import component
 import TestDB from './pages/TestDB';
 import { Login, LandingPage, TokenPage } from './pages/Login';
-import { Signin } from './pages/Signin';
-import { Signup } from './pages/Signup';
+import { Signin } from './utils/Signin';
+import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
 // import { Home } from './pages/Home';
 import Game from './pages/Game';

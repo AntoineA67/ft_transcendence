@@ -69,7 +69,7 @@ export function Signin() {
 						
 						<div className="mt-4">
 							<input type="checkbox" id="remember me" className='d-inline w-auto'
-								checked={check == 'true'}
+								checked={check === 'true'}
 								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
 							<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
 						</div>
