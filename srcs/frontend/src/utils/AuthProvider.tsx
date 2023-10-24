@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -29,7 +30,6 @@ export function CallBack42() {
 				setStatus('2fa');
 				return;
 			}
-			// check where to store access token and refresh token elsewhere
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.removeItem('_2fa');
@@ -80,7 +80,17 @@ export function Protected() {
 		function onError(err: any) {
 			setStatus('error')
 			console.log('err', err)
-			localStorage.removeItem('token');
+			// if (localStorage.getItem('token')) {
+				// axios.post("http://localhost:3000/auth/signout", {}, {
+				// 	headers: {
+				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
+				// 	}
+				// });
+				// localStorage.removeItem('token');
+			// }
+			// localStorage.removeItem('random');
+			// localStorage.removeItem('email');
+			// localStorage.removeItem('refreshToken');
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
