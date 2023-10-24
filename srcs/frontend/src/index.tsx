@@ -6,7 +6,8 @@ import {
 	Route,
 	RouterProvider,
 	LoaderFunctionArgs, 
-	Outlet
+	Outlet,
+	redirect
  } from 'react-router-dom';
 // import router from './router';
 import React from 'react';
@@ -56,7 +57,8 @@ async function loader(route: string, param?: string) {
 		}
 	}
 	if (!token) {
-		throw new Response('Unauthorized', {status: 401});
+		// throw new Response('Unauthorized', {status: 401});
+		return redirect("/login");
 	}
 	const res = await fetch(fetchUrl, fetchObj);
 	if (res.status != 200 && res.status != 201) {
