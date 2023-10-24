@@ -8,7 +8,6 @@ export type Message = {
 };
 
 export type Block = {
-	id: number,
 	userId: number,
 	blockedId: number,
 };

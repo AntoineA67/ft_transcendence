@@ -10,7 +10,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
-import { act } from "react-dom/test-utils";
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -41,9 +40,6 @@ export function ChatBox() {
 		});
 
 		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
-			if (!data) {
-				navigate('/chat');
-			}
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
@@ -54,7 +50,6 @@ export function ChatBox() {
 			setShowSettings(false);
 			setLoading(false);
 			setMess('');
-			console.log('data', data);
 		});
 	}, [chatId]);
 
@@ -74,7 +69,7 @@ export function ChatBox() {
 		const handlenewmess = (newMessage: Message) => {
 			if ((chatId && newMessage.roomId !== parseInt(chatId, 10))) return;
 			const block = blocks.find((block) => block.blockedId === newMessage.userId);
-			if (block) return;
+			if (block || (memberstatus && memberstatus.ban)) return;
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		};
 
@@ -92,6 +87,11 @@ export function ChatBox() {
 		const handlenewmemberStatus = (response: Member) => {
 			if (response) {
 				setMemberstatus(response);
+				if (response.ban) {
+					setMessages([]);
+					setroomTitle('You have been banned');
+					setMemberList([]);
+				}
 			}
 		};
 
@@ -195,8 +195,6 @@ export function ChatBox() {
 		chatsSocket.emit('sendMessage', {
 			content: mess,
 			roomId: chatId,
-			userid: profile.id,
-			username: profile.username,
 		}, (response: boolean) => {
 			if (!response) {
 				console.error('Erreur lors de l\'envoi du message');
@@ -235,22 +233,51 @@ export function ChatBox() {
 			memberId: memberid,
 			roomId: chatId,
 			action: actions,
-		});
+		}, (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid)
+						member.ban = !actions;
+					return member;
+				}));
+			}
+		}
+		);
 	};
 
 	const handleBlock = (memberid: number, actions: boolean) => {
+		if (profile === undefined) {
+			return;
+		}
+
 		chatsSocket.emit('blockUser', {
 			memberId: memberid,
 			action: actions,
+		}, (response: boolean) => {
+			if (response) {
+				setBlocks((prevBlocks) => {
+					if (!actions) {
+						return [...prevBlocks, { userId: profile.id, blockedId: memberid }];
+					} else {
+						return prevBlocks.filter((block) => block.blockedId !== memberid);
+					}
+				});
+			}
 		});
-	}
+	};
+
+
+
 
 	const handleKick = (memberid: number) => {
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
-		});
-	};
+		}, (response: boolean) => {
+			if (response)
+				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid))
+		})
+	}
 
 	const handleRoleChange = (memberid: number, role: string) => {
 		chatsSocket.emit('changeRole', {
@@ -258,6 +285,17 @@ export function ChatBox() {
 			roomid: chatId,
 			owner: role === 'Owner' ? true : false,
 			admin: role === 'Admin' ? true : false,
+		}, (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid) {
+						member.owner = role === 'Owner' ? true : false;
+						member.admin = role === 'Admin' ? true : false;
+					}
+					return member;
+				}
+				));
+			}
 		});
 	}
 
@@ -351,16 +389,21 @@ export function ChatBox() {
 							disabled={
 								memberstatus
 									? memberstatus.ban || (memberstatus.mute !== null && new Date(memberstatus.mute) > new Date())
+										? true
+										: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+											? true
+											: false
 									: true
 							}
 							placeholder={
 								memberstatus
 									? (memberstatus.ban && roomChannel)
 										? 'You\'re banned...'
-										// : (memberstatus. && roomChannel)
 										: memberstatus.mute !== null && new Date(memberstatus.mute) > new Date()
 											? 'You are muted...'
-											: 'Write a message...'
+											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+												? 'You are blocking this user...'
+												: 'Write a message...'
 									: ''
 							}
 						/>
@@ -418,7 +461,7 @@ export function ChatBox() {
 								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
-						{roomChannel && roomTitle && profile && <button className="btn btn-outline-secondary w-20 ml-2" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-outline-secondary w-20 ml-2" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
 					</div>
 					<ul className="members-list">
 						{membersList
