@@ -59,16 +59,16 @@ async function loader(route: string, param?: string, refresh = false) {
 		return redirect("/login");
 	}
 	const res = await fetch(fetchUrl, fetchObj);
-	// if (res.statusText == 'token expired' && !refresh) {
+	if (res.status == 200 || res.status == 201) {
+		console.log('fetch ', fetchUrl);
+		return (res.json());
+	}
+	// if (!refresh) {
 	// 		create a new token
 	//      save to local storage
 	//      return (loader(toute, param, true)) 
 	// }
-	
-	if (res.status != 200 && res.status != 201) {
-		throw new Response(res.statusText, {status: res.status})
-	}
-	return (res.json());
+	throw new Response(res.statusText, {status: res.status})
 }
 
 const router = createBrowserRouter(
@@ -86,7 +86,7 @@ const router = createBrowserRouter(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />}>
+			<Route element={<Protected />} loader={() => (loader('auth', 'checkTokenValidity'))}>
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
