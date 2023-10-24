@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
@@ -10,8 +10,6 @@ type textProp = {
 	profile: profileType,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
-
-
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
@@ -35,7 +33,7 @@ function Text({ type, profile, setEdit }: textProp) {
 type editTextProp = {
 	type: 'nick' | 'bio',
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>,
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
@@ -55,7 +53,7 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 	async function handleSubmit(
 		e: React.FormEvent<HTMLFormElement>, 
 		type: string, profile: profileType, 
-		setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+		setProfile: React.Dispatch<React.SetStateAction<profileType>>
 	) {
 		const content = (type == 'nick') ? profile.username : profile.bio;
 		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
@@ -95,8 +93,8 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
 		const file = input.files ? input.files[0] : null;
 		if (!file) return ;
-		if (file.size >= 10485760) {
-			console.log('file size limit: 10MB');
+		if (file.size >= 1048576) {
+			console.log('file size limit: 1MB');
 			return ;
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
@@ -122,50 +120,47 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 }
 
 function Profile() {
-	const [profile, setProfile] = useState<profileType | null>(null);
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 	const [update, setUpdate] = useState<boolean>(true);
+	// const profile: profileType = useLoaderData() as profileType;
 
-	useEffect(() => {	
-		socket.emit('MyProfile', (response: profileType) => {
-			setProfile(response)
-			console.log('Myprofile: ', response);
-		})
-	}, [update]);
+	// useEffect(() => {	
+	// 	socket.emit('MyProfile', (response: profileType) => {
+	// 		setProfile(response)
+	// 		console.log('Myprofile: ', response);
+	// 	})
+	// }, [update]);
 
 	return (
-		profile ? (
-			<>
-				<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
-					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
-				
-					<div>
-						<Avatar size={150} user={{
-							id: profile.id, 
-							username: profile.username, 
-							avatar: profile.avatar,
-							status: profile.status
-						}} />
-					</div>
-					<NewAvatar setUpdate={setUpdate}/>
-
-					{ (edit == 'nick'
-						) ? ( 
-							<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
-						) : (
-							<Text type='nick' profile={profile} setEdit={setEdit} /> )}
-					
-					 { (edit == 'bio'
-					 	) ? (
-							<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
-						) : (
-							<Text type='bio' profile={profile} setEdit={setEdit} />)}
+		<>
+			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+			
+				<div>
+					<Avatar size={150} user={{
+						id: profile.id, 
+						username: profile.username, 
+						avatar: profile.avatar,
+						status: profile.status
+					}} />
 				</div>
-				<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
-			</>
-		) : (
-			<p className='white-text'>loading</p>
-		)
+				<NewAvatar setUpdate={setUpdate}/>
+
+				{ (edit == 'nick'
+					) ? ( 
+						<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+					) : (
+						<Text type='nick' profile={profile} setEdit={setEdit} /> )}
+				
+					{ (edit == 'bio'
+					) ? (
+						<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
+					) : (
+						<Text type='bio' profile={profile} setEdit={setEdit} />)}
+			</div>
+			<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
+		</>
 	);
 }
 

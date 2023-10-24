@@ -56,7 +56,7 @@ model User {
   block            Block[]         @relation("block")
   blocked          Block[]         @relation("blocked")
 
-  refreshToken     RefreshToken[]
+  refreshToken     RefreshToken[] @relation("refreshToken")
 }
 
 enum OnlineStatus {
@@ -146,7 +146,7 @@ model RefreshToken {
       
   // This field is the relation field that lets you fetch the actual User object. 
   // The fields and references arguments define how the relationship is mapped.
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation("refreshToken", fields: [userId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime @default(now())
   expiresAt   DateTime 
