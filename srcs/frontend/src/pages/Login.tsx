@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link } from "react-router-dom";
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
+// import { useHistory } from "react-router-dom";
+
 
 type newUser = {
 	username: string,
