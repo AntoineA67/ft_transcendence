@@ -7,8 +7,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link } from "react-router-dom";
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
-// import { useHistory } from "react-router-dom";
-
+import { useNavigate } from 'react-router-dom';
 
 type newUser = {
 	username: string,
@@ -26,19 +25,21 @@ type login = {
 // 	togglePassword: () => void,
 // }
 
-// const SignIn: React.FC = () => {
 export function Login() {
+	const navigate = useNavigate();
+
 
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.setItem('email', user.email);
+			navigate('/');
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
-		const errMess = document.getElementById("error-message") as HTMLInputElement;
-		setErr(data.error);
+		// const errMess = document.getElementById("error-message") as HTMLInputElement;
+		setErr(data.message);
 	}
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
@@ -124,7 +125,7 @@ export const InputToken = ({ handleChange }: any) => {
 };
 
 let url42 = () => {
-	return axios.get('http://localhost:3000/api/auth/42Url')
+	return axios.get('http://localhost:3000/auth/42Url')
 }
 
 export function TokenPage() {
@@ -193,8 +194,10 @@ export function LandingPage() {
 	// const oauth42Url = url42();
 	const github = "https://github.com/AntoineA67/ft_transcendence";
 
+
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
+		// localStorage.removeItem('_2fa');
 	}, []);
 
 	return (
