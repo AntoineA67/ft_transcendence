@@ -92,6 +92,20 @@ export function ChatBox() {
 					setroomTitle('You have been banned');
 					setMemberList([]);
 				}
+				else {
+					chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
+						setroomTitle(data.roomTitle);
+						setMessages(data.messages);
+						setRoomChannel(data.roomChannel);
+						setMemberstatus(data.memberStatus);
+						setMemberList(data.members);
+						setnewRoomTitleSuccess(undefined);
+						setinviteUsernameSuccess(undefined);
+						setShowSettings(false);
+						setLoading(false);
+						setMess('');
+					});
+				}
 			}
 		};
 
@@ -225,6 +239,14 @@ export function ChatBox() {
 			memberId: memberid,
 			duration: time,
 			roomId: chatId
+		} , (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid)
+						member.mute = time > 0 ? new Date(Date.now() + time * 1000) : null;
+					return member;
+				}));
+			}
 		});
 	};
 
@@ -326,11 +348,6 @@ export function ChatBox() {
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'justify-content-end' : 'justify-content-start';
-		// const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
-		// 	hour: '2-digit',
-		// 	minute: '2-digit',
-		// 	second: '2-digit',
-		// });
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
@@ -477,7 +494,7 @@ export function ChatBox() {
 										</div>
 									</Link>
 									<div className="member-actions">
-										{roomChannel && <select
+										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <select
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
 											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
 										>
@@ -485,13 +502,13 @@ export function ChatBox() {
 											<option value="Admin">Admin</option>
 											<option value="Member">Member</option>
 										</select>}
-										{roomChannel && <button
+										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date() ? 'action-disabled' : ''}`}
 											onClick={() => handleMuteDurationChange(member.userId, member.muteduration, member.mute && new Date(member.mute) > new Date())}
 										>
 											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
 										</button>}
-										{roomChannel && (!member.mute || new Date(member.mute) < new Date()) && (
+										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && (!member.mute || new Date(member.mute) < new Date()) && (
 											<select
 												defaultValue={member.muteduration}
 												onChange={(e) => member.muteduration = parseInt(e.target.value)}
@@ -504,7 +521,7 @@ export function ChatBox() {
 												<option value="86400">24 h</option>
 											</select>
 										)}
-										{roomChannel && <button
+										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
 											onClick={() => handleBan(member.userId, member.ban)}
 										>
@@ -777,10 +794,22 @@ export function ChatList() {
 			}
 		};
 
+		const handlenewProfile = (response: Profile) => {
+			if (response) {
+				setProfile(response);
+				setBlocks(response.blocks);
+				const allRooms: Room[] = response.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
+				setRooms(allRooms);
+				if (response.pvrooms !== undefined)
+					setPvrooms(response.pvrooms);
+			}
+		}
+
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
 		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
+		socketListeners.push({ event: 'newProfile', handler: handlenewProfile });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
