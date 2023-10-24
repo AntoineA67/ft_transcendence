@@ -5,7 +5,8 @@ import {
 	createRoutesFromElements,
 	Route,
 	RouterProvider,
-	LoaderFunctionArgs
+	LoaderFunctionArgs, 
+	Outlet
  } from 'react-router-dom';
 // import router from './router';
 import React from 'react';
@@ -69,7 +70,8 @@ async function loader(route: string, param?: string) {
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
-		<>	
+		<Route element={<Outlet />} errorElement={<DefaultErrorPage />}>	
+			
 			<Route element={<Guest />}>
 				<Route path="login" element={<Login />}>
 					<Route index element={<LandingPage />}></Route>
@@ -81,7 +83,7 @@ const router = createBrowserRouter(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />} errorElement={<DefaultErrorPage />}>
+			<Route element={<Protected />}>
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
@@ -105,7 +107,11 @@ const router = createBrowserRouter(
 					</Route>
 					
 					<Route path="chat" element={<Chat />}>
-						<Route path=':chatId' element={<ChatBox />}></Route>
+						<Route 
+							path=':chatId' 
+							element={<ChatBox />}
+							loader={({ params }) => (loader('rooms', params.chatId))}
+						/>
 					</Route>
 					
 					{/* <Route path="setting" element={<Setting />}>
@@ -130,7 +136,7 @@ const router = createBrowserRouter(
 					</GameSocketProvider>
 				</>}></Route> */}
 			<Route path="/test-db" element={<TestDB />} />	
-		</>
+		</Route>
 	)
 );
 
