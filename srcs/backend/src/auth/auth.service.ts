@@ -25,7 +25,6 @@ export class AuthService {
 		private jwt: JwtService,
     ) {
         this.JWT_SECRET = jwtConstants.secret;
-
         if (!this.JWT_SECRET) {
             throw new Error("JWT_SECRET environment variable not set!");
         }
@@ -84,33 +83,7 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		// if 2fa is activated and user have not sent token
-		// let response;
-		// if (!req.query._2fa && req.user.activated2FA) {
-		// 	response = { id: req.user.id, _2fa: true };
-		// // if 2fa is activated and user have sent token
-		// } else if (req.query._2fa && req.user.activated2FA) {
-		// 	const _2FAValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2FAValid) {
-		// 		return this.signToken(user.id, res);
-		// 		// response = await this.authService.signToken(req.user.id, res);
-		// 	} else {
-		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-		// 	}
-		// }
-		// if (req.query._2fa && req.user.activated2FA)
-		// {
-		// 	const _2FAValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2FAValid) {
-		// 		// return this.signToken(user.id, res);
-		// 		// response = await this.authService.signToken(req.user.id, res);
-		// 	} else {
-		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-		// 	}
-		// 	// no 2fa
-		// } 
-		// send the token
-		// return this.signToken(user.id, res);
+		
 		return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -133,7 +106,7 @@ export class AuthService {
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
-				response = await this.signJwtTokens(req.user.id, req.user.email);
+				response = await this.signJwtTokens(dto.id, dto.email);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
@@ -150,7 +123,6 @@ export class AuthService {
 			id: userId,
 			email: userEmail,
 		}
-		
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(
 			payload, 
@@ -166,19 +138,16 @@ export class AuthService {
 		};
 	}
 	
-	async login(user: any) {
-		if (!user) {
+	async login42(user: any) {
+		if (!user)
 			throw new BadRequestException('Unauthenticated');
-		}
 		let userExists: any = await this.usersService.getUserByEmail(user.emails[0].value);
-
-		if (!userExists) {
-			userExists = await this.registerUser(user);
-		}
+		if (!userExists)
+			userExists = await this.registerUser42(user);
 		return (userExists);
 	}
 
-	async registerUser(user: any): Promise<User | undefined> {
+	async registerUser42(user: any): Promise<User | undefined> {
 		try {
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
@@ -217,7 +186,6 @@ export class AuthService {
         // Extract the token from the Authorization header
 		const authHeader = req.headers.authorization;
 		const token = authHeader && authHeader.split(' ')[1];
-
         console.log("passing by checktokenvalidity");
         if (!token)
             return res.status(401).json({ valid: false, message: "Token Missing" });
@@ -234,11 +202,9 @@ export class AuthService {
         // Invalidate the refresh token to make the signout more secure
         // Extract the refresh token from the body or header
         const refreshToken = req.body.refreshToken;
-
         if (!refreshToken) {
             return res.status(401).json({ message: "Refresh token is missing" });
         }
-
         // Remove the refresh token from the database to invalidate it
         try {
             this.prisma.refreshToken.delete({
