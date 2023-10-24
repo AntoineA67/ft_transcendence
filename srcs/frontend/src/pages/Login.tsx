@@ -4,9 +4,10 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 
 import { useState, useEffect } from 'react';
-import { Outlet, useOutletContext, Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
+import { useNavigate } from 'react-router-dom';
 
 type newUser = {
 	username: string,
@@ -19,24 +20,26 @@ type login = {
 	password: string
 }
 
-type loginContext = {
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
-	togglePassword: () => void,
-}
+// type loginContext = {
+// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
+// 	togglePassword: () => void,
+// }
 
-// const SignIn: React.FC = () => {
 export function Login() {
+	const navigate = useNavigate();
+
 
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.setItem('email', user.email);
+			navigate('/');
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
-		const errMess = document.getElementById("error-message") as HTMLInputElement;
-		setErr(data.error);
+		// const errMess = document.getElementById("error-message") as HTMLInputElement;
+		setErr(data.message);
 	}
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
@@ -54,8 +57,8 @@ export function Login() {
 			let response = await fetch(url, fetchObj)
 			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			console.log("data===", data);
-			console.log("coucouuu", data.error);
+			// console.log("data===", data);
+			// console.log("coucouuu", data.error);
 			('error' in data) && dealError(data, setErr);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
@@ -77,137 +80,6 @@ export function Login() {
 
 	return (
 		<Outlet context={{ togglePassword, handleSubmit }} />
-	);
-}
-
-/* sign up page */
-
-export function Signup() {
-	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
-
-	const [nick, setNick] = useState('');
-	const [email, setEmail] = useState('');
-	const [pass, setPass] = useState('');
-	const [err, setErr] = useState('');
-
-	return (
-		<div className='container'>
-			<div className="row justify-content-center">
-				<div className='col-sm-6 col-lg-4'>
-					{/* sm="6" lg="4" */}
-					<Link to="..">
-						<button className="leftArrow my-4"></button>
-					</Link>
-					<form className="w-100" onSubmit={(e) => (
-						handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
-						<h3 className='white-text'>New Account!</h3>
-
-						<div className="mt-4">
-							<label htmlFor='nickname'>Nickname</label>
-							<input id='nickname' required type="text" placeholder="nickname"
-								value={nick} onChange={(e) => { setNick(e.target.value) }} />
-						</div>
-
-						<div className="mt-4">
-							<label htmlFor='email'>Email address</label>
-							<input id='email' required type="email" placeholder="email"
-								value={email} onChange={(e) => { setEmail(e.target.value) }} />
-						</div>
-
-						<div className="mt-4">
-							<label htmlFor='password'>Password</label>
-							<input id='password' required type="password" placeholder="password"
-								value={pass} onChange={(e) => { setPass(e.target.value) }} />
-							<div className="d-flex justify-content-end">
-								<img
-									id="eye"
-									src={eyeopen}
-									onClick={togglePassword}
-									className="togglePassword" />
-							</div>
-						</div>
-						<div id='error-message' className='white-text'>
-							{err}
-						</div>
-
-						<div className="mt-4">
-							<input required type="checkbox" id="accept-terms" className='d-inline w-auto'/>
-							<label htmlFor="accept-terms" className='d-inline ms-3'>
-								I accept terms and conditions
-							</label>
-						</div>
-
-						<button type="submit" className="btn btn-secondary w-100 mt-4" >
-							Sign up
-						</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	)
-}
-
-/* sign in page */
-
-export function Signin() {
-	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();
-
-	const [email, setEmail] = useState<string>('');
-	const [pass, setPass] = useState<string>('');
-	const [check, setCheck] = useState<string>('true');
-	const [err, setErr] = useState('');
-
-	return (
-		<div className='container'>
-			<div className="row justify-content-center">
-				<div className='col-sm-6 col-lg-4'>
-					{/* sm="6" lg="4" */}
-					<Link to='..'>
-						<button className="leftArrow my-4"></button>
-					</Link>
-					<form className="w-100" onSubmit={(e) => (handleSubmit(e, { email: email, password: pass }, setErr))}>
-						<h3 className='white-text'>Welcome back!</h3>
-
-						<div className="mt-4">
-							<label htmlFor='email'>Email</label>
-							<input id='email' required type="text" placeholder="email"
-								value={email} onChange={(e) => setEmail(e.target.value)} />
-						</div>
-
-						<div className="mt-4">
-							<label htmlFor='password'>Password</label>
-							<input id='password' required type="password" placeholder="password"
-								value={pass} onChange={(e) => setPass(e.target.value)} />
-							<div className="d-flex justify-content-end">
-								<img
-									id="eye"
-									src={eyeopen}
-									onClick={togglePassword}
-									className="togglePassword" />
-							</div>
-						</div>
-						
-						<div className="mt-4">
-							<input type="checkbox" id="remember me" className='d-inline w-auto'
-								checked={check == 'true'}
-								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
-							<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
-						</div>
-						
-						<div id='error-message' className='red-text mt-4'>
-							{err}
-						</div>
-
-						<button type="submit" className="btn btn-primary w-100">
-							Login
-						</button>
-					</form>
-					<button className="btn btn-invisible w-100">
-						Forget password
-					</button>
-				</div>
-			</div>
-		</div>
 	);
 }
 
@@ -252,9 +124,9 @@ export const InputToken = ({ handleChange }: any) => {
 	);
 };
 
-	let url42 = () => {
-		return axios.get('http://localhost:3000/api/auth/42Url')
-	}
+let url42 = () => {
+	return axios.get('http://localhost:3000/auth/42Url')
+}
 
 export function TokenPage() {
 
@@ -319,10 +191,13 @@ export function TokenPage() {
 export function LandingPage() {
 
 	const oauth42Url = Oauth42();
+	// const oauth42Url = url42();
 	const github = "https://github.com/AntoineA67/ft_transcendence";
+
 
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
+		// localStorage.removeItem('_2fa');
 	}, []);
 
 	return (
