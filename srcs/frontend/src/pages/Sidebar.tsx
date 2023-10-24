@@ -83,8 +83,8 @@ export default function Sidebar() {
 					</div>
 				</div>
 			</div>
-			{/* <button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
-			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button> */}
+			<button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
+			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button>
 			{popup == 'pong' && <PongPopup nick={popupNick} setPopup={setPopup} />}
 			{popup == 'ponged' && <PongedPopup nick={popupNick} setPopup={setPopup} />}
 		</>
