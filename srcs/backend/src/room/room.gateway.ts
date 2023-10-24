@@ -263,7 +263,8 @@ export class RoomGateway
 				username: usertomute.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
-			SocketInvite.emit('newmemberStatus', membertosend);
+			if (SocketInvite)
+				SocketInvite.emit('newmemberStatus', membertosend);
 			return true;
 		}
 		return false;
@@ -286,8 +287,10 @@ export class RoomGateway
 				username: usertoban.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
+			const profileupdated = await this.roomService.getProfileForUser(content.memberId);
 			if (SocketInvite) {
 				SocketInvite.emit('newmemberStatus', membertosend);
+				SocketInvite.emit('newProfile', profileupdated);
 				if (content.action)
 					SocketInvite.leave("room_" + roomid.toString());
 				else
@@ -304,10 +307,19 @@ export class RoomGateway
 
 		const bool = await this.roomService.blockUser(userid, content.memberId, content.action);
 		this.logger.log(bool);
-		const privateroomusermember = await this.roomService.getPrivateRoomBet2users(userid, content.memberId);
+		const usertoblock = await this.roomService.getMemberDatabyId(content.memberId);
+		const SocketInvite = this.clients[usertoblock.id.toString()];
+		const profileupdated = await this.roomService.getProfileForUser(content.memberId);
+		const member = await this.memberService.getMemberById(content.memberId);
+		const membertosend = {
+			...member,
+			username: usertoblock.username,
+		};
 		if (bool) {
-			const blockStatus = await this.roomService.getBlockData(userid);
-			client.emit('newBlockStatus', blockStatus);
+			if (SocketInvite) {
+				SocketInvite.emit('newProfile', profileupdated);
+				SocketInvite.emit('newmemberStatus', membertosend);
+			}
 			return true;
 		}
 		return false;
