@@ -65,7 +65,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 		//console.log('accessToken', accessToken, refreshToken, profile);
 		// const user: any = await this.usersService.findOrCreate(profile.username).then(
 		//console.log("profile ===>", profile);
-		const user: any = await this.authService.login(profile).then(
+		const user: any = await this.authService.login42(profile).then(
 			(user) => {
 				//console.log('user', user);
 				return cb(null, user);
