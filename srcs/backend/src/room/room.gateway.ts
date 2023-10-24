@@ -9,7 +9,6 @@ import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
-import { subscribe } from 'diagnostics_channel';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -57,7 +56,13 @@ export class RoomGateway
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
 		const members = await this.memberService.getMembersByRoomId(roomid);
 		if (!memberStatus || memberStatus.ban)
-			return null;
+			return {
+				messages: [],
+				roomTitle: '',
+				roomChannel: false,
+				members: [],
+				memberStatus,
+			};
 		const roomData = await this.roomService.getRoomData(roomid, userId);
 		return {
 			...roomData,
@@ -149,15 +154,22 @@ export class RoomGateway
 		}
 	}
 
-
 	@SubscribeMessage('sendMessage')
-	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string, userid: number, username: string }) {
+	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string }) {
 		const roomid = parseInt(message.roomId, 10);
+		const userid = client.data.user.id;
+		const user = await this.roomService.getUserbyId(userid);
 		this.logger.log('message', message);
-		const user = await this.memberService.getMemberDatabyRoomId(message.userid, roomid);
-		if (user.ban || (user.mute !== null && new Date(user.mute) > new Date()))
-			return;
-		const createdMessage = await this.messagesService.createMessage(message.content, roomid, message.userid);
+		const member = await this.memberService.getMemberDatabyRoomId(user.id, roomid);
+		const room = await this.roomService.getRoomDataById(roomid);
+		if (!room.isChannel) {
+			const blockedinPrivRoom = await this.roomService.PrivRoomisBlocked(user.id, roomid);
+			if (blockedinPrivRoom)
+				return false;
+		}
+		if (member.ban || (member.mute !== null && new Date(member.mute) > new Date()))
+			return false;
+		const createdMessage = await this.messagesService.createMessage(message.content, roomid, user.id);
 		const roomName = "room_" + roomid.toString();
 		if (createdMessage) {
 			const newMessage = {
@@ -166,7 +178,7 @@ export class RoomGateway
 				send_date: createdMessage.send_date,
 				userId: createdMessage.userId,
 				roomId: createdMessage.roomId,
-				username: message.username,
+				username: user.username,
 			};
 			this.server.to(roomName).emit('messageSent', newMessage);
 			return true;
@@ -191,13 +203,6 @@ export class RoomGateway
 		const userId: number = client.data.user.id;
 		const roomid = parseInt(roomId, 10);
 		return await this.roomService.getPrivateRoomById(userId, roomid);
-	}
-
-	@SubscribeMessage('getBlockStatus')
-	async handlegetBlockStatus(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<boolean> {
-		const userId: number = client.data.user.id;
-		const roomid = parseInt(roomId, 10);
-		return await this.roomService.getBlockStatus(userId, roomid);
 	}
 
 	@SubscribeMessage('changeRoomTitle')
@@ -276,19 +281,17 @@ export class RoomGateway
 			const roomName = "room_" + roomid.toString();
 			const member = await this.memberService.getMemberById(content.memberId);
 			const SocketInvite = this.clients[usertoban.id.toString()];
-			if (content.action)
-				client.leave("room_" + roomid.toString());
-			else
-				client.join("room_" + roomid.toString());
 			const membertosend = {
 				...member,
 				username: usertoban.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
-
 			if (SocketInvite) {
 				SocketInvite.emit('newmemberStatus', membertosend);
-				SocketInvite.leave(roomName);
+				if (content.action)
+					SocketInvite.leave("room_" + roomid.toString());
+				else
+					SocketInvite.join("room_" + roomid.toString());
 			}
 			return true;
 		}
@@ -303,18 +306,8 @@ export class RoomGateway
 		this.logger.log(bool);
 		const privateroomusermember = await this.roomService.getPrivateRoomBet2users(userid, content.memberId);
 		if (bool) {
-			const usertoblock = await this.roomService.getMemberDatabyId(content.memberId);
-			const SocketInvite = this.clients[usertoblock.id.toString()];
-			if (SocketInvite) {
-				SocketInvite.emit('newblockStatus', content.action);
-			}
-			if (privateroomusermember) {
-				const roomName = "room_" + privateroomusermember.id.toString();
-				if (content.action)
-					client.leave(roomName);
-				else
-					client.join(roomName);
-			}
+			const blockStatus = await this.roomService.getBlockData(userid);
+			client.emit('newBlockStatus', blockStatus);
 			return true;
 		}
 		return false;
@@ -368,7 +361,8 @@ export class RoomGateway
 				username: usertochangerole.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
-			SocketInvite.emit('newmemberStatus', membertosend);
+			if (SocketInvite)
+				SocketInvite.emit('newmemberStatus', membertosend);
 			return true;
 		}
 		return false;
