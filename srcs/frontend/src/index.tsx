@@ -9,9 +9,11 @@ import {
 import React from 'react';
 //import component
 import TestDB from './pages/TestDB';
-import { Login, Signin, Signup, LandingPage, TokenPage } from './pages/Login';
+import { Login, LandingPage, TokenPage } from './pages/Login';
+import { Signin } from './utils/Signin';
+import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
-import { Home } from './pages/Home';
+// import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
