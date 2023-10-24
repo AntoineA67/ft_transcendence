@@ -4,7 +4,8 @@ import { Canvas } from "@react-three/fiber"
 import { Box, Text } from "@react-three/drei"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
-import { gamesSocket } from '../utils/socket';
+import { gamesSocket, socket as globalSocket } from '../utils/socket';
+import axios, { AxiosResponse } from "axios"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -69,6 +70,19 @@ export default function Game() {
 	// const socket = useGameSocket();
 
 	useEffect(() => {
+		// const profile = axios.get('/profile', {
+		// 	headers: {
+		// 		Authorization: `Bearer ${localStorage.getItem('token')}`,
+		// 	},
+		// }).then((res: AxiosResponse) => res.data.json()).then((res) => {
+		// 	setId(res.id);
+		// });
+		const profile = globalSocket.emit('MyProfile', (res: any) => {
+			console.log("MyProfile", res);
+			setId(res.id);
+
+		});
+		console.log("Id", id);
 		// gamesSocket?.on('connect', function () {
 		// 	console.log('connect')
 		// })
@@ -76,9 +90,9 @@ export default function Game() {
 		// 	console.log('disconnect ' + message)
 		// })
 
-		gamesSocket?.on('id', (newId: any) => {
-			setId(newId)
-		})
+		// gamesSocket?.on('id', (newId: any) => {
+		// 	setId(newId)
+		// })
 		gamesSocket?.on('startGame', (newId: any) => {
 			console.log('startGame: ', newId)
 			setGameStatus(GameStatus.Started);
@@ -86,6 +100,7 @@ export default function Game() {
 		})
 		gamesSocket?.on('clients', (newClients: any) => {
 			setClients(newClients.clients)
+			// console.log('clients: ', newClients.clients, newClients.ball)
 			// clients.current = newClients.clients
 			if (newClients.ball) {
 				setBall(newClients.ball)
@@ -213,7 +228,9 @@ export default function Game() {
 					{Object.keys(clients)
 						.map((client) => {
 							const { y, dir, score } = clients[client]
-							const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
+							// console.log(client, id, client === id);
+							const pos = [client == id ? -10 : 10, y * 20 - 10, 0]
+							// console.log(pos);
 							return (
 								<UserWrapper
 									key={client}
