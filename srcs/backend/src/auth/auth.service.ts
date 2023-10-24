@@ -114,8 +114,8 @@ export class AuthService {
 		} else 
 			response = await this.signJwtTokens(req.user.id, req.user.email);
 		// console.log(response);
-		res.status(HttpStatus.OK).json(response);
 		// return response;
+		res.status(HttpStatus.OK).json(response);
 	}
 
 	async signJwtTokens(userId: number, userEmail: string,) {

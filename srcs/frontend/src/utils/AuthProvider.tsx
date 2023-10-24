@@ -18,7 +18,7 @@ export function CallBack42() {
 		let response;
 
 		try {
-			if (_2fa?.actived === true) {
+			if (_2fa?.activated === true) {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
 			} else {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
@@ -26,7 +26,7 @@ export function CallBack42() {
 			const data = await response.json();
 			console.log('data: ', data)
 			if (data._2fa) {
-				localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
+				localStorage.setItem('_2fa', JSON.stringify({id: data.id, activated : true}));
 				setStatus('2fa');
 				return;
 			}
