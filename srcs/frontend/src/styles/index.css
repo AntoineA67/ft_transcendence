@@ -172,3 +172,31 @@ button {
 	clip-path: circle();
 }
 /* 	clipPath: `circle(at ${size / 2}px ${size / 2}px)`,  */
+
+.screen-mask {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 1021;
+}
+
+.popup {
+	position: fixed;
+	top: 20%;
+	bottom: 20%;
+	left: 20%;
+	right: 20%;
+	padding: 3rem;
+	background-color: black;
+	color: white;
+	border-radius: 1rem;
+	border: 3px solid #34fafa;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+}
