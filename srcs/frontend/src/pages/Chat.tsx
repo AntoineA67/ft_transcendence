@@ -1,5 +1,5 @@
 
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLoaderData } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -11,8 +11,17 @@ import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-i
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 
+type ChatBoxData = {
+	messages: Message[], 
+	roomTitle: string, 
+	roomChannel: boolean, 
+	members: Member[], 
+	memberStatus: Member 
+}
+
 export function ChatBox() {
 	const { chatId } = useParams();
+	const data = useLoaderData() as ChatBoxData;
 	const [mess, setMess] = useState('');
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [roomTitle, setroomTitle] = useState<string>('');
@@ -31,10 +40,10 @@ export function ChatBox() {
 	const [newPassword, setNewPassword] = useState<string>('');
 
 	useEffect(() => {
-		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
-			if (!data) {
-				navigate('/chat');
-			}
+		// chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
+		// 	if (!data) {
+		// 		navigate('/chat');
+		// 	}
 			setroomTitle(data.roomTitle);
 			setMessages(data.messages);
 			setRoomChannel(data.roomChannel);
@@ -45,7 +54,7 @@ export function ChatBox() {
 			setShowSettings(false);
 			setLoading(false);
 			setMess('');
-		});
+		// });
 
 		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
 			if (profiletest) {

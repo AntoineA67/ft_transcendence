@@ -104,9 +104,10 @@ export function Protected() {
 
 	return (
 		<>
-			{status === 'loading' && <p className='white-text'> loading ... </p>}
-			{status === 'connect' && <Outlet />}
-			{status === 'error' && <Navigate to="/login" replace />}
+			<Outlet />
+			{/* {status == 'loading' && <p className='white-text'> loading ... </p>}
+			{status == 'connect' && <Outlet />}
+			{status == 'error' && <Navigate to="/login" replace />} */}
 		</>
 	);
 }
