@@ -45,28 +45,27 @@ import { GameSocketProvider } from './utils/GameSocketProvider';
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
-async function loader(route: string, param?: string) {
+async function loader(route: string, param?: string, refresh = false) {
 	const token = localStorage.getItem('token') || null;
 	const baseUrl = 'http://127.0.0.1:3000/';
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
 	const fetchObj = {
 		method: 'GET',
-		headers: {
-			'Authorization': `Bearer ${token}`,
-			// 'Content-Type': 'application/json',
-		}
+		headers: { 'Authorization': `Bearer ${token}` }
 	}
 	if (!token) {
-		// throw new Response('Unauthorized', {status: 401});
 		return redirect("/login");
 	}
 	const res = await fetch(fetchUrl, fetchObj);
+	// if (res.statusText == 'token expired' && !refresh) {
+	// 		create a new token
+	//      save to local storage
+	//      return (loader(toute, param, true)) 
+	// }
+	
 	if (res.status != 200 && res.status != 201) {
-		console.log('fetch: ', fetchUrl);
-		console.log('err in loader: ', res);
 		throw new Response(res.statusText, {status: res.status})
 	}
-	console.log('react router loader');
 	return (res.json());
 }
 
