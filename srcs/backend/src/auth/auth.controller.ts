@@ -39,7 +39,7 @@ export class AuthController {
 
 	@Public()
     @Post('signout') 
-    async signout(@Req() req: Request, @Res() res: Response) {
+    signout(@Req() req: Request, @Res() res: Response) {
         return this.authService.signout(req, res);
     }
 

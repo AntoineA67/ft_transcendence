@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -79,7 +80,17 @@ export function Protected() {
 		function onError(err: any) {
 			setStatus('error')
 			console.log('err', err)
-			localStorage.removeItem('token');
+			// if (localStorage.getItem('token')) {
+				// axios.post("http://localhost:3000/auth/signout", {}, {
+				// 	headers: {
+				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
+				// 	}
+				// });
+				// localStorage.removeItem('token');
+			// }
+			// localStorage.removeItem('random');
+			// localStorage.removeItem('email');
+			// localStorage.removeItem('refreshToken');
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
@@ -93,9 +104,9 @@ export function Protected() {
 
 	return (
 		<>
-			{status == 'loading' && <p className='white-text'> loading ... </p>}
-			{status == 'connect' && <Outlet />}
-			{status == 'error' && <Navigate to="/login" replace />}
+			{status === 'loading' && <p className='white-text'> loading ... </p>}
+			{status === 'connect' && <Outlet />}
+			{status === 'error' && <Navigate to="/login" replace />}
 		</>
 	);
 }
