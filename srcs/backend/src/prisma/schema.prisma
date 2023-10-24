@@ -8,64 +8,64 @@ datasource db {
 }
 
 model Game {
-  id         Int       @default(autoincrement()) @id(map: "PK_352a30652cd352f552fef73dec5")
-  finish     Boolean      @default(false)
-  start_date DateTime     @default(now())  @db.Timestamp(6)
-  end_date   DateTime?    @db.Timestamp(6)
-  score      String?      @db.VarChar
+  id         Int       @id(map: "PK_352a30652cd352f552fef73dec5") @default(autoincrement())
+  finish     Boolean   @default(false)
+  start_date DateTime  @default(now()) @db.Timestamp(6)
+  end_date   DateTime? @db.Timestamp(6)
+  score      String?   @db.VarChar
   players    Player[]
 }
 
 model Player {
-  id     Int      @default(autoincrement()) @id(map: "PK_b5c4d0f9ae826735c474b188ef5")
+  id     Int      @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
   win    Boolean?
-  game   Game        @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
+  game   Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
   gameId Int
-  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
   userId Int
 }
 
 model Custom {
-  id     Int    @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
-  ball   Int       @default(0)
-  padel  Int       @default(0)
-  user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
-  userId Int    @unique()
+  id     Int  @id(map: "PK_7913689ead642c66760cf2bf2b9") @default(autoincrement())
+  ball   Int  @default(0)
+  padel  Int  @default(0)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1371e64d4796f781184c3e79124")
+  userId Int  @unique()
 }
 
 model User {
-  id               Int          @default(autoincrement()) @id(map: "PK_758b8ce7c18b9d347461b30228d")
-  status           OnlineStatus    @default(ONLINE)
-  username         String          @db.VarChar @unique
-  email            String          @db.VarChar @unique(sort: Asc) // @default("") 
-  password         String?         @db.VarChar
-  u2fHash          String?         @db.VarChar
-  otpHash          String?         @db.VarChar
-  activated2FA     Boolean         @default(false)
-  avatar           Bytes?
-  bio              String          @default("Nothing written yet ...")
-  custom           Custom?
-  achieve          Achievement?
-  gameHistory      Player[]
-  membership       Member[] 
-  message          Message[]
-  friend           Friendship[]
-  sendFriendReq    FriendRequest[] @relation("sendFriendReq")
-  recvFriendReq    FriendRequest[] @relation("recvFriendReq")
-  block            Block[]         @relation("block")
-  blocked          Block[]         @relation("blocked")
+  id            Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @default(autoincrement())
+  status        OnlineStatus    @default(ONLINE)
+  username      String          @unique @db.VarChar
+  email         String          @unique(sort: Asc) @db.VarChar // @default("") 
+  password      String?         @db.VarChar
+  u2fHash       String?         @db.VarChar
+  otpHash       String?         @db.VarChar
+  activated2FA  Boolean         @default(false)
+  avatar        Bytes?
+  bio           String          @default("Nothing written yet ...")
+  custom        Custom?
+  achieve       Achievement?
+  gameHistory   Player[]
+  membership    Member[]
+  message       Message[]
+  friend        Friendship[]
+  sendFriendReq FriendRequest[] @relation("sendFriendReq")
+  recvFriendReq FriendRequest[] @relation("recvFriendReq")
+  block         Block[]         @relation("block")
+  blocked       Block[]         @relation("blocked")
 }
 
 enum OnlineStatus {
-	ONLINE
-	OFFLINE
-	INGAME
+  ONLINE
+  OFFLINE
+  INGAME
 }
 
 model Achievement {
-  id            Int  @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int  @unique
+  userId        Int     @unique
   firstWin      Boolean @default(false)
   win10Games    Boolean @default(false)
   win100Games   Boolean @default(false)
@@ -75,27 +75,27 @@ model Achievement {
 
 // latest message first
 model Message {
-  id        Int   @default(autoincrement()) @unique(sort: Desc) @id(map: "PK_ba01f0a3e0123651915008bc578")
+  id        Int      @id(map: "PK_ba01f0a3e0123651915008bc578") @unique(sort: Desc) @default(autoincrement())
   message   String   @db.VarChar
-  send_date DateTime @db.Timestamp(6) @default(now())
+  send_date DateTime @default(now()) @db.Timestamp(6)
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "FK_446251f8ceb2132af01b68eb593")
-  userId    Int? 
+  userId    Int?
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_fdfe54a21d1542c564384b74d5c")
-  roomId    Int 
+  roomId    Int
 }
 
 model Room {
-  id        Int    @default(autoincrement()) @id(map: "PK_c6d46db005d623e691b2fbcba23") 
+  id        Int       @id(map: "PK_c6d46db005d623e691b2fbcba23") @default(autoincrement())
   isChannel Boolean
-  title     String?   @db.VarChar(255) @unique()
-  private   Boolean?  
+  title     String?   @unique() @db.VarChar(255)
+  private   Boolean?
   password  String?   @db.VarChar(100)
   message   Message[]
   members   Member[]
 }
 
 model Member {
-  id     Int    @default(autoincrement()) @id(map: "PK_42347ce202629a5cda29ce741e5")
+  id     Int       @id(map: "PK_42347ce202629a5cda29ce741e5") @default(autoincrement())
   user   User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_88f8befdb79fd0d39d17f6354a6")
   userId Int
   room   Room      @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_b86b11d1abcbbb56a5d6a8ad99e")
@@ -112,24 +112,24 @@ model Friendship {
 }
 
 model FriendRequest {
-  id               Int @id @default(autoincrement()) @unique(sort: Desc)
-  user             User   @relation("sendFriendReq", fields: [userId], references: [id], onDelete: Cascade)
+  id               Int      @id @unique(sort: Desc) @default(autoincrement())
+  user             User     @relation("sendFriendReq", fields: [userId], references: [id], onDelete: Cascade)
   userId           Int
-  possibleFriend   User   @relation("recvFriendReq", fields: [possibleFriendId], references: [id], onDelete: Cascade)
+  possibleFriend   User     @relation("recvFriendReq", fields: [possibleFriendId], references: [id], onDelete: Cascade)
   possibleFriendId Int
   status           ReqState @default(PENDING)
 }
 
 enum ReqState {
-	PENDING
-	ACCEPT
-	DECLINE
+  PENDING
+  ACCEPT
+  DECLINE
 }
 
 model Block {
-  id        Int     @id @default(autoincrement())
-  user      User    @relation("block", fields: [userId], references: [id], onDelete: Cascade)
+  id        Int  @id @default(autoincrement())
+  user      User @relation("block", fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  blocked   User    @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+  blocked   User @relation("blocked", fields: [blockedId], references: [id], onDelete: Cascade)
   blockedId Int
 }

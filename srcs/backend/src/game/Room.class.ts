@@ -16,8 +16,8 @@ export default class Room {
 
 	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
 
-		this.players[player1.id] = new Player(player1.id, player1.data.user.id, false);
-		this.players[player2.id] = new Player(player2.id, player2.data.user.id, true);
+		this.players[player1.data.user.id] = new Player(player1.data.user.id, player1.data.user.id, false);
+		this.players[player2.data.user.id] = new Player(player2.data.user.id, player2.data.user.id, true);
 
 		Object.keys(this.players).forEach((id) => {
 			this.wss.to(id).emit('start', roomId);
@@ -43,12 +43,9 @@ export default class Room {
 		this.ball = new Ball();
 		this.wss.to(this.roomId).emit('startGame');
 
-		// save game in database
-		const newGame = await this.gameService.create({});
-		this.gameId = newGame.id;
-
-		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: this.players[Object.keys(this.players)[0]].userId });
-		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: this.players[Object.keys(this.players)[1]].userId });
+		// // save game in database
+		// const newGame = await this.gameService.create({});
+		// this.gameId = newGame.id;
 
 		this.interval = setInterval(() => {
 			this.updateGameTick();
@@ -56,33 +53,68 @@ export default class Room {
 		}, 1000 / 60);
 	}
 
-	private async updateGameTick() {
+	private updateGameTick() {
 		if (!this.ball) return;
 		for (const client of Object.values(this.players)) {
 			client.update();
 		}
 		const winner = this.ball.update(this.players);
-		let loser;
 		if (winner) {
-			this.ball = null;
-			clearInterval(this.interval!);
-			this.interval = null;
-			for (const playerId in this.players) {
-				if (playerId !== winner) {
-					loser = playerId;
-					break;
-				}
-			}
-			this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
+			this.endGame(Number(winner));
+			// let loser;
+			// this.ball = null;
+			// clearInterval(this.interval!);
+			// this.interval = null;
+			// for (const playerId in this.players) {
+			// 	if (playerId !== winner) {
+			// 		loser = playerId;
+			// 		break;
+			// 	}
+			// }
+			// this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
 
-			this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
-			this.playerService.updatePlayer(this.players[winner].userId, { win: true });
-			this.playerService.updatePlayer(this.players[loser].userId, { win: false });
+			// this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
+			// this.playerService.updatePlayer(this.players[winner].userId, { win: true });
+			// this.playerService.updatePlayer(this.players[loser].userId, { win: false });
 		}
 	}
 
 	public handleKey(client: string, data: { up: boolean, down: boolean, time: number }) {
 		this.players[client].handleKeysPresses(data);
+	}
+
+	public async endGame(winner: number) {
+
+		clearInterval(this.interval!);
+
+		let loser;
+		this.ball = null;
+		this.interval = null;
+		for (const playerId in this.players) {
+			if (playerId !== winner.toString()) {
+				loser = Number(playerId);
+				break;
+			}
+		}
+		this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
+
+		const newGame = await this.gameService.create({});
+		this.gameId = newGame.id;
+
+		await this.playerService.createPlayer({ win: true, gameId: this.gameId, userId: winner });
+		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: loser });
+
+		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
+		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: true } });
+		if (wins.length == 1) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
+		} else if (wins.length == 10) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { win10Games: true } });
+		} else if (wins.length == 100) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
+		}
+		// this.playerService.updatePlayer(this.players[winner].userId, { win: true });
+		// this.playerService.updatePlayer(this.players[loser].userId, { win: false });
 	}
 
 	// public addPlayer(player: Player) {

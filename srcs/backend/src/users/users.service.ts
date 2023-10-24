@@ -20,13 +20,19 @@ export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
 	async createUser(username: string, email: string, password: string) {
-		return await this.prisma.user.create({
+		const user = await this.prisma.user.create({
 			data: {
 				username,
 				email,
 				password
 			},
 		});
+		await this.prisma.achievement.create({
+			data: {
+				userId: user.id,
+			}
+		});
+		return user;
 	}
 
 	async getAllUsers(): Promise<UserDto[]> {
@@ -81,7 +87,7 @@ export class UsersService {
 
 	async getIdByNick(email: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: email	}
+			where: { email: email }
 		});
 		if (!user) return (null);
 		return (user.id);

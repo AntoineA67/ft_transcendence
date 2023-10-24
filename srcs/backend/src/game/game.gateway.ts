@@ -46,8 +46,8 @@ export class GameGateway
         //     client.disconnect();
         //     return;
         // }
-        console.log(`Client successfully connected! 🆔  ${socket.id}`)
-        socket.emit('id', socket.id)
+        console.log(`Client successfully connected! 🆔  ${socket.data.user.id}`)
+        socket.emit('id', socket.data.user.id)
     }
 
     @SubscribeMessage('match')
@@ -64,7 +64,8 @@ export class GameGateway
 
     @SubscribeMessage('keyPresses')
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
-        this.gamesService.handleKeysPresses(socket.id, payload);
+        console.log(socket.data.user.id);
+        this.gamesService.handleKeysPresses(socket.data.user.id, payload);
     }
 }
 

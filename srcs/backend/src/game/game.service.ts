@@ -29,12 +29,12 @@ export class GamesService {
   }
 
   disconnect(client: Socket) {
-    const roomId = this.clients[client.id];
+    const roomId = this.clients[client.data.user.id];
     if (roomId) {
       const room = this.rooms[roomId];
       if (room) {
-        room.leave(client.id);
-        delete this.clients[client.id];
+        room.leave(client.data.user.id);
+        delete this.clients[client.data.user.id];
         if (room.isEmpty()) {
           delete this.rooms[roomId];
         }
@@ -42,13 +42,14 @@ export class GamesService {
     } else {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
-        console.log('removeFromQueue', client.id)
+        console.log('removeFromQueue', client.data.user.id)
         this.matchmakingQueue.splice(index, 1);
       }
     }
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
+    console.log(this.clients)
     this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
 
@@ -63,11 +64,11 @@ export class GamesService {
       player1.join(roomId);
       player2.join(roomId);
 
-      this.clients[player1.id] = roomId;
-      this.clients[player2.id] = roomId;
+      this.clients[player1.data.user.id] = roomId;
+      this.clients[player2.data.user.id] = roomId;
 
-      console.log('player1', player1.id)
-      console.log('player2', player2.id)
+      console.log('player1', player1.id, player1.data.user.id)
+      console.log('player2', player2.id, player2.data.user.id)
 
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
@@ -100,6 +101,4 @@ export class GamesService {
       data,
     });
   }
-
-
 }
