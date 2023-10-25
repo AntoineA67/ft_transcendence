@@ -1,6 +1,7 @@
 import { profileType, userType } from "../../types/user";
 import { useEffect, useState } from "react";
-import { socket, friendsSocket } from "./socket";
+import { socket, friendsSocket, chatsSocket } from "./socket";
+import { useNavigate } from "react-router-dom";
 
 type OptionsProp = {
 	profile: profileType,
@@ -102,6 +103,7 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 
 export function ChatOption({ profile, setProfile }: optionProp) {
 	const [text, setText] = useState<'Chat' | 'block'>('Chat');
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		function handleBlock() {
@@ -136,7 +138,11 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text == 'Chat') {
-			// do something
+			chatsSocket.emit('createPrivateRoom', profile.username, (response: number) => {
+				if (response > 0) {
+					navigate(`/chat/${response}`);
+				}
+			});
 		}
 	}
 	

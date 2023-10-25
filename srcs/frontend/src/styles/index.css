@@ -69,6 +69,31 @@ button {
 	margin: 0;	
 }
 
+select, option {
+	color: white;
+	border: 1px solid white;
+	background-color: transparent;
+	border-radius: 0.5rem;
+}
+
+option {
+	color: white;
+	border: 1px solid white;
+	background-color: black;
+	border-radius: 0.5rem;
+}
+
+option:hover {
+	color: black;
+	border: 1px solid white;
+	background-color: white;
+	border-radius: 0.5rem;
+}
+
+select option:hover {
+    box-shadow: 0 0 10px 100px #000 inset;
+}
+
 /* WEBKIT SCROLLBAR */
 ::-webkit-scrollbar {
 	width: 0.5em;
