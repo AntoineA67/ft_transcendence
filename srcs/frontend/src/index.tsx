@@ -86,7 +86,7 @@ const router = createBrowserRouter(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />} loader={() => (loader('auth', 'checkTokenValidity'))}>
+			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
