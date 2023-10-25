@@ -69,6 +69,31 @@ button {
 	margin: 0;	
 }
 
+select, option {
+	color: white;
+	border: 1px solid white;
+	background-color: transparent;
+	border-radius: 0.5rem;
+}
+
+option {
+	color: white;
+	border: 1px solid white;
+	background-color: black;
+	border-radius: 0.5rem;
+}
+
+option:hover {
+	color: black;
+	border: 1px solid white;
+	background-color: white;
+	border-radius: 0.5rem;
+}
+
+select option:hover {
+    box-shadow: 0 0 10px 100px #000 inset;
+}
+
 /* WEBKIT SCROLLBAR */
 ::-webkit-scrollbar {
 	width: 0.5em;
@@ -172,3 +197,31 @@ button {
 	clip-path: circle();
 }
 /* 	clipPath: `circle(at ${size / 2}px ${size / 2}px)`,  */
+
+.screen-mask {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.6);
+	z-index: 1021;
+}
+
+.popup {
+	position: fixed;
+	top: 20%;
+	bottom: 20%;
+	left: 20%;
+	right: 20%;
+	padding: 3rem;
+	background-color: black;
+	color: white;
+	border-radius: 1rem;
+	border: 3px solid #34fafa;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+}

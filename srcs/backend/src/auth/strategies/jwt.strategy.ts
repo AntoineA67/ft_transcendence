@@ -46,11 +46,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		});
 	}
 
+	private logger = new Logger('jwtStrategy');
+
+    // async validate(req: any, payload: any) {
 	async validate(req: any) {
+		this.logger.log('req', req);
 		console.log("req", req);
       const user = await this.userService.getUserByEmail(req.email);
       if (!user) {
-          throw new UnauthorizedException();
+		throw new UnauthorizedException();
       }
       return user;
   }
