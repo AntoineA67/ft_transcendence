@@ -5,18 +5,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, ProfileTest, Room, Member, Pvrooms } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 
 type ChatBoxData = {
-	messages: Message[], 
-	roomTitle: string, 
-	roomChannel: boolean, 
-	members: Member[], 
-	memberStatus: Member 
+	messages: Message[],
+	roomTitle: string,
+	roomChannel: boolean,
+	members: Member[],
+	memberStatus: Member
 }
 
 export function ChatBox() {
@@ -29,36 +29,40 @@ export function ChatBox() {
 	const [roomChannel, setRoomChannel] = useState<boolean>(true);
 	const navigate = useNavigate();
 	const messagesEndRef = useRef<HTMLUListElement | null>(null);
-	const [profile, setProfile] = useState<ProfileTest>();
+	const [profile, setProfile] = useState<Profile>();
 	const [showSettings, setShowSettings] = useState(false);
 	const [memberstatus, setMemberstatus] = useState<Member>();
 	const [membersList, setMemberList] = useState<Member[]>([]);
 	const [newRoomTitle, setNewRoomTitle] = useState<string>('');
 	const [newRoomTitleSuccess, setnewRoomTitleSuccess] = useState<boolean>();
+	const [newPasswordSucess, setnewPasswordSucess] = useState<boolean>();
 	const [inviteUsername, setInviteUsername] = useState<string>('');
 	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
 	const [newPassword, setNewPassword] = useState<string>('');
+	const [blocks, setBlocks] = useState<Block[]>([]);
 
 	useEffect(() => {
 		// chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
 		// 	if (!data) {
 		// 		navigate('/chat');
 		// 	}
-			setroomTitle(data.roomTitle);
-			setMessages(data.messages);
-			setRoomChannel(data.roomChannel);
-			setMemberstatus(data.memberStatus);
-			setMemberList(data.members);
-			setnewRoomTitleSuccess(undefined);
-			setinviteUsernameSuccess(undefined);
-			setShowSettings(false);
-			setLoading(false);
-			setMess('');
+		setroomTitle(data.roomTitle);
+		setMessages(data.messages);
+		setRoomChannel(data.roomChannel);
+		setMemberstatus(data.memberStatus);
+		setMemberList(data.members);
+		setnewRoomTitleSuccess(undefined);
+		setinviteUsernameSuccess(undefined);
+		setnewPasswordSucess(undefined);
+		setShowSettings(false);
+		setLoading(false);
+		setMess('');
 		// });
 
-		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
-			if (profiletest) {
-				setProfile(profiletest);
+		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
+			if (profile) {
+				setProfile(profile);
+				setBlocks(profile.blocks);
 			}
 		});
 	}, [chatId]);
@@ -71,21 +75,20 @@ export function ChatBox() {
 				setMemberList((prevMembersList) =>
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
-
 			} else {
 				console.error('Failed to leave the channel');
 			}
 		};
 
 		const handlenewmess = (newMessage: Message) => {
-			if (chatId && newMessage.roomId !== parseInt(chatId, 10))
-				return;
+			if ((chatId && newMessage.roomId !== parseInt(chatId, 10))) return;
+			const block = blocks.find((block) => block.blockedId === newMessage.userId);
+			if (block || (memberstatus && memberstatus.ban)) return;
 			setMessages((prevMessages) => [...prevMessages, newMessage]);
 		};
 
 		const handlenewMember = (newMember: Member) => {
-			if (chatId && newMember.roomId !== parseInt(chatId, 10))
-				return;
+			if (chatId && newMember.roomId !== parseInt(chatId, 10)) return;
 			setMemberList((prevMembersList) => [...prevMembersList, newMember]);
 		}
 
@@ -98,6 +101,25 @@ export function ChatBox() {
 		const handlenewmemberStatus = (response: Member) => {
 			if (response) {
 				setMemberstatus(response);
+				if (response.ban) {
+					setMessages([]);
+					setroomTitle('You have been banned');
+					setMemberList([]);
+				}
+				else {
+					chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
+						setroomTitle(data.roomTitle);
+						setMessages(data.messages);
+						setRoomChannel(data.roomChannel);
+						setMemberstatus(data.memberStatus);
+						setMemberList(data.members);
+						setnewRoomTitleSuccess(undefined);
+						setinviteUsernameSuccess(undefined);
+						setShowSettings(false);
+						setLoading(false);
+						setMess('');
+					});
+				}
 			}
 		};
 
@@ -131,8 +153,6 @@ export function ChatBox() {
 			});
 		};
 	}, [messages, membersList]);
-
-
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -203,8 +223,6 @@ export function ChatBox() {
 		chatsSocket.emit('sendMessage', {
 			content: mess,
 			roomId: chatId,
-			userid: profile.id,
-			username: profile.username,
 		}, (response: boolean) => {
 			if (!response) {
 				console.error('Erreur lors de l\'envoi du message');
@@ -235,23 +253,67 @@ export function ChatBox() {
 			memberId: memberid,
 			duration: time,
 			roomId: chatId
+		}, (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid)
+						member.mute = time > 0 ? new Date(Date.now() + time * 1000) : null;
+					return member;
+				}));
+			}
 		});
 	};
 
-	const handleToggleBan = (memberid: number, actions: boolean) => {
+	const handleBan = (memberid: number, actions: boolean) => {
 		chatsSocket.emit('banMember', {
 			memberId: memberid,
 			roomId: chatId,
 			action: actions,
+		}, (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid)
+						member.ban = !actions;
+					return member;
+				}));
+			}
+		}
+		);
+	};
+
+	const handleBlock = (memberid: number, actions: boolean) => {
+		if (profile === undefined) {
+			return;
+		}
+
+		chatsSocket.emit('blockUser', {
+			memberId: memberid,
+			action: actions,
+		}, (response: boolean) => {
+			if (response) {
+				setBlocks((prevBlocks) => {
+					if (!actions) {
+						return [...prevBlocks, { userId: profile.id, blockedId: memberid }];
+					} else {
+						return prevBlocks.filter((block) => block.blockedId !== memberid);
+					}
+				});
+			}
 		});
 	};
+
+
+
 
 	const handleKick = (memberid: number) => {
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
-		});
-	};
+		}, (response: boolean) => {
+			if (response)
+				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid))
+		})
+	}
 
 	const handleRoleChange = (memberid: number, role: string) => {
 		chatsSocket.emit('changeRole', {
@@ -259,6 +321,17 @@ export function ChatBox() {
 			roomid: chatId,
 			owner: role === 'Owner' ? true : false,
 			admin: role === 'Admin' ? true : false,
+		}, (response: boolean) => {
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.map((member) => {
+					if (member.userId === memberid) {
+						member.owner = role === 'Owner' ? true : false;
+						member.admin = role === 'Admin' ? true : false;
+					}
+					return member;
+				}
+				));
+			}
 		});
 	}
 
@@ -270,7 +343,10 @@ export function ChatBox() {
 			}, (response: boolean) => {
 				if (response) {
 					setNewPassword('');
+					setnewPasswordSucess(true);
 				}
+				else
+					setnewPasswordSucess(false);
 			})
 		}
 	}
@@ -286,14 +362,9 @@ export function ChatBox() {
 		})
 	}
 
-	const myMap = (message: Message, profile: ProfileTest) => {
+	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'justify-content-end' : 'justify-content-start';
-		// const formattedTime = new Date(message.send_date).toLocaleTimeString([], {
-		// 	hour: '2-digit',
-		// 	minute: '2-digit',
-		// 	second: '2-digit',
-		// });
 
 		if (message.userId === profile.id) {
 			message.username = profile.username;
@@ -302,15 +373,15 @@ export function ChatBox() {
 		return (
 			<li className="message-container" key={message.id}>
 				<div className={`d-flex ${classuser}`}>
+					{message.userId !== profile.id && (
+						<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+							<span style={{ marginRight: '20px' }}>
+								<FontAwesomeIcon icon={faPlay} />
+							</span>
+						</Link>
+					)}
 					<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
 						<strong className='user-header'>
-							{message.userId !== profile.id && (
-								<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
-									<span style={{ marginRight: '20px' }}>
-										<FontAwesomeIcon icon={faPlay} />
-									</span>
-								</Link>
-							)}
 							{message.username}
 						</strong>
 					</Link>
@@ -322,17 +393,17 @@ export function ChatBox() {
 
 
 	return (
-		<div className="h-100 d-flex flex-column pb-5 pb-sm-0">
-			<div className="chat-container d-flex h-100" style={{border: '1px solid yellow'}}>
+		<div className="h-100 d-flex flex-column pb-5 pb-sm-0 " style={{position: 'relative'}}>
+			<div className="chat-container d-flex h-100" style={{ border: '1px solid yellow' }}>
 				<div className="d-flex w-100 align-items-center p-1">
 					<Link to="..">
 						<button className="leftArrow m-2"></button>
 					</Link>
 					<h4 className='white-text ms-2'>{roomTitle}</h4>
-					<button  onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
-					<div style={{border: '1px solid purple'}} className="p-5 flex-grow-2 overflow-y-auto">
+					<div style={{ border: '1px solid purple' }} className="p-5 flex-grow-2 overflow-y-auto">
 						<ul
 							ref={messagesEndRef}
 							className="d-flex flex-column"
@@ -352,15 +423,21 @@ export function ChatBox() {
 							disabled={
 								memberstatus
 									? memberstatus.ban || (memberstatus.mute !== null && new Date(memberstatus.mute) > new Date())
+										? true
+										: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+											? true
+											: false
 									: true
 							}
 							placeholder={
 								memberstatus
-									? memberstatus.ban
-										? 'You\'re banned/blocked or you\'re blocking the person...'
+									? (memberstatus.ban && roomChannel)
+										? 'You\'re banned...'
 										: memberstatus.mute !== null && new Date(memberstatus.mute) > new Date()
 											? 'You are muted...'
-											: 'Write a message...'
+											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+												? 'You are blocking this user...'
+												: 'Write a message...'
 									: ''
 							}
 						/>
@@ -378,53 +455,51 @@ export function ChatBox() {
 				)}
 			</div>
 			{showSettings && (
-				<div className="w-100 h-100 d-flex flex-column" style={{border: '1px solid red'}}>
-					<div className="align-items-center d-flex flex-column">
+				<div className="w-100 h-75 d-flex flex-column overflowY-auto" style={{ border: '1px solid red', position: 'absolute', zIndex: '2', marginTop: '5rem' }}>
+					<div className="align-items-center d-flex flex-column p-5">
 						{memberstatus?.admin && roomChannel && (
 							<>
 								<input
 									id="roomTitleInput"
-									className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+									className={`form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
 									type="text"
 									placeholder="New Room name"
 									value={newRoomTitle}
 									onChange={(e) => setNewRoomTitle(e.target.value)}
-									style={{ background: 'white', color: 'black' }}
 									disabled={!memberstatus?.admin}
 								/>
-								<button className='btn btn-outline-secondary  ml-2' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
+								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
 								{memberstatus?.owner && (
 									<input
-										id="roomTitleInput"
-										className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+										id="Newpassword"
+										className={`form-control ${newPasswordSucess === true ? 'is-valid' : newPasswordSucess === false ? 'is-invalid' : ''}`}
 										type="text"
 										placeholder="New Password"
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
-										style={{ background: 'white', color: 'black' }}
+
 										disabled={!memberstatus?.owner}
 									/>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary mt-3 mb-1' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary mb-3' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
 								<input
 									id="inviteUserInput"
-									className={`w-50 form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
+									className={`form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
 									type="text"
 									placeholder="Invite user by username"
 									value={inviteUsername}
 									onChange={(e) => setInviteUsername(e.target.value)}
-									style={{ background: 'white', color: 'black' }}
 								/>
-								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
+								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
-						{roomChannel && roomTitle && profile && <button className="btn btn-outline-secondary w-20 ml-2" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-danger w-20 ml-2"  onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
 					</div>
 					<ul className="members-list">
 						{membersList
 							.filter((member) => member.userId !== profile?.id)
 							.map((member) => (
-								<li key={member.id} className="member">
+								<li key={member.id} className="member d-flex flex-wrap">
 									<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
 										<div className="member-details">
 											<span className="member-username">{member.username}</span>
@@ -433,8 +508,8 @@ export function ChatBox() {
 											</span>
 										</div>
 									</Link>
-									<div className="member-actions">
-										{roomChannel && <select
+									<div className="member-actions d-flex flex-wrap">
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <select
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
 											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
 										>
@@ -442,13 +517,13 @@ export function ChatBox() {
 											<option value="Admin">Admin</option>
 											<option value="Member">Member</option>
 										</select>}
-										{roomChannel && <button
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date() ? 'action-disabled' : ''}`}
 											onClick={() => handleMuteDurationChange(member.userId, member.muteduration, member.mute && new Date(member.mute) > new Date())}
 										>
 											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
 										</button>}
-										{roomChannel && (!member.mute || new Date(member.mute) < new Date()) && (
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && (!member.mute || new Date(member.mute) < new Date()) && (
 											<select
 												defaultValue={member.muteduration}
 												onChange={(e) => member.muteduration = parseInt(e.target.value)}
@@ -461,13 +536,33 @@ export function ChatBox() {
 												<option value="86400">24 h</option>
 											</select>
 										)}
-										<button
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
-											onClick={() => handleToggleBan(member.userId, member.ban)}
+											onClick={() => handleBan(member.userId, member.ban)}
 										>
-											{roomChannel ? (member.ban ? 'Unban' : 'Ban') : (member.ban ? 'Unblock' : 'Block')}
+											{member.ban ? 'Unban' : 'Ban'}
+										</button>}
+										<button
+											className="action-button"
+											onClick={() => {
+												const block = blocks.find((block) => block.blockedId === member.userId);
+												handleBlock(
+													member.userId,
+													block ? true : false
+												)
+											}
+											}
+										>
+											{blocks.find((block) => block.blockedId === member.userId)
+												? 'Unblock'
+												: 'Block'}
 										</button>
-										{roomChannel && <button className="action-button" onClick={() => handleKick(member.userId)}>Kick</button>}
+										{roomChannel && !member.owner && (memberstatus?.owner || memberstatus?.admin) && <button
+											className="action-button"
+											onClick={() => handleKick(member.userId)}
+										>
+											Kick
+										</button>}
 									</div>
 								</li>
 							))}
@@ -654,17 +749,19 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 export function ChatList() {
 	const [page, setPage] = useState<'chatList' | 'newChat'>('chatList');
 	const [rooms, setRooms] = useState<Room[]>([]);
-	const [profile, setProfile] = useState<ProfileTest>();
+	const [profile, setProfile] = useState<Profile>();
 	const [pvrooms, setPvrooms] = useState<Pvrooms[]>();
+	const [blocks, setBlocks] = useState<Block[]>([]);
 
 	useEffect(() => {
-		chatsSocket.emit('getProfileForUser', (profiletest: ProfileTest) => {
-			if (profiletest) {
-				setProfile(profiletest);
-				const allRooms: Room[] = profiletest.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
+		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
+			if (profile) {
+				setProfile(profile);
+				setBlocks(profile.blocks);
+				const allRooms: Room[] = profile.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
 				setRooms(allRooms);
-				if (profiletest.pvrooms !== undefined)
-					setPvrooms(profiletest.pvrooms);
+				if (profile.pvrooms !== undefined)
+					setPvrooms(profile.pvrooms);
 			}
 		});
 	}, []);
@@ -698,6 +795,7 @@ export function ChatList() {
 
 		const handleMessageSent = (newMessage: Message) => {
 			const newRooms = [...rooms];
+			if (newMessage.userId === blocks.find((block) => block.blockedId === newMessage.userId)?.blockedId) return;
 			const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
@@ -711,10 +809,22 @@ export function ChatList() {
 			}
 		};
 
+		const handlenewProfile = (response: Profile) => {
+			if (response) {
+				setProfile(response);
+				setBlocks(response.blocks);
+				const allRooms: Room[] = response.membership.map((memberWithLatestMessage) => memberWithLatestMessage.member.room);
+				setRooms(allRooms);
+				if (response.pvrooms !== undefined)
+					setPvrooms(response.pvrooms);
+			}
+		}
+
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
 		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
+		socketListeners.push({ event: 'newProfile', handler: handlenewProfile });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
@@ -728,7 +838,7 @@ export function ChatList() {
 	}, [rooms]);
 
 
-	const myMap = (room: Room, pvrooms: Pvrooms[], profile: ProfileTest) => {
+	const myMap = (room: Room, pvrooms: Pvrooms[], profile: Profile) => {
 		let channelclass = room.isChannel === true ? 'chatListItemChannel' : 'chatListItemPrivate';
 		const roomId = room.id;
 		let roomtitle;
@@ -740,7 +850,7 @@ export function ChatList() {
 		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId == roomId);
 		if (privateroom) {
 			roomtitle = privateroom.username2;
-			if (privateroom.blocked || privateroom.block) {
+			if (privateroom.blocked) {
 				channelclass = 'chatListItemBan';
 				isBanned = true;
 			}
@@ -753,7 +863,7 @@ export function ChatList() {
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
 					className={`white-text ${isBanned ? "banned-link" : ""}`}
-					style={{pointerEvents: isBanned ? "none" : "auto" }}
+					style={{ pointerEvents: isBanned ? "none" : "auto" }}
 				>
 					<div className={`chatListItemButton ${channelclass}`}>
 						<span
