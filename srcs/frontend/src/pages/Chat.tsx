@@ -8,11 +8,13 @@ import { useNavigate } from 'react-router-dom';
 import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { BsArrowUpRight } from 'react-icons/bs';
+import { BsArrowUpRight, BsPersonHeart } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 import { MdGroup, MdGroups2 } from 'react-icons/md';
 import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
+import { FaChessKing, FaUserNinja } from 'react-icons/fa';
+import { MdPersonOutline } from 'react-icons/md';
 
 
 type ChatBoxData = {
@@ -350,6 +352,15 @@ export function ChatBox() {
 					return member;
 				}
 				));
+				if (memberid === profile?.id) {
+					setMemberstatus((prevMemberstatus) => {
+						if (prevMemberstatus) {
+							prevMemberstatus.owner = role === 'Owner' ? true : false;
+							prevMemberstatus.admin = role === 'Admin' ? true : false;
+						}
+						return prevMemberstatus;
+					});
+				}
 			}
 		});
 	}
@@ -433,10 +444,11 @@ export function ChatBox() {
 					<h4 className='ms-auto mr-3' style={{ margin: '0 5px' }} title={roomChannel ? "Group" : "Private message"}>{roomChannel ? <MdGroups2 /> : <MdGroup />}</h4>
 					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "Private" : "Public"}>{privateStatus ? <MdPublicOff /> : <MdPublic />}</h4>}
 					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "" : passwordStatus ? "Locked" : "Unlocked"}>{privateStatus ? '' : passwordStatus ? <CiLock /> : <CiUnlock />}</h4>}
+					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={memberstatus?.owner ? "Owner" : memberstatus?.admin ? "Admin" : "Member"}>{memberstatus?.owner ? <FaChessKing /> : memberstatus?.admin ? <FaUserNinja /> : <BsPersonHeart />}</h4>}
 					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3" title="Settings"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
-					<div style={{ border: '1px solid purple' }} className="p-5 flex-grow-2 overflow-y-auto">
+					<div className="p-5 flex-grow-2 overflow-y-auto">
 						<ul
 							ref={messagesEndRef}
 							className="d-flex flex-column"
