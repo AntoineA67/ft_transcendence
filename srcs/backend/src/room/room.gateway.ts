@@ -331,7 +331,7 @@ export class RoomGateway
 
 
 	@SubscribeMessage('inviteUser')
-	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<boolean> {
+	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member> {
 		const userid: number = client.data.user.id;
 		const roomid = parseInt(content.roomId, 10);
 
@@ -354,9 +354,18 @@ export class RoomGateway
 				username: usertoadd.username,
 			};
 			this.server.to(roomName).emit('newMember', membertosend);
-			return true;
+			return membertosend;
 		}
-		return false;
+		const membnull: Member = {
+			id: 0,
+			roomId: 0,
+			userId: 0,
+			owner: false,
+			admin: false,
+			ban: false,
+			mute: null,
+		};
+		return membnull;
 	}
 
 	@SubscribeMessage('changeRole')
