@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 // Constants
 const API_CHECK_TOKEN_VALIDITY = 'http://localhost:3000/auth/checkTokenValidity';
+const API_REFRESH_TOKEN = '';
 const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
 
 /**
@@ -13,14 +14,14 @@ const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
  */
 const isTokenExpired = async (): Promise<boolean> => {
     // Setup an abort controller to cancel the fetch request in case it takes too long.
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    // const controller = new AbortController();
+    // setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
     try {
         const response = await fetch(API_CHECK_TOKEN_VALIDITY, {
             method: 'GET',
             credentials: 'include',
-            signal: controller.signal  // Signal to possibly abort the fetch
+            // signal: controller.signal  // Signal to possibly abort the fetch
         });
 
         // If the response is OK, then the token is valid (not expired).
