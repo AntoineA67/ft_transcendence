@@ -169,11 +169,8 @@ export class AuthService {
 
 	async createRefreshToken(userId: number): Promise<string> {
         const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
-
         const expiration = new Date();
-
         expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
-
         await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
@@ -185,34 +182,6 @@ export class AuthService {
     }
 
 	async refreshToken(refreshToken: string, req: Request, res: Response) {
-	// async refreshToken(user: User, res: Response) {
-	// async refreshToken(userId: number, userEmail: string, res: Response) {
-		// if (!user)
-		// 	throw new BadRequestException('No user in params/ refreshToken');
-		// if (!this.isRefreshTokenValid(user.email, user.id))
-		// 	throw new Error('Refresh token has expired.');
-		// const userInfo = await this.prisma.user.findUnique({
-		// where: {
-		// 	email: user.email,
-		// },
-		// 	include: {
-		// 		refreshToken: {
-		// 			where: {
-		// 				userId: user.id,
-		// 			},
-		// 		},
-		// 	},
-		// });
-		// const refreshToken = user.refreshToken[0];
-		// if (refreshToken.expiresAt.getTime() < Date.now()) {
-		// // 	// Handle token expiry
-		// 	throw new Error('Refresh token has expired.');
-		// }
-
-		// let payload = {
-		// 	id: user.id,
-		// 	email: user.email,
-		// }
 		if (this.isTokenValid(req))
 			return res.status(200).json({ valid: true, message: "Token is valid" });
 		if (!this.isRefreshTokenValid(refreshToken))
@@ -221,7 +190,6 @@ export class AuthService {
 		return this.signJwtTokens(req.user.id, req.user.email);
 	}
 
-	// async isRefreshTokenValid(userEmail: string, userId: number, res: Response)
 	async isRefreshTokenValid(tokenReq: string)
 	{
 		if (!tokenReq)
@@ -231,19 +199,6 @@ export class AuthService {
 				token: tokenReq,
 			},
 		});
-		// const user = await this.prisma.user.findUnique({
-		// 	where: {
-		// 		email: userEmail,
-		// 	},
-		// 		include: {
-		// 			userRefreshToken: {
-		// 				where: {
-		// 					userId: userId,
-		// 				},
-		// 			},
-		// 		},
-		// 	});
-		// 	const userRefreshToken = user.userRefreshToken[0];
 		if (userRefreshToken.expiresAt.getTime() < Date.now())
 		{
 			// await this.prisma.refreshToken.delete(this.refreshToken);
@@ -254,27 +209,6 @@ export class AuthService {
 			return true;
 				// return res.status(200).json({ valid: true, message: "Refresh token is valid" });
 	}
-	
-	// async isRefreshTokenValid(userEmail: string, userId: number, res: Response)
-	// {
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: {
-	// 			email: userEmail,
-	// 		},
-	// 			include: {
-	// 				refreshToken: {
-	// 					where: {
-	// 						userId: userId,
-	// 					},
-	// 				},
-	// 			},
-	// 		});
-	// 		const refreshToken = user.refreshToken[0];
-	// 		if (refreshToken.expiresAt.getTime() < Date.now())
-	// 			return res.status(401).json({ valid: false, message: "Invalid Token" });
-	// 		else
-	// 			return res.status(200).json({ valid: true, message: "Refresh token is valid" });
-	// }
 
 	async isTokenValid(req: Request) {
         // Extract the token from the Authorization header
