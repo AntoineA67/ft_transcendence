@@ -49,6 +49,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.1",
+    "use-history": "^1.4.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
