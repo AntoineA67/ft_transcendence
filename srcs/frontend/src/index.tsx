@@ -48,26 +48,36 @@ axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string, refresh = false) {
-	const token = localStorage.getItem('token') || null;
 	const baseUrl = 'http://127.0.0.1:3000/';
+	const token = localStorage.getItem('token') || null;
+	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
-	const fetchObj = {
-		method: 'GET',
-		headers: { 'Authorization': `Bearer ${token}` }
-	}
 	if (!token) {
 		return redirect("/login");
 	}
-	const res = await fetch(fetchUrl, fetchObj);
+	const res = await fetch(fetchUrl, {
+		method: 'GET',
+		headers: { 'Authorization': `Bearer ${token}` }
+	});
 	if (res.status == 200 || res.status == 201) {
-		console.log('fetch ', fetchUrl);
 		return (res.json());
 	}
-	// if (!refresh) {
-	// 		create a new token
-	//      save to local storage
-	//      return (loader(toute, param, true)) 
-	// }
+	
+	if (!refresh) {
+		fetch(`${baseUrl}auth/refreshToken`, {
+			method: 'POST',
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ 'refreshToken': refreshToken })
+		}).then(async (res2) => {
+			const newTokens = await res2.json();
+			localStorage.setItem('token', newTokens.token);
+			localStorage.setItem('refreshToken', newTokens.refreshToken);
+			loader(route, param, true);
+		}).catch((err) => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('refreshToken');
+		})
+	}
 	throw new Response(res.statusText, {status: res.status})
 }
 
@@ -86,7 +96,7 @@ const router = createBrowserRouter(
 
 			<Route path='/42/callback' element={<CallBack42 />} />
 
-			<Route element={<Protected />} loader={() => (loader('auth', 'checkTokenValidity'))}>
+			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 					<Route index 
 						element={<Profile />} 
