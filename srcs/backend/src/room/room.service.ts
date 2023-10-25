@@ -124,14 +124,6 @@ export class RoomService {
 	}
 
 	async createChannelRoom(roomtitle: string, isPublic: boolean, psw: string, userId: number): Promise<Room> {
-		const existingRoom = await this.prisma.room.findFirst({
-			where: {
-				title: roomtitle,
-				isChannel: true,
-			},
-		});
-		if (existingRoom)
-			return null;
 		return this.prisma.room.create(
 			{
 				data: {
@@ -259,7 +251,7 @@ export class RoomService {
 		});
 	}
 
-	async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean }> {
+	async getRoomData(roomid: number, userid: number): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, private: boolean, password: boolean }> {
 		const room = await this.prisma.room.findUnique({
 			where: {
 				id: roomid,
@@ -283,7 +275,7 @@ export class RoomService {
 		});
 		let roomTitle = room.title;
 		if (!room) {
-			return { messages: [], roomTitle: '', roomChannel: true };
+			return { messages: [], roomTitle: '', roomChannel: true, private: false, password: false };
 		}
 
 		const blocksbyuserId = await this.prisma.block.findMany({
@@ -314,11 +306,11 @@ export class RoomService {
 			const privchan = await this.getPrivateRoomById(userid, roomid);
 			const blockedbyother = await this.isBlockedBy(userid, privchan.userId2);
 			if (blockedbyother)
-				return { messages: [], roomTitle: '', roomChannel: false };
+				return { messages: [], roomTitle: '', roomChannel: false, private: true, password: false };
 			roomTitle = privchan.username2;
 		}
 
-		return { messages: messwithoutblock, roomTitle, roomChannel: room.isChannel };
+		return { messages: messwithoutblock, roomTitle, roomChannel: room.isChannel, private: room.private, password: room.password ? true : false };
 	}
 
 	async joinRoom(roomname: string, roomid: number, password: string, userid: number): Promise<Room> {
@@ -412,13 +404,24 @@ export class RoomService {
 		});
 	}
 
-	async deleteRoom(id: number): Promise<Room | null> {
-		const existingRoom = await this.prisma.room.findUnique({ where: { id } });
+	async deleteRoom(roomid: number): Promise<Room | null> {
+		const existingRoom = await this.prisma.room.findFirst({
+		  where: {
+			id: roomid,
+		  },
+		});
+	  
 		if (!existingRoom) {
-			throw new NotFoundException(`Room with ID ${id} not found`);
+		  throw new NotFoundException(`Room with ID ${roomid} not found`);
 		}
-		return this.prisma.room.delete({ where: { id } });
-	}
+	  
+		return this.prisma.room.delete({
+		  where: {
+			id: roomid,
+		  },
+		});
+	  }
+	  
 
 	async getProfileForUser(userId: number): Promise<ProfileTest | null> {
 		const user = await this.prisma.user.findUnique({
@@ -480,7 +483,6 @@ export class RoomService {
 		return profile;
 	}
 
-
 	async getAllPrivateRooms(userId: number): Promise<Pvrooms[]> {
 		const privateRooms = await this.prisma.room.findMany({
 			where: {
@@ -509,15 +511,23 @@ export class RoomService {
 				},
 			},
 		});
-
+		
 		const roomData = await Promise.all(privateRooms.map(async (room) => {
-			const userId2 = room.members[0].user.id;
+			if (room.members.length !== 1) {
+				this.prisma.room.delete({
+					where: {
+						id: room.id,
+					},
+				});
+				return null;
+			}
+			const user2 = room.members[0].user;
 			return {
 				roomId: room.id,
-				userId2,
-				username2: room.members[0].user.username,
-				block: await this.isBlocking(userId, userId2),
-				blocked: await this.isBlocked(userId2, userId),
+				userId2: user2.id,
+				username2: user2.username,
+				block: await this.isBlocking(userId, user2.id),
+				blocked: await this.isBlocked(user2.id, userId),
 			};
 		}));
 
