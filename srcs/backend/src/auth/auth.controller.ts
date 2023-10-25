@@ -100,26 +100,11 @@ export class AuthController {
         return (url);
     }
 
-	// @Get('isTokenValid')
-    // async isTokenValid(@Req() req: Request, @Res() res: Response) {
-    //     console.log("passing by isTokenValid");
-    //     return this.authService.isTokenValid(req, res);
-    // }
-
-	// @UseGuards(JwtAuthGuard) // send user or user id from front ? 
 	@Post('refreshToken')
-	// async refreshToken(userId: number, userEmail: string, @Res() res: Response)
 	async refreshToken(refreshToken: string, @Req() req: Request, @Res() res: Response)
 	{
 		console.log("passing by refreshToken");
-		// return this.authService.refreshToken(userId, userEmail, res);
 		return this.authService.refreshToken(refreshToken, req, res);
 
 	}
-
-	// @UseGuards(JwtAuthGuard) // send user or user id from front ? 
-	// @Get('isRefreshTokenValid')
-	// async isRefreshTokenValid(userEmail: string, userId: number, @Res() res: Response) {
-	// 	return this.authService.isRefreshTokenValid(userEmail, userId, res);
-	// }
 }
