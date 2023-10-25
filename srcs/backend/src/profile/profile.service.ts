@@ -43,7 +43,7 @@ export class ProfileService {
 	async getUserProfileByNick(userId: number, otherNick: string): Promise<ProfileDto | null> {
 		const otherId = await this.usersService.getIdByNick(otherNick);
 		if (!otherId) return (null);
-		return ( await this.getUserProfileById(userId, otherId) );
+		return (await this.getUserProfileById(userId, otherId) );
 	}
 
 
