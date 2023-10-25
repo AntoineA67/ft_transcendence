@@ -9,7 +9,6 @@ import { Logger } from '@nestjs/common';
 import { Signin42Dto, SigninDto } from '../dto';
 import { SignupDto } from '../dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { get } from 'http';
 
 
 @Controller('auth')
@@ -100,11 +99,29 @@ export class AuthController {
         return (url);
     }
 
+	@UseGuards(JwtAuthGuard)
+	@Get('isTokenValid')
+    async isTokenValid(@Req() req: Request, @Res() res: Response) {
+        // console.log("passing by isTokenValid");
+        // return this.authService.isTokenValid(req, res);
+		return res.status(200).json({ valid: true, message: "Token is valid" });
+
+    }
+
+	// @UseGuards(JwtAuthGuard) // send user or user id from front ? 
 	@Post('refreshToken')
-	async refreshToken(refreshToken: string, @Req() req: Request, @Res() res: Response)
+	// async refreshToken(userId: number, userEmail: string, @Res() res: Response)
+	async refreshToken(@Req() req: Request, @Res() res: Response)
 	{
 		console.log("passing by refreshToken");
-		return this.authService.refreshToken(refreshToken, req, res);
+		// return this.authService.refreshToken(userId, userEmail, res);
+		return this.authService.refreshToken(req.body.refreshToken, req, res);
 
 	}
+
+	// @UseGuards(JwtAuthGuard) // send user or user id from front ? 
+	// @Get('isRefreshTokenValid')
+	// async isRefreshTokenValid(userEmail: string, userId: number, @Res() res: Response) {
+	// 	return this.authService.isRefreshTokenValid(userEmail, userId, res);
+	// }
 }
