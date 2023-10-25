@@ -1,5 +1,5 @@
-import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req} from '@nestjs/common';
-import { Request, response, Response } from 'express';
+import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req, GatewayTimeoutException} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
@@ -12,7 +12,7 @@ import { Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { EphemeralKeyInfo } from 'tls';
+// import { EphemeralKeyInfo } from 'tls';
 
 @Injectable()
 export class AuthService {
@@ -123,6 +123,7 @@ export class AuthService {
 			id: userId,
 			email: userEmail,
 		}
+		// console.log("payload==", payload);
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(
 			payload, 
@@ -130,6 +131,7 @@ export class AuthService {
 				expiresIn: '15m',
 				secret: secret,
 			});
+		console.log("Payload=", payload)
 		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
@@ -181,6 +183,74 @@ export class AuthService {
         });
         return refreshToken;
     }
+
+	// async refreshToken(user: User, res: Response) {
+	async refreshToken(user: any, res: Response) {
+		if (!user)
+			throw new BadRequestException('No user in params/ refreshToken');
+		const userInfo = await this.prisma.user.findUnique({
+		where: {
+			email: user.email,
+		},
+			include: {
+				refreshToken: {
+					where: {
+						userId: user.id,
+					},
+				},
+			},
+		});
+		const refreshToken = user.refreshToken[0];
+		if (refreshToken.expiresAt.getTime() < Date.now()) {
+		// 	// Handle token expiry
+			throw new Error('Refresh token has expired.');
+		}
+		let payload = {
+			id:user.id,
+			email: user.email,
+		}
+		const secret = this.JWT_SECRET;
+		const token = this.jwtService.sign(
+		payload, 
+		{ 
+			expiresIn: '15m',
+			secret: secret,
+		});
+		res.status(HttpStatus.OK).json(token);
+	}
+
+		// refreshToken.
+
+		// const user = await this.prisma.user.findFirst({
+		// 	where: {
+		// 	  email: userEmail,
+		// 	},
+		// 	include: {
+		// 	  refreshToken: true,
+		// 	},
+		//   });
+		
+		// const userInfo = await this.prisma.user.findUnique({
+		// 	where: {
+		// 		email: userEmail,
+		// 	}
+		// });
+		// const user = await this.prisma.user.findFirst({
+		// 	where: {
+		// 		email: userEmail,
+		// 	},
+		// 		include: {
+		// 			refreshToken: {
+		// 				where: {
+		// 					userId: userInfo.id,
+		// 				},
+		// 			},
+		// 	},
+		// });
+		// const refreshToken = user.refreshToken[0].expiresAt
+		// if (refreshToken.)
+
+    // }
 
 	async checkTokenValidity(req: Request, res: Response) {
         // Extract the token from the Authorization header

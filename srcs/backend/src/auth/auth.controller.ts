@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
 import { Signin42Dto, SigninDto } from '../dto';
 import { SignupDto } from '../dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 
 @Controller('auth')
@@ -103,4 +104,14 @@ export class AuthController {
         console.log("passing by checkTokenValidity");
         return this.authService.checkTokenValidity(req, res);
     }
+
+	@UseGuards(JwtAuthGuard)
+	@Get('refreshToken')
+	async refreshToken(@Req() req: Request, @Res() res: Response)
+	{
+		console.log("passing by refreshToken");
+		console.log("req===" , req.user);
+		return this.authService.refreshToken(req.user, res);
+		// return this.authService.refreshToken(req.user.email, res);
+	}
 }
