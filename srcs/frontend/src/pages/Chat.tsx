@@ -667,7 +667,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	const handleCreateGroup = () => {
 		if (create.trim() === '') return;
 
-		const password = isPublic ? '' : createPassword;
+		const password = !isPublic ? '' : createPassword;
 		const roomdata = {
 			roomTitle: create,
 			isPublic: isPublic,
