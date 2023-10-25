@@ -72,6 +72,7 @@ async function loader(route: string, param?: string, refresh = false) {
 			const newTokens = await res2.json();
 			localStorage.setItem('token', newTokens.token);
 			localStorage.setItem('refreshToken', newTokens.refreshToken);
+			console.log('refreshtoken: ', newTokens)
 			loader(route, param, true);
 		}).catch((err) => {
 			localStorage.removeItem('token');
