@@ -149,6 +149,7 @@ export class UsersService {
 				where: { id },
 				select: {
 					id: true,
+					email: true,
 					username: true,
 					avatar: true,
 					status: true,
