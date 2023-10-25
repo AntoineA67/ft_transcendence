@@ -119,7 +119,6 @@ export class AuthService {
 		// no 2fa
 		} else 
 			response = await this.signJwtTokens(req.user.id, req.user.email);
-		// console.log(response);
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
@@ -129,7 +128,6 @@ export class AuthService {
 			id: userId,
 			email: userEmail,
 		}
-		// console.log("payload==", payload);
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(
 			payload, 
@@ -188,8 +186,6 @@ export class AuthService {
     }
 
 	async refreshToken(refreshToken: string, req: Request, res: Response) {
-		// if (this.isTokenValid(req))
-		// 	return res.status(200).json({ valid: true, message: "Token is valid" });
 		if (!this.isRefreshTokenValid(refreshToken))
 		{
 			this.deleteRefreshTokenForUser(req.user.id);
@@ -216,21 +212,6 @@ export class AuthService {
 			return true;
 	}
 
-	// async isTokenValid(req: Request, res: Response) {
-    //     // Extract the token from the Authorization header
-	// 	const authHeader = req.headers.authorization;
-	// 	const token = authHeader && authHeader.split(' ')[1];
-    //     console.log("passing by isTokenValid");
-    //     if (!token)
-    //         return res.status(401).json({ valid: false, message: "Token Missing" });
-    //     try {
-    //         jwt.verify(token, this.JWT_SECRET);
-    //         return res.status(200).json({ valid: true, message: "Token is valid" });
-	// 	} catch (error) {
-    //         return res.status(401).json({ valid: false, message: "Invalid Token" });
-	// 	}
-    // }
-
 	signout(req: Request, res: Response): Response {
         // Invalidate the refresh token to make the signout more secure
         // Extract the refresh token from the body or header
@@ -241,9 +222,6 @@ export class AuthService {
         // Remove the refresh token from the database to invalidate it
         try {
 				this.deleteRefreshTokenForUser(req.user.id);
-            // this.prisma.refreshToken.delete({
-            //     where: { token: refreshToken }
-            // });
             	return res.status(200).send({ message: 'Signed out successfully' });
         } catch (error) {
             console.error(error); 
