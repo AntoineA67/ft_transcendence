@@ -6,6 +6,7 @@ import { UserDto } from 'src/dto/user.dto';
 import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
 import * as argon from 'argon2';
+import { userInfo } from 'os';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -106,8 +107,8 @@ export class UsersService {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
-				email,
-			},
+				email: email,
+			}
 		});
 		return user;
 	}

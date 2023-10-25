@@ -1,18 +1,24 @@
-import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req} from '@nestjs/common';
-import { Request, response, Response } from 'express';
+import { 
+	HttpStatus, 
+	Injectable, 
+	NotFoundException, 
+	ForbiddenException, 
+	UnauthorizedException, 
+	BadRequestException, 
+	InternalServerErrorException, 
+	Req 
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
-import { SigninDto } from '../dto';
-import { SignupDto } from '../dto';
-import { Signin42Dto } from '../dto';
+import { SigninDto, SignupDto, Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
-import { EphemeralKeyInfo } from 'tls';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +28,7 @@ export class AuthService {
 		private usersService: UsersService,
 		private prisma: PrismaService,
 		public jwtService: JwtService,
-		private jwt: JwtService,
+		// private jwt: JwtService,
     ) {
         this.JWT_SECRET = jwtConstants.secret;
         if (!this.JWT_SECRET) {
@@ -113,9 +119,8 @@ export class AuthService {
 		// no 2fa
 		} else 
 			response = await this.signJwtTokens(req.user.id, req.user.email);
-		// console.log(response);
-		res.status(HttpStatus.OK).json(response);
 		// return response;
+		res.status(HttpStatus.OK).json(response);
 	}
 
 	async signJwtTokens(userId: number, userEmail: string,) {
@@ -130,6 +135,7 @@ export class AuthService {
 				expiresIn: '15m',
 				secret: secret,
 			});
+		console.log("Payload=", payload)
 		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
@@ -167,11 +173,8 @@ export class AuthService {
 
 	async createRefreshToken(userId: number): Promise<string> {
         const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
-
         const expiration = new Date();
-
         expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
-
         await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
@@ -182,21 +185,32 @@ export class AuthService {
         return refreshToken;
     }
 
-	async checkTokenValidity(req: Request, res: Response) {
-        // Extract the token from the Authorization header
-		const authHeader = req.headers.authorization;
-		const token = authHeader && authHeader.split(' ')[1];
-        console.log("passing by checktokenvalidity");
-        if (!token)
-            return res.status(401).json({ valid: false, message: "Token Missing" });
+	async refreshToken(refreshToken: string, req: Request, res: Response) {
+		if (!this.isRefreshTokenValid(refreshToken))
+		{
+			this.deleteRefreshTokenForUser(req.user.id);
+			return res.status(401).json({ valid: false, message: "Invalid Token" });
+		}
+		// delete refreshToken from DB to make a new one
+		return this.signJwtTokens(req.user.id, req.user.email);
+	}
 
-        try {
-            jwt.verify(token, this.JWT_SECRET);
-            return res.status(200).json({ valid: true, message: "Token is valid" });
-        } catch (error) {
-            return res.status(401).json({ valid: false, message: "Invalid Token" });
-        }
-    }
+	async isRefreshTokenValid(tokenReq: string)
+	{
+		if (!tokenReq)
+			return false;
+		const userRefreshToken = await this.prisma.refreshToken.findUnique({
+			where: {
+				token: tokenReq,
+			},
+		});
+		if (!userRefreshToken)
+			return false;
+		if (userRefreshToken.expiresAt.getTime() < Date.now())
+			return false;
+		else
+			return true;
+	}
 
 	signout(req: Request, res: Response): Response {
         // Invalidate the refresh token to make the signout more secure
@@ -207,13 +221,24 @@ export class AuthService {
         }
         // Remove the refresh token from the database to invalidate it
         try {
-            this.prisma.refreshToken.delete({
-                where: { token: refreshToken }
-            });
-            return res.status(200).send({ message: 'Signed out successfully' });
+				this.deleteRefreshTokenForUser(req.user.id);
+            	return res.status(200).send({ message: 'Signed out successfully' });
         } catch (error) {
             console.error(error); 
-            return res.status(500).send({ message: "An error occurred" });
+            return res.status(500).send({ message: "An error occurred in signout" });
         }
     }
+
+	async deleteRefreshTokenForUser(userId: number): Promise<void> {
+		try {
+			await this.prisma.refreshToken.deleteMany({
+				where: {
+					userId: userId,
+				},
+			});
+		} catch (error) {
+			console.error('Error deleting refresh token:', error);
+			throw new InternalServerErrorException('Failed to delete refresh token');
+		}
+	}
 }
