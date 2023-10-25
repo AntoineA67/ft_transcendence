@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
 // Constants
-const API_CHECK_TOKEN_VALIDITY = 'http://localhost:3000/auth/checkTokenValidity';
-const API_REFRESH_TOKEN = '';
+const API_CHECK_TOKEN = 'http://localhost:3000/auth/isTokenValid';
+const API_CHECK_REFRESH_TOKEN = 'http://localhost:3000/auth/isRefreshTokenValid';
+const API_REFRESH_TOKEN = 'http://localhost:3000/auth/refreshToken';
 const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
 
 /**
@@ -12,26 +13,57 @@ const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
  *                            True if the token has expired, false otherwise.
  *                            In case of any error, the function throws it.
  */
+
+ const refreshJWTToken = async () => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    const response = await fetch(API_REFRESH_TOKEN, {
+        method: 'GET',
+        credentials: 'include',
+        signal: controller.signal
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to refresh token: ${response.status}`);
+    }
+    const responseData = await response.json();
+    localStorage.setItem('token', responseData.token);
+}
+
+const isRefreshTokenExpired = async (): Promise<boolean> => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    const response = await fetch(API_CHECK_REFRESH_TOKEN, {
+        method: 'GET',
+        credentials: 'include',
+        signal: controller.signal
+    });
+    return !response.ok;
+}
+
+
 const isTokenExpired = async (): Promise<boolean> => {
     // Setup an abort controller to cancel the fetch request in case it takes too long.
-    // const controller = new AbortController();
-    // setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), FETCH_TIMEOUT);
 
     try {
-        const response = await fetch(API_CHECK_TOKEN_VALIDITY, {
+        const response = await fetch(API_CHECK_TOKEN, {
             method: 'GET',
             credentials: 'include',
-            // signal: controller.signal  // Signal to possibly abort the fetch
+            signal: controller.signal  // Signal to possibly abort the fetch
         });
-
-        // If the response is OK, then the token is valid (not expired).
+        // If the reponse is OK, then the token is valid (not expired).
         if (response.ok) {
             return false;
+        // Else, try to refresh the access token if refresh token is valid
         } else {
-            // If not OK, then there's an issue with the token. Throw an error.
-            throw new Error(`Something is wrong with your token ${response.status}`);
+            const refreshTokenExpired = await isRefreshTokenExpired();
+            if (!refreshTokenExpired) {
+                await refreshJWTToken();
+                return false;
+            }
+            return true;  // Both main token and refresh token are invalid.
         }
-
     } catch (error: any) {
         if (error?.message) {
             console.error("Token check error:", error.message);
