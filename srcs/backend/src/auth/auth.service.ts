@@ -184,88 +184,114 @@ export class AuthService {
         return refreshToken;
     }
 
+	async refreshToken(refreshToken: string, req: Request, res: Response) {
 	// async refreshToken(user: User, res: Response) {
-	async refreshToken(user: any, res: Response) {
-		if (!user)
-			throw new BadRequestException('No user in params/ refreshToken');
-		const userInfo = await this.prisma.user.findUnique({
-		where: {
-			email: user.email,
-		},
-			include: {
-				refreshToken: {
-					where: {
-						userId: user.id,
-					},
-				},
-			},
-		});
-		const refreshToken = user.refreshToken[0];
-		if (refreshToken.expiresAt.getTime() < Date.now()) {
-		// 	// Handle token expiry
-			throw new Error('Refresh token has expired.');
-		}
-		let payload = {
-			id:user.id,
-			email: user.email,
-		}
-		const secret = this.JWT_SECRET;
-		const token = this.jwtService.sign(
-		payload, 
-		{ 
-			expiresIn: '15m',
-			secret: secret,
-		});
-		res.status(HttpStatus.OK).json(token);
+	// async refreshToken(userId: number, userEmail: string, res: Response) {
+		// if (!user)
+		// 	throw new BadRequestException('No user in params/ refreshToken');
+		// if (!this.isRefreshTokenValid(user.email, user.id))
+		// 	throw new Error('Refresh token has expired.');
+		// const userInfo = await this.prisma.user.findUnique({
+		// where: {
+		// 	email: user.email,
+		// },
+		// 	include: {
+		// 		refreshToken: {
+		// 			where: {
+		// 				userId: user.id,
+		// 			},
+		// 		},
+		// 	},
+		// });
+		// const refreshToken = user.refreshToken[0];
+		// if (refreshToken.expiresAt.getTime() < Date.now()) {
+		// // 	// Handle token expiry
+		// 	throw new Error('Refresh token has expired.');
+		// }
+
+		// let payload = {
+		// 	id: user.id,
+		// 	email: user.email,
+		// }
+		if (this.isTokenValid(req))
+			return res.status(200).json({ valid: true, message: "Token is valid" });
+		if (!this.isRefreshTokenValid(refreshToken))
+			return res.status(200).json({ valid: false, message: "Invalid token" });
+		// delete refreshToken from DB to make a new one
+		return this.signJwtTokens(req.user.id, req.user.email);
 	}
 
-		// refreshToken.
-
-		// const user = await this.prisma.user.findFirst({
-		// 	where: {
-		// 	  email: userEmail,
-		// 	},
-		// 	include: {
-		// 	  refreshToken: true,
-		// 	},
-		//   });
-		
-		// const userInfo = await this.prisma.user.findUnique({
-		// 	where: {
-		// 		email: userEmail,
-		// 	}
-		// });
-		// const user = await this.prisma.user.findFirst({
+	// async isRefreshTokenValid(userEmail: string, userId: number, res: Response)
+	async isRefreshTokenValid(tokenReq: string)
+	{
+		if (!tokenReq)
+			return false;
+		const userRefreshToken = await this.prisma.refreshToken.findUnique({
+			where: {
+				token: tokenReq,
+			},
+		});
+		// const user = await this.prisma.user.findUnique({
 		// 	where: {
 		// 		email: userEmail,
 		// 	},
 		// 		include: {
-		// 			refreshToken: {
+		// 			userRefreshToken: {
 		// 				where: {
-		// 					userId: userInfo.id,
+		// 					userId: userId,
 		// 				},
 		// 			},
-		// 	},
-		// });
-		// const refreshToken = user.refreshToken[0].expiresAt
-		// if (refreshToken.)
+		// 		},
+		// 	});
+		// 	const userRefreshToken = user.userRefreshToken[0];
+		if (userRefreshToken.expiresAt.getTime() < Date.now())
+		{
+			// await this.prisma.refreshToken.delete(this.refreshToken);
+			return false;
+		}
+				// return res.status(401).json({ valid: false, message: "Invalid Token" });
+		else
+			return true;
+				// return res.status(200).json({ valid: true, message: "Refresh token is valid" });
+	}
+	
+	// async isRefreshTokenValid(userEmail: string, userId: number, res: Response)
+	// {
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: {
+	// 			email: userEmail,
+	// 		},
+	// 			include: {
+	// 				refreshToken: {
+	// 					where: {
+	// 						userId: userId,
+	// 					},
+	// 				},
+	// 			},
+	// 		});
+	// 		const refreshToken = user.refreshToken[0];
+	// 		if (refreshToken.expiresAt.getTime() < Date.now())
+	// 			return res.status(401).json({ valid: false, message: "Invalid Token" });
+	// 		else
+	// 			return res.status(200).json({ valid: true, message: "Refresh token is valid" });
+	// }
 
-    // }
-
-	async checkTokenValidity(req: Request, res: Response) {
+	async isTokenValid(req: Request) {
         // Extract the token from the Authorization header
 		const authHeader = req.headers.authorization;
 		const token = authHeader && authHeader.split(' ')[1];
-        console.log("passing by checktokenvalidity");
+        console.log("passing by isTokenValid");
         if (!token)
-            return res.status(401).json({ valid: false, message: "Token Missing" });
-
+			return false;
+            // return res.status(401).json({ valid: false, message: "Token Missing" });
         try {
             jwt.verify(token, this.JWT_SECRET);
-            return res.status(200).json({ valid: true, message: "Token is valid" });
-        } catch (error) {
-            return res.status(401).json({ valid: false, message: "Invalid Token" });
-        }
+            // return res.status(200).json({ valid: true, message: "Token is valid" });
+			return true;
+		} catch (error) {
+            // return res.status(401).json({ valid: false, message: "Invalid Token" });
+			return false;
+		}
     }
 
 	signout(req: Request, res: Response): Response {
