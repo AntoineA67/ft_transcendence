@@ -8,15 +8,23 @@ import { useNavigate } from 'react-router-dom';
 import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { BsArrowUpRight } from 'react-icons/bs';
+import { BsArrowUpRight, BsPersonHeart } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
+import { MdGroup, MdGroups2 } from 'react-icons/md';
+import { MdPublic, MdPublicOff } from 'react-icons/md';
+import { CiLock, CiUnlock } from 'react-icons/ci';
+import { FaChessKing, FaUserNinja } from 'react-icons/fa';
+import { MdPersonOutline } from 'react-icons/md';
+
 
 type ChatBoxData = {
 	messages: Message[],
 	roomTitle: string,
 	roomChannel: boolean,
 	members: Member[],
-	memberStatus: Member
+	memberStatus: Member,
+	private: boolean,
+	password: boolean
 }
 
 export function ChatBox() {
@@ -40,24 +48,23 @@ export function ChatBox() {
 	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
 	const [newPassword, setNewPassword] = useState<string>('');
 	const [blocks, setBlocks] = useState<Block[]>([]);
+	const [privateStatus, setPrivateStatus] = useState<boolean>(false);
+	const [passwordStatus, setPasswordStatus] = useState<boolean>(false);
 
 	useEffect(() => {
-		// chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
-		// 	if (!data) {
-		// 		navigate('/chat');
-		// 	}
 		setroomTitle(data.roomTitle);
 		setMessages(data.messages);
 		setRoomChannel(data.roomChannel);
 		setMemberstatus(data.memberStatus);
 		setMemberList(data.members);
+		setPrivateStatus(data.private);
+		setPasswordStatus(data.password);
 		setnewRoomTitleSuccess(undefined);
 		setinviteUsernameSuccess(undefined);
 		setnewPasswordSucess(undefined);
 		setShowSettings(false);
 		setLoading(false);
 		setMess('');
-		// });
 
 		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
 			if (profile) {
@@ -136,12 +143,19 @@ export function ChatBox() {
 			}
 		};
 
+		const handleDeleteRoom = (response: number) => {
+			if (response === parseInt(chatId || '', 10)) {
+				navigate('/chat');
+			}
+		}
+
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
 		socketListeners.push({ event: 'messageSent', handler: handlenewmess });
 		socketListeners.push({ event: 'newMember', handler: handlenewMember });
 		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
 		socketListeners.push({ event: 'newmemberStatus', handler: handlenewmemberStatus });
 		socketListeners.push({ event: 'newmemberListStatus', handler: handlenewmemberListStatus });
+		socketListeners.push({ event: 'deleteRoom', handler: handleDeleteRoom });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
@@ -241,6 +255,9 @@ export function ChatBox() {
 			if (response && profile.id === usertoKick) {
 				navigate('/chat');
 			}
+			if (response) {
+				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== usertoKick));
+			}
 		});
 	}
 
@@ -286,6 +303,8 @@ export function ChatBox() {
 			return;
 		}
 
+		console.log('blockUser', memberid, actions);
+
 		chatsSocket.emit('blockUser', {
 			memberId: memberid,
 			action: actions,
@@ -298,6 +317,8 @@ export function ChatBox() {
 						return prevBlocks.filter((block) => block.blockedId !== memberid);
 					}
 				});
+				if (!actions)
+					setMessages((prevMessages) => prevMessages.filter((message) => message.userId !== memberid));
 			}
 		});
 	};
@@ -331,6 +352,15 @@ export function ChatBox() {
 					return member;
 				}
 				));
+				if (memberid === profile?.id) {
+					setMemberstatus((prevMemberstatus) => {
+						if (prevMemberstatus) {
+							prevMemberstatus.owner = role === 'Owner' ? true : false;
+							prevMemberstatus.admin = role === 'Admin' ? true : false;
+						}
+						return prevMemberstatus;
+					});
+				}
 			}
 		});
 	}
@@ -344,6 +374,7 @@ export function ChatBox() {
 				if (response) {
 					setNewPassword('');
 					setnewPasswordSucess(true);
+					setPasswordStatus(true);
 				}
 				else
 					setnewPasswordSucess(false);
@@ -357,9 +388,19 @@ export function ChatBox() {
 			password: ''
 		}, (response: boolean) => {
 			if (response) {
+				setPasswordStatus(false);
+				setnewPasswordSucess(undefined);
 				setNewPassword('');
 			}
 		})
+	}
+
+	const handleDeleteChannel = () => {
+		chatsSocket.emit('deleteChannel', chatId, (response: boolean) => {
+			if (response) {
+				navigate('/chat');
+			}
+		});
 	}
 
 	const myMap = (message: Message, profile: Profile) => {
@@ -393,17 +434,21 @@ export function ChatBox() {
 
 
 	return (
-		<div className="h-100 d-flex flex-column pb-5 pb-sm-0 " style={{position: 'relative'}}>
-			<div className="chat-container d-flex h-100" style={{ border: '1px solid yellow' }}>
+		<div className="h-100 d-flex flex-column pb-5 pb-sm-0 " style={{ position: 'relative' }}>
+			<div className="chat-container d-flex h-100">
 				<div className="d-flex w-100 align-items-center p-1">
 					<Link to="..">
-						<button className="leftArrow m-2"></button>
+						<button className="leftArrow m-2" title="Go Back"></button>
 					</Link>
-					<h4 className='white-text ms-2'>{roomTitle}</h4>
-					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3"><BsThreeDots /></button>
+					<h4 className='white-text ms-2' title={roomTitle}>{roomTitle}</h4>
+					<h4 className='ms-auto mr-3' style={{ margin: '0 5px' }} title={roomChannel ? "Group" : "Private message"}>{roomChannel ? <MdGroups2 /> : <MdGroup />}</h4>
+					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "Private" : "Public"}>{privateStatus ? <MdPublicOff /> : <MdPublic />}</h4>}
+					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "" : passwordStatus ? "Locked" : "Unlocked"}>{privateStatus ? '' : passwordStatus ? <CiLock /> : <CiUnlock />}</h4>}
+					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={memberstatus?.owner ? "Owner" : memberstatus?.admin ? "Admin" : "Member"}>{memberstatus?.owner ? <FaChessKing /> : memberstatus?.admin ? <FaUserNinja /> : <BsPersonHeart />}</h4>}
+					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3" title="Settings"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
-					<div style={{ border: '1px solid purple' }} className="p-5 flex-grow-2 overflow-y-auto">
+					<div className="p-5 flex-grow-2 overflow-y-auto">
 						<ul
 							ref={messagesEndRef}
 							className="d-flex flex-column"
@@ -416,7 +461,6 @@ export function ChatBox() {
 					<div className="mt-auto p-3 d-flex align-items-center">
 						<input
 							className={`${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
-							// style={{ borderRadius: '10px' }}
 							value={mess}
 							onChange={(e) => setMess(e.target.value)}
 							onKeyDown={handleKeyDown}
@@ -455,10 +499,25 @@ export function ChatBox() {
 				)}
 			</div>
 			{showSettings && (
-				<div className="w-100 h-75 d-flex flex-column overflowY-auto" style={{ border: '1px solid red', position: 'absolute', zIndex: '2', marginTop: '5rem' }}>
+				<div className="w-100 h-75 d-flex flex-column overflowY-auto" style={{ position: 'absolute', zIndex: '2', marginTop: '5rem' }}>
 					<div className="align-items-center d-flex flex-column p-5">
 						{memberstatus?.admin && roomChannel && (
 							<>
+								<div style={{ display: 'flex', alignItems: 'center' }}>
+									<h4 className='white-text'>Settings of</h4>
+									<strong
+										style={{
+											borderRadius: '40%',
+											backgroundColor: 'white',
+											color: 'black',
+											padding: '6px',
+											marginLeft: '10px',
+										}}
+										className='my-3'
+									>
+										{chatId}
+									</strong>
+								</div>
 								<input
 									id="roomTitleInput"
 									className={`form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
@@ -469,7 +528,7 @@ export function ChatBox() {
 									disabled={!memberstatus?.admin}
 								/>
 								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
-								{memberstatus?.owner && (
+								{memberstatus?.owner && !privateStatus && (
 									<input
 										id="Newpassword"
 										className={`form-control ${newPasswordSucess === true ? 'is-valid' : newPasswordSucess === false ? 'is-invalid' : ''}`}
@@ -480,8 +539,28 @@ export function ChatBox() {
 
 										disabled={!memberstatus?.owner}
 									/>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary mt-3 mb-1' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary mb-3' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
+								<div style={{ display: 'flex', alignItems: 'center', margin: 'auto' }}>
+									{memberstatus?.owner && !privateStatus && (
+										<button
+											className='btn btn-outline-secondary my-3 mr-2'
+											type='submit'
+											onClick={handleChangePassword}
+											disabled={!memberstatus.owner || !newPassword.trim()}
+										>
+											Update
+										</button>
+									)}
+									{memberstatus?.owner && !privateStatus && passwordStatus && (
+										<button
+											className='btn btn-outline-secondary my-3'
+											type='submit'
+											onClick={handleDeletePassword}
+											disabled={!memberstatus.owner}
+										>
+											Delete
+										</button>
+									)}
+								</div>
 								<input
 									id="inviteUserInput"
 									className={`form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
@@ -493,7 +572,8 @@ export function ChatBox() {
 								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
-						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-danger w-20 ml-2"  onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-danger mt-3 mb-1" onClick={() => handleLeaveChannel(profile?.id)}>Leave</button>}
+						{roomChannel && roomTitle && profile && memberstatus && memberstatus.owner && <button className="btn btn-danger mb-3" onClick={() => handleDeleteChannel()}>Delete Channel</button>}
 					</div>
 					<ul className="members-list">
 						{membersList
@@ -719,7 +799,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					className='w-75 form-control with-white-placeholder'
 					placeholder='Group Name'
 				/>
-				{isPublic ? (
+				{!isPublic ? (
 					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
 						Create
 					</button>
@@ -731,7 +811,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 							value={createPassword}
 							onChange={(e) => setCreatePassword(e.target.value)}
 							className='w-75 form-control with-white-placeholder'
-							placeholder='Password'
+							placeholder='Password ?'
 						/>
 						<button type='submit' className='btn btn-outline-secondary' disabled={!create.trim()}>
 							Create
@@ -820,11 +900,18 @@ export function ChatList() {
 			}
 		}
 
+		const handledeleteRoom = (response: number) => {
+			if (response) {
+				setRooms((prevRooms) => prevRooms.filter((room) => room.id !== response));
+			}
+		}
+
 		socketListeners.push({ event: 'newRoom', handler: handleNewRoom });
 		socketListeners.push({ event: 'messageSent', handler: handleMessageSent });
 		socketListeners.push({ event: 'newRoomTitle', handler: handlenewRoomTitle });
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
 		socketListeners.push({ event: 'newProfile', handler: handlenewProfile });
+		socketListeners.push({ event: 'deleteRoom', handler: handledeleteRoom });
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
@@ -859,7 +946,7 @@ export function ChatList() {
 			roomtitle = room.title;
 
 		return (
-			<li key={roomtitle}>
+			<li key={room.id}>
 				<Link
 					to={isBanned ? "#" : `/chat/${room.id}`}
 					className={`white-text ${isBanned ? "banned-link" : ""}`}
