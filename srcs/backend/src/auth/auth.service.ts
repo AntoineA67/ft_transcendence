@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, NotFoundException, ForbiddenException, UnauthorizedException, BadRequestException, InternalServerErrorException, Req} from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from '@prisma/client';
@@ -8,9 +8,11 @@ import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
 import { SigninDto } from '../dto';
 import { SignupDto } from '../dto';
+import { Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import { EphemeralKeyInfo } from 'tls';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +25,6 @@ export class AuthService {
 		private jwt: JwtService,
     ) {
         this.JWT_SECRET = jwtConstants.secret;
-
         if (!this.JWT_SECRET) {
             throw new Error("JWT_SECRET environment variable not set!");
         }
@@ -31,52 +32,59 @@ export class AuthService {
 
 
 	async signup(dto: SignupDto, res: Response) {
-		//verify if user exists 
-		const hashPassword = await argon.hash(dto.password);
+		const existingEmail = await this.prisma.user.findUnique({
+			where: {
+				email: dto.email,
+			},
+		});
+		if (existingEmail)
+		{
+			throw new BadRequestException('This email is already used');
+		}
+		const existingUsername = await this.prisma.user.findUnique({
+			where: {
+				username: dto.username,
+			},
+		});
+		if (existingUsername)
+		{
+			throw new BadRequestException('Username taken');
+		}
 		try {
-			const user = await this.prisma.user.create({
-				data: {
-					email: dto.email,
-					username: dto.username,
-					hashPassword,
-				},
-			});
-			return this.signToken(user.id, res);
+		const hashPassword = await argon.hash(dto.password);
+		const user = await this.prisma.user.create({
+			data: {
+				email: dto.email,
+				username: dto.username,
+				hashPassword,
+			},
+		});
+		return this.signJwtTokens(user.id, user.email);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
 				if (error.code === 'P2002') {
-					throw new ForbiddenException('Credentials taken');
-				}
+					console.log("error hereeee");
+				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
 			}
-			throw error;
+		}
+		throw error;
 		}
 	  }
   
 	async signin(dto: SigninDto, res: Response, @Req() req) {
 		// find user with email
-		const user = await this.usersService.getUserByUsername(dto.username);
+		const user = await this.usersService.getUserByEmail(dto.email);
 		// if user not found throw exception
 		if (!user)
-			throw new NotFoundException('Username not found',);
+			throw new NotFoundException('User not found',);
 		// compare password
 		const passwordMatch = await argon.verify(user.hashPassword, dto.password,);
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		if (req.query._2fa && req.user.activated2FA)
-		{
-			const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-			if (_2faValid) {
-				return this.signToken(user.id, res);
-				// response = await this.authService.signToken(req.user.id, res);
-			} else {
-				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-			}
-			// no 2fa
-		} 
-		// send the token
-		return this.signToken(user.id, res);
+		
+		return this.signJwtTokens(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -85,51 +93,44 @@ export class AuthService {
 		  throw new UnauthorizedException();      
 		return user;
 	  }
-  
-	  async signToken(
-		  userId: number,
-		  res: Response
-	  	): Promise<void> {
-		  const payload = {
-			  sub: userId,
-		  };
-		  const secret = this.JWT_SECRET;
-		  const token = await this.jwt.signAsync(
-			  payload,
-			  {
-				  expiresIn: '15m',
-				  secret: secret,
-			  },
-		  );
-  
-		const refreshToken = await this.createRefreshToken(userId);
-		console.log('refresh token = ');
-		console.log(refreshToken);
-		console.log('token = ');
-		console.log(token);
 
-		// Return the tokens in the response body
-		res.status(200).send({
-			message: 'Authentication successful',
-			token: token,
-			refreshToken: refreshToken
-		});
-	  }
+	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+		// if 2fa is activated and user have not sent token
+		let response;
+		if (!dto.token2FA && dto.activated2FA) {
+			response = {
+				id: dto.id,
+				_2fa: true
+			};
+		// if 2fa is activated and user have sent token
+		} else if (dto.token2FA && dto.activated2FA) {
+			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
+			if (_2FAValid) {
+				response = await this.signJwtTokens(dto.id, dto.email);
+			} else {
+				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+			}
+		// no 2fa
+		} else 
+			response = await this.signJwtTokens(req.user.id, req.user.email);
+		// console.log(response);
+		res.status(HttpStatus.OK).json(response);
+		// return response;
+	}
 
-	async createJWT(req: any) {
+	async signJwtTokens(userId: number, userEmail: string,) {
 		let payload = {
-			id: req.user.id,
-			email: req.user.email,
+			id: userId,
+			email: userEmail,
 		}
 		const secret = this.JWT_SECRET;
-		// return this.jwtService.sign(
 		const token = this.jwtService.sign(
 			payload, 
 			{ 
 				expiresIn: '15m',
 				secret: secret,
 			});
-		const refreshToken = await this.createRefreshToken(req.user.id);
+		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
 			token: token,
@@ -137,19 +138,16 @@ export class AuthService {
 		};
 	}
 	
-	async login(user: any) {
-		if (!user) {
+	async login42(user: any) {
+		if (!user)
 			throw new BadRequestException('Unauthenticated');
-		}
 		let userExists: any = await this.usersService.getUserByEmail(user.emails[0].value);
-
-		if (!userExists) {
-			userExists = await this.registerUser(user);
-		}
+		if (!userExists)
+			userExists = await this.registerUser42(user);
 		return (userExists);
 	}
 
-	async registerUser(user: any): Promise<User | undefined> {
+	async registerUser42(user: any): Promise<User | undefined> {
 		try {
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
 			return newUser;
@@ -188,7 +186,6 @@ export class AuthService {
         // Extract the token from the Authorization header
 		const authHeader = req.headers.authorization;
 		const token = authHeader && authHeader.split(' ')[1];
-
         console.log("passing by checktokenvalidity");
         if (!token)
             return res.status(401).json({ valid: false, message: "Token Missing" });
@@ -205,11 +202,9 @@ export class AuthService {
         // Invalidate the refresh token to make the signout more secure
         // Extract the refresh token from the body or header
         const refreshToken = req.body.refreshToken;
-
         if (!refreshToken) {
             return res.status(401).json({ message: "Refresh token is missing" });
         }
-
         // Remove the refresh token from the database to invalidate it
         try {
             this.prisma.refreshToken.delete({

@@ -1,5 +1,5 @@
 
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLoaderData } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -11,8 +11,17 @@ import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-i
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 
+type ChatBoxData = {
+	messages: Message[],
+	roomTitle: string,
+	roomChannel: boolean,
+	members: Member[],
+	memberStatus: Member
+}
+
 export function ChatBox() {
 	const { chatId } = useParams();
+	const data = useLoaderData() as ChatBoxData;
 	const [mess, setMess] = useState('');
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [roomTitle, setroomTitle] = useState<string>('');
@@ -26,30 +35,35 @@ export function ChatBox() {
 	const [membersList, setMemberList] = useState<Member[]>([]);
 	const [newRoomTitle, setNewRoomTitle] = useState<string>('');
 	const [newRoomTitleSuccess, setnewRoomTitleSuccess] = useState<boolean>();
+	const [newPasswordSucess, setnewPasswordSucess] = useState<boolean>();
 	const [inviteUsername, setInviteUsername] = useState<string>('');
 	const [inviteUsernameSuccess, setinviteUsernameSuccess] = useState<boolean>();
 	const [newPassword, setNewPassword] = useState<string>('');
 	const [blocks, setBlocks] = useState<Block[]>([]);
 
 	useEffect(() => {
+		// chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
+		// 	if (!data) {
+		// 		navigate('/chat');
+		// 	}
+		setroomTitle(data.roomTitle);
+		setMessages(data.messages);
+		setRoomChannel(data.roomChannel);
+		setMemberstatus(data.memberStatus);
+		setMemberList(data.members);
+		setnewRoomTitleSuccess(undefined);
+		setinviteUsernameSuccess(undefined);
+		setnewPasswordSucess(undefined);
+		setShowSettings(false);
+		setLoading(false);
+		setMess('');
+		// });
+
 		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
 			if (profile) {
 				setProfile(profile);
 				setBlocks(profile.blocks);
 			}
-		});
-
-		chatsSocket.emit('getRoomData', chatId, (data: { messages: Message[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member }) => {
-			setroomTitle(data.roomTitle);
-			setMessages(data.messages);
-			setRoomChannel(data.roomChannel);
-			setMemberstatus(data.memberStatus);
-			setMemberList(data.members);
-			setnewRoomTitleSuccess(undefined);
-			setinviteUsernameSuccess(undefined);
-			setShowSettings(false);
-			setLoading(false);
-			setMess('');
 		});
 	}, [chatId]);
 
@@ -239,7 +253,7 @@ export function ChatBox() {
 			memberId: memberid,
 			duration: time,
 			roomId: chatId
-		} , (response: boolean) => {
+		}, (response: boolean) => {
 			if (response) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
 					if (member.userId === memberid)
@@ -329,7 +343,10 @@ export function ChatBox() {
 			}, (response: boolean) => {
 				if (response) {
 					setNewPassword('');
+					setnewPasswordSucess(true);
 				}
+				else
+					setnewPasswordSucess(false);
 			})
 		}
 	}
@@ -356,15 +373,15 @@ export function ChatBox() {
 		return (
 			<li className="message-container" key={message.id}>
 				<div className={`d-flex ${classuser}`}>
+					{message.userId !== profile.id && (
+						<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+							<span style={{ marginRight: '20px' }}>
+								<FontAwesomeIcon icon={faPlay} />
+							</span>
+						</Link>
+					)}
 					<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
 						<strong className='user-header'>
-							{message.userId !== profile.id && (
-								<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
-									<span style={{ marginRight: '20px' }}>
-										<FontAwesomeIcon icon={faPlay} />
-									</span>
-								</Link>
-							)}
 							{message.username}
 						</strong>
 					</Link>
@@ -376,7 +393,7 @@ export function ChatBox() {
 
 
 	return (
-		<div className="h-100 d-flex flex-column pb-5 pb-sm-0">
+		<div className="h-100 d-flex flex-column pb-5 pb-sm-0 " style={{position: 'relative'}}>
 			<div className="chat-container d-flex h-100" style={{ border: '1px solid yellow' }}>
 				<div className="d-flex w-100 align-items-center p-1">
 					<Link to="..">
@@ -438,53 +455,51 @@ export function ChatBox() {
 				)}
 			</div>
 			{showSettings && (
-				<div className="w-100 h-100 d-flex flex-column" style={{ border: '1px solid red' }}>
-					<div className="align-items-center d-flex flex-column">
+				<div className="w-100 h-75 d-flex flex-column overflowY-auto" style={{ border: '1px solid red', position: 'absolute', zIndex: '2', marginTop: '5rem' }}>
+					<div className="align-items-center d-flex flex-column p-5">
 						{memberstatus?.admin && roomChannel && (
 							<>
 								<input
 									id="roomTitleInput"
-									className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+									className={`form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
 									type="text"
 									placeholder="New Room name"
 									value={newRoomTitle}
 									onChange={(e) => setNewRoomTitle(e.target.value)}
-									style={{ background: 'white', color: 'black' }}
 									disabled={!memberstatus?.admin}
 								/>
-								<button className='btn btn-outline-secondary  ml-2' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
+								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim()}>Valider</button>
 								{memberstatus?.owner && (
 									<input
-										id="roomTitleInput"
-										className={`w-50 form-control ${newRoomTitleSuccess === true ? 'is-valid' : newRoomTitleSuccess === false ? 'is-invalid' : ''}`}
+										id="Newpassword"
+										className={`form-control ${newPasswordSucess === true ? 'is-valid' : newPasswordSucess === false ? 'is-invalid' : ''}`}
 										type="text"
 										placeholder="New Password"
 										value={newPassword}
 										onChange={(e) => setNewPassword(e.target.value)}
-										style={{ background: 'white', color: 'black' }}
+
 										disabled={!memberstatus?.owner}
 									/>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
-								{memberstatus?.owner && (<button className='btn btn-outline-secondary ml-2' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary mt-3 mb-1' type='submit' onClick={handleChangePassword} disabled={!memberstatus.owner || !newPassword.trim()}>Update Password</button>)}
+								{memberstatus?.owner && (<button className='btn btn-outline-secondary mb-3' type='submit' onClick={handleDeletePassword} disabled={!memberstatus.owner}>Delete Password</button>)}
 								<input
 									id="inviteUserInput"
-									className={`w-50 form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
+									className={`form-control ${inviteUsernameSuccess === true ? 'is-valid' : inviteUsernameSuccess === false ? 'is-invalid' : ''}`}
 									type="text"
 									placeholder="Invite user by username"
 									value={inviteUsername}
 									onChange={(e) => setInviteUsername(e.target.value)}
-									style={{ background: 'white', color: 'black' }}
 								/>
-								<button className='btn btn-outline-secondary w-20' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
+								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
-						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-outline-secondary w-20 ml-2" onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
+						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-danger w-20 ml-2"  onClick={() => handleLeaveChannel(profile?.id)}>Leave Channel</button>}
 					</div>
 					<ul className="members-list">
 						{membersList
 							.filter((member) => member.userId !== profile?.id)
 							.map((member) => (
-								<li key={member.id} className="member">
+								<li key={member.id} className="member d-flex flex-wrap">
 									<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
 										<div className="member-details">
 											<span className="member-username">{member.username}</span>
@@ -493,8 +508,8 @@ export function ChatBox() {
 											</span>
 										</div>
 									</Link>
-									<div className="member-actions">
-										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <select
+									<div className="member-actions d-flex flex-wrap">
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <select
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
 											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
 										>
@@ -502,13 +517,13 @@ export function ChatBox() {
 											<option value="Admin">Admin</option>
 											<option value="Member">Member</option>
 										</select>}
-										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <button
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date() ? 'action-disabled' : ''}`}
 											onClick={() => handleMuteDurationChange(member.userId, member.muteduration, member.mute && new Date(member.mute) > new Date())}
 										>
 											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
 										</button>}
-										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && (!member.mute || new Date(member.mute) < new Date()) && (
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && (!member.mute || new Date(member.mute) < new Date()) && (
 											<select
 												defaultValue={member.muteduration}
 												onChange={(e) => member.muteduration = parseInt(e.target.value)}
@@ -521,7 +536,7 @@ export function ChatBox() {
 												<option value="86400">24 h</option>
 											</select>
 										)}
-										{roomChannel && (memberstatus?.admin || memberstatus?.owner) && <button
+										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
 											onClick={() => handleBan(member.userId, member.ban)}
 										>
@@ -542,7 +557,7 @@ export function ChatBox() {
 												? 'Unblock'
 												: 'Block'}
 										</button>
-										{roomChannel && (memberstatus?.owner || memberstatus?.admin) && <button
+										{roomChannel && !member.owner && (memberstatus?.owner || memberstatus?.admin) && <button
 											className="action-button"
 											onClick={() => handleKick(member.userId)}
 										>

@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
 import { Alert } from 'react-bootstrap';
-
+import axios from 'axios';
 
 export function Title({ title }: { title: string }) {
 	return (
@@ -217,7 +217,16 @@ export function SettingMenu() {
 				<hr />
 				<br></br>
 				<button onClick={() => {
-					localStorage.removeItem('token');
+					axios.post("http://localhost:3000/auth/signout", {}, {
+						headers: {
+					  'Authorization': `Bearer ${localStorage.getItem('token')}`
+					  }
+				  });
+				  localStorage.removeItem('token');
+				  localStorage.removeItem('random');
+				  localStorage.removeItem('email');
+				  localStorage.removeItem('refreshToken');
+					// localStorage.removeItem('token');
 					window.location.href = '/';
 				}} className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
 
