@@ -7,18 +7,24 @@ export type Message = {
 	username: string,
 };
 
+export type Block = {
+	userId: number,
+	blockedId: number,
+};
+
 export type MemberWithLatestMessage = {
 	member: Member;
 	latestMessage: Message | null;
   };
 
-export type ProfileTest = {
+export type Profile = {
 	bio: string;
 	id: number;
 	status: string;
 	username: string;
 	membership: MemberWithLatestMessage[];
 	pvrooms: Pvrooms[];
+	blocks: Block[];
 };
 
 export type Member = {
