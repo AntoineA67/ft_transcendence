@@ -16,12 +16,18 @@ model Game {
   players    Player[]
 }
 
+enum Result {
+  WIN
+  LOSE
+  DRAW
+}
+
 model Player {
-  id     Int      @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
-  win    Boolean?
-  game   Game     @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
+  id     Int    @id(map: "PK_b5c4d0f9ae826735c474b188ef5") @default(autoincrement())
+  win    Result @default(DRAW)
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7e5bcb1cfcc8a1ab3aa757c5fff")
   gameId Int
-  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_4097abc6b24629e7c497802e50b")
   userId Int
 }
 

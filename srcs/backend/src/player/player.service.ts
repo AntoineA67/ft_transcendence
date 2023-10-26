@@ -3,6 +3,8 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'uti
 import { Player, Prisma } from '@prisma/client';
 import { HistoryDto } from 'src/dto/history.dto';
 
+import { Result } from '@prisma/client';
+
 @Injectable()
 export class PlayerService {
 	constructor(private prisma: PrismaService) { }
@@ -44,7 +46,7 @@ export class PlayerService {
 		let history = await this.prisma.player.findMany({
 			where: {
 				userId: { equals: id },
-				win: { equals: true }
+				win: { equals: Result.WIN }
 			}
 		})
 		return (history.length);
