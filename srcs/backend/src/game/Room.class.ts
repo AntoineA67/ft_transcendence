@@ -5,6 +5,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { GamesService } from './game.service';
 import { PlayerService } from 'src/player/player.service';
 
+import { Result } from '@prisma/client';
+
 export default class Room {
 	private prisma: PrismaService = new PrismaService();
 	private gameService: GamesService = new GamesService(this.prisma);
@@ -13,6 +15,7 @@ export default class Room {
 	private ball: Ball | null = null;
 	private interval: NodeJS.Timeout | null = null;
 	private gameId: number = 0;
+	private startTime: number = Date.now();
 
 	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
 
@@ -53,6 +56,8 @@ export default class Room {
 		// const newGame = await this.gameService.create({});
 		// this.gameId = newGame.id;
 
+
+
 		this.interval = setInterval(() => {
 			this.updateGameTick();
 			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
@@ -67,21 +72,15 @@ export default class Room {
 		const winner = this.ball.update(this.players);
 		if (winner) {
 			this.endGame(Number(winner));
-			// let loser;
-			// this.ball = null;
-			// clearInterval(this.interval!);
-			// this.interval = null;
-			// for (const playerId in this.players) {
-			// 	if (playerId !== winner) {
-			// 		loser = playerId;
-			// 		break;
-			// 	}
-			// }
-			// this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
-
-			// this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
-			// this.playerService.updatePlayer(this.players[winner].userId, { win: true });
-			// this.playerService.updatePlayer(this.players[loser].userId, { win: false });
+		} else if (Date.now() - this.startTime > 3 * 1000) { // 3 * 60 * 1000
+			const players = Object.values(this.players);
+			if (players[0].score > players[1].score) {
+				this.endGame(Number(players[0].id));
+			} else if (players[0].score < players[1].score) {
+				this.endGame(Number(players[1].id));
+			} else {
+				this.endGame(-1); // -1 means nobody won
+			}
 		}
 	}
 
@@ -92,6 +91,17 @@ export default class Room {
 	public async endGame(winner: number) {
 
 		clearInterval(this.interval!);
+
+		if (winner == -1) {
+			this.wss.to(this.roomId).emit('gameOver', { winner: null, loser: null });
+			const newGame = await this.gameService.create({});
+			this.gameId = newGame.id;
+			const players = Object.values(this.players);
+			await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${players[0].score}:${players[1].score}` });
+			await this.playerService.createPlayer({ win: Result.DRAW, gameId: this.gameId, userId: players[0].id });
+			await this.playerService.createPlayer({ win: Result.DRAW, gameId: this.gameId, userId: players[1].id });
+			return;
+		}
 
 		let loser;
 		this.ball = null;
@@ -107,11 +117,11 @@ export default class Room {
 		const newGame = await this.gameService.create({});
 		this.gameId = newGame.id;
 
-		await this.playerService.createPlayer({ win: true, gameId: this.gameId, userId: winner });
-		await this.playerService.createPlayer({ win: false, gameId: this.gameId, userId: loser });
+		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
+		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
 		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
-		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: true } });
+		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
 		if (wins.length == 1) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
 		} else if (wins.length == 10) {
@@ -119,80 +129,5 @@ export default class Room {
 		} else if (wins.length == 100) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
 		}
-		// this.playerService.updatePlayer(this.players[winner].userId, { win: true });
-		// this.playerService.updatePlayer(this.players[loser].userId, { win: false });
 	}
-
-	// public addPlayer(player: Player) {
-	// 	this.players.push(player);
-	// 	this.wss.to(this.roomId).emit('players', this.players);
-	// }
-
-
-	// public removePlayer(playerId: string) {
-	// 	this.players = this.players.filter((player) => player.id !== playerId);
-	// 	this.wss.to(this.roomId).emit('players', this.players);
-	// }
-
-	// public stopGame() {
-	// 	clearInterval(this.interval!);
-	// 	this.interval = null;
-	// 	this.ball = null;
-	// 	// Object.keys(this.players).forEach((player) => {
-	// 	// 	player.reset();
-	// 	// });
-	// 	this.wss.to(this.roomId).emit('gameState', { players: this.players, ball: this.ball });
-	// }
-
-	// private updateGameTick() {
-	// 	// Update player positions
-	// 	this.players.forEach((player) => {
-	// 		player.updatePosition();
-	// 	});
-
-	// 	// Update ball position
-	// 	if (this.ball) {
-	// 		this.ball.updatePosition();
-	// 		this.checkBallCollision();
-	// 	}
-	// }
-
-	// private checkBallCollision() {
-	// 	// Check if ball collides with any player
-	// 	this.players.forEach((player) => {
-	// 		if (this.ball!.collidesWith(player)) {
-	// 			this.ball!.bounceOff(player);
-	// 		}
-	// 	});
-
-	// 	// Check if ball collides with walls
-	// 	if (this.ball!.collidesWithTopWall() || this.ball!.collidesWithBottomWall()) {
-	// 		this.ball!.bounceOffWall();
-	// 	}
-
-	// 	// Check if ball goes out of bounds
-	// 	if (this.ball!.goesOutOfBounds()) {
-	// 		this.stopGame();
-	// 	}
-	// }
-	// @SubscribeMessage('UpKeyPressed')
-	// async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
-	// 	console.log('UpKeyPressed', payload)
-	// 	this.players[client.id].direction = 1
-	// }
-	// @SubscribeMessage('UpKeyReleased')
-	// async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
-	// 	console.log('UpKeyReleased', payload)
-	// 	this.players[client.id].direction = 0
-	// }
-	// @SubscribeMessage('DownKeyPressed')
-	// async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
-	// 	console.log('DownKeyPressed', payload)
-	// 	this.players[client.id].direction = -1
-	// }
-	// @SubscribeMessage('DownKeyReleased')
-	// async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
-	// 	console.log('DownKeyReleased', payload)
-	// 	this.players[client.id].direction = 0
-	// }
 }
