@@ -10,11 +10,14 @@ export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
-	const state = searchParams.get('state') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		if (!code || !state) return;
+		console.log('callback42');
+		if (!code) {
+			setStatus('done');
+			return;
+		}
 		let response;
 
 		try {
@@ -104,9 +107,10 @@ export function Protected() {
 
 	return (
 		<>
-			{status === 'loading' && <p className='white-text'> loading ... </p>}
-			{status === 'connect' && <Outlet />}
-			{status === 'error' && <Navigate to="/login" replace />}
+			<Outlet />
+			{/* {status == 'loading' && <p className='white-text'> loading ... </p>}
+			{status == 'connect' && <Outlet />}
+			{status == 'error' && <Navigate to="/login" replace />} */}
 		</>
 	);
 }

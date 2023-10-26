@@ -9,6 +9,12 @@ export type MessageWithUsername = {
 	username: string;
 };
 
+export type Block = {
+	id: number,
+	userId: number,
+	blockedId: number;
+};
+
 export type ProfileTest = {
 	bio: string;
 	id: number;
@@ -16,7 +22,9 @@ export type ProfileTest = {
 	username: string;
 	membership: MemberWithLatestMessage[];
 	pvrooms: Pvrooms[] | null;
+	blocks: Block[];
 };
+
 
 export type Pvrooms = {
 	roomId: number,

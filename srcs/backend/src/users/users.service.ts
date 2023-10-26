@@ -219,7 +219,7 @@ export class UsersService {
 
 	async getUserByUsername(username: string): Promise<User> {
 		try {
-            const user = await this.prisma.user.findUnique({
+            const user = await this.prisma.user.findFirst({
             where: {
                 username: username,
             },

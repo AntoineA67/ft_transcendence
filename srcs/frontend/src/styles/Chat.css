@@ -5,7 +5,9 @@
 	word-wrap: break-word;
 }
 
-.messageBlue, .messagePink, .messagebanned {
+.messageBlue,
+.messagePink,
+.messagebanned {
 	border-radius: 0.7rem;
 	padding: 0.5rem;
 	max-width: 75%;
@@ -88,7 +90,7 @@
 #createGroup::placeholder,
 #roomTitleInput,
 #createPassword::placeholder {
-	color: #555;
+	color: #d5d3d3;
 }
 
 
@@ -206,5 +208,4 @@
 	margin: 0 5px;
 	cursor: pointer;
 	width: auto;
-  }
-  
+}
