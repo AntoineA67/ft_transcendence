@@ -281,9 +281,14 @@ export class UsersService {
 			profile = { ...profile, hashPassword: null };
 		}
 		return ({
-			...profile,
+			...profile, 
+			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
+	}
+
+	bufferToBase64(buf: Buffer): string {
+		return (buf.toString('base64'));
 	}
 }

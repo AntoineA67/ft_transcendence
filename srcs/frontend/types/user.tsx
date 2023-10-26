@@ -4,7 +4,7 @@ import { gameHistoryType } from "./gameHistoryType";
 export type userType = {
 	id: number;
 	username: string;
-	avatar: Buffer | null | ArrayBuffer;
+	avatar: Buffer | null; // ArrayBuffer
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 }
 
@@ -12,7 +12,7 @@ export type profileType = {
 	id: number,
 	password: string,
 	username: string,
-	avatar: null,
+	avatar: Buffer | null,
 	status: 'ONLINE' | 'OFFLINE' | 'INGAME',
 	bio: string,
 	activated2FA: boolean,
