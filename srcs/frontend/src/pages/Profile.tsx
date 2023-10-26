@@ -4,6 +4,8 @@ import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
 import { profileType } from '../../types/user';
+import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
+
 
 type textProp = {
 	type: 'nick' | 'bio',
@@ -11,36 +13,31 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
-/**
- * @brief Validates the given password against certain criteria
- * 
- * @param Username User's password
- * 
- * @returns null if the password is valid, error message otherwise
- */
+// /**
+//  * @brief Validates the given password against certain criteria
+//  * 
+//  * @param Username User's password
+//  * 
+//  * @returns null if the password is valid, error message otherwise
+//  */
 
- const validateUsername = (Username: string): string | null => {
-    if (Username.length < 8) {
-        return 'Username should be at least 8 characters long.';
-    }
-    if (!/[a-z]/.test(Username)) {
-        return 'Username should contain at least one lowercase letter.';
-    }
-    if (!/[A-Z]/.test(Username)) {
-        return 'Username should contain at least one uppercase letter.';
-    }
-    if (!/[0-9]/.test(Username)) {
-        return 'Username should contain at least one digit.';
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(Username)) {
-        return 'Username should contain at least one special character (e.g., @, #, $, etc.).';
-    }
-    return null;
-};
+//  const validateUsername = (Username: string): string | null => {
+//     if (Username.length < 4) {
+//         return 'Username should be at least 4 characters long.';
+//     }
+//     if (!/[a-z A-Z]/.test(Username)) {
+//         return 'Username should contain at least one letter.';
+//     }
+// 	if (/[\ ]/.test(Username)){
+// 		return 'Username cannot contain a space character.';
+// 	}
+//     return null;
+// };
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
-	
+	const [err, setErr] = useState('');
+
 	return (
 		<>
 			{type == 'nick' ? (
@@ -91,7 +88,6 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			// console.log('profile', profile)
 			console.log('success: ', success)
 			success && setProfile((prev) => (
 				prev ? ({... prev, ... obj}) : prev
