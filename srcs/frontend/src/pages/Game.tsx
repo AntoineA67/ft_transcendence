@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Box, Text } from "@react-three/drei"
 import { Circles, FidgetSpinner } from "react-loader-spinner"
-import { Card } from "react-bootstrap"
+import { Card, Container } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import axios, { AxiosResponse } from "axios"
 
@@ -188,7 +188,7 @@ export default function Game() {
 							{gameStatus === GameStatus.Finished && <>
 								<Card.Title>Game over !</Card.Title>
 								<Card.Text>
-									null
+									You lost or maybe you won, who knows...
 								</Card.Text>
 								<br></br>
 								<button onClick={startMatchmaking} className="btn btn-primary"><b>Replay</b></button>

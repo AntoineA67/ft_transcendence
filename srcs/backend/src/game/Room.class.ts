@@ -25,18 +25,24 @@ export default class Room {
 		this.startGame();
 	}
 
-	public leave(id: string) {
+	public async leave(id: string) {
 		if (this.players[id]) {
-			delete this.players[id];
-			this.wss.to(this.roomId).emit('removePlayer', id);
-			if (Object.keys(this.players).length < 2) {
-				this.ball = null;
+			let winner;
+			for (const playerId in this.players) {
+				if (playerId != id) {
+					winner = Number(playerId);
+					break;
+				}
 			}
+			this.endGame(winner).then(() => {
+
+				delete this.players[id];
+			});
 		}
 	}
 
 	public isEmpty(): boolean {
-		return Object.keys(this.players).length === 0;
+		return Object.keys(this.players).length < 2;
 	}
 
 	public async startGame() {
