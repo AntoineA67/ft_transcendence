@@ -36,26 +36,25 @@ export function Avatar({ size, user }: avatarProp) {
 			socket.off('ingame', onIngame);
 		};
 	}, []);
-	
-	useEffect(() => {
-		// set Avatar
-		if (!user.avatar) {
-			setAvatar(DefaultAvatar);
-		} else {
-			const base64 = btoa(
-				new Uint8Array(user.avatar)
-				.reduce((data, byte) => data + String.fromCharCode(byte), '')
-			);
-			// no need to decide file type, idk it just works
-			setAvatar(`data:image/jpeg;base64,${base64}`)
-		}
-	}, [user])
 
 	useEffect(() => {
 		status == 'ONLINE' && setColor('green');
 		status == 'OFFLINE' && setColor('grey');
 		status == 'INGAME' && setColor('red');
 	}, [status])
+	
+	useEffect(() => {
+		// set Avatar
+		if (!user.avatar) {
+			setAvatar(DefaultAvatar);
+		} else {
+			const base64 = Buffer.from(user.avatar).toString('base64');
+			console.log('user.avatar: ', user.avatar)
+			console.log('avatar bin: ', base64)
+			// no need to decide file type, idk it just works
+			setAvatar(`data:image/jpeg;base64,${base64}`)
+		}
+	}, [user])
 
 	return (
 		<div 
