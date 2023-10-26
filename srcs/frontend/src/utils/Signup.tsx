@@ -1,5 +1,7 @@
 import { useOutletContext, Link } from "react-router-dom";
 import { useState } from 'react';
+// import { 'ValidatePassword' }
+import { validatePassword, validateUsername } from "./CredentialsRegex";
 // import githubLogo from '../assets/github.svg';
 // import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
@@ -24,31 +26,61 @@ type loginContext = {
 	togglePassword: () => void,
 }
 
-/**
- * @brief Validates the given password against certain criteria
- * 
- * @param password User's password
- * 
- * @returns null if the password is valid, error message otherwise
- */
- const validatePassword = (password: string): string | null => {
-    if (password.length < 8) {
-        return 'Password should be at least 8 characters long.';
-    }
-    if (!/[a-z]/.test(password)) {
-        return 'Password should contain at least one lowercase letter.';
-    }
-    if (!/[A-Z]/.test(password)) {
-        return 'Password should contain at least one uppercase letter.';
-    }
-    if (!/[0-9]/.test(password)) {
-        return 'Password should contain at least one digit.';
-    }
-    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(password)) {
-        return 'Password should contain at least one special character (e.g., @, #, $, etc.).';
-    }
-    return null;
-};
+// /**
+//  * @brief Validates the given password against certain criteria
+//  * 
+//  * @param Username User's password
+//  * 
+//  * @returns null if the password is valid, error message otherwise
+//  */
+
+// const validateUsername = (Username: string): string | null => {
+//     if (Username.length < 4) {
+//         return 'Username should be at least 4 characters long.';
+//     }
+//     if (!/[a-z A-Z]/.test(Username)) {
+//         return 'Username should contain at least one letter.';
+//     }
+//     // if (!/[A-Z]/.test(Username)) {
+//     //     return 'Username should contain at least one uppercase letter.';
+//     // }
+// 	if (/[\ ]/.test(Username)){
+// 		return 'Username cannot contain a space character.';
+// 	}
+//     // if (!/[0-9]/.test(Username)) {
+//     //     return 'Username should contain at least one digit.';
+//     // }
+//     // if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(Username)) {
+//     //     return 'Username should contain at least one special character (e.g., @, #, $, etc.).';
+//     // }
+//     return null;
+// };
+
+// /**
+//  * @brief Validates the given password against certain criteria
+//  * 
+//  * @param password User's password
+//  * 
+//  * @returns null if the password is valid, error message otherwise
+//  */
+//  const validatePassword = (password: string): string | null => {
+//     if (password.length < 8) {
+//         return 'Password should be at least 8 characters long.';
+//     }
+//     if (!/[a-z]/.test(password)) {
+//         return 'Password should contain at least one lowercase letter.';
+//     }
+//     if (!/[A-Z]/.test(password)) {
+//         return 'Password should contain at least one uppercase letter.';
+//     }
+//     if (!/[0-9]/.test(password)) {
+//         return 'Password should contain at least one digit.';
+//     }
+//     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(password)) {
+//         return 'Password should contain at least one special character (e.g., @, #, $, etc.).';
+//     }
+//     return null;
+// };
 
 /* sign up page */
 
@@ -60,11 +92,6 @@ export function Signup() {
 	const [pass, setPass] = useState('');
 	const [err, setErr] = useState('');
 
-	// const passwordValidationError = validatePassword(pass);
-    //     if (passwordValidationError) {
-    //         setErr(passwordValidationError);
-    //     }
-
 	return (
 		<div className='container'>
 			<div className="row justify-content-center">
@@ -73,8 +100,23 @@ export function Signup() {
 					<Link to="..">
 						<button className="leftArrow my-4"></button>
 					</Link>
-					<form className="w-100" onSubmit={(e) => (
-						handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
+					<form className="w-100" onSubmit={(e) => {
+						e.preventDefault();
+
+						const passwordValidationError = validatePassword(pass);
+						if (passwordValidationError) {
+							setErr(passwordValidationError);
+							return;
+						}
+
+						const usernameValidationError = validateUsername(nick);
+						if (usernameValidationError) {
+							setErr(usernameValidationError);
+							return;
+						}
+
+						handleSubmit(e, { username: nick, email: email, password: pass }, setErr);
+					}}>
 						<h3 className='white-text'>New Account!</h3>
 
 						<div className="mt-4">
