@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
-import { UserDto } from 'src/dto/UserDto';
-import { ProfileDto } from 'src/dto/ProfileDto';
+import { UserDto } from 'src/dto/user.dto';
+import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
+import * as argon from 'argon2';
+import { userInfo } from 'os';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -19,20 +21,36 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
+	// async createUser(username: string, email: string, hashPassword: string) {
+	// 	return await this.prisma.user.create({
+	// 		data: {
+	// 			username,
+	// 			email,
+	// 			password
+	// 		},
+	// 	});
+	// }
+
 	async createUser(username: string, email: string, password: string) {
-		const user = await this.prisma.user.create({
-			data: {
-				username,
-				email,
-				password
-			},
-		});
-		await this.prisma.achievement.create({
-			data: {
-				userId: user.id,
+		const hashPassword = await argon.hash(password);
+		try {
+			const user = await this.prisma.user.create({
+				data: {
+					username: username,
+					email: email,
+					hashPassword: hashPassword,
+				},
+			});
+			return user;
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				console.log(error)
+				if (error.code === 'P2002') {
+					throw new ForbiddenException('Credentials taken');
+				}
 			}
-		});
-		return user;
+			throw error;
+		}
 	}
 
 	async getAllUsers(): Promise<UserDto[]> {
@@ -48,7 +66,16 @@ export class UsersService {
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
+		if (data.username || data.username === "") {
+			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+			let empty = data.username.match(/^(?!\s*$).+/i);
+			if (!valid || empty == null) return (false)
+		}
 		let user: User;
+		if (data.password) {
+			const hashPassword = await argon.hash(data.password);
+			data.password = hashPassword;
+		}
 		try {
 			user = await this.prisma.user.update({
 				where: { id },
@@ -79,15 +106,15 @@ export class UsersService {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
-				email,
-			},
+				email: email,
+			}
 		});
 		return user;
 	}
 
-	async getIdByNick(email: string) {
+	async getIdByNick(username: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email: email }
+			where: { username: username }
 		});
 		if (!user) return (null);
 		return (user.id);
@@ -121,6 +148,7 @@ export class UsersService {
 				where: { id },
 				select: {
 					id: true,
+					email: true,
 					username: true,
 					avatar: true,
 					status: true,
@@ -136,7 +164,7 @@ export class UsersService {
 			where: { id },
 			select: {
 				id: true,
-				password: true,
+				hashPassword: true,
 				username: true,
 				avatar: true,
 				bio: true,
@@ -144,10 +172,10 @@ export class UsersService {
 				activated2FA: true,
 			}
 		});
-		if (profile && profile.password === "nopass") {
-			profile = { ...profile, password: "nopass" };
+		if (profile && profile.hashPassword === "nopass") {
+			profile = { ...profile, hashPassword: "nopass" };
 		} else {
-			profile = { ...profile, password: null };
+			profile = { ...profile, hashPassword: null };
 		}
 		return ({
 			...profile,
@@ -188,6 +216,23 @@ export class UsersService {
 		)
 	}
 
+	async getUserByUsername(username: string): Promise<User> {
+		try {
+			const user = await this.prisma.user.findFirst({
+				where: {
+					username: username,
+				},
+			});
+			if (!user) {
+				throw new NotFoundException(`User not found with username ${username}`);
+			}
+			return user;
+		} catch (error) {
+			console.error(`Error fetching user with username ${username}`, error);
+			throw error;
+		}
+	}
+
 	async generate2FASecret(user: User) {
 		const secret = authenticator.generateSecret();
 		const otpauthUrl = authenticator.keyuri(user.email, process.env.APP_NAME, secret);
@@ -213,4 +258,31 @@ export class UsersService {
 		}));
 	}
 
+	async getHalfProfile(id: number): Promise<ProfileDto | null> {
+		let profile = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				hashPassword: true,
+				username: true,
+				avatar: true,
+				bio: true,
+				status: true,
+				activated2FA: true,
+			}
+		});
+		if (!profile) {
+			return (null);
+		}
+		if (profile && profile.hashPassword === "nopass") {
+			profile = { ...profile, hashPassword: "nopass" };
+		} else {
+			profile = { ...profile, hashPassword: null };
+		}
+		return ({
+			...profile,
+			friend: null, block: null, blocked: null, sent: null,
+			gameHistory: [], achieve: null
+		})
+	}
 }

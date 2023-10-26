@@ -4,7 +4,7 @@ import { Prisma, ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 
 // const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
 // export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
@@ -62,9 +62,6 @@ export class FriendRequestService {
 		//check if there are pending requests
 		const pendings = await this.getPendingReq(id, friend.id);
 		if (pendings.length != 0) return (true);
-		this.logger.log('before prisma create')
-		this.logger.log(me.username)
-		this.logger.log(friend.username)
 		await this.prisma.friendRequest.create({
 			data: {
 				user: {
@@ -75,7 +72,6 @@ export class FriendRequestService {
 				}
 			}
 		})
-		this.logger.log('after prisma create')
 		return (true);
 	}
 
@@ -88,7 +84,6 @@ export class FriendRequestService {
 		if (status == ReqState.ACCEPT) {
 			await this.friendshipService.makeFriend(id, otherId);
 		}
-		this.logger.log('adter MakeFriend');
 		try {
 			await this.prisma.friendRequest.updateMany({
 				where: {

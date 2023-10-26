@@ -1,21 +1,27 @@
-import React, { createContext, ReactComponentElement, useContext, useState, useEffect, useReducer, ReactNode } from 'react';
-import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect} from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import axios from 'axios';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
-	const state = searchParams.get('state') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		if (!code || !state) return;
+		console.log('callback42');
+		if (!code) {
+			setStatus('done');
+			return;
+		}
 		let response;
 
 		try {
-			if (_2fa?.actived === true) {
+			if (_2fa?.activated === true) {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
 			} else {
 				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
@@ -23,11 +29,12 @@ export function CallBack42() {
 			const data = await response.json();
 			console.log('data: ', data)
 			if (data._2fa) {
-				localStorage.setItem('_2fa', JSON.stringify({id: data.id, actived : true}));
+				localStorage.setItem('_2fa', JSON.stringify({id: data.id, activated : true}));
 				setStatus('2fa');
 				return;
 			}
-			localStorage.setItem('token', data);
+			localStorage.setItem('token', data.token);
+			localStorage.setItem('refreshToken', data.refreshToken);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log('response: ', response)
@@ -39,11 +46,16 @@ export function CallBack42() {
 
 	return (
 		<>
-			{status == '2fa' && <Navigate to='/login/2fa' replace />}
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
-			{status == 'done' && <Navigate to='/' replace />}
+		  {status === '2fa' && <Navigate to='/login/2fa' replace />}
+		  {status === 'loading' && (
+			<div style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
+			  <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '0.5rem' }} />
+			  Loading...
+			</div>
+		  )}
+		  {status === 'done' && <Navigate to='/' replace />}
 		</>
-	);
+	  );
 }
 
 export function Protected() {
@@ -71,7 +83,17 @@ export function Protected() {
 		function onError(err: any) {
 			setStatus('error')
 			console.log('err', err)
-			localStorage.removeItem('token');
+			// if (localStorage.getItem('token')) {
+				// axios.post("http://localhost:3000/auth/signout", {}, {
+				// 	headers: {
+				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
+				// 	}
+				// });
+				// localStorage.removeItem('token');
+			// }
+			// localStorage.removeItem('random');
+			// localStorage.removeItem('email');
+			// localStorage.removeItem('refreshToken');
 		}
 		socket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
@@ -85,9 +107,10 @@ export function Protected() {
 
 	return (
 		<>
-			{status == 'loading' && <p style={{ color: 'white' }}> loading ... </p>}
+			<Outlet />
+			{/* {status == 'loading' && <p className='white-text'> loading ... </p>}
 			{status == 'connect' && <Outlet />}
-			{status == 'error' && <Navigate to="/login" replace />}
+			{status == 'error' && <Navigate to="/login" replace />} */}
 		</>
 	);
 }

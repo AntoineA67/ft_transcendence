@@ -9,5 +9,6 @@ import { UsersModule } from 'src/users/users.module';
   imports: [PrismaModule, UsersModule],
   providers: [BlockService, BlockGateway],
   controllers: [BlockController],
+  exports: [BlockService]
 })
 export class BlockModule {}

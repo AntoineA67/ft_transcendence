@@ -3,65 +3,20 @@
 	border-bottom: 3px solid #34fafa;
 	color: white;
 	text-align: center;
-	padding: 10px;
+	padding: 0.7rem;
 	overflow: hidden;
 }
 
-.tab-greyout {
-	filter: brightness(0.4);
-}
-
-.tab-ul {
-	padding-left: 0;
-	margin-left: 0;
-	margin: auto;
-}
-
-.achieve-item {
-	background-color: #5a5a5a;
-	color: white;
-	list-style-type: none;
-	text-align: center;
-	margin-bottom: 5px;
-	padding: 15px;
-	border-radius: 10px;
-}
-.achieve-item-transparent {
-	background-color: transparent;
-	color: white;
-	list-style-type: none;
-	text-align: center;
-	margin-bottom: 5px;
-	padding: 15px;
-	border-radius: 10px;
-}
-
-.history-item {
-	background-color: #5a5a5a;
-	color: white;
-	list-style-type: none;
+.stat-list-item {
 	text-align: left;
-	margin-bottom: 5px;
-	padding: 15px;
-	border-radius: 10px;
+	padding: 1rem;
+	margin-bottom: 0.3rem;
+	border-radius: 0.7rem;
 }
 
-.history-item-transparent {
-	background-color: transparent;
+.win-rate {
 	color: white;
-	list-style-type: none;
-	text-align: left;
-	margin-bottom: 5px;
-	padding: 15px;
-	border-radius: 10px;
+	position: relative;
+	bottom: 110px;
+	left: 5px;
 }
-
-.text-magenta {
-	color: #fa34c3;
-}
-
-.text-cyan {
-	color: #34fafa;
-
-}
-

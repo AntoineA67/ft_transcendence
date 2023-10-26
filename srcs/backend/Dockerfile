@@ -1,5 +1,5 @@
 # Base image
-FROM node:18-alpine as base
+FROM node:lts as base
 
 ARG POSTGRES_HOST=;
 ARG POSTGRES_PORT=;
@@ -10,13 +10,14 @@ ARG JWT_SECRET=;
 ARG DATABASE_URL=;
 
 WORKDIR /app
-RUN apk --no-cache add curl
+
+RUN apt-get update -y
+RUN apt-get upgrade -y
 
 FROM base as DEV
 
 ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate && npm run start:dev"]
-# ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma generate && npx prisma migrate reset --force && npx prisma migrate dev --name initdb && npm run start:dev"]
 # npx prisma studio
 FROM base as PROD
-ENTRYPOINT ["sh", "-c", "npm ci && npm build"]
+# ENTRYPOINT ["sh", "-c", "npm ci && npm build"]
 CMD [ "node", "dist/main.js" ]

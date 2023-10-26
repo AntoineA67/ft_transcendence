@@ -9,7 +9,7 @@ type UserItemProp = {
 
 export function UserItem({user, linkTo}: UserItemProp) {
 	return (
-		<Link to={linkTo} className='link-text w-100 ' style={{color: 'white'}}>
+		<Link to={linkTo} className='w-100 white-text'>
 			<div 
 				className='userItem d-flex flex-row align-items-center'>
 				<Avatar size={40} user={{... user}} />

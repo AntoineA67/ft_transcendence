@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
 import { Prisma } from '@prisma/client';
 import { PlayerService } from 'src/player/player.service';
-import { AchieveDto } from 'src/dto/AchieveDto';
+import { AchieveDto } from 'src/dto/achieve.dto';
 
 @Injectable()
 export class AchievementService {
@@ -11,7 +11,7 @@ export class AchievementService {
 		private playerService: PlayerService
 	) {}
 
-	
+	// the id stands for userId, NOT the id of achievement
 	async getAchieveById(id: number): Promise<AchieveDto> {
 		const achieve = await this.prisma.achievement.upsert({
 			where: { userId: id },
@@ -23,6 +23,7 @@ export class AchievementService {
 		return {userId: id,  ... achieve};
 	}
 	
+	// the id stands for userId, NOT the id of achievement
 	async updateAchievement(id: number) {
 		const allWin: number = await this.playerService.getAllWin(id);
 		const allGame: number = await this.playerService.getAllGame(id);
@@ -38,18 +39,4 @@ export class AchievementService {
 		})
 	}
 
-	
-	//   async createAchievement(data: Prisma.AchievementCreateInput): Promise<Achievement> {
-	//     return this.prisma.achievement.create({ data });
-	//   }
-//   async getAllAchievements(): Promise<Achievement[]> {
-//     return this.prisma.achievement.findMany();
-//   }
-//   async deleteAchievement(id: number): Promise<Achievement | null> {
-//     const existingAchievement = await this.prisma.achievement.findUnique({ where: { id } });
-//     if (!existingAchievement) {
-//       throw new NotFoundException(`Achievement with ID ${id} not found`);
-//     }
-//     return this.prisma.achievement.delete({ where: { id } });
-//   }
 }

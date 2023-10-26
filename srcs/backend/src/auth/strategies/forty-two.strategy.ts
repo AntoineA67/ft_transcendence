@@ -2,11 +2,11 @@
 // import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { jwtConstants } from './constants';
+import { jwtConstants } from '../constants';
 import { Strategy } from 'passport-42';
 import passport from 'passport';
-import { User, UsersService } from '../users/users.service';
-import { AuthService } from './auth.service';
+import { User, UsersService } from '../../users/users.service';
+import { AuthService } from '../auth.service';
 
 
 // var FortyTwoStrategy = require('passport-42').Strategy;
@@ -60,12 +60,12 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 		});
 	}
 
-	async validate(accessToken: string, refreshToken: string, profile: any, cb: any): Promise<any> {
+	async validate(token: string, refreshToken: string, profile: any, cb: any): Promise<any> {
 		// You can implement your own logic to find or create the user here
 		//console.log('accessToken', accessToken, refreshToken, profile);
 		// const user: any = await this.usersService.findOrCreate(profile.username).then(
 		//console.log("profile ===>", profile);
-		const user: any = await this.authService.login(profile).then(
+		const user: any = await this.authService.login42(profile).then(
 			(user) => {
 				//console.log('user', user);
 				return cb(null, user);

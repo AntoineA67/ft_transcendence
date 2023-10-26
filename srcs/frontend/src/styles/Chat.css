@@ -1,61 +1,36 @@
 .message-container {
 	display: flex;
 	flex-direction: column;
-	max-width: 75%;
-	margin-bottom: 5px;
-	height: auto;
+	margin-bottom: 0.5rem;
 	word-wrap: break-word;
 }
 
-.messageBlue, .messagePink, .messagebanned {
-	border-radius: 10px;
-	padding: 5px;
-	margin-bottom: 1px;
+.messageBlue,
+.messagePink,
+.messagebanned {
+	border-radius: 0.7rem;
+	padding: 0.5rem;
 	max-width: 75%;
 }
 
 .messageBlue {
 	border: 1px solid blue;
 	margin-left: auto;
-	text-align: right;
 }
 
 .messagePink {
 	border: 1px solid pink;
 	margin-right: auto;
-	text-align: left;
 }
 
 .banned-text {
 	color: #000000;
-  }
+}
 
-.userBlue, .userPink {
-	display: flex;
-	align-items: center;
-	border-radius: 1px;
-	padding: 5px;
-	max-width: 75%;
+.user-header {
+	padding: 0.3rem;
 	font-style: italic;
 	font-size: smaller;
-	margin-bottom: 5px;
-}
-
-.userBlue {
-	margin-left: auto;
-	text-align: right;
-}
-
-.userPink {
-	margin-right: auto;
-	text-align: left;
-}
-
-.nostyleList {
-	list-style-type: none;
-	text-decoration: none;
-	padding: 0;
-	margin: 0;
 }
 
 .chatListItemButton {
@@ -87,74 +62,150 @@
 	border-color: #ffffff;
 }
 
+/* merge  */
 .chat-container {
-	width: 400px;
 	margin: 0 auto;
-	padding: 20px;
-	background-color: #f5f5f5;
-	border-radius: 8px;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.chat-header {
-	font-size: 24px;
-	margin-bottom: 10px;
-}
-
-.chat-messages {
-	max-height: 300px;
-	overflow-y: auto;
 	padding: 10px;
-	background-color: #fff;
-	border: 1px solid #ddd;
-	border-radius: 5px;
-}
-
-.chat-message {
-	margin-bottom: 8px;
-	padding: 5px;
-	background-color: #e1e1e1;
-	border-radius: 5px;
-}
-
-.chat-input-container {
+	/* height: 100%; */
+	width: 100%;
 	display: flex;
-	align-items: center;
+	flex-direction: column;
+	background-color: transparent;
+	min-height: 0;
 }
 
-.chat-input {
-	flex-grow: 1;
-	padding: 8px;
-	border: 1px solid #ddd;
-	border-radius: 5px;
-	margin-right: 5px;
-}
-
-.chat-send-button {
-	background-color: #007bff;
-	color: #fff;
-	border: none;
-	border-radius: 5px;
-	padding: 8px 15px;
+.custom-select select {
+	border: 1px solid #ffffff;
+	border-radius: 4px;
+	background-color: transparent;
+	color: #ffffff;
 	cursor: pointer;
 }
 
-::-webkit-scrollbar {
-	width: 0.5em;
+#private-message::placeholder,
+#groupname::placeholder,
+#groupnamecreate::placeholder,
+#roomID::placeholder,
+#password::placeholder,
+#createGroup::placeholder,
+#roomTitleInput,
+#createPassword::placeholder {
+	color: #d5d3d3;
 }
 
-::-webkit-scrollbar-thumb {
-	background-color: #888;
-	border-radius: 4px;
+
+.members-button {
+	position: relative;
 }
 
-::-webkit-scrollbar-thumb:hover {
-	background-color: #555;
+.members-button button {
+	background: none;
+	border: none;
+	color: white;
+	cursor: pointer;
 }
 
-.userItem {
-	margin: 0;
-	background-color: grey;
-	/* margin-bottom: 3px; */
+.members-panel {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	width: 200px;
 	padding: 10px;
+}
+
+
+.members-panel ul {
+	list-style: none;
+	padding: 0;
+}
+
+.members-panel li {
+	margin: 5px 0;
+}
+
+
+.members-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.member {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px 10px;
+	transition: background-color 0.2s;
+}
+
+.member-details {
+	display: flex;
+	align-items: center;
+	padding: 8px;
+	border-radius: 8px;
+	margin-right: 10px;
+}
+
+.member-username {
+	font-weight: bold;
+	color: #ffffff;
+	margin-right: 4px;
+}
+
+.member-role {
+	font-size: 14px;
+	color: #ff8ae8;
+}
+
+
+.member-actions {
+	display: flex;
+}
+
+.mute-icon,
+.ban-icon,
+.kick-icon {
+	font-size: 1.2rem;
+	cursor: pointer;
+	transition: color 0.2s;
+	color: #ffffff;
+}
+
+.mute-icon:hover,
+.ban-icon:hover,
+.kick-icon:hover {
+	color: #ff0000;
+}
+
+.members-list,
+.member {
+	border: none;
+	padding: 10;
+	margin: 0;
+	background-color: transparent;
+}
+
+.settings-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	width: 50px;
+	font-size: 20px;
+	color: white;
+	outline: none;
+	margin-right: 50px;
+}
+
+.action-button {
+	background: transparent;
+	color: white;
+	border-radius: 5px;
+	padding: 5px 10px;
+	margin: 0 5px;
+	cursor: pointer;
+	width: auto;
 }
