@@ -170,7 +170,6 @@ export class AuthService {
     }
 
 	async refreshToken(refreshToken: string, req: Request, res: Response) {
-		// this.logger.log('refreshToken');
 		if (!refreshToken)
 		return res.status(401).json({ valid: false, message: "Empty refresh token" });
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({
@@ -178,7 +177,6 @@ export class AuthService {
 				token: refreshToken,
 			},
 		});
-		// this.logger.log('refreshToken', userRefreshToken);
 		const user = await this.prisma.user.findUnique({
 			where: {
 				id: userRefreshToken.userId,
