@@ -19,7 +19,6 @@ import * as randomstring from 'randomstring';
 import { SigninDto, SignupDto, Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
-import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -37,35 +36,19 @@ export class AuthService {
         }
     }
 
-	private logger = new Logger('auth');
-
 	async signup(dto: SignupDto, res: Response) {
-		const existingEmail = await this.prisma.user.findUnique({
-			where: {
-				email: dto.email,
-			},
-		});
-		if (existingEmail)
-		{
+		if (await this.usersService.getUserByEmail(dto.email))
 			throw new BadRequestException('This email is already used');
-		}
-		const existingUsername = await this.prisma.user.findUnique({
-			where: {
-				username: dto.username,
-			},
-		});
-		if (existingUsername)
-		{
+		if (await this.usersService.getUserByNick(dto.username))
 			throw new BadRequestException('Username taken');
-		}
 		try {
-		const hashPassword = await argon.hash(dto.password);
-		const user = await this.prisma.user.create({
-			data: {
-				email: dto.email,
-				username: dto.username,
-				hashPassword,
-			},
+			const hashPassword = await argon.hash(dto.password);
+			const user = await this.prisma.user.create({
+				data: {
+					email: dto.email,
+					username: dto.username,
+					hashPassword,
+				},
 		});
 		return this.signJwtTokens(user.id, user.email);
 		} catch (error) {
@@ -91,7 +74,6 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		
 		return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -202,6 +184,8 @@ export class AuthService {
 				id: userRefreshToken.userId,
 			}
 		});
+		if (!user)
+			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
 		if (!this.isRefreshTokenValid(refreshToken))
 		{
 			this.deleteRefreshTokenForUser(user.id);
@@ -209,10 +193,7 @@ export class AuthService {
 		}
 		// delete refreshToken from DB to make a new one
 		// return this.signJwtTokens(req.user.id, req.user.email);
-		const token = await this.signJwtTokens(user.id, user.email);
-		this.logger.log('refreshToken', 'token', token);
-		return (token);
-
+		return await this.signJwtTokens(user.id, user.email);
 	}
 
 	async isRefreshTokenValid(tokenReq: string)
