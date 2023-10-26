@@ -83,8 +83,6 @@ export function ChatBox() {
 				setMemberList((prevMembersList) =>
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
-			} else {
-				console.error('Failed to leave the channel');
 			}
 		};
 
@@ -212,7 +210,6 @@ export function ChatBox() {
 				roomId: chatId,
 				username: inviteUsername,
 			}, (response: Member) => {
-				console.log(response);
 				if (response && response.userId > 0) {
 					setinviteUsernameSuccess(true);
 					setMemberList((prevMembersList) => [...prevMembersList, response]);
@@ -243,7 +240,8 @@ export function ChatBox() {
 			roomId: chatId,
 		}, (response: boolean) => {
 			if (!response) {
-				console.error('Erreur lors de l\'envoi du message');
+				alert('Erreur lors de l\'envoi du message');
+				navigate('/chat');
 			}
 		});
 		setMess('');
@@ -306,8 +304,6 @@ export function ChatBox() {
 		if (profile === undefined) {
 			return;
 		}
-
-		console.log('blockUser', memberid, actions);
 
 		chatsSocket.emit('blockUser', {
 			memberId: memberid,
@@ -508,19 +504,7 @@ export function ChatBox() {
 						{memberstatus?.admin && roomChannel && (
 							<>
 								<div style={{ display: 'flex', alignItems: 'center' }}>
-									<h4 className='white-text'>Settings of</h4>
-									<strong
-										style={{
-											borderRadius: '40%',
-											backgroundColor: 'white',
-											color: 'black',
-											padding: '6px',
-											marginLeft: '10px',
-										}}
-										className='my-3'
-									>
-										{chatId}
-									</strong>
+									<h4 className='white-text'>Settings of #{chatId}</h4>
 								</div>
 								<input
 									id="roomTitleInput"
@@ -849,8 +833,6 @@ export function ChatList() {
 			}
 		});
 	}, []);
-
-	console.log('Profile', profile);
 
 	useEffect(() => {
 		const socketListeners: { event: string; handler: (response: any) => void }[] = [];

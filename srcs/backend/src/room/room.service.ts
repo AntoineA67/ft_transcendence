@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Room, Prisma, User } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import * as argon from 'argon2';
 
 @Injectable()
 export class RoomService {
@@ -123,13 +124,17 @@ export class RoomService {
 	}
 
 	async createChannelRoom(roomtitle: string, isPublic: boolean, psw: string, userId: number): Promise<Room> {
+		if (psw.trim() === '')
+			psw = null;
+		else
+			psw = await argon.hash(psw);
 		return this.prisma.room.create(
 			{
 				data: {
 					title: roomtitle,
 					isChannel: true,
 					private: !isPublic,
-					password: (psw.trim() === '' ? null : psw),
+					password: psw,
 					members: {
 						create: {
 							admin: true,
@@ -320,7 +325,11 @@ export class RoomService {
 				isChannel: true,
 			},
 		});
-		if (!room || (room.password && room.password !== password)) {
+		let passwordMatch = true;
+		if (room && room.password && password.trim() !== '') {
+			passwordMatch = await argon.verify(room.password, password);
+		}
+		if (!room || (room.password && !passwordMatch)) {
 			return null;
 		}
 		const existingMember = await this.prisma.member.findFirst({
@@ -912,6 +921,9 @@ export class RoomService {
 
 		if (password.trim() === '') {
 			password = null;
+		}
+		else {
+			password = await argon.hash(password);
 		}
 
 		await this.prisma.room.update({
