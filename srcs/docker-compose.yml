@@ -13,6 +13,8 @@ services:
         - POSTGRES_NAME
         - JWT_SECRET
         - DATABASE_URL
+        - NEW_RELIC_LICENSE_KEY
+        - NEW_RELIC_APP_NAME
     restart: always
     container_name: backend
     ports:
@@ -36,11 +38,11 @@ services:
   db:
     image: postgres:15.3
     environment:
-        - POSTGRES_HOST=${POSTGRES_HOST}
-        - POSTGRES_PORT=${POSTGRES_PORT}
-        - POSTGRES_USERNAME=${POSTGRES_USERNAME}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_NAME=${POSTGRES_NAME}
     restart: always
     user: postgres
     container_name: db

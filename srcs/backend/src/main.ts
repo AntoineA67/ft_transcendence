@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AuthIoAdapter } from './AuthIoAdapter';
 import { AuthService } from './auth/auth.service';
+// require('newrelic');
+import 'newrelic';
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule, {
