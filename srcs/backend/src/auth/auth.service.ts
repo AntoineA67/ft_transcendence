@@ -36,32 +36,18 @@ export class AuthService {
     }
 
 	async signup(dto: SignupDto, res: Response) {
-		const existingEmail = await this.prisma.user.findUnique({
-			where: {
-				email: dto.email,
-			},
-		});
-		if (existingEmail)
-		{
+		if (await this.usersService.getUserByEmail(dto.email))
 			throw new BadRequestException('This email is already used');
-		}
-		const existingUsername = await this.prisma.user.findUnique({
-			where: {
-				username: dto.username,
-			},
-		});
-		if (existingUsername)
-		{
+		if (await this.usersService.getUserByNick(dto.username))
 			throw new BadRequestException('Username taken');
-		}
 		try {
-		const hashPassword = await argon.hash(dto.password);
-		const user = await this.prisma.user.create({
-			data: {
-				email: dto.email,
-				username: dto.username,
-				hashPassword,
-			},
+			const hashPassword = await argon.hash(dto.password);
+			const user = await this.prisma.user.create({
+				data: {
+					email: dto.email,
+					username: dto.username,
+					hashPassword,
+				},
 		});
 		return this.signJwtTokens(user.id, user.email);
 		} catch (error) {
@@ -87,7 +73,6 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		
 		return this.signJwtTokens(user.id, user.email);
 	}
   
