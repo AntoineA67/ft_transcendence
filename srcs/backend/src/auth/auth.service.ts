@@ -6,7 +6,8 @@ import {
 	UnauthorizedException, 
 	BadRequestException, 
 	InternalServerErrorException, 
-	Req 
+	Req, 
+	Logger
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
@@ -36,6 +37,7 @@ export class AuthService {
         }
     }
 
+	private logger = new Logger('auth');
 
 	async signup(dto: SignupDto, res: Response) {
 		const existingEmail = await this.prisma.user.findUnique({
@@ -186,13 +188,15 @@ export class AuthService {
     }
 
 	async refreshToken(refreshToken: string, req: Request, res: Response) {
+		this.logger.log('refreshToken');
 		if (!refreshToken)
-			return res.status(401).json({ valid: false, message: "Empty refresh token" });
+		return res.status(401).json({ valid: false, message: "Empty refresh token" });
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({
 			where: {
 				token: refreshToken,
 			},
 		});
+		this.logger.log('refreshToken', userRefreshToken);
 		const user = await this.prisma.user.findUnique({
 			where: {
 				id: userRefreshToken.userId,
@@ -205,7 +209,9 @@ export class AuthService {
 		}
 		// delete refreshToken from DB to make a new one
 		// return this.signJwtTokens(req.user.id, req.user.email);
-		return this.signJwtTokens(user.id, user.email);
+		const token = await this.signJwtTokens(user.id, user.email);
+		this.logger.log('refreshToken', 'token', token);
+		return (token);
 
 	}
 
