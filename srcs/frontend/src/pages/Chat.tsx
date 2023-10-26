@@ -8,13 +8,14 @@ import { useNavigate } from 'react-router-dom';
 import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { BsArrowUpRight, BsPersonHeart } from 'react-icons/bs';
+import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 import { MdGroup, MdGroups2 } from 'react-icons/md';
 import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
-import { FaChessKing, FaUserNinja } from 'react-icons/fa';
+import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
 import { MdPersonOutline } from 'react-icons/md';
+import { set } from "lodash-es";
 
 
 type ChatBoxData = {
@@ -210,9 +211,11 @@ export function ChatBox() {
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
-			}, (response: boolean) => {
-				if (response) {
+			}, (response: Member) => {
+				console.log(response);
+				if (response && response.userId > 0) {
 					setinviteUsernameSuccess(true);
+					setMemberList((prevMembersList) => [...prevMembersList, response]);
 				} else {
 					setinviteUsernameSuccess(false);
 				}
@@ -220,6 +223,7 @@ export function ChatBox() {
 		}
 		setInviteUsername('');
 	};
+
 
 	const handleClick = () => {
 		if (mess.trim()) {
@@ -444,7 +448,7 @@ export function ChatBox() {
 					<h4 className='ms-auto mr-3' style={{ margin: '0 5px' }} title={roomChannel ? "Group" : "Private message"}>{roomChannel ? <MdGroups2 /> : <MdGroup />}</h4>
 					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "Private" : "Public"}>{privateStatus ? <MdPublicOff /> : <MdPublic />}</h4>}
 					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={privateStatus ? "" : passwordStatus ? "Locked" : "Unlocked"}>{privateStatus ? '' : passwordStatus ? <CiLock /> : <CiUnlock />}</h4>}
-					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={memberstatus?.owner ? "Owner" : memberstatus?.admin ? "Admin" : "Member"}>{memberstatus?.owner ? <FaChessKing /> : memberstatus?.admin ? <FaUserNinja /> : <BsPersonHeart />}</h4>}
+					{roomChannel && <h4 className='mr-3' style={{ margin: '0 5px' }} title={memberstatus?.owner ? "Owner" : memberstatus?.admin ? "Admin" : "Member"}>{memberstatus?.owner ? <FaChessKing /> : memberstatus?.admin ? <FaChessKnight /> : <FaChessPawn />}</h4>}
 					<button onClick={() => setShowSettings(!showSettings)} className="settings-button ms-auto mr-3" title="Settings"><BsThreeDots /></button>
 				</div>
 				{!showSettings && (
@@ -583,9 +587,9 @@ export function ChatBox() {
 									<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
 										<div className="member-details">
 											<span className="member-username">{member.username}</span>
-											<span className="member-role">
+											{roomChannel && (<span className="member-role">
 												{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
-											</span>
+											</span>)}
 										</div>
 									</Link>
 									<div className="member-actions d-flex flex-wrap">
