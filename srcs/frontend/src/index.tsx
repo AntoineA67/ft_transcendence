@@ -48,27 +48,48 @@ axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string, refresh = false) {
-	const token = localStorage.getItem('token') || null;
 	const baseUrl = 'http://127.0.0.1:3000/';
+	const token = localStorage.getItem('token') || null;
+	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
-	const fetchObj = {
-		method: 'GET',
-		headers: { 'Authorization': `Bearer ${token}` }
-	}
-	if (!token) {
+
+	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
-	const res = await fetch(fetchUrl, fetchObj);
-	if (res.status == 200 || res.status == 201) {
-		console.log('fetch ', fetchUrl);
-		return (res.json());
+	try {
+		const res = await fetch(fetchUrl, {
+			headers: { 'Authorization': `Bearer ${token}` }
+		});
+		if (res.status == 200 || res.status == 201) {
+			return (res.json());
+		} else {
+			throw new Response(res.statusText, { status: res.status })
+		}
+	} catch (err: any) {
+		if (refresh) { throw err; }
+		return fetch(`${baseUrl}auth/refreshToken`, {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ "refreshToken": refreshToken })
+		}).then(async (res): Promise<Response> => {
+			if (res.status != 201) {
+				throw new Response(res.statusText, { status: res.status })
+			}
+			const newTokens = await res.json();
+			localStorage.setItem('token', newTokens.token);
+			localStorage.setItem('refreshToken', newTokens.refreshToken);
+			// console.log('success');
+			// console.log('newToken: ', newTokens);
+			return loader(route, param, true);
+		}).catch((err) => {
+			localStorage.removeItem('token');
+			localStorage.removeItem('refreshToken');
+			throw err;
+		})
 	}
-	// if (!refresh) {
-	// 		create a new token
-	//      save to local storage
-	//      return (loader(toute, param, true)) 
-	// }
-	throw new Response(res.statusText, {status: res.status})
 }
 
 const router = createBrowserRouter(
