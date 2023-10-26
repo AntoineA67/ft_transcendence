@@ -67,14 +67,14 @@ async function loader(route: string, param?: string, refresh = false) {
 		}
 	} catch (err: any) {
 		if (refresh) { throw err; }
-		fetch(`${baseUrl}auth/refreshToken`, {
+		return fetch(`${baseUrl}auth/refreshToken`, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
 				"Content-Type": "application/json"
 			},
 			body: JSON.stringify({ "refreshToken": refreshToken })
-		}).then(async (res) => {
+		}).then(async (res): Promise<Response> => {
 			if (res.status != 201) {
 				throw new Response(res.statusText, { status: res.status })
 			}
