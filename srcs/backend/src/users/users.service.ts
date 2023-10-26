@@ -66,14 +66,16 @@ export class UsersService {
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		if (data.username || data.username === "") {
-			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
-            let empty = data.username.match(/^(?!\s*$).+/i);
-            if (!valid || empty == null) return (false)
-        }
+		// if (data.username || data.username === "") {
+		// 	let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+        //     let empty = data.username.match(/^(?!\s*$).+/i);
+        //     if (!valid || empty == null) return (false)
+        // }
+		console.log("PASS ==", data.password);
 		let user: User;
 		if (data.password)
 		{
+			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
