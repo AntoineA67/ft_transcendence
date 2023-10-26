@@ -18,7 +18,6 @@ import * as randomstring from 'randomstring';
 import { SigninDto, SignupDto, Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
-import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +34,6 @@ export class AuthService {
             throw new Error("JWT_SECRET environment variable not set!");
         }
     }
-
 
 	async signup(dto: SignupDto, res: Response) {
 		const existingEmail = await this.prisma.user.findUnique({
