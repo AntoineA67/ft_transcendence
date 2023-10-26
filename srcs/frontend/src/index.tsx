@@ -12,7 +12,6 @@ import {
 // import router from './router';
 import React from 'react';
 //import component
-import TestDB from './pages/TestDB';
 import { Login, LandingPage, TokenPage } from './pages/Login';
 import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
@@ -147,13 +146,6 @@ const router = createBrowserRouter(
 					<Route path="game" element={<Game />}></Route>
 				</Route>
 			</Route>
-
-			{/* <Route path="/game" element={<>
-					<GameSocketProvider>
-						<GameSocketProvider />
-					</GameSocketProvider>
-				</>}></Route> */}
-			<Route path="/test-db" element={<TestDB />} />
 		</Route>
 	)
 );

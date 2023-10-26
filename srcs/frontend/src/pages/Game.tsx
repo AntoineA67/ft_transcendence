@@ -67,7 +67,7 @@ export default function Game() {
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	// const socket = useGameSocket();
+	// const socket = useGamesSocket();
 
 	useEffect(() => {
 		// const profile = axios.get('/profile', {
@@ -83,22 +83,22 @@ export default function Game() {
 
 		});
 		console.log("Id", id);
-		// gamesSocket?.on('connect', function () {
+		// gamesSocket.on('connect', function () {
 		// 	console.log('connect')
 		// })
-		// gamesSocket?.on('disconnect', function (message: any) {
+		// gamesSocket.on('disconnect', function (message: any) {
 		// 	console.log('disconnect ' + message)
 		// })
 
-		// gamesSocket?.on('id', (newId: any) => {
+		// gamesSocket.on('id', (newId: any) => {
 		// 	setId(newId)
 		// })
-		gamesSocket?.on('startGame', (newId: any) => {
+		gamesSocket.on('startGame', (newId: any) => {
 			console.log('startGame: ', newId)
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
 		})
-		gamesSocket?.on('clients', (newClients: any) => {
+		gamesSocket.on('clients', (newClients: any) => {
 			setClients(newClients.clients)
 			// console.log('clients: ', newClients.clients, newClients.ball)
 			// clients.current = newClients.clients
@@ -107,17 +107,19 @@ export default function Game() {
 				// ball.current = newClients.ball
 			}
 		})
-		gamesSocket?.on('gameOver', (winner: any) => {
+		gamesSocket.on('gameOver', (winner: any) => {
 			console.log('Game Over! Winner: ', winner);
 			setGameStatus(GameStatus.Finished);
 		})
 		return () => {
+			cancelMatchmaking();
+			console.log("Game unmounted");
 		}
 	}, [gamesSocket])
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
-		gamesSocket?.emit("keyPresses", keysPressed.current);
+		gamesSocket.emit("keyPresses", keysPressed.current);
 		// console.log("sendPressed", keysPressed.current)
 	}
 	const onkeydown = (event: KeyboardEvent) => {
@@ -141,12 +143,12 @@ export default function Game() {
 	}, [gameStatus])
 	const startMatchmaking = () => {
 		if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
-		gamesSocket?.emit('match');
+		gamesSocket.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
 	const cancelMatchmaking = () => {
-		if (gameStatus !== GameStatus.Matching) return
-		gamesSocket?.emit('cancel');
+		// if (gameStatus !== GameStatus.Matching) return
+		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
 
@@ -162,7 +164,7 @@ export default function Game() {
 									You are about to play a game against another player. Get ready to compete and have fun!
 								</Card.Text>
 								<br></br>
-								<button onClick={startMatchmaking} disabled={!gamesSocket?.connected} className="btn btn-primary"><b>Play</b></button>
+								<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
 							</>}
 							{gameStatus === GameStatus.Matching && <>
 								<Card.Title>Matchmeking in progress</Card.Title>
@@ -170,7 +172,7 @@ export default function Game() {
 									Looking for another player
 								</Card.Text>
 								<FidgetSpinner
-									visible={gamesSocket?.connected}
+									visible={gamesSocket.connected}
 									height="80"
 									width="80"
 									ariaLabel="dna-loading"
