@@ -198,6 +198,8 @@ export class AuthService {
 				id: userRefreshToken.userId,
 			}
 		});
+		if (!user)
+			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
 		if (!this.isRefreshTokenValid(refreshToken))
 		{
 			this.deleteRefreshTokenForUser(user.id);
@@ -205,7 +207,7 @@ export class AuthService {
 		}
 		// delete refreshToken from DB to make a new one
 		// return this.signJwtTokens(req.user.id, req.user.email);
-		return this.signJwtTokens(user.id, user.email);
+		return await this.signJwtTokens(user.id, user.email);
 
 	}
 

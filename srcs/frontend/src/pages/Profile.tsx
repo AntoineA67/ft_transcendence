@@ -11,7 +11,32 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
+/**
+ * @brief Validates the given password against certain criteria
+ * 
+ * @param Username User's password
+ * 
+ * @returns null if the password is valid, error message otherwise
+ */
 
+ const validateUsername = (Username: string): string | null => {
+    if (Username.length < 8) {
+        return 'Username should be at least 8 characters long.';
+    }
+    if (!/[a-z]/.test(Username)) {
+        return 'Username should contain at least one lowercase letter.';
+    }
+    if (!/[A-Z]/.test(Username)) {
+        return 'Username should contain at least one uppercase letter.';
+    }
+    if (!/[0-9]/.test(Username)) {
+        return 'Username should contain at least one digit.';
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(Username)) {
+        return 'Username should contain at least one special character (e.g., @, #, $, etc.).';
+    }
+    return null;
+};
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 w-50 text-center text-wrap text-break";
