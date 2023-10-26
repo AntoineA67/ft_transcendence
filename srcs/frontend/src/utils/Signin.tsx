@@ -24,10 +24,10 @@ type loginContext = {
 	togglePassword: () => void,
 }
 
+
 /* sign in page */
 
 // import { useSearchParams } from "react-router-dom";
-
 
 export function Signin() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();

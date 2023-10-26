@@ -24,6 +24,32 @@ type loginContext = {
 	togglePassword: () => void,
 }
 
+/**
+ * @brief Validates the given password against certain criteria
+ * 
+ * @param password User's password
+ * 
+ * @returns null if the password is valid, error message otherwise
+ */
+ const validatePassword = (password: string): string | null => {
+    if (password.length < 8) {
+        return 'Password should be at least 8 characters long.';
+    }
+    if (!/[a-z]/.test(password)) {
+        return 'Password should contain at least one lowercase letter.';
+    }
+    if (!/[A-Z]/.test(password)) {
+        return 'Password should contain at least one uppercase letter.';
+    }
+    if (!/[0-9]/.test(password)) {
+        return 'Password should contain at least one digit.';
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(password)) {
+        return 'Password should contain at least one special character (e.g., @, #, $, etc.).';
+    }
+    return null;
+};
+
 /* sign up page */
 
 export function Signup() {
@@ -33,6 +59,11 @@ export function Signup() {
 	const [email, setEmail] = useState('');
 	const [pass, setPass] = useState('');
 	const [err, setErr] = useState('');
+
+	// const passwordValidationError = validatePassword(pass);
+    //     if (passwordValidationError) {
+    //         setErr(passwordValidationError);
+    //     }
 
 	return (
 		<div className='container'>
