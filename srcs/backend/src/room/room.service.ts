@@ -82,7 +82,6 @@ export class RoomService {
 		return room;
 	}
 
-	// TODO : check how to change this (found on prisma.io), maybe there are too many operations to sort...
 	async getAllRoomsByUserid(id: number): Promise<Room[]> {
 		const rooms = await this.prisma.room.findMany({
 			where: {
