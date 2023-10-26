@@ -52,12 +52,12 @@ async function loader(route: string, param?: string, refresh = false) {
 	const token = localStorage.getItem('token') || null;
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
+
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
 	try {
 		const res = await fetch(fetchUrl, {
-			method: 'GET',
 			headers: { 'Authorization': `Bearer ${token}` }
 		});
 		if (res.status == 200 || res.status == 201) {
@@ -81,8 +81,8 @@ async function loader(route: string, param?: string, refresh = false) {
 			const newTokens = await res.json();
 			localStorage.setItem('token', newTokens.token);
 			localStorage.setItem('refreshToken', newTokens.refreshToken);
-			console.log('success');
-			console.log('newToken: ', newTokens);
+			// console.log('success');
+			// console.log('newToken: ', newTokens);
 			return loader(route, param, true);
 		}).catch((err) => {
 			localStorage.removeItem('token');
