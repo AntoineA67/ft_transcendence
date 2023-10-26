@@ -1,19 +1,9 @@
-import '../styles/App.css';
-import '../styles/Profile.css';
-
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
-import { socket } from '../utils/socket';
+import { Link, useLoaderData } from "react-router-dom";
 import Stat from './Stat';
-
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Stack from 'react-bootstrap/Stack';
-import { arrayBuffer } from 'stream/consumers';
-import { profileType } from '../../types/user';
+import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
-
+import { profileType } from '../../types/user';
 
 type textProp = {
 	type: 'nick' | 'bio',
@@ -27,11 +17,11 @@ function Text({ type, profile, setEdit }: textProp) {
 	return (
 		<>
 			{type == 'nick' ? (
-				<h5 style={{ color: "white"}} className={classname}>
+				<h5 className={`${classname} white-text`}>
 					{profile.username}
 				</h5>
 			) : (
-				<p style={{ color: "white" }} className={classname}>
+				<p className={`${classname} white-text`}>
 					{profile.bio}
 				</p>
 			)}
@@ -43,7 +33,7 @@ function Text({ type, profile, setEdit }: textProp) {
 type editTextProp = {
 	type: 'nick' | 'bio',
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>,
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
@@ -63,7 +53,7 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 	async function handleSubmit(
 		e: React.FormEvent<HTMLFormElement>, 
 		type: string, profile: profileType, 
-		setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+		setProfile: React.Dispatch<React.SetStateAction<profileType>>
 	) {
 		const content = (type == 'nick') ? profile.username : profile.bio;
 		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
@@ -74,8 +64,8 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		}
 		let data = (type == 'nick') ? {username: mod} : {bio: mod};
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			console.log('profile', profile)
-			console.log('obj', obj)
+			// console.log('profile', profile)
+			console.log('success: ', success)
 			success && setProfile((prev) => (
 				prev ? ({... prev, ... obj}) : prev
 			));
@@ -103,8 +93,8 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
 		const file = input.files ? input.files[0] : null;
 		if (!file) return ;
-		if (file.size >= 10485760) {
-			console.log('file size limit: 10MB');
+		if (file.size >= 1048576) {
+			console.log('file size limit: 1MB');
 			return ;
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
@@ -114,7 +104,7 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 
 	return (
 		<form id='form-avatar' action='link' method="post" encType="multipart/form-data">
-			<label htmlFor="new-avatar" className='add' style={{ position: "relative", bottom: "40px", left: "50px" }}>
+			<label htmlFor="new-avatar" className='add new-avatar-pos'>
 				<input 
 					className='d-none' 
 					id="new-avatar" 
@@ -130,49 +120,47 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 }
 
 function Profile() {
-	const [profile, setProfile] = useState<profileType | null>(null);
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 	const [update, setUpdate] = useState<boolean>(true);
+	// const profile: profileType = useLoaderData() as profileType;
 
-	useEffect(() => {
-		socket.emit('MyProfile', (response: profileType) => {
-			setProfile(response)
-			console.log('Myprofile: ', response);
-		})
-	}, [update]);
+	// useEffect(() => {	
+	// 	socket.emit('MyProfile', (response: profileType) => {
+	// 		setProfile(response)
+	// 		console.log('Myprofile: ', response);
+	// 	})
+	// }, [update]);
 
 	return (
-		profile ? (
-			<>
-				<Container className="my-5 pb-sm-5 d-flex flex-column align-items-center" 
-					style={{ color: "white"}}>			
-					<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
-				
-					<Avatar size={100} user={{
+		<>
+			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+			
+				<div>
+					<Avatar size={150} user={{
 						id: profile.id, 
 						username: profile.username, 
 						avatar: profile.avatar,
 						status: profile.status
 					}} />
-					<NewAvatar setUpdate={setUpdate}/>
+				</div>
+				<NewAvatar setUpdate={setUpdate}/>
 
-					{ (edit == 'nick'
-						) ? ( 
-							<EditText type={'nick'} profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
-						) : (
-							<Text type={'nick'} profile={profile} setEdit={setEdit} /> )}
-					
-					 { (edit == 'bio'
-					 	) ? (
-							<EditText type={'bio'} profile={profile} setProfile={setProfile} setEdit={setEdit} />
-						) : (
-							<Text type={'bio'} profile={profile} setEdit={setEdit} />)}
-				</Container>
-				<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
-			</>
-		) : (
-			<p style={{color: 'white'}}>loading</p>
-		)
+				{ (edit == 'nick'
+					) ? ( 
+						<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} /> 
+					) : (
+						<Text type='nick' profile={profile} setEdit={setEdit} /> )}
+				
+					{ (edit == 'bio'
+					) ? (
+						<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
+					) : (
+						<Text type='bio' profile={profile} setEdit={setEdit} />)}
+			</div>
+			<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
+		</>
 	);
 }
 

@@ -1,8 +1,8 @@
-import '../styles/ProfileSetting.css';
 import Stack from 'react-bootstrap/Stack';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+// import '../styles/index.css'
 
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
@@ -14,13 +14,13 @@ import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
 import { Alert } from 'react-bootstrap';
-
+import axios from 'axios';
 
 export function Title({ title }: { title: string }) {
 	return (
-		<div className='d-flex w-100 align-items-center' style={{ backgroundColor: "black" }}>
-			<Link to=".."><button className='goBack'></button></Link>
-			<h4 style={{ color: "white", margin: "auto 0" }}>{title}</h4>
+		<div className='d-flex w-100 align-items-center bg-black'>
+			<Link to=".."><button className='leftArrow m-2'></button></Link>
+			<h4 className='white-text' >{title}</h4>
 		</div>
 	);
 }
@@ -77,7 +77,7 @@ export function TwoFactorAuth() {
 			<Title title="Two-factor authentication" />
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >
 				<form className="d-flex flex-column gap-3">
-					<div style={{ color: "white", margin: "auto 0" }}>
+					<div className='white-text mx-auto my-0'>
 						{profile! && (
 							profile.activated2FA === false && (
 								<>
@@ -102,10 +102,10 @@ export function TwoFactorAuth() {
 					{profile! && (
 						profile.activated2FA === false && (
 							<>
-								<div style={{ margin: "auto" }}>
+								<div className='m-auto'>
 									<QRCode value={qrCodePath} />
 								</div>
-								<div style={{ color: "white" }}>
+								<div className='white-text'>
 									<p>
 										Enter the 6-digit code from your 2FA app to confirm its authenticity.
 									</p>
@@ -125,7 +125,7 @@ export function TwoFactorAuth() {
 					<br></br>
 					{invalidToken === true && (
 						<>
-							<div style={{ color: 'red', textAlign: 'center' }}>Your token is invalid, please try again !</div>
+							<div className='red-text text-center'>Your token is invalid, please try again !</div>
 							<br></br>
 						</>
 					)}
@@ -153,8 +153,8 @@ export const InputToken = ({ handleChange }: any) => {
 			pattern="[0-9]*"
 			value={value}
 			onChange={handleChangeToken}
-			style={{ overflow: "hidden", letterSpacing: "10px", display: 'flex' }}
-			className="text-center"
+			style={{ letterSpacing: "10px" }}
+			className="text-center overflow-hidden d-flex "
 		/>
 	);
 };
@@ -182,27 +182,30 @@ export function SettingMenu() {
 	};
 
 	return (
-		<Container fluid className='px-0 h-75'>
+		<div className='container-fluid px-0 h-75'>
 			<Title title="Setting" />
-			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" style={{ minHeight: '400px' }}>
-				<Form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
-					<Form.Group controlId="currentPassword" >
-						<Form.Label>Confirm password</Form.Label>
-						<Form.Control type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
-					<Form.Group controlId="newPassword" >
-						<Form.Label>New password</Form.Label>
-						<Form.Control type="password" placeholder="New password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
-					<Form.Group controlId="confirmPassword" >
-						<Form.Label>Confirm password</Form.Label>
-						<Form.Control type="password" placeholder="Password" disabled={profile?.password === 'nopass'} />
-					</Form.Group>
+			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >  {/* style={{ minHeight: '400px' }} */}
+				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+					<div>
+						<label htmlFor='current-password'>Current password</label>
+						<input id='current-password' type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
+					</div>
+					<div>
+						<label htmlFor='new-password'>New password</label>
+						<input id='new-password' type="password" placeholder="New password" 
+							disabled={profile?.password === 'nopass'} />
+					</div>
+					<div>
+						<label htmlFor='confirm-password'>Confirm password</label>
+						<input id='confirm-password' type="password" placeholder="Password" 
+							disabled={profile?.password === 'nopass'} />
+					</div>
 					{profile?.password === 'nopass' && (
-						<div style={{ color: 'red' }}>You cannot change the password because you are connected with the 42 school API</div>
+						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
 					)}
 					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
-				</Form>
+				</form>
+				
 				<hr />
 				<Form.Check
 					type="switch"
@@ -214,12 +217,37 @@ export function SettingMenu() {
 				<hr />
 				<br></br>
 				<button onClick={() => {
+				let url = ("http://localhost:3000/auth/signout");
+				const fetchObj = {
+					method: 'POST',
+					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`,},
+					body: JSON.stringify({
+						refreshToken: localStorage.getItem('refreshToken'),
+					}),
+				}
+				// 	axios.post("http://localhost:3000/auth/signout", {}, {
+				// 		headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+				// 		body: JSON.stringify(localStorage.getItem('refreshToken')),
+				//   });
+				try {
+					fetch(url, fetchObj)
+					// if (!response.ok) { throw Error('response not ok'); }
+					// let data = await response.json();
+
 					localStorage.removeItem('token');
+					localStorage.removeItem('random');
+					localStorage.removeItem('email');
+					localStorage.removeItem('refreshToken');
+					// localStorage.removeItem('token');
 					window.location.href = '/';
-				}} className='btn btn-outline-secondary w-100 mt-auto mb-5 mb-sm-0'>Log out</button>
+				} catch (err: any) {
+				console.log(err);
+				}
+			}}
+				className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
 
 			</Stack>
-		</Container>
+		</div>
 	);
 }
 

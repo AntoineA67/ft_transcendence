@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
-import { Player } from '@prisma/client';
-import { HistoryDto } from 'src/dto/HistoryDto';
+import { Player, Prisma } from '@prisma/client';
+import { HistoryDto } from 'src/dto/history.dto';
 
 @Injectable()
 export class PlayerService {

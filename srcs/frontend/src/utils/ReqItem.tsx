@@ -1,3 +1,5 @@
+// import '../styles/iconButton.css';
+// import '../styles/index.css'
 import { Avatar } from './Avatar';
 import { userType } from '../../types/user';
 import { Link } from 'react-router-dom';
@@ -16,7 +18,7 @@ export function ReqItem({ user, linkTo, onAccept, onDecline }: ReqItemProp) {
 			<Link to={linkTo}>
 				<Avatar size={40} user={{... user}} />
 			</Link>
-			<p className='m-0 ms-3' style={{color: 'white'}}>
+			<p className='m-0 ms-3 white-text'>
 				{user.username}
 				 {/* <br /> send you a friend request */}
 			</p>

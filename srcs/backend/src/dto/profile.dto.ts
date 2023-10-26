@@ -1,5 +1,5 @@
-import { HistoryDto } from "./HistoryDto";
-import { AchieveDto } from "./AchieveDto";
+import { HistoryDto } from "./history.dto";
+import { AchieveDto } from "./achieve.dto";
 
 export class ProfileDto {
 	id: number;

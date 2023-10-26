@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { FriendRequestService } from './friendrequest.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({ cors: true, namespace: 'friends' })
@@ -37,7 +37,6 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() nick: string): Promise<boolean> {
 		const id: number = client.data.user.id;
-		this.logger.log('id: ', id)
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
 		const result = await this.friendReqService.sendFriendReq(id, nick);

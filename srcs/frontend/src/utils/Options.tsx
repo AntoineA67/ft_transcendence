@@ -1,10 +1,11 @@
 import { profileType, userType } from "../../types/user";
 import { useEffect, useState } from "react";
-import { socket, friendsSocket } from "./socket";
+import { socket, friendsSocket, chatsSocket } from "./socket";
+import { useNavigate } from "react-router-dom";
 
 type OptionsProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>> 
+	setProfile: React.Dispatch<React.SetStateAction<profileType>> 
 }
 export function Options({profile, setProfile}: OptionsProp) {
 
@@ -24,7 +25,7 @@ export function Options({profile, setProfile}: OptionsProp) {
 
 type optionProp = {
 	profile: profileType,
-	setProfile: React.Dispatch<React.SetStateAction<profileType | null>>
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>
 }
 
 export function AddOption({profile, setProfile}: optionProp) {
@@ -68,7 +69,7 @@ export function AddOption({profile, setProfile}: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='addOption' onClick={handleClick}/>
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
@@ -95,13 +96,14 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='blockOption' onClick={handleClick} />
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
 
 export function ChatOption({ profile, setProfile }: optionProp) {
 	const [text, setText] = useState<'Chat' | 'block'>('Chat');
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		function handleBlock() {
@@ -136,14 +138,18 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text == 'Chat') {
-			// do something
+			chatsSocket.emit('createPrivateRoom', profile.username, (response: number) => {
+				if (response > 0) {
+					navigate(`/chat/${response}`);
+				}
+			});
 		}
 	}
 	
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='chatOption' onClick={handleClick} />
-			<p style={{ color: '#be2693' }}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }
@@ -191,7 +197,7 @@ export function PongOption({ profile, setProfile }: optionProp) {
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='pongOption' onClick={handleClick} />
-			<p style={{ color: '#be2693'}}>{text}</p>
+			<p className='magenta-text'>{text}</p>
 		</div>
 	)
 }

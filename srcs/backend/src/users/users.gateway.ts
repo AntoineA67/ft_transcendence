@@ -9,10 +9,10 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
 import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
-import { ProfileDto } from 'src/dto/ProfileDto';
+import { ProfileDto } from 'src/dto/profile.dto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
-import { UserDto } from 'src/dto/UserDto';
+import { UserDto } from 'src/dto/user.dto';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -20,11 +20,6 @@ export class UsersGateway
 	
 	constructor(
 		private readonly usersService: UsersService, 
-		private readonly friendService: FriendshipService, 
-		private readonly friendReqService: FriendRequestService, 
-		private readonly blockService: BlockService, 
-		private readonly playerService: PlayerService,
-		private readonly achieveService: AchievementService,
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -52,14 +47,14 @@ export class UsersGateway
 		return (await this.usersService.getAllUsers());
 	}
 	
-	@SubscribeMessage('MyProfile')
-	async handleMyProfile(@ConnectedSocket() client: Socket) {
-		const id: number = client.data.user.id;
-		const gameHistory = await this.playerService.getHistory(id);
-		const achieve = await this.achieveService.getAchieveById(id);
-		let profile = await this.usersService.getUserProfileById(id);
-		return ({ ... profile, gameHistory, achieve });
-	}
+	// @SubscribeMessage('MyProfile')
+	// async handleMyProfile(@ConnectedSocket() client: Socket) {
+	// 	const id: number = client.data.user.id;
+	// 	const gameHistory = await this.playerService.getHistory(id);
+	// 	const achieve = await this.achieveService.getAchieveById(id);
+	// 	let profile = await this.usersService.getUserProfileById(id);
+	// 	return ({ ... profile, gameHistory, achieve });
+	// }
 
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
@@ -90,19 +85,19 @@ export class UsersGateway
 	}
 
 	// this function cannot be done in the service, it will create circular dependency
-	@SubscribeMessage('Profile')
-	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string): Promise<ProfileDto> {
-		const id: number = client.data.user.id;
-		let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
-		if (id == otherprofile.id) return (otherprofile);
-		const friend = await this.friendService.isFriend(id, otherprofile.id);
-		const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
-		const block = await this.blockService.isBlocked(id, otherprofile.id);
-		const blocked = await this.blockService.isBlocked(otherprofile.id, id);
-		const gameHistory = await this.playerService.getHistory(otherprofile.id);
-		const achieve = await this.achieveService.getAchieveById(otherprofile.id);
-		return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
-	}
+	// @SubscribeMessage('Profile')
+	// async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string): Promise<ProfileDto> {
+	// 	const id: number = client.data.user.id;
+	// 	let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
+	// 	if (id == otherprofile.id) return (otherprofile);
+	// 	const friend = await this.friendService.isFriend(id, otherprofile.id);
+	// 	const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
+	// 	const block = await this.blockService.isBlocked(id, otherprofile.id);
+	// 	const blocked = await this.blockService.isBlocked(otherprofile.id, id);
+	// 	const gameHistory = await this.playerService.getHistory(otherprofile.id);
+	// 	const achieve = await this.achieveService.getAchieveById(otherprofile.id);
+	// 	return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
+	// }
 
 	@SubscribeMessage('Create2FA')
 	async handleCreate2FA(@ConnectedSocket() client: Socket) {
