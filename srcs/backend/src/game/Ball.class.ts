@@ -39,7 +39,7 @@ export default class Ball {
 		// const player = playersList[this.x < .5 ? 0 : 1];
 		for (let player of playersList) {
 			if (this.collide(player)) {
-				console.log("collide", player);
+				// console.log("collide", player);
 				let collidePoint = this.y - player.y;
 				collidePoint = collidePoint / Player.halfPaddleHeight;
 				const angleRad = (Math.PI / 4) * collidePoint;
