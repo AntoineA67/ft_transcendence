@@ -11,7 +11,7 @@ export class UserDto {
 	@IsNotEmpty() @IsString()				username?: string;
 	@IsNotEmpty() @IsString() 				password?: string;
 	@IsString() 							bio?: string;
-											avatar: Buffer | null | ArrayBuffer;
+											avatar: Buffer | null; // ArrayBuffer
 											status: 'ONLINE' | 'OFFLINE' | 'INGAME';
 											otpHash?: string;
 											activated2FA?: boolean;
