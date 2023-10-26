@@ -52,33 +52,44 @@ async function loader(route: string, param?: string, refresh = false) {
 	const token = localStorage.getItem('token') || null;
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
-	if (!token) {
+	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
-	const res = await fetch(fetchUrl, {
-		method: 'GET',
-		headers: { 'Authorization': `Bearer ${token}` }
-	});
-	if (res.status == 200 || res.status == 201) {
-		return (res.json());
-	}
-	
-	if (!refresh) {
+	try {
+		const res = await fetch(fetchUrl, {
+			method: 'GET',
+			headers: { 'Authorization': `Bearer ${token}` }
+		});
+		if (res.status == 200 || res.status == 201) {
+			return (res.json());
+		} else {
+			throw new Response(res.statusText, { status: res.status })
+		}
+	} catch (err: any) {
+		if (refresh) { throw err; }
 		fetch(`${baseUrl}auth/refreshToken`, {
 			method: 'POST',
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ 'refreshToken': refreshToken })
-		}).then(async (res2) => {
-			const newTokens = await res2.json();
+			headers: {
+				'Accept': 'application/json',
+				"Content-Type": "application/json"
+			},
+			body: JSON.stringify({ "refreshToken": refreshToken })
+		}).then(async (res) => {
+			if (res.status != 201) {
+				throw new Response(res.statusText, { status: res.status })
+			}
+			const newTokens = await res.json();
 			localStorage.setItem('token', newTokens.token);
 			localStorage.setItem('refreshToken', newTokens.refreshToken);
-			loader(route, param, true);
+			console.log('success');
+			console.log('newToken: ', newTokens);
+			return loader(route, param, true);
 		}).catch((err) => {
 			localStorage.removeItem('token');
 			localStorage.removeItem('refreshToken');
+			throw err;
 		})
 	}
-	throw new Response(res.statusText, {status: res.status})
 }
 
 const router = createBrowserRouter(
