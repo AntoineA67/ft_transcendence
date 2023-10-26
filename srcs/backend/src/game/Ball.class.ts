@@ -18,6 +18,7 @@ export default class Ball {
 	update(players: { [id: string]: Player; }) {
 		// console.log(players)
 		const playersList = Object.values(players)
+		if (playersList.length < 2) return null;
 		this.x += this.velocityX;
 		this.y += this.velocityY;
 		if (this.y - Ball.radius < 0) {

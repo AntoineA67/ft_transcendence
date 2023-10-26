@@ -34,11 +34,13 @@ export class GamesService {
       const room = this.rooms[roomId];
       if (room) {
         console.log('leave room', client.data.user.id)
-        room.leave(client.data.user.id);
-        delete this.clients[client.data.user.id];
-        if (room.isEmpty()) {
-          delete this.rooms[roomId];
-        }
+        if (room.isEmpty()) return;
+        room.leave(client.data.user.id).then(() => {
+          delete this.clients[client.data.user.id];
+          if (room.isEmpty()) {
+            delete this.rooms[roomId];
+          }
+        });
       }
     } else {
       const index = this.matchmakingQueue.indexOf(client);
