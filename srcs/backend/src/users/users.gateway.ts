@@ -53,7 +53,7 @@ export class UsersGateway
 	// 	const gameHistory = await this.playerService.getHistory(id);
 	// 	const achieve = await this.achieveService.getAchieveById(id);
 	// 	let profile = await this.usersService.getUserProfileById(id);
-	// 	return ({ ... profile, gameHistory, achieve });
+	// 	return ({ ...profile, gameHistory, achieve });
 	// }
 
 	@SubscribeMessage('UpdateProfile')
@@ -96,7 +96,7 @@ export class UsersGateway
 	// 	const blocked = await this.blockService.isBlocked(otherprofile.id, id);
 	// 	const gameHistory = await this.playerService.getHistory(otherprofile.id);
 	// 	const achieve = await this.achieveService.getAchieveById(otherprofile.id);
-	// 	return ({ ... otherprofile, friend, block, blocked, sent, gameHistory, achieve });
+	// 	return ({ ...otherprofile, friend, block, blocked, sent, gameHistory, achieve });
 	// }
 
 	@SubscribeMessage('Create2FA')
@@ -129,6 +129,13 @@ export class UsersGateway
 			return (true);
 		}
 		return (false);
+	}
+	
+	@SubscribeMessage('myAvatar')
+	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string | null> {
+		const id: number = client.data.user.id;
+
+		return (await this.usersService.getAvatar(id))
 	}
 
 } 

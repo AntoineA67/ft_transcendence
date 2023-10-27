@@ -15,7 +15,7 @@ export class BlockService {
 	async getAllBlocked(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
-		const blocked = await this.prisma.block.findMany({
+		let data = await this.prisma.block.findMany({
 			where: { userId: { equals: id } },
 			include: {
 				blocked: {
@@ -28,7 +28,12 @@ export class BlockService {
 				}
 			}
 		})
-		return (blocked.map((x) => (x.blocked)));
+		let blocked = data.map((x) => (x.blocked));
+		let ret: UserDto[] = [];
+		for (let x of blocked) {
+			ret.push({ ...x, avatar: this.usersService.bufferToBase64(x.avatar) })
+		}
+		return (ret);
 	}
 
 	async createBlock(id: number, otherId: number): Promise<Boolean> {
