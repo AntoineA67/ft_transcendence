@@ -135,19 +135,19 @@ export class UsersService {
 		return (user.username);
 	}
 
-	async getUserBasic(id: number) {
-		return (
-			await this.prisma.user.findUnique({
-				where: { id },
-				select: {
-					id: true,
-					username: true,
-					avatar: true,
-					status: true,
-				}
-			})
-		)
-	}
+	// async getUserBasic(id: number) {
+	// 	return (
+	// 		await this.prisma.user.findUnique({
+	// 			where: { id },
+	// 			select: {
+	// 				id: true,
+	// 				username: true,
+	// 				avatar: true,
+	// 				status: true,
+	// 			}
+	// 		})
+	// 	)
+	// }
 
 	async getUserById(id: number): Promise<UserDto> {
 		let user = await this.prisma.user.findUnique({
@@ -302,5 +302,15 @@ export class UsersService {
 			return (null)
 		}
 		return (buf.toString('base64'));
+	}
+	
+	async getAvatar(id: number): Promise<string | null> {
+		let { avatar } = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				avatar: true,
+			}
+		});
+		return (this.bufferToBase64(avatar));
 	}
 }

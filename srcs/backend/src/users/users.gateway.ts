@@ -130,5 +130,12 @@ export class UsersGateway
 		}
 		return (false);
 	}
+	
+	@SubscribeMessage('myAvatar')
+	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string | null> {
+		const id: number = client.data.user.id;
+
+		return (await this.usersService.getAvatar(id))
+	}
 
 } 
