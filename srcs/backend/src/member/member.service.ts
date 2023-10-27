@@ -14,10 +14,11 @@ export class MemberService {
 		return this.prisma.member.create({ data });
 	}
 
-	async getMemberById(id: number): Promise<Member> {
+	async getMemberById(id: number, roomid: number): Promise<Member> {
 		const member = await this.prisma.member.findFirst({
 			where: {
 				userId: id,
+				roomId: roomid,
 			},
 		});
 		if (!member) {

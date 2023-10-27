@@ -241,10 +241,11 @@ export class RoomGateway
 				userid: content.usertoKick,
 				roomId: roomid
 			}
-
+			const SockettoKick = this.clients[content.usertoKick.toString()];
 			const roomName = "room_" + roomid.toString();
 			this.server.to(roomName).emit('UserLeaveChannel', leavechan);
-			client.leave("room_" + roomid.toString());
+			if (SockettoKick)
+				SockettoKick.leave("room_" + roomid.toString());
 
 			return true;
 		}
@@ -260,7 +261,7 @@ export class RoomGateway
 		if (bool) {
 			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomId.toString();
-			const member = await this.memberService.getMemberById(content.memberId);
+			const member = await this.memberService.getMemberById(content.memberId, roomId);
 			const SockettoMute = this.clients[usertomute.id.toString()];
 			const membertosend = {
 				...member,
@@ -284,7 +285,7 @@ export class RoomGateway
 		if (bool) {
 			const usertoban = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomid.toString();
-			const member = await this.memberService.getMemberById(content.memberId);
+			const member = await this.memberService.getMemberById(content.memberId, roomid);
 			const SocketToBan = this.clients[usertoban.id.toString()];
 			const membertosend = {
 				...member,
@@ -314,15 +315,9 @@ export class RoomGateway
 		const usertoblock = await this.roomService.getMemberDatabyId(content.memberId);
 		const SocketToBlock = this.clients[usertoblock.id.toString()];
 		const profileupdated = await this.roomService.getProfileForUser(content.memberId);
-		const member = await this.memberService.getMemberById(content.memberId);
-		const membertosend = {
-			...member,
-			username: usertoblock.username,
-		};
 		if (bool) {
 			if (SocketToBlock) {
 				SocketToBlock.emit('newProfile', profileupdated);
-				SocketToBlock.emit('newmemberStatus', membertosend);
 			}
 			return true;
 		}
@@ -348,11 +343,12 @@ export class RoomGateway
 				SocketInvite.join(roomName);
 				SocketInvite.emit('newRoom', room);
 			}
-			const member = await this.memberService.getMemberById(usertoadd.id);
+			const member = await this.memberService.getMemberById(usertoadd.id, roomid);
 			const membertosend = {
 				...member,
 				username: usertoadd.username,
 			};
+			console.log('membertosend backend');
 			this.server.to(roomName).emit('newMember', membertosend);
 			return membertosend;
 		}
@@ -379,7 +375,7 @@ export class RoomGateway
 		if (bool) {
 			const usertochangerole = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomId.toString();
-			const member = await this.memberService.getMemberById(content.memberId);
+			const member = await this.memberService.getMemberById(content.memberId, roomId);
 			const SockettoChange = this.clients[usertochangerole.id.toString()];
 			const membertosend = {
 				...member,
