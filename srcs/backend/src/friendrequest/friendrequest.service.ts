@@ -45,7 +45,11 @@ export class FriendRequestService {
 		const pendings = reqs.map((x) => (x.user)).filter(async (x) => (
 			await this.blockService.isBlocked(user.id, x.id) == false
 		));
-		return (pendings);
+		let ret: UserDto[] = [];
+		for (let p of pendings) {
+			ret.push({ ...p, avatar: this.usersService.bufferToBase64(p.avatar)})
+		}
+		return (ret);
 	}
 
 	async sendFriendReq(id: number, nick: string): Promise<boolean> {
