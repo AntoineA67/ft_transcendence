@@ -214,10 +214,10 @@ export default function Stat({gameHistory, achieve} : statProp) {
 				{/* content */}
 				<div className="row">
 					<div className="col-12 col-sm-6 d-none d-sm-flex p-0" id='history-content'>
-						<HistoryContent gameHistory={gameHistory.map((a) => ({... a}))} />
+						<HistoryContent gameHistory={gameHistory.map((a) => ({...a}))} />
 					</div>
 					<div className="col-12 col-sm-6 p-0" id='achieve-content'>
-						<AchieveContent achieve={{... achieve}} />	
+						<AchieveContent achieve={{...achieve}} />	
 					</div>
 				</div>
 			</div>
