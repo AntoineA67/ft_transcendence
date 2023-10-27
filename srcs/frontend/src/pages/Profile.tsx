@@ -87,9 +87,9 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 }
 
 type NewAvatarProp = {
-	setUpdate: React.Dispatch<React.SetStateAction<boolean>>
+	setProfile: React.Dispatch<React.SetStateAction<profileType>>
 }
-function NewAvatar({ setUpdate }: NewAvatarProp) {
+function NewAvatar({ setProfile }: NewAvatarProp) {
 
 	async function autoUpload() {
 		const input = document.getElementById('new-avatar') as HTMLInputElement;
@@ -100,7 +100,13 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 			return ;
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
-			success ? (setUpdate((prev) => (!prev))) : console.log('fail');
+			if (!success) {
+				console.log('fails');
+				return ;
+			}
+			socket .emit('myAvatar', (avatar: string) => {
+				setProfile((prev) => ({ ...prev, avatar}))
+			})
 		})
 	}
 
@@ -124,15 +130,6 @@ function NewAvatar({ setUpdate }: NewAvatarProp) {
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
-	const [update, setUpdate] = useState<boolean>(true);
-	// const profile: profileType = useLoaderData() as profileType;
-
-	// useEffect(() => {	
-	// 	socket.emit('MyProfile', (response: profileType) => {
-	// 		setProfile(response)
-	// 		console.log('Myprofile: ', response);
-	// 	})
-	// }, [update]);
 
 	return (
 		<>
@@ -147,7 +144,7 @@ function Profile() {
 						status: profile.status
 					}} />
 				</div>
-				<NewAvatar setUpdate={setUpdate}/>
+				<NewAvatar setProfile={setProfile}/>
 
 				{ (edit == 'nick'
 					) ? ( 
