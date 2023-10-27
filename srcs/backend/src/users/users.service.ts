@@ -221,6 +221,9 @@ export class UsersService {
 				status: true,
 			}
 		})
+		if (user == null) {
+			return (null)
+		}
 		return ({
 			... user, avatar: this.bufferToBase64(user.avatar)
 		})
