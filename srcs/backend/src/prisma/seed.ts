@@ -5,6 +5,7 @@ import { friendReqs } from './seeds/friendReq'
 import { achieves } from './seeds/achieve'
 import { rooms } from './seeds/rooms'
 import { games } from './seeds/games'
+import * as argon from 'argon2';
 const prisma = new PrismaClient()
 
 async function seeding() {
@@ -18,8 +19,9 @@ async function seeding() {
 
 async function seedUsers() {
 	for (let user of users){
+		const hashPassword = await argon.hash(user.hashPassword);
 		await prisma.user.create({
-			data: user
+			data: { ...user, hashPassword}
 		});
 	}
 }
