@@ -79,10 +79,13 @@ export function ChatBox() {
 		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
 
 		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
-			if (response) {
+			if (response.userid !== profile?.id && response.roomId === parseInt(chatId || '', 10)) {
 				setMemberList((prevMembersList) =>
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
+			}
+			else {
+				navigate('/chat');
 			}
 		};
 
@@ -94,6 +97,9 @@ export function ChatBox() {
 		};
 
 		const handlenewMember = (newMember: Member) => {
+			console.log(newMember);
+			const memberalreadyin = membersList.find((member) => member.userId === newMember.userId);
+			if (memberalreadyin) return;
 			if (chatId && newMember.roomId !== parseInt(chatId, 10)) return;
 			setMemberList((prevMembersList) => [...prevMembersList, newMember]);
 		}
@@ -148,6 +154,24 @@ export function ChatBox() {
 			}
 		}
 
+		const handleNewProfile = (response: Profile) => {
+			const roominfo = response.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10));
+			if (roominfo?.blocked) {
+				setProfile(response);
+				setBlocks(response.blocks);
+				setMessages([]);
+				setroomTitle('You have been blocked by this user');
+				setMemberList([]);
+			}
+			else if (roominfo?.blocked === false) {
+				setProfile(response);
+				setBlocks(response.blocks);
+				setMessages(data.messages);
+				setroomTitle(data.roomTitle);
+				setMemberList(data.members);
+			}
+		}
+
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
 		socketListeners.push({ event: 'messageSent', handler: handlenewmess });
 		socketListeners.push({ event: 'newMember', handler: handlenewMember });
@@ -155,17 +179,21 @@ export function ChatBox() {
 		socketListeners.push({ event: 'newmemberStatus', handler: handlenewmemberStatus });
 		socketListeners.push({ event: 'newmemberListStatus', handler: handlenewmemberListStatus });
 		socketListeners.push({ event: 'deleteRoom', handler: handleDeleteRoom });
+		socketListeners.push({ event: 'newProfile', handler: handleNewProfile });
+
+		console.log('event listener');
 
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
 		});
 
 		return () => {
+			console.log('event listener removed');
 			socketListeners.forEach(({ event, handler }) => {
 				chatsSocket.off(event, handler);
 			});
 		};
-	}, [messages, membersList]);
+	}, [chatId]);
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -204,15 +232,15 @@ export function ChatBox() {
 		setNewRoomTitle('');
 	}
 
-	const handleInviteUser = () => {
+	const handleInviteUser = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		e.preventDefault();
 		if (inviteUsername && inviteUsername.trim() !== '') {
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
 			}, (response: Member) => {
-				if (response && response.userId > 0) {
+				if (response.userId > 0) {
 					setinviteUsernameSuccess(true);
-					setMemberList((prevMembersList) => [...prevMembersList, response]);
 				} else {
 					setinviteUsernameSuccess(false);
 				}
@@ -323,10 +351,8 @@ export function ChatBox() {
 		});
 	};
 
-
-
-
-	const handleKick = (memberid: number) => {
+	const handleKick = (memberid: number, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		e.preventDefault();
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
@@ -352,11 +378,11 @@ export function ChatBox() {
 					return member;
 				}
 				));
-				if (memberid === profile?.id) {
+				if (response && role === 'Owner') {
 					setMemberstatus((prevMemberstatus) => {
 						if (prevMemberstatus) {
-							prevMemberstatus.owner = role === 'Owner' ? true : false;
-							prevMemberstatus.admin = role === 'Admin' ? true : false;
+							prevMemberstatus.owner = false;
+							prevMemberstatus.admin = true;
 						}
 						return prevMemberstatus;
 					});
@@ -557,7 +583,7 @@ export function ChatBox() {
 									value={inviteUsername}
 									onChange={(e) => setInviteUsername(e.target.value)}
 								/>
-								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={handleInviteUser} disabled={!inviteUsername.trim()}>Invite</button>
+								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={(e) => handleInviteUser(e)} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
 						)}
 						{roomChannel && roomTitle && profile && memberstatus && !memberstatus.ban && <button className="btn btn-danger mt-3 mb-1" onClick={() => handleLeaveChannel(profile?.id)}>Leave</button>}
@@ -581,7 +607,7 @@ export function ChatBox() {
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
 											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
 										>
-											<option value="Owner">Owner</option>
+											{memberstatus.owner && <option value="Owner">Owner</option>}
 											<option value="Admin">Admin</option>
 											<option value="Member">Member</option>
 										</select>}
@@ -627,7 +653,7 @@ export function ChatBox() {
 										</button>
 										{roomChannel && !member.owner && (memberstatus?.owner || memberstatus?.admin) && <button
 											className="action-button"
-											onClick={() => handleKick(member.userId)}
+											onClick={(e) => handleKick(member.userId, e)}
 										>
 											Kick
 										</button>}
