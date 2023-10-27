@@ -32,7 +32,7 @@ export function SearchBar() {
 		return (
 			<li key={item.id} className='p-0 m-0 w-100'>
 				<UserItem 
-					user={{... item}}
+					user={{...item}}
 					linkTo={`${item.username}`}/>
 			</li>
 		)

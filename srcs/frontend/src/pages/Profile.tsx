@@ -69,7 +69,7 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		socket.emit('UpdateProfile', data, (success: boolean) => {
 			console.log('success: ', success)
 			success && setProfile((prev) => (
-				prev ? ({... prev, ... obj}) : prev
+				prev ? ({...prev, ...obj}) : prev
 			));
 		})
 		setEdit('done');
@@ -158,7 +158,7 @@ function Profile() {
 					) : (
 						<Text type='bio' profile={profile} setEdit={setEdit} />)}
 			</div>
-			<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{... (profile.achieve)}} />
+			<Stat gameHistory={profile.gameHistory.map((a) => ({...a}))} achieve={{...(profile.achieve)}} />
 		</>
 	);
 }

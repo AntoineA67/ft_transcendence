@@ -39,7 +39,7 @@ export class FriendshipService {
 		})
 		let myFriends: UserDto[] = friendships.map((x) => {
 			let ret = (x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			return ({ ... ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
+			return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
 		})
 		// filter does not work with async
 		const promises = await Promise.all(myFriends.map(async (x) => (

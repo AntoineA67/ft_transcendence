@@ -64,7 +64,7 @@ export class UsersService {
 		});
 		let ret: UserDto[] = [];
 		for (let user of users) {
-			ret.push({ ... user, avatar: this.bufferToBase64(user.avatar)})
+			ret.push({ ...user, avatar: this.bufferToBase64(user.avatar)})
 		}
 		return ret;
 	}
@@ -162,7 +162,7 @@ export class UsersService {
 			}
 		})
 		
-		return ({ ... user, avatar: this.bufferToBase64(user.avatar) })
+		return ({ ...user, avatar: this.bufferToBase64(user.avatar) })
 	}
 
 	// the freind, block, blocked should be given by other services
@@ -225,7 +225,7 @@ export class UsersService {
 			return (null)
 		}
 		return ({
-			... user, avatar: this.bufferToBase64(user.avatar)
+			...user, avatar: this.bufferToBase64(user.avatar)
 		})
 	}
 
