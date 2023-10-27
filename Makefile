@@ -50,6 +50,8 @@ down-volume: down
 re:
 	@make down
 	@make clean
+	@rm -r ./srcs/frontend/node_modules
+	@rm -r ./srcs/backend/node_modules
 	@make
 
 clean: down-volume
