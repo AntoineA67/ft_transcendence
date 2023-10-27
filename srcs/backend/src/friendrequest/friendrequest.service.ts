@@ -62,10 +62,11 @@ export class FriendRequestService {
 		if (blocked) return (false);
 		// check if they are already friends
 		const isFriend = await this.friendshipService.isFriend(id, friend.id);
-		if (isFriend) return (true);
+		this.logger.log(isFriend)
+		if (isFriend) return (false);
 		//check if there are pending requests
 		const pendings = await this.getPendingReq(id, friend.id);
-		if (pendings.length != 0) return (true);
+		if (pendings.length > 0) return (false);
 		await this.prisma.friendRequest.create({
 			data: {
 				user: {
