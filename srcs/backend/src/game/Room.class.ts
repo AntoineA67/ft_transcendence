@@ -38,7 +38,6 @@ export default class Room {
 				}
 			}
 			this.endGame(winner).then(() => {
-
 				delete this.players[id];
 			});
 		}
@@ -52,15 +51,9 @@ export default class Room {
 		this.ball = new Ball();
 		this.wss.to(this.roomId).emit('startGame');
 
-		// // save game in database
-		// const newGame = await this.gameService.create({});
-		// this.gameId = newGame.id;
-
-
-
 		this.interval = setInterval(() => {
 			this.updateGameTick();
-			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
+			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball, time: 3 * 1000 * 60 - (Date.now() - this.startTime) });
 		}, 1000 / 60);
 	}
 
@@ -72,7 +65,7 @@ export default class Room {
 		const winner = this.ball.update(this.players);
 		if (winner) {
 			this.endGame(Number(winner));
-		} else if (Date.now() - this.startTime > 3 * 1000) { // 3 * 60 * 1000
+		} else if (Date.now() - this.startTime > 3 * 1000 * 60) { // 3 * 60 * 1000
 			const players = Object.values(this.players);
 			if (players[0].score > players[1].score) {
 				this.endGame(Number(players[0].id));
@@ -112,15 +105,22 @@ export default class Room {
 				break;
 			}
 		}
-		this.wss.to(this.roomId).emit('gameOver', { winner: this.players[winner].userId, loser: this.players[loser].userId });
+		const loserPlayer = this.players[loser];
+		const winnerPlayer = this.players[winner];
+		this.wss.to(this.roomId).emit('gameOver', { winner: winnerPlayer.userId, loser: loserPlayer.userId });
 
 		const newGame = await this.gameService.create({});
 		this.gameId = newGame.id;
 
+		if (!winnerPlayer || !loserPlayer) {
+			return;
+		}
+
+		// try {
 		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
-		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${this.players[winner].score}:${this.players[loser].score}` });
+		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
 		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
 		if (wins.length == 1) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
@@ -129,5 +129,9 @@ export default class Room {
 		} else if (wins.length == 100) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
 		}
+
+		// } catch (error) {
+		// 	console.log(error);
+		// }
 	}
 }

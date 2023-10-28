@@ -1,18 +1,17 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Box, Text } from "@react-three/drei"
-import { Circles, FidgetSpinner } from "react-loader-spinner"
-import { Card, Container } from "react-bootstrap"
+import { Box, Plane, Text } from "@react-three/drei"
+import { FidgetSpinner } from "react-loader-spinner"
+import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
-import axios, { AxiosResponse } from "axios"
+import { Grid } from "@react-three/postprocessing"
 
 
 const BallWrapper = ({ ball, client }: any) => {
 	const ballClientPosition: THREE.Vector3 = useMemo(() => {
-		const invertedX = client.invertedSide ? 1 - ball.x : ball.x
-		// console.log("client", client)
-		return new THREE.Vector3(invertedX * 20 - 10, ball.y * 20 - 10, 0);
+		const invertedX = client.invertedSide ? ball.x : ball.x * -1;
+		return new THREE.Vector3(invertedX, ball.y, 0);
 	}, [ball, client]);
 	return (
 		<>
@@ -20,7 +19,7 @@ const BallWrapper = ({ ball, client }: any) => {
 			<mesh
 				position={ballClientPosition}
 				// rotation={rotation}
-				geometry={new THREE.BoxGeometry()}
+				geometry={new THREE.BoxGeometry(2, 2, 2)}
 				material={new THREE.MeshBasicMaterial()}
 			>
 			</mesh>
@@ -35,11 +34,11 @@ const UserWrapper = ({ position, rotation, id, score }: any) => {
 			<mesh
 				position={position}
 				// rotation={rotation}
-				geometry={new THREE.BoxGeometry(1, 2, 1)}
-				material={new THREE.MeshNormalMaterial()}
+				geometry={new THREE.BoxGeometry(5, 20, 2)}
+				material={new THREE.MeshBasicMaterial({ color: 'black' })}
 			>
 				<Text
-					position={[0, 1.0, 0]}
+					position={[0, 10, 0]}
 					color="black"
 					anchorX="center"
 					anchorY="middle"
@@ -47,6 +46,23 @@ const UserWrapper = ({ position, rotation, id, score }: any) => {
 					{score}
 				</Text>
 			</mesh>
+		</>
+	)
+}
+
+const Timer = ({ time }: any) => {
+	const minutes = Math.floor(time / 60 / 1000);
+	const seconds = Math.floor(time / 1000 % 60);
+	return (
+		<>
+			<Text
+				position={[0, 10, 0]}
+				color="black"
+				anchorX="center"
+				anchorY="middle"
+			>
+				{minutes}:{seconds}
+			</Text>
 		</>
 	)
 }
@@ -64,6 +80,7 @@ export default function Game() {
 	// const clients = useRef({} as any)
 	const [id, setId] = useState('' as any)
 	const [ball, setBall] = useState({} as any)
+	const [time, setTime] = useState(0);
 	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
@@ -102,6 +119,7 @@ export default function Game() {
 			setClients(newClients.clients)
 			// console.log('clients: ', newClients.clients, newClients.ball)
 			// clients.current = newClients.clients
+			setTime(newClients.time);
 			if (newClients.ball) {
 				setBall(newClients.ball)
 				// ball.current = newClients.ball
@@ -167,7 +185,7 @@ export default function Game() {
 								<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
 							</>}
 							{gameStatus === GameStatus.Matching && <>
-								<Card.Title>Matchmeking in progress</Card.Title>
+								<Card.Title>Matchmaking in progress</Card.Title>
 								<Card.Text>
 									Looking for another player
 								</Card.Text>
@@ -226,12 +244,13 @@ export default function Game() {
 				// 	</EffectComposer>
 				// 	<Environment background preset="sunset" blur={0.8} />
 				// </Canvas>
-				<Canvas shadows camera={{ position: [0, 0, 50], fov: 30 }}>
+				<Canvas shadows camera={{ position: [0, 50, 200], fov: 60 }}>
+					<Timer time={time} />
 					{Object.keys(clients)
 						.map((client) => {
-							const { y, dir, score } = clients[client]
+							const { y, dir, score, xDistance } = clients[client]
 							// console.log(client, id, client === id);
-							const pos = [client == id ? -10 : 10, y * 20 - 10, 0]
+							const pos = [client == id ? 97.5 : -97.5, y, 0]
 							// console.log(pos);
 							return (
 								<UserWrapper
@@ -245,9 +264,11 @@ export default function Game() {
 						})}
 					{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
 					< color attach="background" args={["#171720"]} />
+					<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
 					<ambientLight intensity={0.5} />
-					<pointLight position={[-10, -10, -10]} />
-					<spotLight position={[10, 10, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
+					<pointLight position={[-100, -100, -10]} />
+					<spotLight position={[100, 100, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
+					{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
 				</Canvas>
 			}
 		</>

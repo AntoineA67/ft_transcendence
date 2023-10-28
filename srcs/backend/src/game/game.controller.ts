@@ -27,19 +27,4 @@ export class GameController {
   ): Promise<Game> {
     return await this.gamesService.create(gameData);
   }
-
-  // @Get(':id')
-  // async getGameById(@Param('id') id: string): Promise<Game> {
-  //   const game = await this.gamesService.find(Number(id));
-  //   return game;
-  // }
-
-  // @Post()
-  // async createGame(@Body('name') name: string) {
-  //   if (!name) {
-  //     throw new Error('Content is required !');
-  //   }
-  //   const newGame = await this.gamesService.create(name);
-  //   return newGame;
-  // }
 }
