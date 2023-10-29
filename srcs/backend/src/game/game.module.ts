@@ -4,10 +4,11 @@ import { GamesService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtService } from '@nestjs/jwt';
+import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 
 @Module({
   imports: [PrismaModule],
-  providers: [GamesService, GameGateway, JwtService],
+  providers: [GamesService, GameGateway, JwtService, GameSettingsService],
   controllers: [GameController],
 })
 export class GameModule { }

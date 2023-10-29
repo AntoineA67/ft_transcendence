@@ -13,6 +13,7 @@ export class GamesService {
   private clients: Record<string, string> = {};
   private rooms: Record<string, Room> = {};
 
+
   addToQueue(socket: Socket, wss: Server) {
     for (let i = 0; i < this.matchmakingQueue.length; i++) {
       if (this.matchmakingQueue[i].data.user.id === socket.data.user.id) {

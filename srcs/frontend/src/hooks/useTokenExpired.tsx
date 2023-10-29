@@ -14,7 +14,7 @@ const FETCH_TIMEOUT = 5000;  // Timeout for the fetch call set to 5 seconds
  *                            In case of any error, the function throws it.
  */
 
- const refreshJWTToken = async () => {
+const refreshJWTToken = async () => {
     const controller = new AbortController();
     setTimeout(() => controller.abort(), FETCH_TIMEOUT);
     const response = await fetch(API_REFRESH_TOKEN, {
@@ -55,7 +55,7 @@ const isTokenExpired = async (): Promise<boolean> => {
         // If the reponse is OK, then the token is valid (not expired).
         if (response.ok) {
             return false;
-        // Else, try to refresh the access token if refresh token is valid
+            // Else, try to refresh the access token if refresh token is valid
         } else {
             const refreshTokenExpired = await isRefreshTokenExpired();
             if (!refreshTokenExpired) {

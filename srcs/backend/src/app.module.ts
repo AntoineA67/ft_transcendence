@@ -16,7 +16,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MessagesModule } from './message/message.module';
 import { AchievementModule } from './achievement/achievement.module';
 import { BlockModule } from './block/block.module';
-import { CustomModule } from './custom/custom.module';
+import { GameSettingsModule } from './gameSettings/gameSettings.module';
 import { FriendRequestModule } from './friendrequest/friendrequest.module';
 import { FriendshipModule } from './friendship/friendship.module';
 import { MemberModule } from './member/member.module';
@@ -34,13 +34,13 @@ import { ProfileModule } from './profile/profile.module';
     AuthModule,
     AchievementModule,
     BlockModule,
-    CustomModule,
+    GameSettingsModule,
     FriendRequestModule,
     FriendshipModule,
     MemberModule,
     PlayerModule,
     RoomModule,
-	ProfileModule,
+    ProfileModule,
     DevtoolsModule.register({
       port: 3001,
       http: process.env.NODE_ENV !== 'production',
