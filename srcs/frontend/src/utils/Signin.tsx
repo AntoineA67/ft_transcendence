@@ -1,12 +1,6 @@
 import { useOutletContext, Link } from "react-router-dom";
 import { useState } from 'react';
-// import githubLogo from '../assets/github.svg';
-// import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
-// import eyeclose from '../assets/eyeclose.svg';
-
-// import axios from 'axios';
-// import Form from 'react-bootstrap/Form';
 
 type newUser = {
 	username: string,
@@ -25,9 +19,6 @@ type loginContext = {
 }
 
 /* sign in page */
-
-// import { useSearchParams } from "react-router-dom";
-
 
 export function Signin() {
 	const { togglePassword, handleSubmit } = useOutletContext<loginContext>();

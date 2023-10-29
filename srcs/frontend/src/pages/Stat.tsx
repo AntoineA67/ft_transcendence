@@ -231,7 +231,7 @@ export default function Stat({ gameHistory, achieve }: statProp) {
 						<AchieveContent achieve={{ ...achieve }} />
 					</div>
 				</div>
-			</div>
+			</div >
 		</>
 	);
 }

@@ -11,7 +11,7 @@ import {
 export class Signin42Dto {
 @IsNumber()                             id!: number;
 @IsNotEmpty() @IsString() @IsEmail()    email!: string;
-@IsNotEmpty() @IsString()              token2FA: string;
+@IsNotEmpty() @IsString()               token2FA: string;
 @IsNotEmpty() @IsBoolean()              activated2FA: boolean;
-user: any;
+                                        user: any;
 }
