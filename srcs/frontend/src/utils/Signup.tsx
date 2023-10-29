@@ -1,12 +1,7 @@
 import { useOutletContext, Link } from "react-router-dom";
 import { useState } from 'react';
-// import githubLogo from '../assets/github.svg';
-// import fortytwologo from '../assets/fortytwologo.svg';
+import { validatePassword, validateUsername } from "./CredentialsRegex";
 import eyeopen from '../assets/eyeopen.svg';
-// import eyeclose from '../assets/eyeclose.svg';
-
-// import axios from 'axios';
-// import Form from 'react-bootstrap/Form';
 
 type newUser = {
 	username: string,
@@ -42,8 +37,23 @@ export function Signup() {
 					<Link to="..">
 						<button className="leftArrow my-4"></button>
 					</Link>
-					<form className="w-100" onSubmit={(e) => (
-						handleSubmit(e, { username: nick, email: email, password: pass }, setErr))}>
+					<form className="w-100" onSubmit={(e) => {
+						e.preventDefault();
+
+						const passwordValidationError = validatePassword(pass);
+						if (passwordValidationError) {
+							setErr(passwordValidationError);
+							return;
+						}
+
+						const usernameValidationError = validateUsername(nick);
+						if (usernameValidationError) {
+							setErr(usernameValidationError);
+							return;
+						}
+
+						handleSubmit(e, { username: nick, email: email, password: pass }, setErr);
+					}}>
 						<h3 className='white-text'>New Account!</h3>
 
 						<div className="mt-4">
