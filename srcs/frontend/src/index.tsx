@@ -41,6 +41,7 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
+import { WebcamPong } from './pages/WebcamPong';
 
 axios.defaults.baseURL = 'http://127.0.0.1:3000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -175,6 +176,7 @@ const router = createBrowserRouter(
 
 					<Route path="/game" element={<Game />}></Route>
 					<Route path="/game/:userId" element={<Game />}></Route>
+					{/* <Route path="/test" element={<WebcamPong />}></Route> */}
 				</Route>
 			</Route>
 		</Route>
