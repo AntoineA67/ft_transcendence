@@ -53,7 +53,7 @@ export class GamesService {
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
-    console.log(this.clients)
+    // console.log(this.clients)
     this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
 
