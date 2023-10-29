@@ -25,7 +25,7 @@ export default class Player {
 	}
 	earnPoint() {
 		this.score++;
-		console.log('score', this.score);
+		console.log('score', this.score, this.id);
 		return this.score >= 5;
 	}
 }

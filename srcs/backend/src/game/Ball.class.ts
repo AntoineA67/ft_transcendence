@@ -27,7 +27,7 @@ export default class Ball {
 		else if (this.y + Ball.ballRadius > 100) {
 			this.y = 100 - Ball.ballRadius;
 			this.velocityY = -this.velocityY;
-			console.log(this.velocityX, this.velocityY, this.x, this.y)
+			// console.log(this.velocityX, this.velocityY, this.x, this.y)
 		}
 		if (this.x - Ball.ballRadius <= -100 || this.x + Ball.ballRadius >= 100) {
 			const playerIndex = (this.x < 0) ? 1 : 0;
@@ -40,7 +40,7 @@ export default class Ball {
 		// const player = playersList[this.x < 50 ? 0 : 1];
 		for (let player of playersList) {
 			if (this.collide(player)) {
-				console.log("collide", player, player.xDistance, this.x, this.y);
+				// console.log("collide", player, player.xDistance, this.x, this.y);
 				let collidePoint = this.y - player.y;
 				collidePoint = collidePoint / Player.halfPaddleHeight;
 				const angleRad = (Math.PI / 4) * collidePoint;

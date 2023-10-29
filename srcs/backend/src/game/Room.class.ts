@@ -16,6 +16,7 @@ export default class Room {
 	private interval: NodeJS.Timeout | null = null;
 	private gameId: number = 0;
 	private startTime: number = Date.now();
+	private playerLeft: number = -1;
 
 	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
 
@@ -30,6 +31,7 @@ export default class Room {
 
 	public async leave(id: string) {
 		if (this.players[id]) {
+
 			let winner;
 			for (const playerId in this.players) {
 				if (playerId != id) {
@@ -37,9 +39,10 @@ export default class Room {
 					break;
 				}
 			}
-			this.endGame(winner).then(() => {
-				delete this.players[id];
-			});
+			this.playerLeft = winner;
+			// this.endGame(winner).then(() => {
+			// delete this.players[id];
+			// });
 		}
 	}
 
@@ -59,6 +62,10 @@ export default class Room {
 
 	private updateGameTick() {
 		if (!this.ball) return;
+		if (this.playerLeft !== -1) {
+			this.endGame(Number(this.playerLeft));
+			return;
+		}
 		for (const client of Object.values(this.players)) {
 			client.update();
 		}
