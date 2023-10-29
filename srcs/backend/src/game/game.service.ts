@@ -94,7 +94,7 @@ export class GamesService {
     console.log('player1', player1.id, player1.data.user.id)
     console.log('player2', player2.id, player2.data.user.id)
 
-    this.rooms[roomId] = new Room(roomId, wss, player1, player2);
+    this.rooms[roomId] = new Room(roomId, wss, player2, player1);
   }
 
   async findAll(): Promise<any> {

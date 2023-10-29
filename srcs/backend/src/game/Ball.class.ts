@@ -16,7 +16,7 @@ export default class Ball {
 
 	update(players: { [id: string]: Player; }) {
 		// console.log(players)
-		const playersList = Object.values(players)
+		const playersList = Object.values(players).sort((a, b) => a.invertedSide ? 1 : -1);
 		if (playersList.length < 2) return null;
 		this.x += this.velocityX;
 		this.y += this.velocityY;
