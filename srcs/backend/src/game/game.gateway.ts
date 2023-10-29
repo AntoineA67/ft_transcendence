@@ -1,5 +1,6 @@
 import { Logger, UseGuards } from '@nestjs/common';
 import {
+    ConnectedSocket,
     OnGatewayConnection,
     OnGatewayDisconnect,
     OnGatewayInit,
@@ -14,11 +15,12 @@ import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/constants';
+import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    constructor(private readonly gamesService: GamesService, private jwtService: JwtService) { }
+    constructor(private readonly gamesService: GamesService, private jwtService: JwtService, private readonly gameSettingsService: GameSettingsService) { }
 
     private logger: Logger = new Logger('Game Gateway');
 
@@ -54,6 +56,22 @@ export class GameGateway
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
         console.log(socket.data.user.id);
         this.gamesService.handleKeysPresses(socket.data.user.id, payload);
+    }
+
+    @SubscribeMessage('changeColor')
+    async handleColor(socket: Socket, payload: string): Promise<void> {
+        this.gameSettingsService.handleColor(socket.data.user.id, payload);
+    }
+
+    // @SubscribeMessage('getMyPaddleColor')
+    // async getColor(socket: Socket, payload: string): Promise<void> {
+    //     this.gameSettingsService.handleColor(socket.data.user.id, payload);
+    // }
+    @SubscribeMessage('getMyPaddleColor')
+    async handleMyProfile(@ConnectedSocket() client: Socket) {
+        this.logger.log('getMyPaddleColor')
+        const userId: number = client.data.user.id;
+        return (await this.gameSettingsService.getUserGameSettings(userId))
     }
 }
 

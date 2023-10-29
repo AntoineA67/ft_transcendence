@@ -5,12 +5,13 @@ import { Box, Plane, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
-import { Grid } from "@react-three/postprocessing"
+// import { Grid } from "@react-three/postprocessing"
+import { Wheel } from '@uiw/react-color';
 
 
 const BallWrapper = ({ ball, client }: any) => {
 	const ballClientPosition: THREE.Vector3 = useMemo(() => {
-		const invertedX = client.invertedSide ? ball.x : ball.x * -1;
+		const invertedX = client.invertedSide ? ball.x * -1 : ball.x;
 		return new THREE.Vector3(invertedX, ball.y, 0);
 	}, [ball, client]);
 	return (
@@ -27,7 +28,7 @@ const BallWrapper = ({ ball, client }: any) => {
 	)
 }
 
-const UserWrapper = ({ position, rotation, id, score }: any) => {
+const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 	return (
 		<>
 			<Box position={position} />
@@ -35,13 +36,14 @@ const UserWrapper = ({ position, rotation, id, score }: any) => {
 				position={position}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry(5, 20, 2)}
-				material={new THREE.MeshBasicMaterial({ color: 'black' })}
+				material={new THREE.MeshBasicMaterial({ color: paddleColor })}
 			>
 				<Text
-					position={[0, 10, 0]}
-					color="black"
+					position={[0, 20, 0]}
+					color="white"
 					anchorX="center"
 					anchorY="middle"
+					scale={[10, 10, 10]}
 				>
 					{score}
 				</Text>
@@ -56,15 +58,49 @@ const Timer = ({ time }: any) => {
 	return (
 		<>
 			<Text
-				position={[0, 10, 0]}
-				color="black"
+				position={[0, 100, 10]}
+				color="white"
 				anchorX="center"
 				anchorY="middle"
+				scale={[10, 10, 10]}
 			>
-				{minutes}:{seconds}
+				{minutes}:{seconds.toString().padStart(2, '0')}
 			</Text>
 		</>
 	)
+}
+
+const PaddleWheel = ({ currentColor }: any) => {
+	const [hex, setHex] = useState("#fff");
+
+	useEffect(() => {
+		setHex(currentColor);
+	}, [currentColor]);
+	return (
+		<Card className="paddle-wheel-card m-5" style={{ maxWidth: "140px" }}>
+			<Card.Header>Paddle Color</Card.Header>
+			<Card.Body className="flex align-center">
+				<Wheel
+					style={{ minHeight: "20px" }}
+					color={hex}
+					width={100}
+					height={100}
+					onChange={(color) => {
+						gamesSocket.emit('changeColor', color.hex);
+						setHex(color.hex);
+					}}
+				/>
+			</Card.Body>
+		</Card>
+		// <Wheel
+		// 	style={{ marginLeft: 20 }}
+		// 	color={hex}
+		// 	onChange={(color) => {
+		// 		gamesSocket.emit('changeColor', color.hex);
+		// 		setHex(color.hex);
+		// 	}}
+		// />
+	);
 }
 
 enum GameStatus {
@@ -77,14 +113,12 @@ enum GameStatus {
 export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
-	// const clients = useRef({} as any)
 	const [id, setId] = useState('' as any)
 	const [ball, setBall] = useState({} as any)
 	const [time, setTime] = useState(0);
-	// const ball = useRef({} as any)
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
-	// const socket = useGamesSocket();
+	const [paddleColor, setPaddleColor] = useState('#fff');
 
 	useEffect(() => {
 		// const profile = axios.get('/profile', {
@@ -97,7 +131,10 @@ export default function Game() {
 		const profile = globalSocket.emit('MyProfile', (res: any) => {
 			console.log("MyProfile", res);
 			setId(res.id);
-
+		});
+		const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
+			console.log("MyColor", res.paddleColor);
+			setPaddleColor(res.paddleColor);
 		});
 		console.log("Id", id);
 		// gamesSocket.on('connect', function () {
@@ -111,6 +148,10 @@ export default function Game() {
 		// 	setId(newId)
 		// })
 		gamesSocket.on('startGame', (newId: any) => {
+			const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
+				console.log("MyColor", res.paddleColor);
+				setPaddleColor(res.paddleColor);
+			});
 			console.log('startGame: ', newId)
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
@@ -183,6 +224,7 @@ export default function Game() {
 								</Card.Text>
 								<br></br>
 								<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
+								<PaddleWheel currentColor={paddleColor} />
 							</>}
 							{gameStatus === GameStatus.Matching && <>
 								<Card.Title>Matchmaking in progress</Card.Title>
@@ -250,7 +292,8 @@ export default function Game() {
 						.map((client) => {
 							const { y, dir, score, xDistance } = clients[client]
 							// console.log(client, id, client === id);
-							const pos = [client == id ? 97.5 : -97.5, y, 0]
+							const pos = [client == id ? -97.5 : 97.5, y, 0]
+							const myPaddleColor = client == id ? paddleColor : '#fff';
 							// console.log(pos);
 							return (
 								<UserWrapper
@@ -259,6 +302,7 @@ export default function Game() {
 									score={score}
 									position={pos}
 									rotation={[0, dir, 0]}
+									paddleColor={myPaddleColor}
 								/>
 							)
 						})}

@@ -2,7 +2,7 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDiscon
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway()
-export class CustomGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class GameSettingsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
