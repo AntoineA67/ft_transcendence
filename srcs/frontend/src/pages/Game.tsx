@@ -7,6 +7,7 @@ import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 // import { Grid } from "@react-three/postprocessing"
 import { Wheel } from '@uiw/react-color';
+import { useParams } from "react-router-dom"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -119,6 +120,7 @@ export default function Game() {
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
 	const [paddleColor, setPaddleColor] = useState('#fff');
+	let params = useParams();
 
 	useEffect(() => {
 		// const profile = axios.get('/profile', {
@@ -170,6 +172,13 @@ export default function Game() {
 			console.log('Game Over! Winner: ', winner);
 			setGameStatus(GameStatus.Finished);
 		})
+		if (params.userId) {
+			console.log("Matching against", params.userId);
+			gamesSocket.emit('matchAgainst', params.userId);
+			if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
+			// gamesSocket.emit('match');
+			setGameStatus(GameStatus.Matching);
+		}
 		return () => {
 			cancelMatchmaking();
 			console.log("Game unmounted");
@@ -225,6 +234,7 @@ export default function Game() {
 								<br></br>
 								<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
 								<PaddleWheel currentColor={paddleColor} />
+
 							</>}
 							{gameStatus === GameStatus.Matching && <>
 								<Card.Title>Matchmaking in progress</Card.Title>

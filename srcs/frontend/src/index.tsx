@@ -82,8 +82,8 @@ async function loader(route: string, param?: string, refresh = false) {
 		localStorage.setItem('refreshToken', newTokens.refreshToken);
 		return loader(route, param, true);
 	})
-	
-	
+
+
 	// try {
 	// 	const res = await fetch(fetchUrl, {
 	// 		headers: { 'Authorization': `Bearer ${token}` }
@@ -173,7 +173,8 @@ const router = createBrowserRouter(
 						<Route index element={<SettingMenu />}></Route>
 					</Route>
 
-					<Route path="game" element={<Game />}></Route>
+					<Route path="/game" element={<Game />}></Route>
+					<Route path="/game/:userId" element={<Game />}></Route>
 				</Route>
 			</Route>
 		</Route>
