@@ -59,11 +59,12 @@ export class GamesService {
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {
+      const player1 = this.matchmakingQueue.pop();
+      const player2 = this.matchmakingQueue.pop();
+
       // Create a new room for the clients
       const roomId = uuidv4();
       console.log('roomId', roomId)
-      const player1 = this.matchmakingQueue.pop();
-      const player2 = this.matchmakingQueue.pop();
 
       player1.join(roomId);
       player2.join(roomId);
@@ -76,6 +77,24 @@ export class GamesService {
 
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
+  }
+
+  public matchmakePlayers(wss, player1: Socket, player2: Socket) {
+
+    // Create a new room for the clients
+    const roomId = uuidv4();
+    console.log('roomId', roomId)
+
+    player1.join(roomId);
+    player2.join(roomId);
+
+    this.clients[player1.data.user.id] = roomId;
+    this.clients[player2.data.user.id] = roomId;
+
+    console.log('player1', player1.id, player1.data.user.id)
+    console.log('player2', player2.id, player2.data.user.id)
+
+    this.rooms[roomId] = new Room(roomId, wss, player1, player2);
   }
 
   async findAll(): Promise<any> {
