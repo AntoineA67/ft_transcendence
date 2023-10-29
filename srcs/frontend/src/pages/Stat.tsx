@@ -51,7 +51,7 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 			<h3 className='p-3 grey-text pb-5'>Empty</h3>
 		) : (
 			<ul className="p-1 pb-5">
-				{gameHistory.map(listItem)}
+				{gameHistory.reverse().map(listItem)}
 			</ul>
 		)
 	);
