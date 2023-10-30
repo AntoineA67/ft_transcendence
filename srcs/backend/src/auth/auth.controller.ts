@@ -96,9 +96,11 @@ export class AuthController {
 	@Public()
     @Get('42Url')
     async get42Url() : Promise<string> {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
-        return (url);
+        // const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "&response_type=code&scope=public";
+        const url = "https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-c3cfa289b86c67f993f89a60fd6cda2bca82977d0bb75253d4dbfd1d9e97b85f&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2F42%2Fcallback&response_type=code";
+		return (url);
     }
+	// https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-368b6ebfaf963be1575b24ba5d191b64a58f371fdaa73d5d3d0e8d8838801902&redirect_uri=http://localhost:3000/42/callback&response_type=code&scope=public
 
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')

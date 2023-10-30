@@ -10,11 +10,14 @@ export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
-	const state = searchParams.get('state') || null;
+	// const state = searchParams.get('state') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		if (!code || !state) return;
+		// if (!code || !state) return;
+		if (!code) {setStatus('done')
+			return;
+		};
 		let response;
 
 		try {
