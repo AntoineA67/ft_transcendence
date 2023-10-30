@@ -90,6 +90,8 @@ export class AuthController {
 	async refreshToken(@Req() req: Request, @Res() res: Response)
 	{
 		console.log("passing by refreshToken");
-		return this.authService.refreshToken(req.body.refreshToken, req, res);
+		const ret = await this.authService.refreshToken(req.body.refreshToken, req, res);
+		console.log('refersh token: ', ret)
+		return res.status(201).json(ret);
 	}
 }

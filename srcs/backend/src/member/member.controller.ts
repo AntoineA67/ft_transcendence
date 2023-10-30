@@ -11,13 +11,6 @@ export class MemberController {
     return this.memberService.createMember(data);
   }
 
-  @Get(':id')
-  async getMessageById(@Param('id') id: string): Promise<Member> {
-    const messageId = parseInt(id, 10);
-    const message = await this.memberService.getMemberById(messageId);
-    return message;
-  }
-
   @Get()
   async getAllMembers(): Promise<Member[]> {
     return this.memberService.getAllMembers();

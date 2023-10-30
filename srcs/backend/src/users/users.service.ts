@@ -62,18 +62,24 @@ export class UsersService {
 				status: true,
 			}
 		});
-		return users;
+		let ret: UserDto[] = [];
+		for (let user of users) {
+			ret.push({ ...user, avatar: this.bufferToBase64(user.avatar)})
+		}
+		return ret;
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		if (data.username || data.username === "") {
-			let valid = data.username.match(/^[a-z0-9\-_]+$/i);
-            let empty = data.username.match(/^(?!\s*$).+/i);
-            if (!valid || empty == null) return (false)
-        }
+		// if (data.username || data.username === "") {
+		// 	let valid = data.username.match(/^[a-z0-9\-_]+$/i);
+        //     let empty = data.username.match(/^(?!\s*$).+/i);
+        //     if (!valid || empty == null) return (false)
+        // }
+		console.log("PASS ==", data.password);
 		let user: User;
 		if (data.password)
 		{
+			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
@@ -129,34 +135,34 @@ export class UsersService {
 		return (user.username);
 	}
 
-	async getUserBasic(id: number) {
-		return (
-			await this.prisma.user.findUnique({
-				where: { id },
-				select: {
-					id: true,
-					username: true,
-					avatar: true,
-					status: true,
-				}
-			})
-		)
-	}
+	// async getUserBasic(id: number) {
+	// 	return (
+	// 		await this.prisma.user.findUnique({
+	// 			where: { id },
+	// 			select: {
+	// 				id: true,
+	// 				username: true,
+	// 				avatar: true,
+	// 				status: true,
+	// 			}
+	// 		})
+	// 	)
+	// }
 
 	async getUserById(id: number): Promise<UserDto> {
-		return (
-			await this.prisma.user.findUnique({
-				where: { id },
-				select: {
-					id: true,
-					email: true,
-					username: true,
-					avatar: true,
-					status: true,
-					activated2FA: true,
-				}
-			})
-		)
+		let user = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				id: true,
+				email: true,
+				username: true,
+				avatar: true,
+				status: true,
+				activated2FA: true,
+			}
+		})
+		
+		return ({ ...user, avatar: this.bufferToBase64(user.avatar) })
 	}
 
 	// the freind, block, blocked should be given by other services
@@ -180,6 +186,7 @@ export class UsersService {
 		}
 		return ({
 			...profile,
+			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
@@ -198,28 +205,33 @@ export class UsersService {
 		});
 		return ({
 			...profile,
+			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
 	}
 
 	async getUserByNick(nick: string): Promise<UserDto> {
-		return (
-			await this.prisma.user.findUnique({
-				where: { username: nick },
-				select: {
-					id: true,
-					username: true,
-					avatar: true,
-					status: true,
-				}
-			})
-		)
+		const user = await this.prisma.user.findUnique({
+			where: { username: nick },
+			select: {
+				id: true,
+				username: true,
+				avatar: true,
+				status: true,
+			}
+		})
+		if (user == null) {
+			return (null)
+		}
+		return ({
+			...user, avatar: this.bufferToBase64(user.avatar)
+		})
 	}
 
 	async getUserByUsername(username: string): Promise<User> {
 		try {
-            const user = await this.prisma.user.findUnique({
+            const user = await this.prisma.user.findFirst({
             where: {
                 username: username,
             },
@@ -281,9 +293,27 @@ export class UsersService {
 			profile = { ...profile, hashPassword: null };
 		}
 		return ({
-			...profile,
+			...profile, 
+			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
+	}
+
+	bufferToBase64(buf: Buffer | null): string {
+		if (buf == null) {
+			return (null)
+		}
+		return (buf.toString('base64'));
+	}
+	
+	async getAvatar(id: number): Promise<string | null> {
+		let { avatar } = await this.prisma.user.findUnique({
+			where: { id },
+			select: {
+				avatar: true,
+			}
+		});
+		return (this.bufferToBase64(avatar));
 	}
 }

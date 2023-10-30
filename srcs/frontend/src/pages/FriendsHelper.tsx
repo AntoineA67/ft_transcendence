@@ -36,7 +36,7 @@ export function FriendList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id} className='m-0 p-0'>
-				<UserItem user={{... user}} linkTo={user.username} />
+				<UserItem user={{...user}} linkTo={user.username} />
 			</li>
 		)
 	}
@@ -59,7 +59,7 @@ export function FriendReqList() {
 			setReqs(res);
 		})
 		function handleReq(sender: userType) {
-			setReqs((prev) => ([sender, ... prev]))
+			setReqs((prev) => ([sender, ...prev]))
 			// setReqs([...reqs, sender]);
 		}
 		friendsSocket.on('recvfriendReq', handleReq);
@@ -86,7 +86,7 @@ export function FriendReqList() {
 		return (
 			<li key={user.id}>
 				<ReqItem 
-					user={{... user}} 
+					user={{...user}} 
 					linkTo={user.username} 
 					onAccept={(e: any) => handleClick(e, user.id,true)} 
 					onDecline={(e: any) => handleClick(e, user.id, false)}/>
@@ -113,7 +113,7 @@ export function BlockList() {
 
 		function handleBlock(otherUser: userType) {
 			console.log('blocks', otherUser)
-			setBlocks((prev) => ([... prev, otherUser]))
+			setBlocks((prev) => ([...prev, otherUser]))
 		}
 		function handleUnblock(otherUser: userType) {			
 			setBlocks((prev) => (prev.filter((x) => (x.id != otherUser.id))))
@@ -129,7 +129,7 @@ export function BlockList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				<UserItem user={{... user}} linkTo={user.username} />	
+				<UserItem user={{...user}} linkTo={user.username} />	
 			</li>
 		)
 	}
