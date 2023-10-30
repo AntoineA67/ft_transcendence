@@ -5,7 +5,7 @@ export function Oauth42() {
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
 	const clientId = 'u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89';
-	const redirectUri = 'http://localhost:8000/42/callback';
+	const redirectUri = 'http://localhost:3000/42/callback';
 	const responseType = 'code';
 	const scope = 'public';
 
