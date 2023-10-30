@@ -95,7 +95,7 @@ export class AuthController {
 	@Public()
     @Get('42Url')
     async get42Url() {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
+        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.REACT_APP_FORTYTWO_APP_ID + "&redirect_uri=" + process.env.REACT_APP_FRONTEND_URL +  + '/42/callback' + "&response_type=code";
         return (url);
     }
 

@@ -217,7 +217,7 @@ export function SettingMenu() {
 				<hr />
 				<br></br>
 				<button onClick={() => {
-				let url = ("http://localhost:3000/auth/signout");
+				let url = (process.env.REACT_APP_BACKEND_URL + "/auth/signout");
 				const fetchObj = {
 					method: 'POST',
 					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`,},

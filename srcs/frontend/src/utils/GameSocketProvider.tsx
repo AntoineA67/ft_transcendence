@@ -2,8 +2,6 @@ import io, { Socket } from "socket.io-client";
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { gamesSocket } from "./socket";
 
-const hostAdress = 'localhost:3000'
-
 function connectToSocketWithToken(token: any) {
   return gamesSocket;
 }
