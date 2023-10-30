@@ -20,11 +20,6 @@ type login = {
 	password: string
 }
 
-// type loginContext = {
-// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
-// 	togglePassword: () => void,
-// }
-
 export function Login() {
 	const navigate = useNavigate();
 
@@ -46,8 +41,8 @@ export function Login() {
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
 		let data;
-		let url = ('username' in user) ? ('http://localhost:3000/auth/signup'
-		) : ('http://localhost:3000/auth/signin');
+		let url = ('username' in user) ? ('http://localhost:4000/auth/signup'
+		) : ('http://localhost:4000/auth/signin');
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -57,8 +52,6 @@ export function Login() {
 			let response = await fetch(url, fetchObj)
 			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			// console.log("data===", data);
-			// console.log("coucouuu", data.error);
 			('error' in data) && dealError(data, setErr);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
@@ -81,18 +74,6 @@ export function Login() {
 	return (
 		<Outlet context={{ togglePassword, handleSubmit }} />
 	);
-}
-
-export function Oauth42() {
-	const api42 = 'https://api.intra.42.fr/oauth/authorize';
-	const clientId = 'u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89';
-	const redirectUri = 'http://localhost:8000/42/callback';
-	const responseType = 'code';
-	const scope = 'public';
-
-	const oauth42 = `${api42}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
-
-	return oauth42;
 }
 
 export const InputToken = ({ handleChange }: any) => {
@@ -119,20 +100,18 @@ export const InputToken = ({ handleChange }: any) => {
 };
 
 let url42 = () => {
-	return axios.get('http://localhost:3000/auth/42Url')
+	return axios.get('http://localhost:4000/auth/42Url');
 }
 
 export function TokenPage() {
 
-	// const oauth42Url = Oauth42();
-	// const oauth42Url = url42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	async function sendToken() {
 		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
-		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		const response = await fetch(`http://localhost:4000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
 			await url42()
@@ -151,7 +130,6 @@ export function TokenPage() {
 		<div className='container' >
 			<div className="row justify-content-center">
 				<div className='col-sm-6 col-lg-6' >
-					{/*  sm="6" lg="6" */}
 
 					<div className='white-text m-0 mt-4' > {/* style={{ color: "white", margin: "60px 0 0 0" }} */}
 						<h2>Two-factor authentication</h2>
@@ -184,15 +162,26 @@ export function TokenPage() {
 
 export function LandingPage() {
 
-	const oauth42Url = Oauth42();
-	// const oauth42Url = url42();
 	const github = "https://github.com/AntoineA67/ft_transcendence";
-
+	const [oauth42Url, setOauth42Url] = useState<string>('');
 
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-		// localStorage.removeItem('_2fa');
-	}, []);
+		// Fetch the URL on component mount
+		const fetchUrl42 = async () => {
+		  try {
+			const response = await axios.get('http://localhost:4000/auth/42Url');
+			setOauth42Url(response.data);
+			console.log("response===", response.data);
+		} catch (error) {
+			console.error("There was an error fetching the 42 API URL: ", error);
+			setOauth42Url(''); // In case of an error, reset the URL
+		  }
+		};
+	
+		fetchUrl42();
+	  }, []);
+	
 
 	return (
 		<>
@@ -213,9 +202,9 @@ export function LandingPage() {
 								<Link to='signup' className="w-75">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								<a href={oauth42Url} >
-									<span>Sign in with </span>
-									<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
+								<a href={oauth42Url}>
+								<span>Sign in with </span>
+								<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
 								</a>
 							</div>
 						</div>

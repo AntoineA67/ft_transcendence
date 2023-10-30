@@ -46,26 +46,7 @@ export class AuthController {
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
-	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
-		// let response;
-
-		// this.logger.log('/42/callback');
-		// // if 2fa is activated and user have not sent token
-		// if (!req.query._2fa && req.user.activated2FA) {
-		// 	response = { id: req.user.id, _2fa: true };
-		// // if 2fa is activated and user have sent token
-		// } else if (req.query._2fa && req.user.activated2FA) {
-		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2faValid) {
-		// 		response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-		// 	} else {
-		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-		// 	}
-		// 	// no 2fa
-		// } else 
-		// 	response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-		// res.status(HttpStatus.OK).json(response);
 		const dto: Signin42Dto = {
 			id: req.user.id,
 			email: req.user.email,
@@ -94,9 +75,9 @@ export class AuthController {
 
 	@Public()
     @Get('42Url')
-    async get42Url() {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
-        return (url);
+    async get42Url() : Promise<string> {
+        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "&response_type=code&scope=public";
+		return (url);
     }
 
 	@UseGuards(JwtAuthGuard)
