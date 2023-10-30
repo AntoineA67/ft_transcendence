@@ -66,6 +66,7 @@ export class AuthController {
 		// } else 
 		// 	response = await this.authService.signJwtTokens(req.user.id, req.user.email);
 		// res.status(HttpStatus.OK).json(response);
+		// console.log("req=",req);
 		const dto: Signin42Dto = {
 			id: req.user.id,
 			email: req.user.email,
@@ -94,7 +95,7 @@ export class AuthController {
 
 	@Public()
     @Get('42Url')
-    async get42Url() {
+    async get42Url() : Promise<string> {
         const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
         return (url);
     }

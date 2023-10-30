@@ -42,7 +42,7 @@ import { ProfileModule } from './profile/profile.module';
     RoomModule,
 	ProfileModule,
     DevtoolsModule.register({
-      port: 3001,
+      port: 4001,
       http: process.env.NODE_ENV !== 'production',
     }),
   ],

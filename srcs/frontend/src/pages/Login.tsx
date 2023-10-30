@@ -46,8 +46,8 @@ export function Login() {
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
 		let data;
-		let url = ('username' in user) ? ('http://localhost:3000/auth/signup'
-		) : ('http://localhost:3000/auth/signin');
+		let url = ('username' in user) ? ('http://localhost:4000/auth/signup'
+		) : ('http://localhost:4000/auth/signin');
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -84,19 +84,19 @@ export function Login() {
 }
 
 export function Oauth42() {
-	const random = Math.random().toString(36).slice(2, 12);
+	// const random = Math.random().toString(36).slice(2, 12);
 
 	const api42 = 'https://api.intra.42.fr/oauth/authorize';
 	const clientId = 'u-s4t2ud-92e9863469ae5ee4e62ea09c6434ee83527230b782782a942f3145cc1ed79b89';
-	const redirectUri = 'http://localhost:8000/42/callback';
+	const redirectUri = 'http://localhost:3000/42/callback';
 	const responseType = 'code';
 	const scope = 'public';
 
-	const oauth42 = `${api42}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&state=${random}`;
+	const oauth42 = `${api42}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
 
-	useEffect(() => {
-		localStorage.setItem('random', random);
-	}, []);
+	// useEffect(() => {
+	// 	localStorage.setItem('random', random);
+	// }, []);
 
 	return oauth42;
 }
@@ -125,7 +125,7 @@ export const InputToken = ({ handleChange }: any) => {
 };
 
 let url42 = () => {
-	return axios.get('http://localhost:3000/auth/42Url')
+	return axios.get('http://localhost:4000/auth/42Url');
 }
 
 export function TokenPage() {
@@ -138,7 +138,7 @@ export function TokenPage() {
 
 	async function sendToken() {
 		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
-		const response = await fetch(`http://localhost:3000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		const response = await fetch(`http://localhost:4000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
 			await url42()
@@ -190,15 +190,57 @@ export function TokenPage() {
 
 export function LandingPage() {
 
-	const oauth42Url = Oauth42();
-	// const oauth42Url = url42();
+	// const oauth42Url = Oauth42();
+	// const oauth42Url = await url42();
+	// const [oauth, setOauth] = useState(null)
 	const github = "https://github.com/AntoineA67/ft_transcendence";
+	// const fetchUrl42 = async () => {
+	// 	try {
+	// 	  const response = await axios.get('http://localhost:4000/auth/42Url');
+	// 	  setOauth(response.data.url); // Assuming that the response has a data object with a url property.
+	// 	} catch (error) {
+	// 	  console.error("There was an error fetching the 42 API URL: ", error);
+	// 	  setOauth(''); // In case of an error, reset the URL or set it to a default error value.
+	// 	}
+	//   };
+  
+	//   fetchUrl42();
+	// }, []);
 
+
+	// useEffect(() => {
+	// 	localStorage.removeItem('_2fa');
+		// localStorage.removeItem('_2fa');
+
+		// const getUrl = async () => {
+		// 	const url = await axios.get('http://localhost:4000/auth/42Url');
+		// 	// JSON.parse(url);
+		// 	setOauth(url);
+		// }
+		// getUrl();
+		
+
+	// }, []);
+
+	const [oauth42Url, setOauth42Url] = useState<string>('jjjjjj');
 
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-		// localStorage.removeItem('_2fa');
-	}, []);
+		// Fetch the URL on component mount
+		const fetchUrl42 = async () => {
+		  try {
+			const response = await axios.get('http://localhost:4000/auth/42Url');
+			setOauth42Url(response.data); // Assuming that the response has a data object with a url property.
+			console.log("response===", response.data);
+		} catch (error) {
+			console.error("There was an error fetching the 42 API URL: ", error);
+			setOauth42Url(''); // In case of an error, reset the URL or set it to a default error value.
+		  }
+		};
+	
+		fetchUrl42();
+	  }, []);
+	
 
 	return (
 		<>
@@ -219,9 +261,9 @@ export function LandingPage() {
 								<Link to='signup' className="w-75">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								<a href={oauth42Url} >
-									<span>Sign in with </span>
-									<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
+								<a href={oauth42Url}>
+								<span>Sign in with </span>
+								<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
 								</a>
 							</div>
 						</div>

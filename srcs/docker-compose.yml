@@ -16,8 +16,8 @@ services:
     restart: always
     container_name: backend
     ports:
-      - 3000:3000
-      - 3001:3001
+      - 4000:4000
+      - 4001:4001
       - 5555:5555
     volumes:
       - "./${ENVPATH}/backend/:/app"
@@ -27,7 +27,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:3000/ || exit 1" ]
+      test: [ "CMD-SHELL", "curl -f http://localhost:4000/ || exit 1" ]
       start_period: 10s
       interval: 10s
       timeout: 5s
@@ -63,7 +63,7 @@ services:
     restart: always
     container_name: frontend
     ports:
-      - 8000:8000
+      - 3000:3000
     volumes:
       - "./frontend/:/app"
       - "../build/frontend/:/build"
@@ -71,7 +71,7 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/" ]
       start_period: 10s
       interval: 10s
       timeout: 5s
