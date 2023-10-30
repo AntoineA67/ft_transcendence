@@ -10,21 +10,21 @@ export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
+	// const state = searchParams.get('state') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		console.log('callback42');
-		if (!code) {
-			setStatus('done');
+		// if (!code || !state) return;
+		if (!code) {setStatus('done')
 			return;
-		}
+		};
 		let response;
 
 		try {
 			if (_2fa?.activated === true) {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
+				response = await fetch(`http://localhost:4000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
 			} else {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+				response = await fetch(`http://localhost:4000/auth/42/callback?code=${code}`);
 			}
 			const data = await response.json();
 			console.log('data: ', data)
@@ -84,7 +84,7 @@ export function Protected() {
 			setStatus('error')
 			console.log('err', err)
 			// if (localStorage.getItem('token')) {
-				// axios.post("http://localhost:3000/auth/signout", {}, {
+				// axios.post("http://localhost:4000/auth/signout", {}, {
 				// 	headers: {
 				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
 				// 	}
