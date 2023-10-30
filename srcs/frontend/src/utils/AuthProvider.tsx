@@ -22,9 +22,9 @@ export function CallBack42() {
 
 		try {
 			if (_2fa?.activated === true) {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
+				response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/42/callback?code=${code}&_2fa=${_2fa?.token}`);
 			} else {
-				response = await fetch(`http://localhost:3000/auth/42/callback?code=${code}`);
+				response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/42/callback?code=${code}`);
 			}
 			const data = await response.json();
 			console.log('data: ', data)

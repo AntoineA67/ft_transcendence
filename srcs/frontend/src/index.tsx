@@ -44,11 +44,11 @@ import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 import { GameSocketProvider } from './utils/GameSocketProvider';
 
-axios.defaults.baseURL = 'http://127.0.0.1:3000';
+axios.defaults.baseURL = process.env.REACT_APP_FRONTEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string, refresh = false) {
-	const baseUrl = 'http://127.0.0.1:3000/';
+	const baseUrl = process.env.REACT_APP_FRONTEND_URL;
 	const token = localStorage.getItem('token') || null;
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
@@ -67,7 +67,7 @@ async function loader(route: string, param?: string, refresh = false) {
 		}
 	} catch (err: any) {
 		if (refresh) { throw err; }
-		return fetch(`${baseUrl}auth/refreshToken`, {
+		return fetch(process.env.REACT_APP_BACKEND_URL + `/auth/refreshToken`, {
 			method: 'POST',
 			headers: {
 				'Accept': 'application/json',
@@ -81,8 +81,8 @@ async function loader(route: string, param?: string, refresh = false) {
 			const newTokens = await res.json();
 			localStorage.setItem('token', newTokens.token);
 			localStorage.setItem('refreshToken', newTokens.refreshToken);
-			// console.log('success');
-			// console.log('newToken: ', newTokens);
+			console.log('success');
+			console.log('newToken: ', newTokens);
 			return loader(route, param, true);
 		}).catch((err) => {
 			localStorage.removeItem('token');
