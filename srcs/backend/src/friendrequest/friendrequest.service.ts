@@ -47,7 +47,7 @@ export class FriendRequestService {
 		));
 		let ret: UserDto[] = [];
 		for (let p of pendings) {
-			ret.push({ ...p, avatar: this.usersService.bufferToBase64(p.avatar)})
+			ret.push({ ...p, avatar: this.usersService.bufferToBase64(p.avatar) })
 		}
 		return (ret);
 	}
