@@ -168,6 +168,7 @@ export function SettingMenu() {
 	useEffect(() => {
 		if (!profile) {
 			socket.emit('MyProfile', profile, (res: profileType) => {
+				console.log(res);
 				setProfile(res);
 			});
 		}
@@ -188,22 +189,22 @@ export function SettingMenu() {
 				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
 					<div>
 						<label htmlFor='current-password'>Current password</label>
-						<input id='current-password' type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
+						<input id='current-password' type="password" placeholder="Current password" disabled={profile?.hashedPassword === 'nopass'} />
 					</div>
 					<div>
 						<label htmlFor='new-password'>New password</label>
 						<input id='new-password' type="password" placeholder="New password" 
-							disabled={profile?.password === 'nopass'} />
+							disabled={profile?.hashedPassword === 'nopass'} />
 					</div>
 					<div>
 						<label htmlFor='confirm-password'>Confirm password</label>
 						<input id='confirm-password' type="password" placeholder="Password" 
-							disabled={profile?.password === 'nopass'} />
+							disabled={profile?.hashedPassword === 'nopass'} />
 					</div>
-					{profile?.password === 'nopass' && (
+					{profile?.hashedPassword === 'nopass' && (
 						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
 					)}
-					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
+					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.hashedPassword === 'nopass'} >Confirm</button>
 				</form>
 				
 				<hr />
