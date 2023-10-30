@@ -90,7 +90,7 @@ model Message {
 model Room {
   id        Int    @default(autoincrement()) @id(map: "PK_c6d46db005d623e691b2fbcba23") 
   isChannel Boolean
-  title     String?   @db.VarChar(255) @unique()
+  title     String?   @db.VarChar(255)
   private   Boolean?  
   password  String?   @db.VarChar(100)
   message   Message[]

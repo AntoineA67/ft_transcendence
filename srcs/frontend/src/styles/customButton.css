@@ -1,7 +1,7 @@
 
 .btn {
 	height: 50px;
-	min-width: 50px;
+	min-width: fit-content;
 }
 
 /* customized bs button */
@@ -81,6 +81,8 @@
 	--bs-gradient: none;
 }
 
+
+
 .btn-invisible {
 	color: grey;
 	border-radius: 16px;
@@ -93,4 +95,18 @@
 	color: #fff;
 	transition: all 0.3s;
 	text-decoration: none;
+}
+
+.form-control {
+	background-color: transparent;
+	color: white;
+}
+
+.form-control:focus {
+	background-color: transparent;
+	color: white;
+}
+
+.form-control::placeholder {
+	color: grey;
 }
