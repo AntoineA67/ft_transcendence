@@ -10,20 +10,21 @@ import { Request } from 'express';
 export class GameController {
   constructor(private readonly gamesService: GamesService, private readonly prisma: PrismaService, private readonly profileService: ProfileService) { }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':userId')
-  async getMyProfile(@Req() req: Request, @Param('userId') userId: string) {
-    // this.logger.log('me')
-    const id = req.user.id;
-    if (userId === req.user.id.toString()) {
-      return "Non"
-    }
-    const profile = await this.profileService.getUserProfileById(id, id)
-    if (!profile) {
-      throw new HttpException('User me not found', HttpStatus.NOT_FOUND);
-    }
-    return profile;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get(':userId')
+  // async gameAgainst(@Req() req: Request, @Param('userId') userId: string) {
+  //   // this.logger.log('me')
+  //   const id = req.user.id;
+  //   console.log(id, userId, id.toString() == userId)
+  //   if (userId == id.toString()) {
+  //     return "Non"
+  //   }
+  //   const profile = await this.profileService.getUserProfileById(id, id)
+  //   if (!profile) {
+  //     throw new HttpException('User me not found', HttpStatus.NOT_FOUND);
+  //   }
+  //   return profile;
+  // }
 
   // @Public()
   // @Get()
