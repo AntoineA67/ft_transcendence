@@ -32,7 +32,11 @@ export class UsersService {
 	// }
 
 	async createUser(username: string, email: string, password: string) {
-		const hashPassword = await argon.hash(password);
+		let hashPassword;
+		if (password == "nopass")
+			hashPassword = "nopass";
+		else 
+			hashPassword = await argon.hash(password);
 		try {
 			const user = await this.prisma.user.create({
 				data: {
