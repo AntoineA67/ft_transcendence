@@ -64,7 +64,7 @@ export class UsersService {
 		});
 		let ret: UserDto[] = [];
 		for (let user of users) {
-			ret.push({ ...user, avatar: this.bufferToBase64(user.avatar)})
+			ret.push({ ...user, avatar: this.bufferToBase64(user.avatar) })
 		}
 		return ret;
 	}
@@ -72,13 +72,12 @@ export class UsersService {
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
 		// if (data.username || data.username === "") {
 		// 	let valid = data.username.match(/^[a-z0-9\-_]+$/i);
-        //     let empty = data.username.match(/^(?!\s*$).+/i);
-        //     if (!valid || empty == null) return (false)
-        // }
+		//     let empty = data.username.match(/^(?!\s*$).+/i);
+		//     if (!valid || empty == null) return (false)
+		// }
 		console.log("PASS ==", data.password);
 		let user: User;
-		if (data.password)
-		{
+		if (data.password) {
 			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
@@ -121,7 +120,7 @@ export class UsersService {
 
 	async getIdByNick(username: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { username: username	}
+			where: { username: username }
 		});
 		if (!user) return (null);
 		return (user.id);
@@ -161,7 +160,7 @@ export class UsersService {
 				activated2FA: true,
 			}
 		})
-		
+
 		return ({ ...user, avatar: this.bufferToBase64(user.avatar) })
 	}
 
@@ -231,19 +230,19 @@ export class UsersService {
 
 	async getUserByUsername(username: string): Promise<User> {
 		try {
-            const user = await this.prisma.user.findFirst({
-            where: {
-                username: username,
-            },
-        });
-        if (!user) {
-            throw new NotFoundException(`User not found with username ${username}`);
-        }
-        return user;
-        } catch (error) {
-            console.error(`Error fetching user with username ${username}`, error);
-            throw error;
-        }
+			const user = await this.prisma.user.findFirst({
+				where: {
+					username: username,
+				},
+			});
+			if (!user) {
+				throw new NotFoundException(`User not found with username ${username}`);
+			}
+			return user;
+		} catch (error) {
+			console.error(`Error fetching user with username ${username}`, error);
+			throw error;
+		}
 	}
 
 	async generate2FASecret(user: User) {
@@ -271,7 +270,7 @@ export class UsersService {
 		}));
 	}
 
-	async getHalfProfile(id: number): Promise<ProfileDto | null>  {
+	async getHalfProfile(id: number): Promise<ProfileDto | null> {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
 			select: {
@@ -293,7 +292,7 @@ export class UsersService {
 			profile = { ...profile, hashPassword: null };
 		}
 		return ({
-			...profile, 
+			...profile,
 			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
@@ -306,7 +305,7 @@ export class UsersService {
 		}
 		return (buf.toString('base64'));
 	}
-	
+
 	async getAvatar(id: number): Promise<string | null> {
 		let { avatar } = await this.prisma.user.findUnique({
 			where: { id },

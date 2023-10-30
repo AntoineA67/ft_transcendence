@@ -1,4 +1,4 @@
-
+import { Result } from '@prisma/client';
 export const games = [
 	{
 		finish: true,
@@ -9,11 +9,11 @@ export const games = [
 			create: [
 				{
 					user: { connect: { username: 'Sasha' } },
-					win: true,
-				}, 
+					win: Result.WIN,
+				},
 				{
 					user: { connect: { username: 'Florian' } },
-					win: false,
+					win: Result.LOSE,
 				},
 			]
 		}
@@ -27,11 +27,11 @@ export const games = [
 			create: [
 				{
 					user: { connect: { username: 'Sasha' } },
-					win: false,
+					win: Result.LOSE,
 				},
 				{
 					user: { connect: { username: 'Florian' } },
-					win: true,
+					win: Result.WIN,
 				},
 			]
 		}
