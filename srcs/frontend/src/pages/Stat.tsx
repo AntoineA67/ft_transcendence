@@ -205,7 +205,7 @@ export default function Stat({ gameHistory, achieve }: statProp) {
 					<div className="col-6">
 						<h5 className="tab-main-color" id="achieve"
 							onClick={() => setShow('achieve')}>
-							Achieve.
+							Achieve
 						</h5>
 					</div>
 				</div>
@@ -218,7 +218,7 @@ export default function Stat({ gameHistory, achieve }: statProp) {
 					</div>
 					<div className="col-6">
 						<h5 className="tab-main-color" id="achieve">
-							Achieve.
+							Achieve
 						</h5>
 					</div>
 				</div>
