@@ -25,7 +25,8 @@ import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 import { DefaultErrorPage } from './pages/DefaultErrorPage';
-
+import { DefaultFriendPage } from './pages/DefaultFriendPage';
+import { DefaultSearchPage } from './pages/DefaultSearchPage';
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
@@ -43,15 +44,16 @@ import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 import { WebcamPong } from './pages/WebcamPong';
 
-axios.defaults.baseURL = 'http://127.0.0.1:4000';
+axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string, refresh = false) {
-	const baseUrl = 'http://127.0.0.1:4000/';
+	const baseUrl = process.env.REACT_APP_BACKEND_URL + '/';
 	const token = localStorage.getItem('token') || null;
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
 
+	console.log('fetch: ', fetchUrl);
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
@@ -65,7 +67,7 @@ async function loader(route: string, param?: string, refresh = false) {
 		throw new Response(res.statusText, { status: res.status });
 	}
 	console.log('refresh')
-	return fetch(`${baseUrl}auth/refreshToken`, {
+	return fetch(process.env.REACT_APP_BACKEND_URL + `/auth/refreshToken`, {
 		method: 'POST',
 		headers: {
 			'Accept': 'application/json',
@@ -84,41 +86,6 @@ async function loader(route: string, param?: string, refresh = false) {
 		return loader(route, param, true);
 	})
 
-
-	// try {
-	// 	const res = await fetch(fetchUrl, {
-	// 		headers: { 'Authorization': `Bearer ${token}` }
-	// 	});
-	// 	if (res.status == 200 || res.status == 201) {
-	// 		return (res.json());
-	// 	} else {
-	// 		throw new Response(res.statusText, { status: res.status })
-	// 	}
-	// } catch (err: any) {
-	// 	if (refresh) { throw err; }
-	// 	return fetch(`${baseUrl}auth/refreshToken`, {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Accept': 'application/json',
-	// 			"Content-Type": "application/json"
-	// 		},
-	// 		body: JSON.stringify({ "refreshToken": refreshToken })
-	// 	}).then(async (res): Promise<Response> => {
-	// 		if (res.status != 201) {
-	// 			throw new Response(res.statusText, { status: res.status })
-	// 		}
-	// 		const newTokens = await res.json();
-	// 		localStorage.setItem('token', newTokens.token);
-	// 		localStorage.setItem('refreshToken', newTokens.refreshToken);
-	// 		// console.log('success');
-	// 		// console.log('newToken: ', newTokens);
-	// 		return loader(route, param, true);
-	// 	}).catch((err) => {
-	// 		localStorage.removeItem('token');
-	// 		localStorage.removeItem('refreshToken');
-	// 		throw err;
-	// 	})
-	// }
 }
 
 const router = createBrowserRouter(
@@ -138,12 +105,18 @@ const router = createBrowserRouter(
 
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
-					<Route index
-						element={<Profile />}
-						loader={() => (loader('profile', 'me'))}
-					/>
+
+					<Route index element={<Game />} />
+					<Route path=":userId" element={<Game />} />
+
+					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
+					<Route path="/me/setting" element={<Setting />}>
+						<Route index element={<SettingMenu />}></Route>
+						<Route path='2fa' element={<TwoFactorAuth />}></Route>
+					</Route>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
+						<Route index element={<DefaultSearchPage />} />
 						<Route
 							path=':userNick'
 							element={<UserProfile />}
@@ -152,6 +125,7 @@ const router = createBrowserRouter(
 					</Route>
 
 					<Route path="friends" element={<Friends />}>
+						<Route index element={<DefaultFriendPage />} />
 						<Route
 							path=':userNick'
 							element={<UserProfile />}
@@ -166,17 +140,9 @@ const router = createBrowserRouter(
 							loader={({ params }) => (loader('rooms', params.chatId))}
 						/>
 					</Route>
-
-					{/* <Route path="setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-					</Route> */}
-					<Route path="setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-					</Route>
-
+					{/* 
 					<Route path="/game" element={<Game />}></Route>
-					<Route path="/game/:userId" element={<Game />}></Route>
-					{/* <Route path="/test" element={<WebcamPong />}></Route> */}
+					<Route path="/game/:userId" element={<Game />}></Route> */}
 				</Route>
 			</Route>
 		</Route>

@@ -170,14 +170,20 @@ export default function Game() {
 		// });
 		const profile = globalSocket.emit('MyProfile', (res: any) => {
 			console.log("MyProfile", res);
-			// setId(res.id);
-			id.current = res.id;
+			setId(res.id);
+			if (params.userId && params.userId != res.id) {
+				console.log("Matching against", params.userId);
+				gamesSocket.emit('matchAgainst', params.userId);
+				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
+				// gamesSocket.emit('match');
+				setGameStatus(GameStatus.Matching);
+			}
 		});
 		const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
 			console.log("MyColor", res.paddleColor);
 			setPaddleColor(res.paddleColor);
 		});
-		// console.log("Id", id.current);
+		// console.log("Id", id);
 		// gamesSocket.on('connect', function () {
 		// 	console.log('connect')
 		// })
@@ -238,13 +244,6 @@ export default function Game() {
 			console.log('Game Over! Winner: ', winner);
 			setGameStatus(GameStatus.Finished);
 		})
-		if (params.userId) {
-			console.log("Matching against", params.userId);
-			gamesSocket.emit('matchAgainst', params.userId);
-			if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
-			// gamesSocket.emit('match');
-			setGameStatus(GameStatus.Matching);
-		}
 		return () => {
 			cancelMatchmaking();
 			console.log("Game unmounted");

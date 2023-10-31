@@ -59,6 +59,9 @@ export class GameGateway
     async handleMatchAgainst(socket: Socket, payload: string): Promise<void> {
         console.log(`Trying match ${socket.data.user.id} against ${payload}`)
         const sockets = await this.wss.fetchSockets();
+        // if (socket.data.user.id == payload) {
+        //     return;
+        // }
         if (this.matches[payload] == socket.data.user.id) {
             delete this.matches[payload];
             console.log("LAUNCHING MATCH " + payload + " " + socket.data.user.id)

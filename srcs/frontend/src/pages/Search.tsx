@@ -12,14 +12,6 @@ export function SearchBar() {
 	const [search, setSearch] = useState('');
 	const [list, setList] = useState(users);
 	const [temp, setTemp] = useState(users);
-	
-	// useEffect(() => {
-	// 	console.log('searchbar: ')
-	// 	socket.emit('getAllUsers', (response: userType[]) => {
-	// 		setList(response)
-	// 		setTemp(response);
-	// 	})
-	// }, [])
 
 	useEffect(() => {
 		const myFilter = (item: userType): boolean => {
@@ -50,13 +42,22 @@ export function SearchBar() {
 					className="w-100"
 				/>
 			</div>
-			{temp.length ? (
+			{!search && <h5 className='p-3 grey-text'>Type something</h5>}
+			{(search && temp.length == 0) && <h5 className='p-3 grey-text'>No result</h5>}
+			{(search && temp.length > 0) && 
+				<ul className='p-0 m-0 w-100 pb-5 mb-5'>
+					{temp.map(myMap)}
+				</ul>
+			}
+			{/* {(temp.length && search) ? (
 				<ul className='p-0 m-0 w-100 pb-5 mb-5'>
 					{temp.map(myMap)}
 				</ul>
 			) : (
-				<h5 className='p-3 grey-text'>No result</h5>
-			)}
+				search ? (<h5 className='p-3 grey-text'>No result</h5>)
+				: (<h5 className='p-3 grey-text'>Type something</h5>)
+				
+			)} */}
 		</div>
 	);
 }
