@@ -19,7 +19,7 @@ import axios from 'axios';
 export function Title({ title }: { title: string }) {
 	return (
 		<div className='d-flex w-100 align-items-center bg-black'>
-			<Link to=".."><button className='leftArrow m-2'></button></Link>
+			<Link to="/me"><button className='leftArrow m-2'></button></Link>
 			<h4 className='white-text' >{title}</h4>
 		</div>
 	);
@@ -43,7 +43,7 @@ export function TwoFactorAuth() {
 			socket.emit('Activate2FA', token, (response: any) => {
 				console.log(response);
 				if (response == true) {
-					navigate("/setting/");
+					navigate("/me/setting/");
 				} else {
 					setInvalidToken(true);
 				}
@@ -52,7 +52,7 @@ export function TwoFactorAuth() {
 			socket.emit('Disable2FA', token, (response: any) => {
 				console.log(response);
 				if (response == true) {
-					navigate("/setting/");
+					navigate("/me/setting/");
 				} else {
 					setInvalidToken(true);
 				}
@@ -179,7 +179,7 @@ export function SettingMenu() {
 	};
 
 	const switchActivate = () => {
-		navigate("/setting/2fa");
+		navigate("/me/setting/2fa");
 	};
 
 	return (
