@@ -41,8 +41,8 @@ export function Login() {
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
 		e.preventDefault();
 		let data;
-		let url = ('username' in user) ? ('http://localhost:4000/auth/signup'
-		) : ('http://localhost:4000/auth/signin');
+		let url = ('username' in user) ? (process.env.REACT_APP_BACKEND_URL + '/auth/signup'
+		) : (process.env.REACT_APP_BACKEND_URL + '/auth/signin');
 		const fetchObj = {
 			method: 'POST',
 			headers: { "Content-Type": "application/json" },
@@ -76,6 +76,18 @@ export function Login() {
 	);
 }
 
+export function Oauth42() {
+	const api42 = 'https://api.intra.42.fr/oauth/authorize';
+	const clientId = process.env.REACT_APP_FORTYTWO_APP_ID;
+	const redirectUri = process.env.REACT_APP_FRONTEND_URL + '/42/callback';
+	const responseType = 'code';
+	const scope = 'public';
+
+	const oauth42 = `${api42}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+
+	return oauth42;
+}
+
 export const InputToken = ({ handleChange }: any) => {
 	const [value, setValue] = useState("");
 
@@ -99,28 +111,23 @@ export const InputToken = ({ handleChange }: any) => {
 	);
 };
 
-let url42 = () => {
-	return axios.get('http://localhost:4000/auth/42Url');
-}
+// let url42 = () => {
+// 	return axios.get(process.env.REACT_APP_BACKEND_URL + '/auth/42Url')
+// }
 
 export function TwoFAPage() {
 
+	const oauth42Url = Oauth42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	async function sendToken() {
-		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); 
-		const response = await fetch(`http://localhost:4000/auth/_2fa/id=${_2fa.id}&token=${token}`);
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
+		const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
-			await url42()
-				.then(response_url => {
-					window.location.href = (response_url.data);
-				})
-				.catch(error => {
-					console.log(error);
-				});
+			window.location.href = oauth42Url;
 		} else {
 			setInvalidToken(true);
 		}
@@ -162,24 +169,11 @@ export function TwoFAPage() {
 
 export function LandingPage() {
 
-	const github = "https://github.com/AntoineA67/ft_transcendence";
-	const [oauth42Url, setOauth42Url] = useState<string>('');
-
+	const github = process.env.REACT_APP_GITHUB_LINK;
+	const oauth42Url = Oauth42();
+	
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-		// Fetch the URL on component mount
-		const fetchUrl42 = async () => {
-		  try {
-			const response = await axios.get('http://localhost:4000/auth/42Url');
-			setOauth42Url(response.data);
-			console.log("response===", response.data);
-		} catch (error) {
-			console.error("There was an error fetching the 42 API URL: ", error);
-			setOauth42Url(''); // In case of an error, reset the URL
-		  }
-		};
-	
-		fetchUrl42();
 	  }, []);
 	
 
@@ -214,6 +208,7 @@ export function LandingPage() {
 			<footer className="d-flex flex-column align-items-center grey-text py-3">
 				Projet de fin de tronc-commun de l’école 42
 				<a href={github}><img src={githubLogo} /></a>
+				<p></p>
 			</footer>
 		</>
 	);

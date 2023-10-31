@@ -219,22 +219,22 @@ export function SettingMenu() {
 				<hr />
 				<br></br>
 				<button onClick={() => {
-					let url = ("http://localhost:4000/auth/signout");
-					const fetchObj = {
-						method: 'POST',
-						headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, },
-						body: JSON.stringify({
-							refreshToken: localStorage.getItem('refreshToken'),
-						}),
-					}
-					// 	axios.post("http://localhost:4000/auth/signout", {}, {
-					// 		headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`},
-					// 		body: JSON.stringify(localStorage.getItem('refreshToken')),
-					//   });
-					try {
-						fetch(url, fetchObj)
-						// if (!response.ok) { throw Error('response not ok'); }
-						// let data = await response.json();
+				let url = (process.env.REACT_APP_BACKEND_URL + "/auth/signout");
+				const fetchObj = {
+					method: 'POST',
+					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`,},
+					body: JSON.stringify({
+						refreshToken: localStorage.getItem('refreshToken'),
+					}),
+				}
+				// 	axios.post("http://localhost:4000/auth/signout", {}, {
+				// 		headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`},
+				// 		body: JSON.stringify(localStorage.getItem('refreshToken')),
+				//   });
+				try {
+					fetch(url, fetchObj)
+					// if (!response.ok) { throw Error('response not ok'); }
+					// let data = await response.json();
 
 						localStorage.removeItem('token');
 						localStorage.removeItem('random');
