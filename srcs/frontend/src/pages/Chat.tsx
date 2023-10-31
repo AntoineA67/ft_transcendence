@@ -461,7 +461,7 @@ export function ChatBox() {
 			variant: 'info',
 			preventDuplicate: true,
 			persist: true,
-			action: (key) => (
+			action: (key: any) => (
 				<div>
 					<Link to={`/game/${userId}`}>
 						<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
@@ -487,7 +487,7 @@ export function ChatBox() {
 				variant: 'info',
 				preventDuplicate: true,
 				persist: true,
-				action: (key) => (
+				action: (key: any) => (
 					<div>
 						<Link to={`/game/${userId}`}>
 							<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
