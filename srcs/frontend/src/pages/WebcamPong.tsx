@@ -62,10 +62,7 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 			return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 		}
 
-		let lastTime = 0;
-
 		async function predictWebcam() {
-			lastTime++;
 			canvasElement.style.width = video.videoWidth;;
 			canvasElement.style.height = video.videoHeight;
 			canvasElement.width = video.videoWidth;
@@ -85,15 +82,12 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 			canvasCtx.save();
 			canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 			if (results.landmarks) {
-				lastTime = 0;
-				let index = 0;
 				for (const landmarks of results.landmarks) {
 					drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
 						color: "#00FF00",
 						lineWidth: 5
 					});
 					drawingUtils.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
-					index++;
 					// console.log(landmarks)
 				}
 				if (results.landmarks.length > 0) {
@@ -101,6 +95,8 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 					changeHandPos(pos);
 					// console.log(pos);
 				}
+			} else {
+				changeHandPos(-1);
 			}
 			canvasCtx.restore();
 
@@ -156,13 +152,13 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 		<>
 			{/* <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet" />
 			<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script> */}
-			<section id="demos" className="invisible">
+			<section style={{ position: "fixed" }} id="demos" className="invisible">
 				<div id="liveView" className="videoView">
 					<button id="webcamButton" className="mdc-button mdc-button--raised">
 						<span className="mdc-button__ripple"></span>
 						<span className="mdc-button__label">ENABLE WEBCAM</span>
 					</button>
-					<div style={{ position: "relative" }}>
+					<div style={{ position: "fixed", opacity: .2 }}>
 						<video id="webcam" autoPlay playsInline></video>
 						<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
 						<p id='gesture_output' className="output" />

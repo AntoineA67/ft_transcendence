@@ -127,37 +127,7 @@ export default function Game() {
 	let params = useParams();
 
 	const changeHandPos = (pos: number = -1) => {
-		// console.log("changeHandPos", pos)
-		// setHandPos(pos);
 		handPos.current = pos
-
-		// console.log("clients ??", clients, id, clients[id])
-		// if (clients && clients[id.toString()]) {
-		// 	const handPos = pos * 100;
-		// 	const currentPos = clients[id.toString()].y;
-		// 	console.log("changeHandPos", handPos, currentPos)
-		// 	if (handPos > currentPos) {
-		// 		sendPressed("down", true);
-		// 		sendPressed("up", false);
-		// 	} else if (handPos < currentPos) {
-		// 		sendPressed("up", true);
-		// 		sendPressed("down", false);
-		// 	}
-		// }
-
-
-		// console.log("cant changeHandPos", pos, clients, id)
-		// if (clients && clients.clients[id]) {
-		// 	console.log("changeHandPos", pos)
-		// 	const currentPos = clients.clients[id].y;
-		// 	if (pos * 1000 > currentPos) {
-		// 		sendPressed("down", true);
-		// 		sendPressed("up", false);
-		// 	} else if (pos * 1000 < currentPos) {
-		// 		sendPressed("up", true);
-		// 		sendPressed("down", false);
-		// 	}
-		// }
 	}
 
 	useEffect(() => {
@@ -294,6 +264,7 @@ export default function Game() {
 	return (
 		<>
 			<WebcamPong changeHandPos={changeHandPos} />
+
 			{gameStatus !== GameStatus.Started &&
 				<div className="d-flex align-items-center justify-content-center h-100">
 					<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
@@ -368,7 +339,7 @@ export default function Game() {
 				// 	</EffectComposer>
 				// 	<Environment background preset="sunset" blur={0.8} />
 				// </Canvas>
-				<Canvas shadows camera={{ position: [0, 50, 200], fov: 60 }}>
+				<Canvas style={{ zIndex: -1 }} shadows camera={{ position: [0, 50, 200], fov: 60 }}>
 					<Timer time={time} />
 					{Object.keys(clients)
 						.map((client) => {
