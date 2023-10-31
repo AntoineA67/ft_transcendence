@@ -38,9 +38,13 @@ export class AuthService {
 
 	async signup(dto: SignupDto, res: Response) {
 		if (await this.usersService.getUserByEmail(dto.email))
-			throw new BadRequestException('This email is already used');
+			return { error: 'This email is already used', status: HttpStatus.BAD_REQUEST };
+			// throw new BadRequestException('This email is already used');
+		if (dto.email.includes('@student.42'))
+			return { error: 'Please sign in in with 42 if you are a 42 student', status: HttpStatus.BAD_REQUEST };
+			// throw new BadRequestException('Please sign in in with 42 if you are a 42 student');
 		if (await this.usersService.getUserByNick(dto.username))
-			throw new BadRequestException('Username taken');
+			return { error: 'Username taken', status: HttpStatus.BAD_REQUEST };
 		try {
 			const hashPassword = await argon.hash(dto.password);
 			const user = await this.prisma.user.create({
@@ -56,7 +60,9 @@ export class AuthService {
 				console.log(error)
 				if (error.code === 'P2002') {
 					console.log("error hereeee");
-				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
+				// return { error: 'Credentials taken', status: HttpStatus.BAD_REQUEST };
+					// throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
+				return { error: 'Server Error', status: HttpStatus.INTERNAL_SERVER_ERROR };
 			}
 		}
 		throw error;
@@ -74,7 +80,26 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		return this.signJwtTokens(user.id, user.email);
+		let response;
+		// if (!dto.token2FA && user.activated2FA) {
+		// 	response = {
+		// 		id: user.id,
+		// 		_2fa: true
+		// 	};
+		// // if 2fa is activated and user have sent token
+		// } else if (dto.token2FA && user.activated2FA) {
+		// 	const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
+		// 	if (_2FAValid) {
+		// 		response = await this.signJwtTokens(user.id, dto.email);
+		// 	} else {
+		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+		// 	}
+		// no 2fa
+		// } 
+		// else 
+			response = await this.signJwtTokens(user.id, user.email);
+		// return response;
+		return response;
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -98,6 +123,7 @@ export class AuthService {
 			if (_2FAValid) {
 				response = await this.signJwtTokens(dto.id, dto.email);
 			} else {
+				// response = { '_2fa': 'need token'}
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 		// no 2fa
@@ -211,7 +237,7 @@ export class AuthService {
 			return true;
 	}
 
-	signout(req: Request, res: Response): Response {
+	async signout(req: Request, res: Response) {
         // Invalidate the refresh token to make the signout more secure
         // Extract the refresh token from the body or header
         const refreshToken = req.body.refreshToken;
