@@ -20,21 +20,16 @@ type login = {
 	password: string
 }
 
-// type loginContext = {
-// 	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
-// 	togglePassword: () => void,
-// }
-
 export function Login() {
 	const navigate = useNavigate();
 
 
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
-			localStorage.setItem('token', data.token);
-			localStorage.setItem('refreshToken', data.refreshToken);
-			localStorage.setItem('email', user.email);
-			navigate('/');
+		localStorage.setItem('token', data.token);
+		localStorage.setItem('refreshToken', data.refreshToken);
+		localStorage.setItem('email', user.email);
+		navigate('/');
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
@@ -57,8 +52,6 @@ export function Login() {
 			let response = await fetch(url, fetchObj)
 			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
-			// console.log("data===", data);
-			// console.log("coucouuu", data.error);
 			('error' in data) && dealError(data, setErr);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
@@ -112,20 +105,19 @@ export const InputToken = ({ handleChange }: any) => {
 			pattern="[0-9]*"
 			value={value}
 			onChange={handleChangeToken}
-			style={{letterSpacing: "10px"}}
+			style={{ letterSpacing: "10px" }}
 			className="text-center overflow-hidden d-flex"
 		/>
 	);
 };
 
-let url42 = () => {
-	return axios.get(process.env.REACT_APP_BACKEND_URL + '/auth/42Url')
-}
+// let url42 = () => {
+// 	return axios.get(process.env.REACT_APP_BACKEND_URL + '/auth/42Url')
+// }
 
 export function TokenPage() {
 
-	// const oauth42Url = Oauth42();
-	// const oauth42Url = url42();
+	const oauth42Url = Oauth42();
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -135,13 +127,7 @@ export function TokenPage() {
 		const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
-			await url42()
-        .then(response_url => {
-            window.location.href = (response_url.data);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+			window.location.href = oauth42Url;
 		} else {
 			setInvalidToken(true);
 		}
@@ -151,7 +137,6 @@ export function TokenPage() {
 		<div className='container' >
 			<div className="row justify-content-center">
 				<div className='col-sm-6 col-lg-6' >
-					{/*  sm="6" lg="6" */}
 
 					<div className='white-text m-0 mt-4' > {/* style={{ color: "white", margin: "60px 0 0 0" }} */}
 						<h2>Two-factor authentication</h2>
@@ -184,19 +169,13 @@ export function TokenPage() {
 
 export function LandingPage() {
 
+	const github = process.env.REACT_APP_GITHUB_LINK;
 	const oauth42Url = Oauth42();
-	// const oauth42Url = url42();
-	const github = process.env.REACT_APP_GITHUB_LINK
-
-
+	
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-
-		// show all process.env in console.log
-		for (let key in process.env) {
-			console.log(key, process.env[key]);
-		}
-	}, []);
+	  }, []);
+	
 
 	return (
 		<>
@@ -217,9 +196,9 @@ export function LandingPage() {
 								<Link to='signup' className="w-75">
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
-								<a href={oauth42Url} >
-									<span>Sign in with </span>
-									<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
+								<a href={oauth42Url}>
+								<span>Sign in with </span>
+								<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
 								</a>
 							</div>
 						</div>

@@ -225,7 +225,7 @@ export function SettingMenu() {
 						refreshToken: localStorage.getItem('refreshToken'),
 					}),
 				}
-				// 	axios.post("http://localhost:3000/auth/signout", {}, {
+				// 	axios.post("http://localhost:4000/auth/signout", {}, {
 				// 		headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`},
 				// 		body: JSON.stringify(localStorage.getItem('refreshToken')),
 				//   });

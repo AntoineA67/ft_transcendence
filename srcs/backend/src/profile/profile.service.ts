@@ -28,7 +28,7 @@ export class ProfileService {
 		const gameHistory = await this.playerService.getHistory(otherId);
 		const achieve = await this.achieveService.getAchieveById(otherId);
 		if (userId == otherId) {
-			return ({ ... profile, gameHistory, achieve })
+			return ({ ...profile, gameHistory, achieve })
 		}
 		const friend = await this.friendService.isFriend(userId, otherId);
 		const sent = (await this.friendReqService.getPendingReq(userId, otherId)).length == 0 ? false : true;

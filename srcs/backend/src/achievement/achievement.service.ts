@@ -20,7 +20,7 @@ export class AchievementService {
 		});
 		delete achieve.id;
 		delete achieve.userId;
-		return {userId: id,  ... achieve};
+		return {userId: id,  ...achieve};
 	}
 	
 	// the id stands for userId, NOT the id of achievement
@@ -35,7 +35,7 @@ export class AchievementService {
 		(allGame >= 100) && (achieve.play100Games = true);
 		await this.prisma.achievement.update({
 			where: { userId: id }, 
-			data: { ... achieve }
+			data: { ...achieve }
 		})
 	}
 
