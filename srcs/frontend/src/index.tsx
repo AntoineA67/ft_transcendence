@@ -26,7 +26,7 @@ import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 import { DefaultErrorPage } from './pages/DefaultErrorPage';
 import { DefaultFriendPage } from './pages/DefaultFriendPage';
-
+import { DefaultSearchPage } from './pages/DefaultSearchPage';
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
@@ -109,6 +109,7 @@ const router = createBrowserRouter(
 					/>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
+						<Route index element={<DefaultSearchPage/>}/>
 						<Route
 							path=':userNick'
 							element={<UserProfile />}
