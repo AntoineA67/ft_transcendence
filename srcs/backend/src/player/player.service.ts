@@ -17,12 +17,11 @@ export class PlayerService {
 			include: {
 				game: {
 					include: {
-						// loser: { select: { userId: true } },
-						// winner: { select: { userId: true } },
 						players: {
-							include: {
+							select: {
+								score: true,
 								user: { select: { username: true } }
-							}
+							},
 						}
 					}
 				}
@@ -36,7 +35,11 @@ export class PlayerService {
 			against: (x.game.players[0].userId == id
 			) ? (x.game.players[1].user.username
 			) : (x.game.players[0].user.username),
-			score: x.game.score
+			score: x.game.score,
+			players: x.game.players.map((p) => ({
+				username: p.user.username,
+				score: p.score,
+			}))
 		}))
 		this.logger.log(history);
 		return (history);

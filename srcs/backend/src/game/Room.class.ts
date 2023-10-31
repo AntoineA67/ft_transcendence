@@ -124,8 +124,8 @@ export default class Room {
 		}
 
 		// try {
-		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
-		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
+		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner, score: winnerPlayer.score });
+		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser, score: loserPlayer.score });
 
 		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
 		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });

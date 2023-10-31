@@ -23,15 +23,15 @@ type achieveProp = {
 
 function HistoryContent({ gameHistory }: gameHistoryProp) {
 
-	const dateStr = (input: any): string => {
-		let date = new Date(input);
-		var year = date.getFullYear();
-		var month = (1 + date.getMonth()).toString();
-		month = month.length > 1 ? month : '0' + month;
-		var day = date.getDate().toString();
-		day = day.length > 1 ? day : '0' + day;
-		return month + '/' + day + '/' + year;
-	}
+	// const dateStr = (input: any): string => {
+	// 	let date = new Date(input);
+	// 	var year = date.getFullYear();
+	// 	var month = (1 + date.getMonth()).toString();
+	// 	month = month.length > 1 ? month : '0' + month;
+	// 	var day = date.getDate().toString();
+	// 	day = day.length > 1 ? day : '0' + day;
+	// 	return month + '/' + day + '/' + year;
+	// }
 
 	const listItem = (x: gameHistoryType, index: number) => {
 		const bgGrey = index % 2 ? 'bg-grey' : '';
@@ -39,7 +39,11 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 		return (
 			<li key={x.playerId}
 				className={`stat-list-item d-flex flex-wrap ${bgGrey}`}>
-				<div>{dateStr(x.date)}</div>
+				{/* <div>{dateStr(x.date)}</div> */}
+				<div className='me-3'> {x.players[0].username} </div>
+				<div className='me-3'> {x.players[0].score} </div>
+				<div className='me-3'> {x.players[1].username} </div>
+				<div className='me-3'> {x.players[1].score} </div>
 				<div className='ms-auto me-3'> {x.against} </div>
 				<div className={color}> {x.score} </div>
 			</li>

@@ -6,4 +6,8 @@ export type gameHistoryType = {
 	win: Result;
 	against: string;
 	score: string;
+	players: {
+		username: string;
+		score: number;
+	}[];
 }
