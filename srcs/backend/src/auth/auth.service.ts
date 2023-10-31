@@ -81,22 +81,22 @@ export class AuthService {
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
 		let response;
-		// if (!dto.token2FA && user.activated2FA) {
-		// 	response = {
-		// 		id: user.id,
-		// 		_2fa: true
-		// 	};
-		// // if 2fa is activated and user have sent token
-		// } else if (dto.token2FA && user.activated2FA) {
-		// 	const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
-		// 	if (_2FAValid) {
-		// 		response = await this.signJwtTokens(user.id, dto.email);
-		// 	} else {
-		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-		// 	}
+		if (!dto.token2FA && user.activated2FA) {
+			response = {
+				id: user.id,
+				_2fa: true
+			};
+		// if 2fa is activated and user have sent token
+		} else if (dto.token2FA && user.activated2FA) {
+			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
+			if (_2FAValid) {
+				response = await this.signJwtTokens(user.id, dto.email);
+			} else {
+				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+			}
 		// no 2fa
-		// } 
-		// else 
+		} 
+		else 
 			response = await this.signJwtTokens(user.id, user.email);
 		// return response;
 		return response;

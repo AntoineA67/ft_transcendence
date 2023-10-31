@@ -9,7 +9,7 @@ import {
 export class SigninDto {
     @IsNotEmpty() @IsString() @IsEmail() email!: string;
     @IsNotEmpty() @IsString()  password!: string;
-    // @IsNotEmpty() @IsString()  token2FA?: string;
+    @IsNotEmpty() @IsString()  token2FA?: string;
 
 
 }
