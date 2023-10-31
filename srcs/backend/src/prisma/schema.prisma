@@ -51,7 +51,7 @@ model User {
   activated2FA  Boolean         @default(false)
   avatar        Bytes? // Using 42 picture profile?
   avatar42      String?
-  bio           String          @default("Nothing written yet ...")
+  bio           String          @default("")
   gameSettings  GameSettings?
   achieve       Achievement?
   gameHistory   Player[]
