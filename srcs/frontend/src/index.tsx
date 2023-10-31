@@ -42,6 +42,7 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
+import { WebcamPong } from './pages/WebcamPong';
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -104,10 +105,10 @@ const router = createBrowserRouter(
 
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
-					
-					<Route index element={<Game />}/>
+
+					<Route index element={<Game />} />
 					<Route path=":userId" element={<Game />} />
-					
+
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
@@ -115,7 +116,7 @@ const router = createBrowserRouter(
 					</Route>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
-						<Route index element={<DefaultSearchPage/>}/>
+						<Route index element={<DefaultSearchPage />} />
 						<Route
 							path=':userNick'
 							element={<UserProfile />}
@@ -124,7 +125,7 @@ const router = createBrowserRouter(
 					</Route>
 
 					<Route path="friends" element={<Friends />}>
-						<Route index element={<DefaultFriendPage/>}/>
+						<Route index element={<DefaultFriendPage />} />
 						<Route
 							path=':userNick'
 							element={<UserProfile />}

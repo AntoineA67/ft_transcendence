@@ -8,6 +8,7 @@ import { gamesSocket, socket as globalSocket } from '../utils/socket';
 // import { Grid } from "@react-three/postprocessing"
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
+import { WebcamPong } from "./WebcamPong"
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -114,13 +115,50 @@ enum GameStatus {
 export default function Game() {
 
 	const [clients, setClients] = useState({} as any)
-	const [id, setId] = useState('' as any)
+	// const [id, setId] = useState('' as any)
+	const id = useRef<string>('')
 	const [ball, setBall] = useState({} as any)
 	const [time, setTime] = useState(0);
 	const keysPressed = useRef({ up: false, down: false, time: Date.now() } as any)
 	const [gameStatus, setGameStatus] = useState<GameStatus>(GameStatus.Idle)
 	const [paddleColor, setPaddleColor] = useState('#fff');
+	// const [handPos, setHandPos] = useState(-1);
+	const handPos = useRef<number>(-1)
 	let params = useParams();
+
+	const changeHandPos = (pos: number = -1) => {
+		// console.log("changeHandPos", pos)
+		// setHandPos(pos);
+		handPos.current = pos
+
+		// console.log("clients ??", clients, id, clients[id])
+		// if (clients && clients[id.toString()]) {
+		// 	const handPos = pos * 100;
+		// 	const currentPos = clients[id.toString()].y;
+		// 	console.log("changeHandPos", handPos, currentPos)
+		// 	if (handPos > currentPos) {
+		// 		sendPressed("down", true);
+		// 		sendPressed("up", false);
+		// 	} else if (handPos < currentPos) {
+		// 		sendPressed("up", true);
+		// 		sendPressed("down", false);
+		// 	}
+		// }
+
+
+		// console.log("cant changeHandPos", pos, clients, id)
+		// if (clients && clients.clients[id]) {
+		// 	console.log("changeHandPos", pos)
+		// 	const currentPos = clients.clients[id].y;
+		// 	if (pos * 1000 > currentPos) {
+		// 		sendPressed("down", true);
+		// 		sendPressed("up", false);
+		// 	} else if (pos * 1000 < currentPos) {
+		// 		sendPressed("up", true);
+		// 		sendPressed("down", false);
+		// 	}
+		// }
+	}
 
 	useEffect(() => {
 		// const profile = axios.get('/profile', {
@@ -132,7 +170,8 @@ export default function Game() {
 		// });
 		const profile = globalSocket.emit('MyProfile', (res: any) => {
 			console.log("MyProfile", res);
-			setId(res.id);
+			// setId(res.id);
+			id.current = res.id;
 			if (params.userId && params.userId != res.id) {
 				console.log("Matching against", params.userId);
 				gamesSocket.emit('matchAgainst', params.userId);
@@ -165,15 +204,47 @@ export default function Game() {
 			setGameStatus(GameStatus.Started);
 			console.log('Game Started!')
 		})
+
+		let indexTime = 0;
 		gamesSocket.on('clients', (newClients: any) => {
 			setClients(newClients.clients)
-			// console.log('clients: ', newClients.clients, newClients.ball)
+			// console.log('clients: ', newClients.clients, newClients.ball, handPos.current)
 			// clients.current = newClients.clients
 			setTime(newClients.time);
 			if (newClients.ball) {
 				setBall(newClients.ball)
 				// ball.current = newClients.ball
 			}
+
+			if (handPos.current === -1) return
+			// if (Date.now() - keysPressed.current.time < 100) return
+			for (const client of Object.keys(newClients.clients)) {
+				// console.log(client, id.current)
+				if (client == id.current) {
+					const pos = 100 - handPos.current * 100;
+					// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()])
+					const currentPos = newClients.clients[id.current.toString()].y;
+					if (indexTime++ % 10 !== 0) return
+					if (Math.abs(pos - currentPos) > 5) {
+						if (pos < currentPos) {
+							// console.log("Going up !")
+							sendPressed("down", true);
+							sendPressed("up", false);
+						} else if (pos > currentPos) {
+							// console.log("Going down !")
+							sendPressed("up", true);
+							sendPressed("down", false);
+						}
+					} else {
+						sendPressed("up", false);
+						sendPressed("down", false);
+					}
+					// console.log(pos, currentPos, keysPressed.current)
+					indexTime = 0;
+					break;
+				}
+			}
+
 		})
 		gamesSocket.on('gameOver', (winner: any) => {
 			console.log('Game Over! Winner: ', winner);
@@ -222,6 +293,7 @@ export default function Game() {
 
 	return (
 		<>
+			<WebcamPong changeHandPos={changeHandPos} />
 			{gameStatus !== GameStatus.Started &&
 				<div className="d-flex align-items-center justify-content-center h-100">
 					<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
@@ -302,8 +374,10 @@ export default function Game() {
 						.map((client) => {
 							const { y, dir, score, xDistance } = clients[client]
 							// console.log(client, id, client === id);
-							const pos = [client == id ? -97.5 : 97.5, y, 0]
-							const myPaddleColor = client == id ? paddleColor : '#fff';
+							const pos = [client == id.current ? -97.5 : 97.5, y, 0]
+							// const pos = [client == id ? -97.5 : 97.5, y, 0]
+							// const myPaddleColor = client == id ? paddleColor : '#fff';
+							const myPaddleColor = client == id.current ? paddleColor : '#fff';
 							// console.log(pos);
 							return (
 								<UserWrapper
@@ -316,7 +390,8 @@ export default function Game() {
 								/>
 							)
 						})}
-					{clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />}
+					{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
+					{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
 					< color attach="background" args={["#171720"]} />
 					<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
 					<ambientLight intensity={0.5} />
