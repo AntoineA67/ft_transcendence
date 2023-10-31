@@ -97,9 +97,10 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		const file = input.files ? input.files[0] : null;
 		if (!file) return;
 		if (file.size >= 1048576) {
-			console.log('file size limit: 1MB');
+			// console.log('file size limit: 1MB');
 			enqueueSnackbar("Oups, la limite est d'1 MB !", {
 				variant: 'error',
+				autoHideDuration: 3000,
 			})
 			return;
 		}
