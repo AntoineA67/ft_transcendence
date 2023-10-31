@@ -210,14 +210,17 @@ export class RoomService {
 		return true;
 	}
 
-	async createPrivateRoom(userId: number, username: string) {
+	async createPrivateRoom(userId: number, username: string): Promise<any> {
 		const userprofile = await this.usersService.getUserById(userId);
 		if (!userprofile)
-			return null;
+			return -1;
 
 		const user = await this.findUserByUsername(username);
-		if (!user || user.id === userId)
-			return null;
+		if (!user)
+			return -2;
+
+		if (user.id === userId)
+			return -3;
 
 		const existingRoom = await this.findExistingPrivateRoom(userId, user.id);
 		if (existingRoom)
@@ -225,7 +228,11 @@ export class RoomService {
 
 		const isBlocked = await this.isBlockedBy(userId, user.id);
 		if (isBlocked)
-			return null;
+			return -4;
+
+		const isBlocking = await this.isBlocking(userId, user.id);
+		if (isBlocking)
+			return -5;
 
 		let randomTitle = Math.random().toString(36).substring(7);
 		let roomname = "priv_room_" + randomTitle;
