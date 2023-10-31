@@ -33,15 +33,16 @@ export class AuthController {
     @Public()
     @Post('signin') // delete async, has to signin and cannot do anything else
     async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-		let response = await this.authService.signin(dto, res, req);
+		const response = await this.authService.signin(dto, res, req);
         res.status(HttpStatus.OK).json(response);
         // return this.authService.signin(dto, res, req);
     }
 
 	@Public()
     @Post('signout') 
-    signout(@Req() req: Request, @Res() res: Response) {
-        return this.authService.signout(req, res);
+    async signout(@Req() req: Request, @Res() res: Response) {
+        const response = await this.authService.signout(req, res);
+		res.status(HttpStatus.OK).json(response);
     }
 
 	@UseGuards(FortyTwoAuthGuard)
@@ -54,7 +55,8 @@ export class AuthController {
 			activated2FA: req.user.activated2FA,
 			user: req.user,
 		}
-		return this.authService.signin42(dto, res, req);
+		const response = await this.authService.signin42(dto, res, req);
+		return response;
 	}
 
 	@Public()
