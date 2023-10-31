@@ -170,7 +170,8 @@ export default function Game() {
 		// });
 		const profile = globalSocket.emit('MyProfile', (res: any) => {
 			console.log("MyProfile", res);
-			setId(res.id);
+			// setId(res.id);
+			id.current = res.id;
 			if (params.userId && params.userId != res.id) {
 				console.log("Matching against", params.userId);
 				gamesSocket.emit('matchAgainst', params.userId);
@@ -224,16 +225,21 @@ export default function Game() {
 					// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()])
 					const currentPos = newClients.clients[id.current.toString()].y;
 					if (indexTime++ % 10 !== 0) return
-					if (pos < currentPos) {
-						// console.log("Going up !")
-						sendPressed("down", true);
+					if (Math.abs(pos - currentPos) > 5) {
+						if (pos < currentPos) {
+							// console.log("Going up !")
+							sendPressed("down", true);
+							sendPressed("up", false);
+						} else if (pos > currentPos) {
+							// console.log("Going down !")
+							sendPressed("up", true);
+							sendPressed("down", false);
+						}
+					} else {
 						sendPressed("up", false);
-					} else if (pos > currentPos) {
-						// console.log("Going down !")
-						sendPressed("up", true);
 						sendPressed("down", false);
 					}
-					console.log(pos, currentPos, keysPressed.current)
+					// console.log(pos, currentPos, keysPressed.current)
 					indexTime = 0;
 					break;
 				}
