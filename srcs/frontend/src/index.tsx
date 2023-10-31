@@ -171,6 +171,7 @@ const router = createBrowserRouter(
 					</Route> */}
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
+						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 
 					<Route path="/game" element={<Game />}></Route>
