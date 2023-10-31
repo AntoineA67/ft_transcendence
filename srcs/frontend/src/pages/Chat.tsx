@@ -234,12 +234,12 @@ export function ChatBox() {
 
 	const displayRoomTitle = () => {
 		if (window.innerWidth < 780) {
-		  if (roomTitle.length > 10) {
-			return roomTitle.substring(0, 5) + '...';
-		  }
+			if (roomTitle.length > 10) {
+				return roomTitle.substring(0, 5) + '...';
+			}
 		}
 		return roomTitle;
-	  };
+	};
 
 	const handleInviteUser = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
@@ -450,7 +450,7 @@ export function ChatBox() {
 			<li className="message-container" key={message.id}>
 				<div className={`d-flex ${classuser}`}>
 					{message.userId !== profile.id && (
-						<Link to={`/game/${message.id}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
+						<Link to={`/game/${message.userId}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
 							<span style={{ marginRight: '20px' }}>
 								<FontAwesomeIcon icon={faPlay} />
 							</span>

@@ -1,134 +1,144 @@
 import { Server } from 'socket.io';
 import Player from './Player.class';
 import Ball from './Ball.class';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { GamesService } from './game.service';
+import { PlayerService } from 'src/player/player.service';
+
+import { Result } from '@prisma/client';
 
 export default class Room {
+	private prisma: PrismaService = new PrismaService();
+	private gameService: GamesService = new GamesService(this.prisma);
+	private playerService: PlayerService = new PlayerService(this.prisma);
 	private players: { [id: string]: Player } = {};
 	private ball: Ball | null = null;
 	private interval: NodeJS.Timeout | null = null;
+	private gameId: number = 0;
+	private startTime: number = Date.now();
+	private playerLeft: number = -1;
 
-	constructor(private readonly roomId: string, private readonly wss: Server, public firstPlayerId: string, public secondPlayerId: string) {
-		this.players[firstPlayerId] = new Player(firstPlayerId, false);
-		this.players[secondPlayerId] = new Player(secondPlayerId, true);
+	constructor(private readonly roomId: string, private readonly wss: Server, public player1: any, public player2: any) {
+
+		this.players[player1.data.user.id] = new Player(player1.data.user.id, player1.data.user.id, false);
+		this.players[player2.data.user.id] = new Player(player2.data.user.id, player2.data.user.id, true);
 
 		Object.keys(this.players).forEach((id) => {
 			this.wss.to(id).emit('start', roomId);
 		});
-
 		this.startGame();
 	}
 
-
-	public leave(id: string) {
+	public async leave(id: string) {
 		if (this.players[id]) {
-			delete this.players[id];
-			this.wss.to(this.roomId).emit('removePlayer', id);
-			if (Object.keys(this.players).length < 2) {
-				this.ball = null;
+
+			let winner;
+			for (const playerId in this.players) {
+				if (playerId != id) {
+					winner = Number(playerId);
+					break;
+				}
 			}
+			this.playerLeft = winner;
+			// this.endGame(winner).then(() => {
+			// delete this.players[id];
+			// });
 		}
 	}
 
 	public isEmpty(): boolean {
-		return Object.keys(this.players).length === 0;
+		return Object.keys(this.players).length < 2;
 	}
 
-	public startGame() {
+	public async startGame() {
 		this.ball = new Ball();
 		this.wss.to(this.roomId).emit('startGame');
+
 		this.interval = setInterval(() => {
 			this.updateGameTick();
-			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball });
+			this.wss.to(this.roomId).emit('clients', { clients: this.players, ball: this.ball, time: 3 * 1000 * 60 - (Date.now() - this.startTime) });
 		}, 1000 / 60);
 	}
 
 	private updateGameTick() {
 		if (!this.ball) return;
+		if (this.playerLeft !== -1) {
+			this.endGame(Number(this.playerLeft));
+			return;
+		}
 		for (const client of Object.values(this.players)) {
 			client.update();
 		}
 		const winner = this.ball.update(this.players);
 		if (winner) {
-			this.ball = null;
-			clearInterval(this.interval!);
-			this.interval = null;
-			this.wss.to(this.roomId).emit('gameOver', { winner: winner });
+			this.endGame(Number(winner));
+		} else if (Date.now() - this.startTime > 3 * 1000 * 60) { // 3 * 60 * 1000
+			const players = Object.values(this.players);
+			if (players[0].score > players[1].score) {
+				this.endGame(Number(players[0].id));
+			} else if (players[0].score < players[1].score) {
+				this.endGame(Number(players[1].id));
+			} else {
+				this.endGame(-1); // -1 means nobody won
+			}
 		}
 	}
+
 	public handleKey(client: string, data: { up: boolean, down: boolean, time: number }) {
 		this.players[client].handleKeysPresses(data);
 	}
 
-	// public addPlayer(player: Player) {
-	// 	this.players.push(player);
-	// 	this.wss.to(this.roomId).emit('players', this.players);
-	// }
+	public async endGame(winner: number) {
 
+		clearInterval(this.interval!);
 
-	// public removePlayer(playerId: string) {
-	// 	this.players = this.players.filter((player) => player.id !== playerId);
-	// 	this.wss.to(this.roomId).emit('players', this.players);
-	// }
+		if (winner == -1) {
+			this.wss.to(this.roomId).emit('gameOver', { winner: null, loser: null });
+			const newGame = await this.gameService.create({});
+			this.gameId = newGame.id;
+			const players = Object.values(this.players);
+			await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${players[0].score}:${players[1].score}` });
+			await this.playerService.createPlayer({ win: Result.DRAW, gameId: this.gameId, userId: players[0].id });
+			await this.playerService.createPlayer({ win: Result.DRAW, gameId: this.gameId, userId: players[1].id });
+			return;
+		}
 
-	// public stopGame() {
-	// 	clearInterval(this.interval!);
-	// 	this.interval = null;
-	// 	this.ball = null;
-	// 	// Object.keys(this.players).forEach((player) => {
-	// 	// 	player.reset();
-	// 	// });
-	// 	this.wss.to(this.roomId).emit('gameState', { players: this.players, ball: this.ball });
-	// }
+		let loser;
+		this.ball = null;
+		this.interval = null;
+		for (const playerId in this.players) {
+			if (playerId !== winner.toString()) {
+				loser = Number(playerId);
+				break;
+			}
+		}
+		const loserPlayer = this.players[loser];
+		const winnerPlayer = this.players[winner];
+		this.wss.to(this.roomId).emit('gameOver', { winner: winnerPlayer.userId, loser: loserPlayer.userId });
 
-	// private updateGameTick() {
-	// 	// Update player positions
-	// 	this.players.forEach((player) => {
-	// 		player.updatePosition();
-	// 	});
+		const newGame = await this.gameService.create({});
+		this.gameId = newGame.id;
 
-	// 	// Update ball position
-	// 	if (this.ball) {
-	// 		this.ball.updatePosition();
-	// 		this.checkBallCollision();
-	// 	}
-	// }
+		if (!winnerPlayer || !loserPlayer) {
+			return;
+		}
 
-	// private checkBallCollision() {
-	// 	// Check if ball collides with any player
-	// 	this.players.forEach((player) => {
-	// 		if (this.ball!.collidesWith(player)) {
-	// 			this.ball!.bounceOff(player);
-	// 		}
-	// 	});
+		// try {
+		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
+		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
-	// 	// Check if ball collides with walls
-	// 	if (this.ball!.collidesWithTopWall() || this.ball!.collidesWithBottomWall()) {
-	// 		this.ball!.bounceOffWall();
-	// 	}
+		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
+		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
+		if (wins.length == 1) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
+		} else if (wins.length == 10) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { win10Games: true } });
+		} else if (wins.length == 100) {
+			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
+		}
 
-	// 	// Check if ball goes out of bounds
-	// 	if (this.ball!.goesOutOfBounds()) {
-	// 		this.stopGame();
-	// 	}
-	// }
-	// @SubscribeMessage('UpKeyPressed')
-	// async handleUpKeyPressed(client: Socket, payload: string): Promise<void> {
-	// 	console.log('UpKeyPressed', payload)
-	// 	this.players[client.id].direction = 1
-	// }
-	// @SubscribeMessage('UpKeyReleased')
-	// async handleUpKeyReleased(client: Socket, payload: string): Promise<void> {
-	// 	console.log('UpKeyReleased', payload)
-	// 	this.players[client.id].direction = 0
-	// }
-	// @SubscribeMessage('DownKeyPressed')
-	// async handleDownKeyPressed(client: Socket, payload: string): Promise<void> {
-	// 	console.log('DownKeyPressed', payload)
-	// 	this.players[client.id].direction = -1
-	// }
-	// @SubscribeMessage('DownKeyReleased')
-	// async handleDownKeyReleased(client: Socket, payload: string): Promise<void> {
-	// 	console.log('DownKeyReleased', payload)
-	// 	this.players[client.id].direction = 0
-	// }
+		// } catch (error) {
+		// 	console.log(error);
+		// }
+	}
 }
