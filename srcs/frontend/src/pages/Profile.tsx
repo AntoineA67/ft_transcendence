@@ -138,10 +138,9 @@ function Profile() {
 
 	return (
 		<>
-			<SnackbarProvider maxSnack={3} />
-			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">
-				<Link to="/setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
-
+			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+				<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
+			
 				<div>
 					<Avatar size={150} user={{
 						id: profile.id,

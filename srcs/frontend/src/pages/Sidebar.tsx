@@ -14,7 +14,7 @@ import { Outlet, useOutletContext, Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
 	const location = useLocation();
-	const pages = ['/', '/search', '/friends', '/chat', '/game'];
+	const pages = ['/', '/me', '/search', '/friends', '/chat'];
 	const [page, setPage] = useState<string>();
 	const [popup, setPopup] = useState<'no' | 'pong' | 'ponged'>('no');
 	const [popupNick, setPopupNick] = useState('');
@@ -71,7 +71,10 @@ export default function Sidebar() {
 						<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4"
 							id="sidebar-ul" role="navigation" >
 							<li className={`nav-item ${(page == '/') && 'magenta'}`} >
-								<Link to="/"><img src={Home} /></Link>
+								<Link to="/"><img src={Game} /></Link>
+							</li>
+							<li className={`nav-item ${(page == '/me') && 'magenta'}`} >
+								<Link to="me"><img src={Home} /></Link>
 							</li>
 							<li className={`nav-item ${(page == '/search') && 'magenta'}`} >
 								<Link to="search"><img src={Search} /></Link>
@@ -81,9 +84,6 @@ export default function Sidebar() {
 							</li>
 							<li className={`nav-item ${(page == '/chat') && 'magenta'}`} >
 								<Link to="chat"><img src={Chat} /></Link>
-							</li>
-							<li className={`nav-item ${(page == '/game') && 'magenta'}`} >
-								<Link to="game"><img src={Game} /></Link>
 							</li>
 						</ul>
 					</div>
