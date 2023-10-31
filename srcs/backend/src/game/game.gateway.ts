@@ -1,5 +1,6 @@
 import { Logger, UseGuards } from '@nestjs/common';
 import {
+    ConnectedSocket,
     OnGatewayConnection,
     OnGatewayDisconnect,
     OnGatewayInit,
@@ -14,11 +15,21 @@ import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/constants';
+import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
+import { UsersService } from 'src/users/users.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    constructor(private readonly gamesService: GamesService, private jwtService: JwtService) { }
+    private matches = {};
+
+    constructor(
+        private readonly gamesService: GamesService,
+        private jwtService: JwtService,
+        private readonly gameSettingsService: GameSettingsService,
+        private readonly prisma: PrismaService,
+    ) { }
 
     private logger: Logger = new Logger('Game Gateway');
 
@@ -28,43 +39,76 @@ export class GameGateway
         this.logger.log('Initialized');
     }
 
-    handleDisconnect(client: Socket) {
-        this.logger.log(`Player Disconnected: ${client.id} from ${client.rooms}`);
-        this.gamesService.disconnect(client);
+    handleDisconnect(socket: Socket) {
+        this.logger.log(`Player Disconnected: ${socket.id} from ${socket.rooms}`);
+        this.gamesService.disconnect(socket);
     }
 
-    handleConnection(client: Socket, ...args: any[]) {
-        //const token = client.handshake.auth.Authorization?.split(' ')[1];
-        //console.log(`Received new connection with token "${token}", is it valid ? 🤔`)
-
-        // try {
-        //     const payload = this.jwtService.verify(token, { secret: jwtConstants.secret });
-        //     console.log('Token is valid! decoded:', payload)
-        // } catch (e) {
-        //     console.log('Error', e)
-        //     client.emit('error', { message: 'Invalid token' });
-        //     client.disconnect();
-        //     return;
-        // }
-        console.log(`Client successfully connected! 🆔  ${client.id}`)
-        client.emit('id', client.id)
+    handleConnection(socket: Socket, ...args: any[]) {
+        console.log(`Client successfully connected! 🆔  ${socket.data.user.id}`)
+        socket.emit('id', socket.data.user.id)
     }
 
     @SubscribeMessage('match')
-    async handleMatch(client: Socket, payload: string): Promise<void> {
-        if (!this.gamesService.isInQueue(client)) {
-            this.gamesService.addToQueue(client, this.wss);
+    async handleMatch(socket: Socket, payload: string): Promise<void> {
+        if (!this.gamesService.isInQueue(socket)) {
+            this.gamesService.addToQueue(socket, this.wss);
+        }
+    }
+    @SubscribeMessage('matchAgainst')
+    async handleMatchAgainst(socket: Socket, payload: string): Promise<void> {
+        console.log(`Trying match ${socket.data.user.id} against ${payload}`)
+        const sockets = await this.wss.fetchSockets();
+        // if (socket.data.user.id == payload) {
+        //     return;
+        // }
+        if (this.matches[payload] == socket.data.user.id) {
+            delete this.matches[payload];
+            console.log("LAUNCHING MATCH " + payload + " " + socket.data.user.id)
+            for (let s of sockets) {
+                if (s.data.user.id == payload) {
+                    this.gamesService.matchmakePlayers(this.wss, socket, s as unknown as Socket);
+                    break;
+                }
+            }
+        } else {
+            for (let s of sockets) {
+                if (s.data.user.id == payload) {
+                    s.emit('ponged', { nick: "", id: socket.data.user.id })
+                    this.matches[socket.data.user.id] = payload;
+                    console.log(`Matched ${socket.data.user.id} with ${payload}, now matches are ${this.matches.toString()}`)
+                    break;
+                }
+            }
         }
     }
 
+
     @SubscribeMessage('cancel')
-    async handleLeave(client: Socket, payload: string): Promise<void> {
-        this.gamesService.disconnect(client);
+    async handleLeave(socket: Socket, payload: string): Promise<void> {
+        this.gamesService.disconnect(socket);
     }
 
     @SubscribeMessage('keyPresses')
-    async handleKeyPresses(client: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
-        this.gamesService.handleKeysPresses(client.id, payload);
+    async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
+        // console.log(socket.data.user.id);
+        this.gamesService.handleKeysPresses(socket.data.user.id, payload);
+    }
+
+    @SubscribeMessage('changeColor')
+    async handleColor(socket: Socket, payload: string): Promise<void> {
+        this.gameSettingsService.handleColor(socket.data.user.id, payload);
+    }
+
+    // @SubscribeMessage('getMyPaddleColor')
+    // async getColor(socket: Socket, payload: string): Promise<void> {
+    //     this.gameSettingsService.handleColor(socket.data.user.id, payload);
+    // }
+    @SubscribeMessage('getMyPaddleColor')
+    async handleMyProfile(@ConnectedSocket() client: Socket) {
+        this.logger.log('getMyPaddleColor')
+        const userId: number = client.data.user.id;
+        return (await this.gameSettingsService.getUserGameSettings(userId))
     }
 }
 

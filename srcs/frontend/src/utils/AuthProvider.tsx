@@ -10,14 +10,14 @@ export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
+	// const state = searchParams.get('state') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		console.log('callback42');
-		if (!code) {
-			setStatus('done');
+		// if (!code || !state) return;
+		if (!code) {setStatus('done')
 			return;
-		}
+		};
 		let response;
 
 		try {
@@ -84,7 +84,7 @@ export function Protected() {
 			setStatus('error')
 			console.log('err', err)
 			// if (localStorage.getItem('token')) {
-				// axios.post("http://localhost:3000/auth/signout", {}, {
+				// axios.post("http://localhost:4000/auth/signout", {}, {
 				// 	headers: {
 				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
 				// 	}
