@@ -163,6 +163,9 @@ export const InputToken = ({ handleChange }: any) => {
 export function SettingMenu() {
 
 	const [profile, setProfile] = useState<profileType | null>(null);
+	const [oldPassword, setOldPassword] = useState<String>('');
+	const [newPassword, setNewPassword] = useState<String>('');
+	const [confirmPassword, setConfirmPassword] = useState<String>('');
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -176,30 +179,51 @@ export function SettingMenu() {
 
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		console.log('handle submit: change password');
+
+
+		console.log('oldPassword ->', oldPassword);
+		console.log('newPassword ->', newPassword);
+		console.log('confirmPassword ->', confirmPassword);
+
+		socket.emit('ChangePassword', {newPassword, oldPassword}, (res: any) => {
+			console.log('res ->');
+			console.log(res);
+
+		});
 	};
 
 	const switchActivate = () => {
 		navigate("/me/setting/2fa");
 	};
 
+	const handleOldPassword = (event: any) => {
+		setOldPassword(event.target.value);
+	};
+
+	const handleNewPassword = (event: any) => {
+		setNewPassword(event.target.value);
+	};
+
+	const handleConfirmPassword = (event: any) => {
+		setConfirmPassword(event.target.value);
+	};
+
 	return (
 		<div className='container-fluid px-0 h-75'>
 			<Title title="Setting" />
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >  {/* style={{ minHeight: '400px' }} */}
-				{profile?.password && <form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+				{profile?.password && <form className='h-100 d-flex flex-column gap-3' onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }}>
 					<div>
 						<label htmlFor='current-password'>Current password</label>
-						<input id='current-password' type="password" placeholder="Current password" />
+						<input id='current-password' type="password" placeholder="Current password" onChange={handleOldPassword} />
 					</div>
 					<div>
 						<label htmlFor='new-password'>New password</label>
-						<input id='new-password' type="password" placeholder="New password"
-						/>
+						<input id='new-password' type="password" placeholder="New password" onChange={handleNewPassword} />
 					</div>
 					<div>
 						<label htmlFor='confirm-password'>Confirm password</label>
-						<input id='confirm-password' type="password" placeholder="Password"
-						/>
+						<input id='confirm-password' type="password" placeholder="Password" onChange={handleConfirmPassword}  />
 					</div>
 					{/* {profile?.password === 'nopass' && (
 						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
