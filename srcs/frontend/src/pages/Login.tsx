@@ -103,7 +103,7 @@ let url42 = () => {
 	return axios.get('http://localhost:4000/auth/42Url');
 }
 
-export function TokenPage() {
+export function TwoFAPage() {
 
 	const [token, setToken] = useState<string>('');
 	const [invalidToken, setInvalidToken] = useState(false);
