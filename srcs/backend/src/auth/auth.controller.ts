@@ -73,13 +73,6 @@ export class AuthController {
 		}
 	}
 
-	@Public()
-    @Get('42Url')
-    async get42Url() : Promise<string> {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "&response_type=code&scope=public";
-		return (url);
-    }
-
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')
     async isTokenValid(@Req() req: Request, @Res() res: Response) {
