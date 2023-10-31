@@ -19,7 +19,7 @@ import Sidebar from './pages/Sidebar'
 // import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
-import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
+import { TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
@@ -103,10 +103,12 @@ const router = createBrowserRouter(
 
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
-					<Route index
-						element={<Profile />}
-						loader={() => (loader('profile', 'me'))}
-					/>
+					
+					<Route index element={<Game />}/>
+					<Route path=":userId" element={<Game />} />
+					
+					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
+					<Route path="/me/setting" element={<SettingMenu />} />						
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route index element={<DefaultSearchPage/>}/>
@@ -136,13 +138,7 @@ const router = createBrowserRouter(
 
 					{/* <Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
-					</Route> */}
-					<Route path="setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-					</Route>
-
-					<Route path="/game" element={<Game />}></Route>
-					<Route path="/game/:userId" element={<Game />}></Route>
+					</Route> */}	
 				</Route>
 			</Route>
 		</Route>
