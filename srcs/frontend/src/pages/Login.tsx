@@ -2,7 +2,6 @@ import githubLogo from '../assets/github.svg';
 import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-
 import { useState, useEffect } from 'react';
 import { Outlet, Link } from "react-router-dom";
 import axios from 'axios';
@@ -23,7 +22,6 @@ type login = {
 export function Login() {
 	const navigate = useNavigate();
 
-
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
 			localStorage.setItem('token', data.token);
@@ -36,6 +34,8 @@ export function Login() {
 		// const errMess = document.getElementById("error-message") as HTMLInputElement;
 		setErr(data.message);
 	}
+
+	// const [require2FA, setRequire2FA] = useState(false);
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
 		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
@@ -110,7 +110,7 @@ export function TokenPage() {
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	async function sendToken() {
-		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
+		localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); 
 		const response = await fetch(`http://localhost:4000/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
