@@ -32,7 +32,13 @@ export class UsersService {
 	// }
 
 	async createUser(username: string, email: string, password: string) {
-		const hashPassword = await argon.hash(password);
+		// const hashPassword = await argon.hash(password);
+		// 💀
+		let hashPassword;
+		if (password == "nopass")
+			hashPassword = "nopass";
+		else
+			hashPassword = await argon.hash(password);
 		try {
 			const user = await this.prisma.user.create({
 				data: {
@@ -287,10 +293,11 @@ export class UsersService {
 			return (null);
 		}
 		if (profile && profile.hashPassword === "nopass") {
-			profile = { ...profile, hashPassword: "nopass" };
+			profile = { ...profile, password: false } as any;
 		} else {
-			profile = { ...profile, hashPassword: null };
+			profile = { ...profile, password: true } as any;
 		}
+		delete profile.hashPassword;
 		return ({
 			...profile,
 			avatar: this.bufferToBase64(profile.avatar),
