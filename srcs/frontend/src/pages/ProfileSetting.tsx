@@ -19,7 +19,7 @@ import axios from 'axios';
 export function Title({ title }: { title: string }) {
 	return (
 		<div className='d-flex w-100 align-items-center bg-black'>
-			<Link to=".."><button className='leftArrow m-2'></button></Link>
+			<Link to="/me"><button className='leftArrow m-2'></button></Link>
 			<h4 className='white-text' >{title}</h4>
 		</div>
 	);
@@ -251,8 +251,8 @@ export function SettingMenu() {
 	);
 }
 
-export function Setting() {
-	return (
-		<Outlet />
-	)
-}
+// export function Setting() {
+// 	return (
+// 		<Outlet />
+// 	)
+// }
