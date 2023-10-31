@@ -25,6 +25,7 @@ import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
 import { UserProfile } from './utils/UserProfile';
 import { DefaultErrorPage } from './pages/DefaultErrorPage';
+import { DefaultFriendPage } from './pages/DefaultFriendPage';
 
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -83,41 +84,6 @@ async function loader(route: string, param?: string, refresh = false) {
 		return loader(route, param, true);
 	})
 
-
-	// try {
-	// 	const res = await fetch(fetchUrl, {
-	// 		headers: { 'Authorization': `Bearer ${token}` }
-	// 	});
-	// 	if (res.status == 200 || res.status == 201) {
-	// 		return (res.json());
-	// 	} else {
-	// 		throw new Response(res.statusText, { status: res.status })
-	// 	}
-	// } catch (err: any) {
-	// 	if (refresh) { throw err; }
-	// 	return fetch(`${baseUrl}auth/refreshToken`, {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Accept': 'application/json',
-	// 			"Content-Type": "application/json"
-	// 		},
-	// 		body: JSON.stringify({ "refreshToken": refreshToken })
-	// 	}).then(async (res): Promise<Response> => {
-	// 		if (res.status != 201) {
-	// 			throw new Response(res.statusText, { status: res.status })
-	// 		}
-	// 		const newTokens = await res.json();
-	// 		localStorage.setItem('token', newTokens.token);
-	// 		localStorage.setItem('refreshToken', newTokens.refreshToken);
-	// 		// console.log('success');
-	// 		// console.log('newToken: ', newTokens);
-	// 		return loader(route, param, true);
-	// 	}).catch((err) => {
-	// 		localStorage.removeItem('token');
-	// 		localStorage.removeItem('refreshToken');
-	// 		throw err;
-	// 	})
-	// }
 }
 
 const router = createBrowserRouter(
@@ -151,6 +117,7 @@ const router = createBrowserRouter(
 					</Route>
 
 					<Route path="friends" element={<Friends />}>
+						<Route index element={<DefaultFriendPage/>}/>
 						<Route
 							path=':userNick'
 							element={<UserProfile />}
