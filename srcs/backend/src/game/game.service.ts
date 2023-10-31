@@ -13,63 +13,92 @@ export class GamesService {
   private clients: Record<string, string> = {};
   private rooms: Record<string, Room> = {};
 
-  addToQueue(client: Socket, wss: Server) {
-    this.matchmakingQueue.push(client);
-    console.log('matchmakingQueue', this.matchmakingQueue.map((client) => client.id));
+
+  addToQueue(socket: Socket, wss: Server) {
+    for (let i = 0; i < this.matchmakingQueue.length; i++) {
+      if (this.matchmakingQueue[i].data.user.id === socket.data.user.id) {
+        console.log('already in queue')
+        return;
+      }
+    }
+    this.matchmakingQueue.push(socket);
     this.tryMatchPlayers(wss);
   }
 
   isInQueue(client: Socket) {
     return this.matchmakingQueue.includes(client);
   }
+
   disconnect(client: Socket) {
-    const roomId = this.clients[client.id];
+    const roomId = this.clients[client.data.user.id];
     if (roomId) {
       const room = this.rooms[roomId];
       if (room) {
-        room.leave(client.id);
-        delete this.clients[client.id];
-        if (room.isEmpty()) {
-          delete this.rooms[roomId];
-        }
+        console.log('leave room', client.data.user.id)
+        if (room.isEmpty()) return;
+        room.leave(client.data.user.id).then(() => {
+          delete this.clients[client.data.user.id];
+          if (room.isEmpty()) {
+            delete this.rooms[roomId];
+          }
+        });
       }
     } else {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
-        console.log('removeFromQueue', client.id)
+        console.log('removeFromQueue', client.data.user.id)
         this.matchmakingQueue.splice(index, 1);
       }
     }
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
+    // console.log(this.clients)
     this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
   }
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {
+      const player1 = this.matchmakingQueue.pop();
+      const player2 = this.matchmakingQueue.pop();
+
       // Create a new room for the clients
       const roomId = uuidv4();
       console.log('roomId', roomId)
-      const player1 = this.matchmakingQueue.pop();
-      const player2 = this.matchmakingQueue.pop();
 
       player1.join(roomId);
       player2.join(roomId);
 
-      this.clients[player1.id] = roomId;
-      this.clients[player2.id] = roomId;
+      this.clients[player1.data.user.id] = roomId;
+      this.clients[player2.data.user.id] = roomId;
 
-      console.log('player1', player1.id)
-      console.log('player2', player2.id)
-      this.rooms[roomId] = new Room(roomId, wss, player1.id, player2.id);
+      console.log('player1', player1.id, player1.data.user.id)
+      console.log('player2', player2.id, player2.data.user.id)
+
+      this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
   }
 
+  public matchmakePlayers(wss, player1: Socket, player2: Socket) {
+
+    // Create a new room for the clients
+    const roomId = uuidv4();
+    console.log('roomId', roomId)
+
+    player1.join(roomId);
+    player2.join(roomId);
+
+    this.clients[player1.data.user.id] = roomId;
+    this.clients[player2.data.user.id] = roomId;
+
+    console.log('player1', player1.id, player1.data.user.id)
+    console.log('player2', player2.id, player2.data.user.id)
+
+    this.rooms[roomId] = new Room(roomId, wss, player2, player1);
+  }
+
   async findAll(): Promise<any> {
-    const games = await this.prisma.game.findMany()
-    console.log("oui", games)
-    return games;
+    return await this.prisma.game.findMany();
   }
 
   // async find(
@@ -85,7 +114,14 @@ export class GamesService {
       data: {
         start_date: new Date(Date.now()).toISOString(),
       }
+    });
+  }
 
+  // update
+  async update(id: number, data: Prisma.GameUpdateInput): Promise<Game> {
+    return await this.prisma.game.update({
+      where: { id },
+      data,
     });
   }
 }

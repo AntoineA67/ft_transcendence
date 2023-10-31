@@ -24,10 +24,10 @@ export function Login() {
 
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
-			localStorage.setItem('token', data.token);
-			localStorage.setItem('refreshToken', data.refreshToken);
-			localStorage.setItem('email', user.email);
-			navigate('/');
+		localStorage.setItem('token', data.token);
+		localStorage.setItem('refreshToken', data.refreshToken);
+		localStorage.setItem('email', user.email);
+		navigate('/');
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
@@ -93,7 +93,7 @@ export const InputToken = ({ handleChange }: any) => {
 			pattern="[0-9]*"
 			value={value}
 			onChange={handleChangeToken}
-			style={{letterSpacing: "10px"}}
+			style={{ letterSpacing: "10px" }}
 			className="text-center overflow-hidden d-flex"
 		/>
 	);
@@ -115,12 +115,12 @@ export function TokenPage() {
 		const data = await response.json();
 		if (data._2fa === 'success') {
 			await url42()
-        .then(response_url => {
-            window.location.href = (response_url.data);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+				.then(response_url => {
+					window.location.href = (response_url.data);
+				})
+				.catch(error => {
+					console.log(error);
+				});
 		} else {
 			setInvalidToken(true);
 		}

@@ -5,14 +5,13 @@ import {
 	createRoutesFromElements,
 	Route,
 	RouterProvider,
-	LoaderFunctionArgs, 
+	LoaderFunctionArgs,
 	Outlet,
 	redirect
- } from 'react-router-dom';
+} from 'react-router-dom';
 // import router from './router';
 import React from 'react';
 //import component
-import TestDB from './pages/TestDB';
 import { Login, LandingPage, TokenPage } from './pages/Login';
 import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
@@ -42,7 +41,6 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { GameSocketProvider } from './utils/GameSocketProvider';
 
 axios.defaults.baseURL = 'http://127.0.0.1:4000';
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -84,8 +82,8 @@ async function loader(route: string, param?: string, refresh = false) {
 		localStorage.setItem('refreshToken', newTokens.refreshToken);
 		return loader(route, param, true);
 	})
-	
-	
+
+
 	// try {
 	// 	const res = await fetch(fetchUrl, {
 	// 		headers: { 'Authorization': `Bearer ${token}` }
@@ -124,8 +122,8 @@ async function loader(route: string, param?: string, refresh = false) {
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
-		<Route element={<Outlet />} errorElement={<DefaultErrorPage />}>	
-			
+		<Route element={<Outlet />} errorElement={<DefaultErrorPage />}>
+
 			<Route element={<Guest />}>
 				<Route path="login" element={<Login />}>
 					<Route index element={<LandingPage />}></Route>
@@ -139,57 +137,46 @@ const router = createBrowserRouter(
 
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
-					<Route index 
-						element={<Profile />} 
+					<Route index
+						element={<Profile />}
 						loader={() => (loader('profile', 'me'))}
 					/>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
-						<Route 
-							path=':userNick' 
-							element={<UserProfile />}
-							loader={({params}) => (loader('profile', params.userNick))}
-						/>
-					</Route>
-					
-					<Route path="friends" element={<Friends />}>
-						<Route 
-							path=':userNick' 
+						<Route
+							path=':userNick'
 							element={<UserProfile />}
 							loader={({ params }) => (loader('profile', params.userNick))}
 						/>
 					</Route>
-					
+
+					<Route path="friends" element={<Friends />}>
+						<Route
+							path=':userNick'
+							element={<UserProfile />}
+							loader={({ params }) => (loader('profile', params.userNick))}
+						/>
+					</Route>
+
 					<Route path="chat" element={<Chat />}>
-						<Route 
-							path=':chatId' 
+						<Route
+							path=':chatId'
 							element={<ChatBox />}
 							loader={({ params }) => (loader('rooms', params.chatId))}
 						/>
 					</Route>
-					
+
 					{/* <Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
 					</Route> */}
 					<Route path="setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
-						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
-					
-					<Route path="game" element={<>
-						<GameSocketProvider>
-							<Game />
-						</GameSocketProvider>
-					</>}></Route>
+
+					<Route path="/game" element={<Game />}></Route>
+					<Route path="/game/:userId" element={<Game />}></Route>
 				</Route>
 			</Route>
-
-				{/* <Route path="/game" element={<>
-					<GameSocketProvider>
-						<GameSocketProvider />
-					</GameSocketProvider>
-				</>}></Route> */}
-			<Route path="/test-db" element={<TestDB />} />	
 		</Route>
 	)
 );
@@ -197,7 +184,7 @@ const router = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 	// with strict mode, fetch fails. I don't know why
 	// <React.StrictMode>
-		<RouterProvider router={router} />
+	<RouterProvider router={router} />
 	// </React.StrictMode>
 );
 
