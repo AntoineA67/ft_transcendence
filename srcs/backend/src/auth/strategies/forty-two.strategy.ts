@@ -40,9 +40,9 @@ import { AuthService } from '../auth.service';
 export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 	constructor(private readonly usersService: UsersService, private readonly authService: AuthService) {
 		super({
-			clientID: process.env.FORTYTWO_APP_ID,
+			clientID: process.env.REACT_APP_FORTYTWO_APP_ID,
 			clientSecret: process.env.FORTYTWO_APP_SECRET,
-			callbackURL: process.env.FORTYTWO_APP_CALLBACK_URL,
+			callbackURL: process.env.REACT_APP_FRONTEND_URL + '/42/callback',
 			profileFields: {
 				'id': function (obj) { return String(obj.id); },
 				'username': 'login',

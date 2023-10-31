@@ -19,7 +19,7 @@ import Sidebar from './pages/Sidebar'
 // import { Home } from './pages/Home';
 import Game from './pages/Game';
 import Profile from './pages/Profile';
-import { TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
+import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
 import { Friends } from './pages/Friends';
 import { Chat, ChatBox } from './pages/Chat';
@@ -43,15 +43,16 @@ import { Guest } from './utils/Guest';
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
 
-axios.defaults.baseURL = 'http://127.0.0.1:4000';
+axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
 
 async function loader(route: string, param?: string, refresh = false) {
-	const baseUrl = 'http://127.0.0.1:4000/';
+	const baseUrl = process.env.REACT_APP_BACKEND_URL + '/';
 	const token = localStorage.getItem('token') || null;
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
 
+	console.log('fetch: ', fetchUrl);
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
@@ -65,7 +66,7 @@ async function loader(route: string, param?: string, refresh = false) {
 		throw new Response(res.statusText, { status: res.status });
 	}
 	console.log('refresh')
-	return fetch(`${baseUrl}auth/refreshToken`, {
+	return fetch(process.env.REACT_APP_BACKEND_URL + `/auth/refreshToken`, {
 		method: 'POST',
 		headers: {
 			'Accept': 'application/json',
@@ -108,7 +109,10 @@ const router = createBrowserRouter(
 					<Route path=":userId" element={<Game />} />
 					
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
-					<Route path="/me/setting" element={<SettingMenu />} />						
+					<Route path="/me/setting" element={<Setting />}>
+						<Route index element={<SettingMenu />}></Route>
+						<Route path='2fa' element={<TwoFactorAuth />}></Route>
+					</Route>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route index element={<DefaultSearchPage/>}/>
@@ -135,10 +139,9 @@ const router = createBrowserRouter(
 							loader={({ params }) => (loader('rooms', params.chatId))}
 						/>
 					</Route>
-
-					{/* <Route path="setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-					</Route> */}	
+					{/* 
+					<Route path="/game" element={<Game />}></Route>
+					<Route path="/game/:userId" element={<Game />}></Route> */}
 				</Route>
 			</Route>
 		</Route>

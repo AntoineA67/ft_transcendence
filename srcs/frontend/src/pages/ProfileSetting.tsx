@@ -169,6 +169,7 @@ export function SettingMenu() {
 		if (!profile) {
 			socket.emit('MyProfile', profile, (res: profileType) => {
 				setProfile(res);
+				// console.log(res);
 			});
 		}
 	}, [profile]);
@@ -185,27 +186,28 @@ export function SettingMenu() {
 		<div className='container-fluid px-0 h-75'>
 			<Title title="Setting" />
 			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >  {/* style={{ minHeight: '400px' }} */}
-				<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+				{profile?.password && <form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
 					<div>
 						<label htmlFor='current-password'>Current password</label>
-						<input id='current-password' type="password" placeholder="Current password" disabled={profile?.password === 'nopass'} />
+						<input id='current-password' type="password" placeholder="Current password" />
 					</div>
 					<div>
 						<label htmlFor='new-password'>New password</label>
-						<input id='new-password' type="password" placeholder="New password" 
-							disabled={profile?.password === 'nopass'} />
+						<input id='new-password' type="password" placeholder="New password"
+						/>
 					</div>
 					<div>
 						<label htmlFor='confirm-password'>Confirm password</label>
-						<input id='confirm-password' type="password" placeholder="Password" 
-							disabled={profile?.password === 'nopass'} />
+						<input id='confirm-password' type="password" placeholder="Password"
+						/>
 					</div>
-					{profile?.password === 'nopass' && (
+					{/* {profile?.password === 'nopass' && (
 						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
-					)}
-					<button type='submit' className='btn btn-outline-secondary w-100' disabled={profile?.password === 'nopass'} >Confirm</button>
+					)} */}
+					<button type='submit' className='btn btn-outline-secondary w-100' >Confirm</button>
 				</form>
-				
+				}
+
 				<hr />
 				<Form.Check
 					type="switch"
@@ -217,7 +219,7 @@ export function SettingMenu() {
 				<hr />
 				<br></br>
 				<button onClick={() => {
-				let url = ("http://localhost:4000/auth/signout");
+				let url = (process.env.REACT_APP_BACKEND_URL + "/auth/signout");
 				const fetchObj = {
 					method: 'POST',
 					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`,},
@@ -234,25 +236,25 @@ export function SettingMenu() {
 					// if (!response.ok) { throw Error('response not ok'); }
 					// let data = await response.json();
 
-					localStorage.removeItem('token');
-					localStorage.removeItem('random');
-					localStorage.removeItem('email');
-					localStorage.removeItem('refreshToken');
-					// localStorage.removeItem('token');
-					window.location.href = '/';
-				} catch (err: any) {
-				console.log(err);
-				}
-			}}
-				className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
+						localStorage.removeItem('token');
+						localStorage.removeItem('random');
+						localStorage.removeItem('email');
+						localStorage.removeItem('refreshToken');
+						// localStorage.removeItem('token');
+						window.location.href = '/';
+					} catch (err: any) {
+						console.log(err);
+					}
+				}}
+					className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
 
 			</Stack>
 		</div>
 	);
 }
 
-// export function Setting() {
-// 	return (
-// 		<Outlet />
-// 	)
-// }
+export function Setting() {
+	return (
+		<Outlet />
+	)
+}
