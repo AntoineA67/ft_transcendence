@@ -43,7 +43,7 @@ export function TwoFactorAuth() {
 			socket.emit('Activate2FA', token, (response: any) => {
 				console.log(response);
 				if (response == true) {
-					navigate("/setting/");
+					navigate("/me/setting/");
 				} else {
 					setInvalidToken(true);
 				}
@@ -52,7 +52,7 @@ export function TwoFactorAuth() {
 			socket.emit('Disable2FA', token, (response: any) => {
 				console.log(response);
 				if (response == true) {
-					navigate("/setting/");
+					navigate("/me/setting/");
 				} else {
 					setInvalidToken(true);
 				}
@@ -179,7 +179,7 @@ export function SettingMenu() {
 	};
 
 	const switchActivate = () => {
-		navigate("/setting/2fa");
+		navigate("/me/setting/2fa");
 	};
 
 	return (
