@@ -210,14 +210,17 @@ export class RoomService {
 		return true;
 	}
 
-	async createPrivateRoom(userId: number, username: string) {
+	async createPrivateRoom(userId: number, username: string): Promise<any> {
 		const userprofile = await this.usersService.getUserById(userId);
 		if (!userprofile)
-			return null;
+			return -1;
 
 		const user = await this.findUserByUsername(username);
-		if (!user || user.id === userId)
-			return null;
+		if (!user)
+			return -2;
+
+		if (user.id === userId)
+			return -3;
 
 		const existingRoom = await this.findExistingPrivateRoom(userId, user.id);
 		if (existingRoom)
@@ -225,7 +228,11 @@ export class RoomService {
 
 		const isBlocked = await this.isBlockedBy(userId, user.id);
 		if (isBlocked)
-			return null;
+			return -4;
+
+		const isBlocking = await this.isBlocking(userId, user.id);
+		if (isBlocking)
+			return -5;
 
 		let randomTitle = Math.random().toString(36).substring(7);
 		let roomname = "priv_room_" + randomTitle;
@@ -780,7 +787,7 @@ export class RoomService {
 		return true;
 	}
 
-	async inviteUser(userId: number, roomId: number, username: string): Promise<boolean> {
+	async inviteUser(userId: number, roomId: number, username: string): Promise<number> {
 		const user = await this.prisma.member.findFirst({
 			where: {
 				roomId,
@@ -797,7 +804,7 @@ export class RoomService {
 		});
 
 		if (!user) {
-			return false;
+			return -1;
 		}
 		const userToInvite = await this.prisma.user.findFirst({
 			where: {
@@ -806,7 +813,7 @@ export class RoomService {
 		});
 
 		if (!userToInvite) {
-			return false;
+			return -2;
 		}
 
 		const blocked = await this.prisma.block.findFirst({
@@ -825,7 +832,7 @@ export class RoomService {
 		});
 
 		if (blocked) {
-			return false;
+			return -3;
 		}
 
 		const isMember = await this.prisma.member.findFirst({
@@ -836,7 +843,7 @@ export class RoomService {
 		});
 
 		if (isMember) {
-			return false;
+			return -4;
 		}
 
 		await this.prisma.member.create({
@@ -846,7 +853,7 @@ export class RoomService {
 			},
 		});
 
-		return true;
+		return userToInvite.id;
 	}
 
 	async changeRole(userid: number, roomId: number, memberId: number, owner: boolean, admin: boolean): Promise<boolean> {
