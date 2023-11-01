@@ -1108,7 +1108,7 @@ export function ChatList() {
 			{page === 'chatList' && (
 				<>
 					<div className='d-flex w-100 align-items-center p-2 ps-4 ps-sm-5 bg-black'>
-						<h4 className='white-text mx-auto my-0'>Chat</h4>
+						<h4 className='white-text my-0'>Chat</h4>
 						<button className='new-chat ms-auto' onClick={() => setPage('newChat')} />
 					</div>
 					<div className='ps-sm-2 overflow-y-auto'>

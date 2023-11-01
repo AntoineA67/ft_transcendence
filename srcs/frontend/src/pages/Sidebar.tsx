@@ -14,7 +14,7 @@ import { Outlet, useOutletContext, Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
 	const location = useLocation();
-	const pages = ['/', '/search', '/friends', '/chat', '/game'];
+	const pages = ['/', '/me', '/search', '/friends', '/chat'];
 	const [page, setPage] = useState<string>();
 	const [popup, setPopup] = useState<'no' | 'pong' | 'ponged'>('no');
 	const [popupNick, setPopupNick] = useState('');
@@ -77,32 +77,31 @@ export default function Sidebar() {
 							<Outlet />
 						</div>
 						<div className="col-sm-auto sticky-bottom order-sm-first bg-black">
-							<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4"
-								id="sidebar-ul" role="navigation" >
-								<li className={`nav-item ${(page == '/') && 'magenta'}`} >
-									<Link to="/"><img src={Home} /></Link>
+							<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4" id="sidebar-ul" role="navigation">
+								<li className={`nav-item ${page === '/' ? 'magenta' : ''}`}>
+									<Link to="/"><img src={Game} alt="Game" /></Link>
 								</li>
-								<li className={`nav-item ${(page == '/search') && 'magenta'}`} >
-									<Link to="search"><img src={Search} /></Link>
+								<li className={`nav-item ${page === '/me' ? 'magenta' : ''}`}>
+									<Link to="me"><img src={Home} alt="Home" /></Link>
 								</li>
-								<li className={`nav-item ${(page == '/friends') && 'magenta'}`} >
-									<Link to="friends"><img src={Friend} /></Link>
+								<li className={`nav-item ${page === '/search' ? 'magenta' : ''}`}>
+									<Link to="search"><img src={Search} alt="Search" /></Link>
 								</li>
-								<li className={`nav-item ${(page == '/chat') && 'magenta'}`} >
-									<Link to="chat"><img src={Chat} /></Link>
+								<li className={`nav-item ${page === '/friends' ? 'magenta' : ''}`}>
+									<Link to="friends"><img src={Friend} alt="Friend" /></Link>
 								</li>
-								<li className={`nav-item ${(page == '/game') && 'magenta'}`} >
-									<Link to="game"><img src={Game} /></Link>
+								<li className={`nav-item ${page === '/chat' ? 'magenta' : ''}`}>
+									<Link to="chat"><img src={Chat} alt="Chat" /></Link>
 								</li>
 							</ul>
 						</div>
 					</div>
 				</div>
-				{/* <button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
-			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button> */}
-				{popup == 'pong' && <PongPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
-				{popup == 'ponged' && <PongedPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
 			</SnackbarProvider>
+			{/* <button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
+			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button> */}
+			{popup == 'pong' && <PongPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
+			{popup == 'ponged' && <PongedPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
 		</>
 	)
 }

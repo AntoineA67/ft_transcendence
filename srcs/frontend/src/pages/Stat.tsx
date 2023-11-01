@@ -36,12 +36,19 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	const listItem = (x: gameHistoryType, index: number) => {
 		const bgGrey = index % 2 ? 'bg-grey' : '';
 		const color = x.win === Result.WIN ? 'magenta-text' : (x.win === Result.LOSE ? 'cyan-text' : 'grey-text');
+		const text: string = (x.win === Result.WIN) ? ('Victory') : (x.win === Result.LOSE ? 'Defeat' : 'Draw');
 		return (
 			<li key={x.playerId}
-				className={`stat-list-item d-flex flex-wrap ${bgGrey}`}>
-				<div>{dateStr(x.date)}</div>
-				<div className='ms-auto me-3'> {x.against} </div>
-				<div className={color}> {x.score} </div>
+				className={`stat-list-item ${bgGrey}`}>
+				<div className='d-flex fw-light font-small justify-content-between'>
+					<div>{dateStr(x.date)}</div>
+					<div>against {x.against}</div>
+				</div>
+				<div className={`${color} d-flex flex-row justify-content-between`}>
+					<div>{text}</div>
+					<div> {x.score} </div>	
+				</div>
+				
 			</li>
 		);
 	}
@@ -61,12 +68,11 @@ function AchieveContent({ achieve }: achieveProp) {
 	const achieveList = ['firstWin', 'win10Games', 'win100Games', 'play100Games', 'play1000Games']
 
 	const myMap = (x: string, index: number) => {
-		const bgGrey = index % 2 ? 'bg-grey' : '';
 		const color = (achieve[x as keyof (typeof achieve)]) ? '' : 'grey-text';
 		return (
 			<li
 				key={`${achieve.userId}_${x}`}
-				className={`${bgGrey} d-flex flex-wrap stat-list-item ${color}`}
+				className={`d-flex flex-wrap stat-list-item ${color}`}
 			>
 				{x}
 			</li>
