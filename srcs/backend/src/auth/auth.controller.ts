@@ -71,7 +71,6 @@ export class AuthController {
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	@HttpCode(HttpStatus.OK)
-	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		const dto: Signin42Dto = {
 			id: req.user.id,
@@ -80,8 +79,7 @@ export class AuthController {
 			activated2FA: req.user.activated2FA,
 			user: req.user,
 		}
-		// const response = await this.authService.signin42(dto, res, req);
-		// return response;
+
 		return await this.authService.signin42(dto, res, req);
 	}
 
@@ -101,12 +99,12 @@ export class AuthController {
 		}
 	}
 
-	@Public()
-    @Get('42Url')
-    async get42Url() {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
-        return (url);
-    }
+	// @Public()
+    // @Get('42Url')
+    // async get42Url() {
+    //     const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
+    //     return (url);
+    // }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')

@@ -137,7 +137,6 @@ export class AuthService {
 				expiresIn: '15m',
 				secret: secret,
 			});
-		console.log("Payload=", payload)
 		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
@@ -146,10 +145,12 @@ export class AuthService {
 		};
 	}
 	
-	async login42(user: any) {
-		if (!user)
-			throw new BadRequestException('Unauthenticated');
-		let userExists: any = await this.usersService.getUserByEmail(user.emails[0].value);
+	async login42(user: any): Promise<User>  {
+		if (!user || !user.emails || !user.emails.length || !user.emails[0].value) {
+			throw new BadRequestException('Invalid user data');
+		  }
+		const email = user.emails[0].value;
+		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
 			userExists = await this.registerUser42(user);
 		return (userExists);
@@ -186,31 +187,6 @@ export class AuthService {
         });
         return refreshToken;
     }
-
-	// async refreshToken(refreshToken: string, req: Request, res: Response) {
-	// 	if (!refreshToken)
-	// 		return res.status(401).json({ valid: false, message: "Empty refresh token" });
-	// 	const userRefreshToken = await this.prisma.refreshToken.findUnique({
-	// 		where: {
-	// 			token: refreshToken,
-	// 		},
-	// 	});
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: {
-	// 			id: userRefreshToken.userId,
-	// 		}
-	// 	});
-	// 	if (!user)
-	// 		return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-	// 	if (!this.isRefreshTokenValid(refreshToken))
-	// 	{
-	// 		await this.deleteRefreshTokenForUser(user.id);
-	// 		return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-	// 	}
-	// 	// delete refreshToken from DB to make a new one
-	// 	// return this.signJwtTokens(req.user.id, req.user.email);
-	// 	return await this.signJwtTokens(user.id, user.email);
-	// }
 
 	async refreshToken(refreshToken: string): Promise<any> {
 		if (!refreshToken) {
