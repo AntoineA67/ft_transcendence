@@ -2,10 +2,9 @@ import githubLogo from '../assets/github.svg';
 import fortytwologo from '../assets/fortytwologo.svg';
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-
 import { useState, useEffect } from 'react';
 import { Outlet, Link } from "react-router-dom";
-import axios from 'axios';
+import { useSearchParams } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +22,6 @@ type login = {
 export function Login() {
 	const navigate = useNavigate();
 
-
 	const saveToken = (data: any, user: newUser | login) => {
 		console.log("savetoken ===", data);
 		localStorage.setItem('token', data.token);
@@ -32,14 +30,25 @@ export function Login() {
 		navigate('/');
 	}
 
+	const handle2FA = (data: any, set2FA: React.Dispatch<React.SetStateAction<boolean>>) => {
+		console.log("data ===", data);
+		set2FA(data._2fa);
+		// set2FA('this is a code');
+
+		// navigate('/');
+	}
+
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
 		// const errMess = document.getElementById("error-message") as HTMLInputElement;
 		setErr(data.message);
 	}
-
+	// const [require2FA, setRequire2FA] = useState(false);
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
-		user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) {
+		user: newUser | login, 
+		setErr: React.Dispatch<React.SetStateAction<string>>, 
+		set2FA: React.Dispatch<React.SetStateAction<boolean>>) {
 		e.preventDefault();
+
 		let data;
 		let url = ('username' in user) ? (process.env.REACT_APP_BACKEND_URL + '/auth/signup'
 		) : (process.env.REACT_APP_BACKEND_URL + '/auth/signin');
@@ -48,11 +57,21 @@ export function Login() {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(user),
 		}
+		// let [searchParams] = useSearchParams();
+		// const _2fa = searchParams.get('_2fa') || null;
+		let response;
 		try {
-			let response = await fetch(url, fetchObj)
+			// if (!_2fa)
+				response = await fetch(url, fetchObj)
+			// else {
+				// url = url + '&_2fa=${_2fa?.token}';
+				// response = await fetch(url + '&_2fa=${_2fa?.token}', fetchObj);
+			// }
+
 			// if (!response.ok) { throw Error('response not ok'); }
 			data = await response.json();
 			('error' in data) && dealError(data, setErr);
+			('_2fa' in data) && handle2FA(data, set2FA);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
 			console.log(err);
@@ -115,7 +134,7 @@ export const InputToken = ({ handleChange }: any) => {
 // 	return axios.get(process.env.REACT_APP_BACKEND_URL + '/auth/42Url')
 // }
 
-export function TokenPage() {
+export function TwoFAPage() {
 
 	const oauth42Url = Oauth42();
 	const [token, setToken] = useState<string>('');

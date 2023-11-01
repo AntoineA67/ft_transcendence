@@ -15,7 +15,7 @@ export type Block = {
 export type MemberWithLatestMessage = {
 	member: Member;
 	latestMessage: Message | null;
-  };
+};
 
 export type Profile = {
 	bio: string;
@@ -41,11 +41,11 @@ export type Member = {
 };
 
 export type Room = {
-    id: number;
-    isChannel: boolean;
-    title: string;
-    private: boolean;
-    password: string;
+	id: number;
+	isChannel: boolean;
+	title: string;
+	private: boolean;
+	password: string;
 	messages: Message[];
 }
 
@@ -55,4 +55,15 @@ export type Pvrooms = {
 	username2: string,
 	block: boolean,
 	blocked: boolean,
-  };
+};
+
+export type ChatBoxData = {
+	messages: Message[],
+	roomTitle: string,
+	roomChannel: boolean,
+	members: Member[],
+	memberStatus: Member,
+	private: boolean,
+	password: boolean,
+	profile: Profile,
+};
