@@ -36,11 +36,13 @@ export class AuthService {
         }
     }
 
-	async signup(dto: SignupDto, res: Response) {
+	async signup(dto: SignupDto) {
 		if (await this.usersService.getUserByEmail(dto.email))
 			throw new BadRequestException('This email is already used');
 		if (await this.usersService.getUserByNick(dto.username))
 			throw new BadRequestException('Username taken');
+		if (dto.email.includes('@student.42'))
+			throw new BadRequestException('Please sign in in with 42 if you are a 42 student');
 		try {
 			const hashPassword = await argon.hash(dto.password);
 			const user = await this.prisma.user.create({
@@ -63,7 +65,7 @@ export class AuthService {
 		}
 	  }
   
-	async signin(dto: SigninDto, res: Response, @Req() req) {
+	async signin(dto: SigninDto) {
 		// find user with email
 		const user = await this.usersService.getUserByEmail(dto.email);
 		// if user not found throw exception
@@ -74,7 +76,23 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		return this.signJwtTokens(user.id, user.email);
+		// let response;
+		if (!dto.token2FA && user.activated2FA) {
+			return {
+				_2fa: true
+			};
+		}
+		// if 2fa is activated and user have sent token
+		if (dto.token2FA && user.activated2FA) {
+			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
+
+			if (!_2FAValid) {
+			  // If 2FA token is invalid, throw an exception
+			  throw new UnauthorizedException('2FA token invalid or required');
+			}
+		  }
+		return await this.signJwtTokens(user.id, user.email);
+		// return this.signJwtTokens(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -102,7 +120,7 @@ export class AuthService {
 			}
 		// no 2fa
 		} else 
-			response = await this.signJwtTokens(req.user.id, req.user.email);
+			response = await this.signJwtTokens(dto.id, dto.email);
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
@@ -211,22 +229,23 @@ export class AuthService {
 			return true;
 	}
 
-	signout(req: Request, res: Response): Response {
-        // Invalidate the refresh token to make the signout more secure
-        // Extract the refresh token from the body or header
-        const refreshToken = req.body.refreshToken;
-        if (!refreshToken) {
-            return res.status(401).json({ message: "Refresh token is missing" });
-        }
-        // Remove the refresh token from the database to invalidate it
-        try {
-				this.deleteRefreshTokenForUser(req.user.id);
-            	return res.status(200).send({ message: 'Signed out successfully' });
-        } catch (error) {
-            console.error(error); 
-            return res.status(500).send({ message: "An error occurred in signout" });
-        }
-    }
+	async signout(req: Request): Promise<{ message: string }> {        // Invalidate the refresh token to make the signout more secure
+		const refreshToken = req.body.refreshToken;
+		if (!refreshToken) {
+			throw new UnauthorizedException("Refresh token is missing");
+		}
+
+		const userRefreshToken = await this.prisma.refreshToken.findUnique({
+			where: { token: refreshToken },
+		});
+
+		if (!userRefreshToken) {
+			throw new UnauthorizedException("Invalid refresh token");
+		}
+
+		await this.deleteRefreshTokenForUser(userRefreshToken.userId);
+		return { message: 'Signed out successfully' };
+	}
 
 	async deleteRefreshTokenForUser(userId: number): Promise<void> {
 		try {

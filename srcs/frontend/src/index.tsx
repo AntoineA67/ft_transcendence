@@ -12,7 +12,7 @@ import {
 // import router from './router';
 import React from 'react';
 //import component
-import { Login, LandingPage, TokenPage } from './pages/Login';
+import { Login, LandingPage, TwoFAPage } from './pages/Login';
 import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
@@ -97,7 +97,7 @@ const router = createBrowserRouter(
 					<Route index element={<LandingPage />}></Route>
 					<Route path="signin" element={<Signin />}></Route>
 					<Route path="signup" element={<Signup />}></Route>
-					<Route path="2fa" element={<TokenPage />}></Route>
+					<Route path="2fa" element={<TwoFAPage />}></Route>
 				</Route>
 			</Route>
 
