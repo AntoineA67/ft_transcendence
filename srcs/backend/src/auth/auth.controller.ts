@@ -53,35 +53,25 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
+	// @Public()
+    // @Post('signout') 
+    // async signout(@Req() req: Request, @Res() res: Response) {
+    //     const response = await this.authService.signout(req);
+	// 	res.status(HttpStatus.OK).json(response);
+    // }
+
 	@Public()
-    @Post('signout') 
-    async signout(@Req() req: Request, @Res() res: Response) {
-        const response = await this.authService.signout(req);
-		res.status(HttpStatus.OK).json(response);
-    }
+	@Post('signout')
+	@HttpCode(HttpStatus.OK)
+	async signout(@Req() req: Request) {
+		const refreshToken = req;
+		return await this.authService.signout(refreshToken);
+	}
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
-		// let response;
-
-		// this.logger.log('/42/callback');
-		// // if 2fa is activated and user have not sent token
-		// if (!req.query._2fa && req.user.activated2FA) {
-		// 	response = { id: req.user.id, _2fa: true };
-		// // if 2fa is activated and user have sent token
-		// } else if (req.query._2fa && req.user.activated2FA) {
-		// 	const _2faValid = await this.usersService.verify2FA(req.user, req.query._2fa);
-		// 	if (_2faValid) {
-		// 		response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-		// 	} else {
-		// 		res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
-		// 	}
-		// 	// no 2fa
-		// } else 
-		// 	response = await this.authService.signJwtTokens(req.user.id, req.user.email);
-		// res.status(HttpStatus.OK).json(response);
 		const dto: Signin42Dto = {
 			id: req.user.id,
 			email: req.user.email,
