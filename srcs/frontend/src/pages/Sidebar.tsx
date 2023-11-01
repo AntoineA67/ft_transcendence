@@ -61,34 +61,43 @@ export default function Sidebar() {
 
 	return (
 		<>
-			<SnackbarProvider />
-			<div className="container-fluid">
-				<div className="row">
-					<div className="col-sm vh-100 overflow-auto p-0" >
-						<Outlet />
-					</div>
-					<div className="col-sm-auto sticky-bottom order-sm-first bg-black">
-						<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4"
-							id="sidebar-ul" role="navigation" >
-							<li className={`nav-item ${(page == '/') && 'magenta'}`} >
-								<Link to="/"><img src={Game} /></Link>
-							</li>
-							<li className={`nav-item ${(page == '/me') && 'magenta'}`} >
-								<Link to="me"><img src={Home} /></Link>
-							</li>
-							<li className={`nav-item ${(page == '/search') && 'magenta'}`} >
-								<Link to="search"><img src={Search} /></Link>
-							</li>
-							<li className={`nav-item ${(page == '/friends') && 'magenta'}`} >
-								<Link to="friends"><img src={Friend} /></Link>
-							</li>
-							<li className={`nav-item ${(page == '/chat') && 'magenta'}`} >
-								<Link to="chat"><img src={Chat} /></Link>
-							</li>
-						</ul>
+			<SnackbarProvider
+				anchorOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+				maxSnack={2}
+				dense
+				autoHideDuration={2500}
+				preventDuplicate
+			>
+				<div className="container-fluid">
+					<div className="row">
+						<div className="col-sm vh-100 overflow-auto p-0" >
+							<Outlet />
+						</div>
+						<div className="col-sm-auto sticky-bottom order-sm-first bg-black">
+							<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4" id="sidebar-ul" role="navigation">
+								<li className={`nav-item ${page === '/' ? 'magenta' : ''}`}>
+									<Link to="/"><img src={Game} alt="Game" /></Link>
+								</li>
+								<li className={`nav-item ${page === '/me' ? 'magenta' : ''}`}>
+									<Link to="me"><img src={Home} alt="Home" /></Link>
+								</li>
+								<li className={`nav-item ${page === '/search' ? 'magenta' : ''}`}>
+									<Link to="search"><img src={Search} alt="Search" /></Link>
+								</li>
+								<li className={`nav-item ${page === '/friends' ? 'magenta' : ''}`}>
+									<Link to="friends"><img src={Friend} alt="Friend" /></Link>
+								</li>
+								<li className={`nav-item ${page === '/chat' ? 'magenta' : ''}`}>
+									<Link to="chat"><img src={Chat} alt="Chat" /></Link>
+								</li>
+							</ul>
+						</div>
 					</div>
 				</div>
-			</div>
+			</SnackbarProvider>
 			{/* <button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
 			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button> */}
 			{popup == 'pong' && <PongPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}

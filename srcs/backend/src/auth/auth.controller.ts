@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
+import { Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
-import { Public } from './public.decorator';
-import { AuthService } from './auth.service';
+
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { Signin42Dto, SigninDto } from '../dto';
-import { SignupDto } from '../dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+
+import {
+	Controller,
+	Post,
+	Body,
+	Get,
+	Param,
+	UseGuards,
+	HttpCode,
+	HttpStatus,
+  } from '@nestjs/common';
+  import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
+  import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+  import { Public } from './public.decorator';
+  import { AuthService } from './auth.service';
+  import { Signin42Dto, SigninDto, SignupDto } from '../dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,28 +35,43 @@ export class AuthController {
 
 	@Public()
     @Post('signup')
-    async signup(@Body() dto: SignupDto, @Res() res: Response) {
-		this.logger.log("coucou", dto);
-		let response = await this.authService.signup(dto, res);
-        res.status(HttpStatus.OK).json(response);
+	@HttpCode(HttpStatus.CREATED)
+    async signup(@Body() dto: SignupDto) {
+		// this.logger.log("coucou", dto);
+		// let response = await this.authService.signup(dto, res);
+        // res.status(HttpStatus.OK).json(response);
+		return await this.authService.signup(dto);
+
     }
 
     @Public()
-    @Post('signin') // delete async, has to signin and cannot do anything else
-    async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-		let response = await this.authService.signin(dto, res, req);
-        res.status(HttpStatus.OK).json(response);
-        // return this.authService.signin(dto, res, req);
+    @Post('signin')
+	@HttpCode(HttpStatus.OK)
+	async signin(@Body() dto: SigninDto) {
+		// const response = await this.authService.signin(dto, res, req);
+        // res.status(HttpStatus.OK).json(response);
+        return this.authService.signin(dto);
     }
 
+	// @Public()
+    // @Post('signout') 
+    // async signout(@Req() req: Request, @Res() res: Response) {
+    //     const response = await this.authService.signout(req);
+	// 	res.status(HttpStatus.OK).json(response);
+    // }
+
 	@Public()
-    @Post('signout') 
-    signout(@Req() req: Request, @Res() res: Response) {
-        return this.authService.signout(req, res);
-    }
+	@Post('signout')
+	@HttpCode(HttpStatus.OK)
+	async signout(@Req() req: Request) {
+		const refreshToken = req;
+		return await this.authService.signout(refreshToken);
+	}
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
+	@HttpCode(HttpStatus.OK)
+	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		const dto: Signin42Dto = {
 			id: req.user.id,
@@ -54,7 +80,9 @@ export class AuthController {
 			activated2FA: req.user.activated2FA,
 			user: req.user,
 		}
-		return this.authService.signin42(dto, res, req);
+		// const response = await this.authService.signin42(dto, res, req);
+		// return response;
+		return await this.authService.signin42(dto, res, req);
 	}
 
 	@Public()
@@ -72,6 +100,13 @@ export class AuthController {
 			res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'error' });
 		}
 	}
+
+	@Public()
+    @Get('42Url')
+    async get42Url() {
+        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
+        return (url);
+    }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')

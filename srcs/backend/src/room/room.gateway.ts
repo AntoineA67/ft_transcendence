@@ -120,7 +120,7 @@ export class RoomGateway
 		const userId: number = client.data.user.id;
 		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 
-		if (createdRoom) {
+		if (createdRoom && createdRoom.id) {
 			const pvroomuser1 = {
 				id: createdRoom.id,
 				isChannel: false,
@@ -154,7 +154,7 @@ export class RoomGateway
 
 			return createdRoom.id;
 		} else {
-			return 0;
+			return createdRoom;
 		}
 	}
 
@@ -230,7 +230,7 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('UserLeaveChannel')
-	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: { usertoKick: number, roomId: string }): Promise<boolean> {
+	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: { usertoKick: number, roomId: string }): Promise<any> {
 		const userid: number = client.data.user.id;
 		const roomid = parseInt(content.roomId, 10);
 		const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
@@ -246,10 +246,17 @@ export class RoomGateway
 			this.server.to(roomName).emit('UserLeaveChannel', leavechan);
 			if (SockettoKick)
 				SockettoKick.leave("room_" + roomid.toString());
-
-			return true;
+			const memtrue = {
+				userid: content.usertoKick,
+				roomId: roomid,
+			}
+			return memtrue;
 		}
-		return false;
+		const memfalse = {
+			userid: 0,
+			roomId: 0,
+		}
+		return memfalse;
 	}
 
 	@SubscribeMessage('muteMember')
@@ -326,16 +333,16 @@ export class RoomGateway
 
 
 	@SubscribeMessage('inviteUser')
-	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member> {
+	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member | number> {
 		const userid: number = client.data.user.id;
 		const roomid = parseInt(content.roomId, 10);
 
-		const bool = await this.roomService.inviteUser(userid, roomid, content.username);
+		const nbid = await this.roomService.inviteUser(userid, roomid, content.username);
 		const usertoadd = await this.roomService.getMemberDatabyUsername(content.username);
 
-		this.logger.log(bool);
+		this.logger.log(nbid > 0 ? true : false);
 
-		if (bool) {
+		if (nbid > 0) {
 			const roomName = "room_" + roomid.toString();
 			const room = await this.roomService.getRoomDataById(roomid);
 			const SocketInvite = this.clients[usertoadd.id.toString()];
@@ -350,18 +357,9 @@ export class RoomGateway
 			};
 			console.log('membertosend backend');
 			this.server.to(roomName).emit('newMember', membertosend);
-			return membertosend;
+			return membertosend.id;
 		}
-		const membnull: Member = {
-			id: 0,
-			roomId: 0,
-			userId: 0,
-			owner: false,
-			admin: false,
-			ban: false,
-			mute: null,
-		};
-		return membnull;
+		return nbid;
 	}
 
 	@SubscribeMessage('changeRole')
