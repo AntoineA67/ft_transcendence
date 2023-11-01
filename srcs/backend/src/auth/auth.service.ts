@@ -212,7 +212,7 @@ export class AuthService {
 	// 	return await this.signJwtTokens(user.id, user.email);
 	// }
 
-	async refreshToken(refreshToken: string, req: Request): Promise<any> {
+	async refreshToken(refreshToken: string): Promise<any> {
 		if (!refreshToken) {
 		  throw new UnauthorizedException("Empty refresh token");
 		}

@@ -110,19 +110,16 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')
-    async isTokenValid(@Req() req: Request, @Res() res: Response) {
-		return res.status(200).json({ valid: true, message: "Token is valid" });
+	@HttpCode(HttpStatus.OK)
+    async isTokenValid() {
+		return { valid: true, message: "Token is valid" };
     }
 
 	@Post('refreshToken')
-	async refreshToken(@Req() req: Request, @Res() res: Response)
+	@HttpCode(HttpStatus.CREATED)
+	async refreshToken(@Req() req: Request)
 	{
-		// console.log("passing by refreshToken");
 		const refreshToken = req.body.refreshToken;
-		const ret = await this.authService.refreshToken(refreshToken, req);
-		// console.log('refersh token: ', ret)
-		// return res.status(201).json(ret);
-		return await this.authService.refreshToken(refreshToken, req);
-
+		return await this.authService.refreshToken(refreshToken);
 	}
 }
