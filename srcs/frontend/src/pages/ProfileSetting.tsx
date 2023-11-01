@@ -177,15 +177,45 @@ export function SettingMenu() {
 		}
 	}, [profile]);
 
+	const handleChange = (event: any, type: string) => {
+		switch (type) {
+			case 'oldPassword':
+				setOldPassword(event.target.value);
+				break;
+			case 'newPassword':
+				setNewPassword(event.target.value);
+				break;
+			case 'confirmPassword':
+				setConfirmPassword(event.target.value);
+				break;
+			default:
+				break;
+		}
+	};
+
+	const handleLogout = () => {
+		try {
+			axios.post(process.env.REACT_APP_BACKEND_URL + "/auth/signout", {
+				refreshToken: localStorage.getItem('refreshToken'),
+			}, {
+				headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+			});
+			['token', 'random', 'email', 'refreshToken'].forEach(item => localStorage.removeItem(item));
+			window.location.href = '/';
+		} catch (err: any) {
+			console.log(err);
+		}
+	}
+
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (newPassword !== confirmPassword) {
+			console.log('handle submit: password not match');
+			return;
+		}
 		console.log('handle submit: change password');
 
-
-		console.log('oldPassword ->', oldPassword);
-		console.log('newPassword ->', newPassword);
-		console.log('confirmPassword ->', confirmPassword);
-
-		socket.emit('ChangePassword', {newPassword, oldPassword}, (res: any) => {
+		socket.emit('ChangePassword', { newPassword, oldPassword }, (res: any) => {
 			console.log('res ->');
 			console.log(res);
 
@@ -196,41 +226,27 @@ export function SettingMenu() {
 		navigate("/me/setting/2fa");
 	};
 
-	const handleOldPassword = (event: any) => {
-		setOldPassword(event.target.value);
-	};
-
-	const handleNewPassword = (event: any) => {
-		setNewPassword(event.target.value);
-	};
-
-	const handleConfirmPassword = (event: any) => {
-		setConfirmPassword(event.target.value);
-	};
-
 	return (
 		<div className='container-fluid px-0 h-75'>
 			<Title title="Setting" />
-			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >  {/* style={{ minHeight: '400px' }} */}
-				{profile?.password && <form className='h-100 d-flex flex-column gap-3' onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }}>
-					<div>
-						<label htmlFor='current-password'>Current password</label>
-						<input id='current-password' type="password" placeholder="Current password" onChange={handleOldPassword} />
-					</div>
-					<div>
-						<label htmlFor='new-password'>New password</label>
-						<input id='new-password' type="password" placeholder="New password" onChange={handleNewPassword} />
-					</div>
-					<div>
-						<label htmlFor='confirm-password'>Confirm password</label>
-						<input id='confirm-password' type="password" placeholder="Password" onChange={handleConfirmPassword}  />
-					</div>
-					{/* {profile?.password === 'nopass' && (
-						<div className='red-text'>You cannot change the password because you are connected with the 42 school API</div>
-					)} */}
-					<button type='submit' className='btn btn-outline-secondary w-100' >Confirm</button>
-				</form>
-				}
+			<Stack className="col-12 col-sm-6 col-md-5 p-3 p-sm-5 h-100 m-auto" >
+				{profile?.password && (
+					<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
+						<div>
+							<label htmlFor='current-password'>Current password</label>
+							<input id='current-password' type="password" placeholder="Current password" onChange={(e) => handleChange(e, 'oldPassword')} />
+						</div>
+						<div>
+							<label htmlFor='new-password'>New password</label>
+							<input id='new-password' type="password" placeholder="New password" onChange={(e) => handleChange(e, 'newPassword')} />
+						</div>
+						<div>
+							<label htmlFor='confirm-password'>Confirm password</label>
+							<input id='confirm-password' type="password" placeholder="Password" onChange={(e) => handleChange(e, 'confirmPassword')} />
+						</div>
+						<button type='submit' className='btn btn-outline-secondary w-100' >Confirm</button>
+					</form>
+				)}
 
 				<hr />
 				<Form.Check
@@ -242,40 +258,7 @@ export function SettingMenu() {
 				/>
 				<hr />
 				<br></br>
-				<button onClick={() => {
-				// let url = (process.env.REACT_APP_BACKEND_URL + "/auth/signout");
-				// const fetchObj = {
-				// 	method: 'POST',
-				// 	headers: { 
-				// 		'Authorization': `Bearer ${localStorage.getItem('token')}`, 
-				// 		'Content-Type': 'application/json',},
-				// 	body: JSON.stringify({
-				// 		refreshToken: localStorage.getItem('refreshToken'),
-				// 	}),
-				// }
-				try {
-					axios.post("http://localhost:4000/auth/signout", {
-					// axios.post("http://localhost:4000/auth/signout", {
-					// Your POST request's body should be an object, not a JSON string.
-					// Axios will automatically stringify the object.
-					refreshToken: localStorage.getItem('refreshToken'),
-					}, {
-					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-					});
-					// fetch(url, fetchObj)
-					// if (!response.ok) { throw Error('response not ok'); }
-					// let data = await response.json();
-
-						localStorage.removeItem('token');
-						localStorage.removeItem('random');
-						localStorage.removeItem('email');
-						localStorage.removeItem('refreshToken');
-						// localStorage.removeItem('token');
-						window.location.href = '/';
-					} catch (err: any) {
-						console.log(err);
-					}
-				}}
+				<button onClick={() => { handleLogout() }}
 					className='btn btn-outline-secondary w-100 mt-auto mb-5'>Log out</button>
 
 			</Stack>
