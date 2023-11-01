@@ -1,15 +1,26 @@
-import { Controller, Get, Post, Body, HttpStatus, Param, Req, Res, UseGuards } from '@nestjs/common';
+import { Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { UsersService } from 'src/users/users.service';
-import { Public } from './public.decorator';
-import { AuthService } from './auth.service';
+
 import { JwtService } from '@nestjs/jwt';
 import { Logger } from '@nestjs/common';
-import { Signin42Dto, SigninDto } from '../dto';
-import { SignupDto } from '../dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+
+import {
+	Controller,
+	Post,
+	Body,
+	Get,
+	Param,
+	UseGuards,
+	HttpCode,
+	HttpStatus,
+  } from '@nestjs/common';
+  import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
+  import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+  import { Public } from './public.decorator';
+  import { AuthService } from './auth.service';
+  import { Signin42Dto, SigninDto, SignupDto } from '../dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,18 +35,22 @@ export class AuthController {
 
 	@Public()
     @Post('signup')
-    async signup(@Body() dto: SignupDto, @Res() res: Response) {
-		this.logger.log("coucou", dto);
-		let response = await this.authService.signup(dto, res);
-        res.status(HttpStatus.OK).json(response);
+	@HttpCode(HttpStatus.CREATED)
+    async signup(@Body() dto: SignupDto) {
+		// this.logger.log("coucou", dto);
+		// let response = await this.authService.signup(dto, res);
+        // res.status(HttpStatus.OK).json(response);
+		return await this.authService.signup(dto);
+
     }
 
     @Public()
-    @Post('signin') // delete async, has to signin and cannot do anything else
-    async signin(@Body() dto: SigninDto, @Res() res: Response, @Req() req: Request) {
-		const response = await this.authService.signin(dto, res, req);
-        res.status(HttpStatus.OK).json(response);
-        // return this.authService.signin(dto, res, req);
+    @Post('signin')
+	@HttpCode(HttpStatus.OK)
+	async signin(@Body() dto: SigninDto) {
+		// const response = await this.authService.signin(dto, res, req);
+        // res.status(HttpStatus.OK).json(response);
+        return this.authService.signin(dto);
     }
 
 	@Public()
