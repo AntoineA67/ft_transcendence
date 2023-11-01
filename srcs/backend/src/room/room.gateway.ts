@@ -333,16 +333,16 @@ export class RoomGateway
 
 
 	@SubscribeMessage('inviteUser')
-	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member> {
+	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member | number> {
 		const userid: number = client.data.user.id;
 		const roomid = parseInt(content.roomId, 10);
 
-		const bool = await this.roomService.inviteUser(userid, roomid, content.username);
+		const nbid = await this.roomService.inviteUser(userid, roomid, content.username);
 		const usertoadd = await this.roomService.getMemberDatabyUsername(content.username);
 
-		this.logger.log(bool);
+		this.logger.log(nbid > 0 ? true : false);
 
-		if (bool) {
+		if (nbid > 0) {
 			const roomName = "room_" + roomid.toString();
 			const room = await this.roomService.getRoomDataById(roomid);
 			const SocketInvite = this.clients[usertoadd.id.toString()];
@@ -357,18 +357,9 @@ export class RoomGateway
 			};
 			console.log('membertosend backend');
 			this.server.to(roomName).emit('newMember', membertosend);
-			return membertosend;
+			return membertosend.id;
 		}
-		const membnull: Member = {
-			id: 0,
-			roomId: 0,
-			userId: 0,
-			owner: false,
-			admin: false,
-			ban: false,
-			mute: null,
-		};
-		return membnull;
+		return nbid;
 	}
 
 	@SubscribeMessage('changeRole')
