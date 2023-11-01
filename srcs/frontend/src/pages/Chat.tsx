@@ -146,7 +146,7 @@ export function ChatBox() {
 				setBlocks(response.blocks);
 				setMessages([]);
 				setMemberList([]);
-				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error' });
+				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error'});
 			}
 			else if (roominfo && roominfo?.blocked === false) {
 				setProfile(response);
@@ -240,19 +240,19 @@ export function ChatBox() {
 			}, (response: number) => {
 				if (response > 0) {
 					setinviteUsernameSuccess(true);
-					enqueueSnackbar(`User invited successfully`, { variant: 'success' })
+					enqueueSnackbar(`User invited successfully`, { variant: 'success', preventDuplicate: false })
 				} else if (response === -1) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error' })
+					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error', preventDuplicate: false })
 				} else if (response === -2) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error' })
+					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error', preventDuplicate: false })
 				} else if (response === -3) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error' })
+					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error', preventDuplicate: false })
 				} else if (response === -4) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error' })
+					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error', preventDuplicate: false })
 				}
 			});
 		}
@@ -269,7 +269,7 @@ export function ChatBox() {
 	const handleSendMessage = () => {
 		if (profile === undefined) return;
 		if (mess.length > 10000) {
-			enqueueSnackbar('Message too long', { variant: 'error' });
+			enqueueSnackbar('Message too long', { variant: 'error'});
 			return;
 		}
 		const messageOptions = {
@@ -286,7 +286,7 @@ export function ChatBox() {
 					</>
 				);
 
-				enqueueSnackbar("Error while sending the message. Please refresh the page.", { variant: 'error', action });
+				enqueueSnackbar("Error while sending the message. Please refresh the page.", { variant: 'error', action, persist: true });
 			}
 		});
 		setMess('');
@@ -427,11 +427,11 @@ export function ChatBox() {
 					setNewPassword('');
 					setnewPasswordSucess(true);
 					setPasswordStatus(true);
-					enqueueSnackbar(`Password changed successfully`, { variant: 'success' });
+					enqueueSnackbar(`Password changed successfully`, { variant: 'success', preventDuplicate: false });
 				}
 				else {
 					setnewPasswordSucess(false);
-					enqueueSnackbar(`Error while changing password`, { variant: 'error' });
+					enqueueSnackbar(`Error while changing password`, { variant: 'error', preventDuplicate: false });
 				}
 			})
 		}
@@ -446,7 +446,7 @@ export function ChatBox() {
 				setPasswordStatus(false);
 				setnewPasswordSucess(undefined);
 				setNewPassword('');
-				enqueueSnackbar(`Password deleted successfully`, { variant: 'success' });
+				enqueueSnackbar(`Password deleted successfully`, { variant: 'success', preventDuplicate: false });
 			}
 		})
 	}
@@ -462,7 +462,6 @@ export function ChatBox() {
 	const handlePlayClick = (userId: number, username: string) => {
 		enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 			variant: 'info',
-			preventDuplicate: true,
 			persist: true,
 			action: (key: any) => (
 				<div>
@@ -488,7 +487,6 @@ export function ChatBox() {
 		const handlePlayClickinMess = (userId: number, username: string) => {
 			enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 				variant: 'info',
-				preventDuplicate: true,
 				persist: true,
 				action: (key: any) => (
 					<div>
@@ -559,7 +557,9 @@ export function ChatBox() {
 										? true
 										: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
 											? true
-											: false
+											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+												? true
+												: false
 									: true
 							}
 							placeholder={
@@ -775,7 +775,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					</>
 				);
 
-				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action });
+				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action, preventDuplicate: false });
 			}
 		});
 	};
@@ -788,19 +788,19 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 				setPage('chatList');
 				navigate(`/chat/${response}`);
 			} else if (response === -1) {
-				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error', preventDuplicate: false });
 			}
 			else if (response === -2) {
-				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error', preventDuplicate: false });
 			}
 			else if (response === -3) {
-				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error', preventDuplicate: false });
 			}
 			else if (response === -4) {
-				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error', preventDuplicate: false });
 			}
 			else if (response === -5) {
-				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error', preventDuplicate: false });
 			}
 			setNick('');
 		});
@@ -816,7 +816,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 
 		chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
 			if (response === false) {
-				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error' });
+				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error', preventDuplicate: false });
 				setJoin('');
 				setRoomId('');
 				setPassword('');
@@ -979,7 +979,7 @@ export function ChatList() {
 					if (!response.isChannel)
 						enqueueSnackbar(`You received a new private message from ${response.title}`, { variant: 'info', action });
 					else
-						enqueueSnackbar(`You joined the room ${response.title} with roomid ${response.id}`, { variant: 'success' });
+						enqueueSnackbar(`You joined the room ${response.title} with roomid ${response.id}`, { variant: 'success', action });
 				}
 			}
 		};
@@ -1011,8 +1011,8 @@ export function ChatList() {
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
 				setRooms([targetRoom, ...filteredRooms]);
-				if (newMessage.userId !== profile?.id && chatId && newMessage.roomId !== parseInt(chatId)) {
-					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action });
+				if (newMessage.userId !== profile?.id && (chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined) {
+					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action});
 				}
 			}
 		};
@@ -1058,7 +1058,7 @@ export function ChatList() {
 				chatsSocket.off(event, handler);
 			});
 		};
-	}, [rooms]);
+	}, [rooms, chatId]);
 
 
 	const myMap = (room: Room, pvrooms: Pvrooms[], profile: Profile) => {
