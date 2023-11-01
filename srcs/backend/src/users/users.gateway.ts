@@ -13,6 +13,7 @@ import { ProfileDto } from 'src/dto/profile.dto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
 import { UserDto } from 'src/dto/user.dto';
+import * as argon from 'argon2';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -136,6 +137,29 @@ export class UsersGateway
 		const id: number = client.data.user.id;
 
 		return (await this.usersService.getAvatar(id))
+	}
+
+	@SubscribeMessage('ChangePassword')
+	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
+
+		console.log('data');
+		console.log(data.newPassword);
+		console.log(data.oldPassword);
+
+		console.log('password');
+		console.log(client.data.user);
+
+		const passwordRespond = await this.usersService.changePassword(client.data.user.id, data.oldPassword, data.newPassword);
+
+		console.log(passwordRespond);
+
+		return(passwordRespond);
+
+		// if (passwordRespond === true) {
+		// 	return ('success');
+		// } else {
+		// 	return ('fail');
+		// }
 	}
 
 } 

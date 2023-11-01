@@ -15,6 +15,7 @@ import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
 import { Alert } from 'react-bootstrap';
 import axios from 'axios';
+import { set } from 'lodash-es';
 
 export function Title({ title }: { title: string }) {
 	return (
@@ -166,18 +167,19 @@ export function SettingMenu() {
 	const [oldPassword, setOldPassword] = useState<String>('');
 	const [newPassword, setNewPassword] = useState<String>('');
 	const [confirmPassword, setConfirmPassword] = useState<String>('');
+	const [err, setErr] = useState<String>('');
 	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!profile) {
 			socket.emit('MyProfile', profile, (res: profileType) => {
 				setProfile(res);
-				// console.log(res);
 			});
 		}
 	}, [profile]);
 
 	const handleChange = (event: any, type: string) => {
+		setErr('');
 		switch (type) {
 			case 'oldPassword':
 				setOldPassword(event.target.value);
@@ -210,7 +212,7 @@ export function SettingMenu() {
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		if (newPassword !== confirmPassword) {
-			console.log('handle submit: password not match');
+			setErr('New password and confirm password does not match');
 			return;
 		}
 		console.log('handle submit: change password');
@@ -218,7 +220,6 @@ export function SettingMenu() {
 		socket.emit('ChangePassword', { newPassword, oldPassword }, (res: any) => {
 			console.log('res ->');
 			console.log(res);
-
 		});
 	};
 
@@ -244,6 +245,9 @@ export function SettingMenu() {
 							<label htmlFor='confirm-password'>Confirm password</label>
 							<input id='confirm-password' type="password" placeholder="Password" onChange={(e) => handleChange(e, 'confirmPassword')} />
 						</div>
+						{err !== '' && (
+							<div className='red-text'>{err}</div>
+						)}
 						<button type='submit' className='btn btn-outline-secondary w-100' >Confirm</button>
 					</form>
 				)}
