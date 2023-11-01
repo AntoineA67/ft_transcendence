@@ -69,6 +69,7 @@ export default function Sidebar() {
 				maxSnack={2}
 				dense
 				autoHideDuration={2500}
+				preventDuplicate
 			>
 				<div className="container-fluid">
 					<div className="row">
