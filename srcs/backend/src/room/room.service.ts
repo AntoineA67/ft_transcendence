@@ -787,7 +787,7 @@ export class RoomService {
 		return true;
 	}
 
-	async inviteUser(userId: number, roomId: number, username: string): Promise<boolean> {
+	async inviteUser(userId: number, roomId: number, username: string): Promise<number> {
 		const user = await this.prisma.member.findFirst({
 			where: {
 				roomId,
@@ -804,7 +804,7 @@ export class RoomService {
 		});
 
 		if (!user) {
-			return false;
+			return -1;
 		}
 		const userToInvite = await this.prisma.user.findFirst({
 			where: {
@@ -813,7 +813,7 @@ export class RoomService {
 		});
 
 		if (!userToInvite) {
-			return false;
+			return -2;
 		}
 
 		const blocked = await this.prisma.block.findFirst({
@@ -832,7 +832,7 @@ export class RoomService {
 		});
 
 		if (blocked) {
-			return false;
+			return -3;
 		}
 
 		const isMember = await this.prisma.member.findFirst({
@@ -843,7 +843,7 @@ export class RoomService {
 		});
 
 		if (isMember) {
-			return false;
+			return -4;
 		}
 
 		await this.prisma.member.create({
@@ -853,7 +853,7 @@ export class RoomService {
 			},
 		});
 
-		return true;
+		return userToInvite.id;
 	}
 
 	async changeRole(userid: number, roomId: number, memberId: number, owner: boolean, admin: boolean): Promise<boolean> {

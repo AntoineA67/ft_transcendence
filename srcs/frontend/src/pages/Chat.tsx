@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
@@ -15,17 +15,8 @@ import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
 import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
 import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { set } from "lodash-es";
 
-
-type ChatBoxData = {
-	messages: Message[],
-	roomTitle: string,
-	roomChannel: boolean,
-	members: Member[],
-	memberStatus: Member,
-	private: boolean,
-	password: boolean
-}
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -59,20 +50,15 @@ export function ChatBox() {
 		setMemberList(data.members);
 		setPrivateStatus(data.private);
 		setPasswordStatus(data.password);
+		setProfile(data.profile);
+		setBlocks(data.profile.blocks);
 		setnewRoomTitleSuccess(undefined);
 		setinviteUsernameSuccess(undefined);
 		setnewPasswordSucess(undefined);
 		setShowSettings(false);
 		setLoading(false);
 		setMess('');
-
-		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
-			if (profile) {
-				setProfile(profile);
-				setBlocks(profile.blocks);
-			}
-		});
-	}, [chatId]);
+	}, [chatId, data]);
 
 	useEffect(() => {
 		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
@@ -83,13 +69,12 @@ export function ChatBox() {
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
 			}
-			else if (response.userid === profile?.id && response.roomId === parseInt(chatId || '', 10)){
+			else if (response.userid === profile?.id && response.roomId === parseInt(chatId || '', 10)) {
 				navigate('/chat');
 			}
 		};
 
 		const handlenewmess = (newMessage: Message) => {
-			console.log(blocks);
 			if ((chatId && newMessage.roomId !== parseInt(chatId, 10))) return;
 			const block = blocks.find((block) => block.blockedId === newMessage.userId);
 			if (block || (memberstatus && memberstatus.ban)) return;
@@ -156,20 +141,25 @@ export function ChatBox() {
 
 		const handleNewProfile = (response: Profile) => {
 			const roominfo = response.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10));
-			if (roominfo?.blocked) {
+			if (roominfo && roominfo?.blocked) {
 				setProfile(response);
 				setBlocks(response.blocks);
 				setMessages([]);
-				setroomTitle('You have been blocked by this user');
 				setMemberList([]);
+				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error' });
 			}
-			else if (roominfo?.blocked === false) {
+			else if (roominfo && roominfo?.blocked === false) {
 				setProfile(response);
 				setBlocks(response.blocks);
 				setMessages(data.messages);
 				setroomTitle(data.roomTitle);
 				setMemberList(data.members);
 			}
+			else {
+				setProfile(response);
+				setBlocks(response.blocks);
+			}
+			console.log('newprofile', response);
 		}
 
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
@@ -193,7 +183,7 @@ export function ChatBox() {
 				chatsSocket.off(event, handler);
 			});
 		};
-	}, [chatId]);
+	}, [chatId, blocks, membersList, profile]);
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -224,7 +214,6 @@ export function ChatBox() {
 				if (response === true) {
 					setroomTitle(newRoomTitle);
 					setnewRoomTitleSuccess(true);
-					enqueueSnackbar(`Room title changed successfully`, { variant: 'success' })
 				}
 				else
 					setnewRoomTitleSuccess(false);
@@ -248,13 +237,22 @@ export function ChatBox() {
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
-			}, (response: Member) => {
-				if (response.userId && response.userId > 0) {
+			}, (response: number) => {
+				if (response > 0) {
 					setinviteUsernameSuccess(true);
 					enqueueSnackbar(`User invited successfully`, { variant: 'success' })
-				} else {
+				} else if (response === -1) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user`, { variant: 'error' })
+					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error' })
+				} else if (response === -2) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error' })
+				} else if (response === -3) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error' })
+				} else if (response === -4) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error' })
 				}
 			});
 		}
@@ -346,30 +344,35 @@ export function ChatBox() {
 		);
 	};
 
-	const handleBlock = (memberid: number, actions: boolean) => {
+	const handleBlock = (memberId: number, toUnBlock: boolean) => {
 		if (profile === undefined) {
 			return;
 		}
 
-		chatsSocket.emit('blockUser', {
-			memberId: memberid,
-			action: actions,
-		}, (response: boolean) => {
+		console.log('toUnBlock', toUnBlock);
+		console.log('memberId', memberId);
+
+		chatsSocket.emit('blockUser', { memberId, action: toUnBlock }, (response: boolean) => {
 			if (response === true) {
-				setBlocks((prevBlocks) => {
-					if (!actions) {
-						return [...prevBlocks, { userId: profile.id, blockedId: memberid }];
-					} else {
-						return prevBlocks.filter((block) => block.blockedId !== memberid);
+				if (toUnBlock) {
+					setBlocks((prevBlocks) => prevBlocks.filter((block) => block.blockedId !== memberId));
+				} else {
+					const blockToFind = blocks.find((block) => block.blockedId === memberId);
+					const newBlock = {
+						userId: profile.id,
+						blockedId: memberId,
+					};
+
+					if (!blockToFind) {
+						setBlocks((prevBlocks) => [...prevBlocks, newBlock]);
 					}
-				});
-				if (!actions)
-					setMessages((prevMessages) => prevMessages.filter((message) => message.userId !== memberid));
-				enqueueSnackbar(`User ${actions ? 'unblocked' : 'blocked'} successfully`, { variant: 'success' });
-				console.log(blocks);
+					setMessages((prevMessages) => prevMessages.filter((message) => message.userId !== memberId));
+				}
+				enqueueSnackbar(`User ${toUnBlock ? 'unblocked' : 'blocked'} successfully`, { variant: 'success' });
 			}
 		});
 	};
+
 
 	const handleKick = (memberid: number, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
@@ -554,7 +557,7 @@ export function ChatBox() {
 								memberstatus
 									? memberstatus.ban || (memberstatus.mute !== null && new Date(memberstatus.mute) > new Date())
 										? true
-										: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+										: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
 											? true
 											: false
 									: true
@@ -567,7 +570,9 @@ export function ChatBox() {
 											? 'You are muted...'
 											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
 												? 'You are blocking this user...'
-												: 'Write a message...'
+												: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
+													? 'You are blocked...'
+													: 'Write your message...'
 									: ''
 							}
 						/>
@@ -971,7 +976,10 @@ export function ChatList() {
 							</button>
 						</>
 					);
-					enqueueSnackbar(`You joined the room ${response.title} with roomid ${response.id}`, { variant: 'success' });
+					if (!response.isChannel)
+						enqueueSnackbar(`You received a new private message from ${response.title}`, { variant: 'info', action });
+					else
+						enqueueSnackbar(`You joined the room ${response.title} with roomid ${response.id}`, { variant: 'success' });
 				}
 			}
 		};
