@@ -36,7 +36,7 @@ export class AuthService {
         }
     }
 
-	async signup(dto: SignupDto, res: Response) {
+	async signup(dto: SignupDto) {
 		if (await this.usersService.getUserByEmail(dto.email))
 			throw new BadRequestException('This email is already used');
 		if (await this.usersService.getUserByNick(dto.username))
@@ -65,7 +65,7 @@ export class AuthService {
 		}
 	  }
   
-	async signin(dto: SigninDto, res: Response, @Req() req) {
+	async signin(dto: SigninDto) {
 		// find user with email
 		const user = await this.usersService.getUserByEmail(dto.email);
 		// if user not found throw exception
@@ -76,26 +76,24 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		let response;
+		// let response;
 		if (!dto.token2FA && user.activated2FA) {
-			response = {
-				id: user.id,
+			return {
 				_2fa: true
 			};
+		}
 		// if 2fa is activated and user have sent token
-		} else if (dto.token2FA && user.activated2FA) {
+		if (dto.token2FA && user.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
-			if (_2FAValid) {
-				response = await this.signJwtTokens(user.id, dto.email);
-			} else {
-				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
+			
+			if (!_2FAValid) {
+			  // If 2FA token is invalid, throw an exception
+			  throw new UnauthorizedException('2FA token invalid or required');
 			}
-		// no 2fa
-		} 
-		else 
-			response = await this.signJwtTokens(user.id, user.email);
+		  }
+			return await this.signJwtTokens(user.id, user.email);
 		// return response;
-		return response;
+		// return response;
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
