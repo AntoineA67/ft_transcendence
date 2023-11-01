@@ -187,30 +187,56 @@ export class AuthService {
         return refreshToken;
     }
 
-	async refreshToken(refreshToken: string, req: Request, res: Response) {
-		if (!refreshToken)
-			return res.status(401).json({ valid: false, message: "Empty refresh token" });
+	// async refreshToken(refreshToken: string, req: Request, res: Response) {
+	// 	if (!refreshToken)
+	// 		return res.status(401).json({ valid: false, message: "Empty refresh token" });
+	// 	const userRefreshToken = await this.prisma.refreshToken.findUnique({
+	// 		where: {
+	// 			token: refreshToken,
+	// 		},
+	// 	});
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: {
+	// 			id: userRefreshToken.userId,
+	// 		}
+	// 	});
+	// 	if (!user)
+	// 		return res.status(401).json({ valid: false, message: "Invalid refresh token" });
+	// 	if (!this.isRefreshTokenValid(refreshToken))
+	// 	{
+	// 		await this.deleteRefreshTokenForUser(user.id);
+	// 		return res.status(401).json({ valid: false, message: "Invalid refresh token" });
+	// 	}
+	// 	// delete refreshToken from DB to make a new one
+	// 	// return this.signJwtTokens(req.user.id, req.user.email);
+	// 	return await this.signJwtTokens(user.id, user.email);
+	// }
+
+	async refreshToken(refreshToken: string, req: Request): Promise<any> {
+		if (!refreshToken) {
+		  throw new UnauthorizedException("Empty refresh token");
+		}
+	  
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({
-			where: {
-				token: refreshToken,
-			},
+		  where: { token: refreshToken },
 		});
+	  
+		if (!userRefreshToken || !this.isRefreshTokenValid(refreshToken)) {
+		  await this.deleteRefreshTokenForUser(userRefreshToken?.userId);
+		  throw new UnauthorizedException("Invalid refresh token");
+		}
+
 		const user = await this.prisma.user.findUnique({
 			where: {
 				id: userRefreshToken.userId,
 			}
 		});
 		if (!user)
-			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-		if (!this.isRefreshTokenValid(refreshToken))
-		{
-			await this.deleteRefreshTokenForUser(user.id);
-			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-		}
-		// delete refreshToken from DB to make a new one
-		// return this.signJwtTokens(req.user.id, req.user.email);
+			throw new UnauthorizedException("Invalid refresh token");
+	  
 		return await this.signJwtTokens(user.id, user.email);
-	}
+	  }
+	  
 
 	async isRefreshTokenValid(tokenReq: string)
 	{
