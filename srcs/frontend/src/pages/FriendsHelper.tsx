@@ -42,7 +42,7 @@ export function FriendList() {
 	}
 	return (
 		(friends.length == 0) ? (
-			<h5 className='grey-text'>Empty</h5>
+			<h5 className='grey-text p-2'>No friends yet :(</h5>
 		) : (
 			<ul className='p-0 m-0'>
 				{friends.map(myMap)}
