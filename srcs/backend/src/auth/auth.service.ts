@@ -38,13 +38,11 @@ export class AuthService {
 
 	async signup(dto: SignupDto, res: Response) {
 		if (await this.usersService.getUserByEmail(dto.email))
-			return { error: 'This email is already used', status: HttpStatus.BAD_REQUEST };
-			// throw new BadRequestException('This email is already used');
-		if (dto.email.includes('@student.42'))
-			return { error: 'Please sign in in with 42 if you are a 42 student', status: HttpStatus.BAD_REQUEST };
-			// throw new BadRequestException('Please sign in in with 42 if you are a 42 student');
+			throw new BadRequestException('This email is already used');
 		if (await this.usersService.getUserByNick(dto.username))
-			return { error: 'Username taken', status: HttpStatus.BAD_REQUEST };
+			throw new BadRequestException('Username taken');
+		if (dto.email.includes('@student.42'))
+			throw new BadRequestException('Please sign in in with 42 if you are a 42 student');
 		try {
 			const hashPassword = await argon.hash(dto.password);
 			const user = await this.prisma.user.create({
@@ -60,9 +58,7 @@ export class AuthService {
 				console.log(error)
 				if (error.code === 'P2002') {
 					console.log("error hereeee");
-				// return { error: 'Credentials taken', status: HttpStatus.BAD_REQUEST };
-					// throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
-				return { error: 'Server Error', status: HttpStatus.INTERNAL_SERVER_ERROR };
+				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
 			}
 		}
 		throw error;
@@ -100,6 +96,7 @@ export class AuthService {
 			response = await this.signJwtTokens(user.id, user.email);
 		// return response;
 		return response;
+		// return this.signJwtTokens(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {
@@ -123,7 +120,6 @@ export class AuthService {
 			if (_2FAValid) {
 				response = await this.signJwtTokens(dto.id, dto.email);
 			} else {
-				// response = { '_2fa': 'need token'}
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 		// no 2fa
@@ -237,22 +233,23 @@ export class AuthService {
 			return true;
 	}
 
-	async signout(req: Request, res: Response) {
-        // Invalidate the refresh token to make the signout more secure
-        // Extract the refresh token from the body or header
-        const refreshToken = req.body.refreshToken;
-        if (!refreshToken) {
-            return res.status(401).json({ message: "Refresh token is missing" });
-        }
-        // Remove the refresh token from the database to invalidate it
-        try {
-				this.deleteRefreshTokenForUser(req.user.id);
-            	return res.status(200).send({ message: 'Signed out successfully' });
-        } catch (error) {
-            console.error(error); 
-            return res.status(500).send({ message: "An error occurred in signout" });
-        }
-    }
+	async signout(req: Request): Promise<{ message: string }> {        // Invalidate the refresh token to make the signout more secure
+		const refreshToken = req.body.refreshToken;
+		if (!refreshToken) {
+			throw new UnauthorizedException("Refresh token is missing");
+		}
+
+		const userRefreshToken = await this.prisma.refreshToken.findUnique({
+			where: { token: refreshToken },
+		});
+
+		if (!userRefreshToken) {
+			throw new UnauthorizedException("Invalid refresh token");
+		}
+
+		await this.deleteRefreshTokenForUser(userRefreshToken.userId);
+		return { message: 'Signed out successfully' };
+	}
 
 	async deleteRefreshTokenForUser(userId: number): Promise<void> {
 		try {
