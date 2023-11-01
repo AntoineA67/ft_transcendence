@@ -70,6 +70,7 @@ export class AuthController {
 
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
+	@HttpCode(HttpStatus.OK)
 	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		const dto: Signin42Dto = {
@@ -79,8 +80,9 @@ export class AuthController {
 			activated2FA: req.user.activated2FA,
 			user: req.user,
 		}
-		const response = await this.authService.signin42(dto, res, req);
-		return response;
+		// const response = await this.authService.signin42(dto, res, req);
+		// return response;
+		return await this.authService.signin42(dto, res, req);
 	}
 
 	@Public()

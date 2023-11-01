@@ -85,15 +85,13 @@ export class AuthService {
 		// if 2fa is activated and user have sent token
 		if (dto.token2FA && user.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
-			
+
 			if (!_2FAValid) {
 			  // If 2FA token is invalid, throw an exception
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
-			return await this.signJwtTokens(user.id, user.email);
-		// return response;
-		// return response;
+		return await this.signJwtTokens(user.id, user.email);
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -122,7 +120,7 @@ export class AuthService {
 			}
 		// no 2fa
 		} else 
-			response = await this.signJwtTokens(req.user.id, req.user.email);
+			response = await this.signJwtTokens(dto.id, dto.email);
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
