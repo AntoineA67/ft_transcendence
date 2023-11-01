@@ -156,9 +156,13 @@ export class AuthService {
 		return (userExists);
 	}
 
-	async registerUser42(user: any): Promise<User | undefined> {
+	async registerUser42(user: any): Promise<User> {
+		if (!user || !user.username || !user.emails || !user.emails.length || !user.emails[0].value) {
+		  throw new BadRequestException('Invalid user data for registration');
+		}
+		const email = user.emails[0].value;
 		try {
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
+			const newUser = await this.usersService.createUser(user.username, email, "nopass")
 			return newUser;
 		} catch {
 			try {
@@ -166,7 +170,7 @@ export class AuthService {
 					length: 6,
 					charset: 'numeric'
 				});
-				const newUser = await this.usersService.createUser(userName, user.emails[0].value, "nopass")
+				const newUser = await this.usersService.createUser(userName, email, "nopass")
 				return newUser;
 			} catch {
 				throw new InternalServerErrorException();
