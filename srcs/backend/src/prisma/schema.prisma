@@ -49,7 +49,7 @@ model User {
   u2fHash       String?         @db.VarChar
   otpHash       String?         @db.VarChar // try removing all the db.VarChar
   activated2FA  Boolean         @default(false)
-  avatar        Bytes? // Using 42 picture profile?
+  avatar        String?
   avatar42      String?
   bio           String          @default("")
   gameSettings  GameSettings?
