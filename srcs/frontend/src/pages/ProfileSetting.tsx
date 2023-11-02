@@ -168,6 +168,7 @@ export function SettingMenu() {
 	const [newPassword, setNewPassword] = useState<String>('');
 	const [confirmPassword, setConfirmPassword] = useState<String>('');
 	const [err, setErr] = useState<String>('');
+	const [success, setSuccess] = useState<String>('');
 	const navigate = useNavigate();
 
 	useEffect(() => {
@@ -180,6 +181,7 @@ export function SettingMenu() {
 
 	const handleChange = (event: any, type: string) => {
 		setErr('');
+		setSuccess('');
 		switch (type) {
 			case 'oldPassword':
 				setOldPassword(event.target.value);
@@ -215,11 +217,12 @@ export function SettingMenu() {
 			setErr('New password and confirm password does not match');
 			return;
 		}
-		console.log('handle submit: change password');
-
 		socket.emit('ChangePassword', { newPassword, oldPassword }, (res: any) => {
-			console.log('res ->');
-			console.log(res);
+			if (res === true) {
+				setSuccess('Password changed successfully !');
+			} else {
+				setErr('Wrong password !');
+			}
 		});
 	};
 
@@ -248,7 +251,16 @@ export function SettingMenu() {
 						{err !== '' && (
 							<div className='red-text'>{err}</div>
 						)}
-						<button type='submit' className='btn btn-outline-secondary w-100' >Confirm</button>
+						{success !== '' && (
+							<div className='green-text'>{success}</div>
+						)}
+						<button
+							type='submit'
+							className='btn btn-outline-secondary w-100'
+							disabled={!oldPassword || !newPassword || !confirmPassword}
+						>
+							Confirm
+						</button>
 					</form>
 				)}
 
