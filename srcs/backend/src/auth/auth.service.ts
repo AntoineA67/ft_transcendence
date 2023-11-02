@@ -24,6 +24,8 @@ import { randomBytes } from 'crypto';
 export class AuthService {
 	private readonly JWT_SECRET: string | any;
 
+	private logger = new Logger('auth');
+
 	constructor(
 		private usersService: UsersService,
 		private prisma: PrismaService,
@@ -157,7 +159,8 @@ export class AuthService {
 
 	async registerUser42(user: any): Promise<User | undefined> {
 		try {
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass")
+			// this.logger.log('42user', user._json.image.link);
+			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass", user._json.image.link)
 			return newUser;
 		} catch {
 			try {
