@@ -162,7 +162,7 @@ export class AuthService {
 		}
 		const email = user.emails[0].value;
 		try {
-			const newUser = await this.usersService.createUser(user.username, email, "nopass")
+			const newUser = await this.usersService.createUser(user.username, email, "nopass", user.profileUrl)
 			return newUser;
 		} catch {
 			try {
@@ -170,7 +170,7 @@ export class AuthService {
 					length: 6,
 					charset: 'numeric'
 				});
-				const newUser = await this.usersService.createUser(userName, email, "nopass")
+				const newUser = await this.usersService.createUser(userName, email, "nopass", user.profileUrl)
 				return newUser;
 			} catch {
 				throw new InternalServerErrorException();

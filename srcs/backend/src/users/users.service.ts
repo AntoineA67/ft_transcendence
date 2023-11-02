@@ -31,7 +31,7 @@ export class UsersService {
 	// 	});
 	// }
 
-	async createUser(username: string, email: string, password: string) {
+	async createUser(username: string, email: string, password: string, profileUrl: string) {
 		// const hashPassword = await argon.hash(password);
 		// 💀
 		let hashPassword;
@@ -39,12 +39,17 @@ export class UsersService {
 			hashPassword = "nopass";
 		else
 			hashPassword = await argon.hash(password);
+		if (profileUrl !== null) {
+			// use the 42 profile picture if not null
+			const avatarUrl = profileUrl;
+		}
 		try {
 			const user = await this.prisma.user.create({
 				data: {
 					username: username,
 					email: email,
 					hashPassword: hashPassword,
+					avatar42: profileUrl,
 				},
 			});
 			return user;
@@ -65,6 +70,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 			}
 		});
@@ -162,6 +168,7 @@ export class UsersService {
 				email: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 				activated2FA: true,
 			}
@@ -179,6 +186,7 @@ export class UsersService {
 				hashPassword: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 				activated2FA: true,
@@ -204,6 +212,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 			}
@@ -223,6 +232,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 			}
 		})
@@ -284,6 +294,7 @@ export class UsersService {
 				hashPassword: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 				activated2FA: true,
@@ -318,8 +329,10 @@ export class UsersService {
 			where: { id },
 			select: {
 				avatar: true,
+				// avatar42: true,
 			}
 		});
 		return (this.bufferToBase64(avatar));
+		// return (this.bufferToBase64(avatar));
 	}
 }
