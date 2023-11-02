@@ -24,7 +24,7 @@ export class UpdateUserDto {
 	password?: string;
 
 	@IsString() 							bio?: string;
-											avatar?: Buffer;
+											avatar?: string;
 											status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
 											otpHash?: string;
 											activated2FA?: boolean;

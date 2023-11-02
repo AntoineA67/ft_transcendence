@@ -79,7 +79,10 @@ export class UsersGateway
 			if (file.byteLength >= 10485760) {
 				return (false);
 			}
-			return (await this.usersService.updateUser(id, { avatar: file }));
+			// transform to base64
+			let base64 = file.toString('base64');
+			base64 = `data:image/jpeg;base64,${base64}`;
+			return (await this.usersService.updateUser(id, {avatar: base64}));
 		};
 		// this.logger.log('newAvatar')
 		return (await fileCheck(file));
