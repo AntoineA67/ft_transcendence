@@ -6,37 +6,49 @@ import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { BlockList, FriendList } from './FriendsHelper';
 import { FriendReqList } from './FriendsHelper';
+import { userType } from '../../types/user';
+import { UserItem } from '../utils/UserItem';
 
 type AddPageProp = {
 	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 }
 function AddPage({ setPage }: AddPageProp) {
-	const [nick, setNick] = useState('');
-	const [mess, setMess] = useState('');
-
-	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		friendsSocket.emit('sendReq', nick, (success: boolean) => {
-			success ? setMess('Success') : setMess('Fails')
-			setNick('');
+	const [ search, setSearch ] = useState('');
+	const [ list, setList ] = useState<userType[]>([]);
+	
+	useEffect(() => {
+		friendsSocket.emit('findOthers', (res: userType[]) => {
+			console.log('findOthers: ', res)
+			setList(res);
 		})
+	}, [])
+	
+	const myFilter = (user: userType) => {
+		return (user.username.toLowerCase().includes(search.toLowerCase()))
+	}
+
+	const myMap = (user: userType) => {
+		return (
+			<li key={user.id} className='m-0 p-0'>
+				<UserItem user={{ ...user }} linkTo={user.username} />
+			</li>
+		)
 	}
 	
 	return (
 		<div>
 			<button className='leftArrow m-2' onClick={() => setPage('friendPage')}/>		
-			<form onSubmit={(e) => handleSubmit(e)} className='p-3'>			
-				<label htmlFor='send-friend-request'>Send friend request</label>
+			<div className='px-3 py-3'>
 				<input 
 					autoFocus
-					className='w-100 my-2'
-					type='text'
-					value={nick}
-					onChange={(e) => setNick(e.target.value)}
+					placeholder='Search for new friends'
+					value={search}
+					onChange={(e) => {setSearch(e.target.value)}}
 				/>
-				<button type="submit" className="btn btn-primary w-100"> send </button>
-				<div id='form-message mt-1' className='white-text'>{mess}</div>
-			</form>
+			</div>
+			<ul>
+				{list.filter(myFilter).map(myMap)}
+			</ul>
 		</div>
 	)
 }
