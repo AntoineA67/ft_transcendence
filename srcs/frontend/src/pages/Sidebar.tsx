@@ -4,7 +4,7 @@ import { PongedPopup, PongPopup } from './Popups';
 
 import Game from '../assets/Game.svg';
 import Chat from '../assets/Chat.svg';
-import Home from '../assets/Home.svg';
+import Me from '../assets/Me.svg';
 import Search from '../assets/Search.svg';
 import Friend from '../assets/Friend.svg';
 
@@ -74,7 +74,7 @@ export default function Sidebar() {
 								<Link to="/"><img src={Game} /></Link>
 							</li>
 							<li className={`nav-item ${(page == '/me') && 'magenta'}`} >
-								<Link to="me"><img src={Home} /></Link>
+								<Link to="me"><img src={Me} /></Link>
 							</li>
 							<li className={`nav-item ${(page == '/search') && 'magenta'}`} >
 								<Link to="search"><img src={Search} /></Link>
