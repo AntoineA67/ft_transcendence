@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, Profile, Room, Member, Pvrooms, Block } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
@@ -14,19 +14,9 @@ import { MdGroup, MdGroups2 } from 'react-icons/md';
 import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
 import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
-import { MdPersonOutline } from 'react-icons/md';
+import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
 import { set } from "lodash-es";
 
-
-type ChatBoxData = {
-	messages: Message[],
-	roomTitle: string,
-	roomChannel: boolean,
-	members: Member[],
-	memberStatus: Member,
-	private: boolean,
-	password: boolean
-}
 
 export function ChatBox() {
 	const { chatId } = useParams();
@@ -60,20 +50,15 @@ export function ChatBox() {
 		setMemberList(data.members);
 		setPrivateStatus(data.private);
 		setPasswordStatus(data.password);
+		setProfile(data.profile);
+		setBlocks(data.profile.blocks);
 		setnewRoomTitleSuccess(undefined);
 		setinviteUsernameSuccess(undefined);
 		setnewPasswordSucess(undefined);
 		setShowSettings(false);
 		setLoading(false);
 		setMess('');
-
-		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
-			if (profile) {
-				setProfile(profile);
-				setBlocks(profile.blocks);
-			}
-		});
-	}, [chatId]);
+	}, [chatId, data]);
 
 	useEffect(() => {
 		const socketListeners: { event: string; handler: (response: any) => void }[] = [];
@@ -84,7 +69,7 @@ export function ChatBox() {
 					prevMembersList.filter((member) => member.userId !== response.userid)
 				);
 			}
-			else {
+			else if (response.userid === profile?.id && response.roomId === parseInt(chatId || '', 10)) {
 				navigate('/chat');
 			}
 		};
@@ -156,20 +141,25 @@ export function ChatBox() {
 
 		const handleNewProfile = (response: Profile) => {
 			const roominfo = response.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10));
-			if (roominfo?.blocked) {
+			if (roominfo && roominfo?.blocked) {
 				setProfile(response);
 				setBlocks(response.blocks);
 				setMessages([]);
-				setroomTitle('You have been blocked by this user');
 				setMemberList([]);
+				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error'});
 			}
-			else if (roominfo?.blocked === false) {
+			else if (roominfo && roominfo?.blocked === false) {
 				setProfile(response);
 				setBlocks(response.blocks);
 				setMessages(data.messages);
 				setroomTitle(data.roomTitle);
 				setMemberList(data.members);
 			}
+			else {
+				setProfile(response);
+				setBlocks(response.blocks);
+			}
+			console.log('newprofile', response);
 		}
 
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
@@ -193,7 +183,7 @@ export function ChatBox() {
 				chatsSocket.off(event, handler);
 			});
 		};
-	}, [chatId]);
+	}, [chatId, blocks, membersList, profile]);
 
 	useEffect(() => {
 		if (!loading && roomTitle === '') {
@@ -221,7 +211,7 @@ export function ChatBox() {
 				roomId: chatId,
 				roomtitle: newRoomTitle
 			}, (response: boolean) => {
-				if (response) {
+				if (response === true) {
 					setroomTitle(newRoomTitle);
 					setnewRoomTitleSuccess(true);
 				}
@@ -247,11 +237,22 @@ export function ChatBox() {
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
-			}, (response: Member) => {
-				if (response.userId > 0) {
+			}, (response: number) => {
+				if (response > 0) {
 					setinviteUsernameSuccess(true);
-				} else {
+					enqueueSnackbar(`User invited successfully`, { variant: 'success', preventDuplicate: false })
+				} else if (response === -1) {
 					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error', preventDuplicate: false })
+				} else if (response === -2) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error', preventDuplicate: false })
+				} else if (response === -3) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error', preventDuplicate: false })
+				} else if (response === -4) {
+					setinviteUsernameSuccess(false);
+					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error', preventDuplicate: false })
 				}
 			});
 		}
@@ -266,19 +267,26 @@ export function ChatBox() {
 	};
 
 	const handleSendMessage = () => {
-		if (profile === undefined)
-			return;
+		if (profile === undefined) return;
 		if (mess.length > 10000) {
-			alert('Message too long');
+			enqueueSnackbar('Message too long', { variant: 'error'});
 			return;
 		}
-		chatsSocket.emit('sendMessage', {
+		const messageOptions = {
 			content: mess,
 			roomId: chatId,
-		}, (response: boolean) => {
-			if (!response) {
-				alert('Erreur lors de l\'envoi du message');
-				navigate('/chat');
+		};
+		chatsSocket.emit('sendMessage', messageOptions, (response: boolean) => {
+			if (response === false) {
+				const action = (key: SnackbarKey | undefined) => (
+					<>
+						<button onClick={() => { closeSnackbar(key); navigate('/chat'); }} style={{ color: 'white' }}>
+							<strong>Close</strong>
+						</button>
+					</>
+				);
+
+				enqueueSnackbar("Error while sending the message. Please refresh the page.", { variant: 'error', action, persist: true });
 			}
 		});
 		setMess('');
@@ -290,12 +298,9 @@ export function ChatBox() {
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: usertoKick,
 			roomId: chatId,
-		}, (response: boolean) => {
-			if (response && profile.id === usertoKick) {
+		}, (response: { userid: number, roomId: number }) => {
+			if (response.userid === profile.id) {
 				navigate('/chat');
-			}
-			if (response) {
-				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== usertoKick));
 			}
 		});
 	}
@@ -310,12 +315,13 @@ export function ChatBox() {
 			duration: time,
 			roomId: chatId
 		}, (response: boolean) => {
-			if (response) {
+			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
 					if (member.userId === memberid)
 						member.mute = time > 0 ? new Date(Date.now() + time * 1000) : null;
 					return member;
 				}));
+				enqueueSnackbar(`User ${time > 0 ? 'muted' : 'unmuted'} successfully`, { variant: 'success' });
 			}
 		});
 	};
@@ -326,48 +332,58 @@ export function ChatBox() {
 			roomId: chatId,
 			action: actions,
 		}, (response: boolean) => {
-			if (response) {
+			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
 					if (member.userId === memberid)
 						member.ban = !actions;
 					return member;
 				}));
+				enqueueSnackbar(`User ${actions ? 'unbanned' : 'banned'} successfully`, { variant: 'success' });
 			}
 		}
 		);
 	};
 
-	const handleBlock = (memberid: number, actions: boolean) => {
+	const handleBlock = (memberId: number, toUnBlock: boolean) => {
 		if (profile === undefined) {
 			return;
 		}
 
-		chatsSocket.emit('blockUser', {
-			memberId: memberid,
-			action: actions,
-		}, (response: boolean) => {
-			if (response) {
-				setBlocks((prevBlocks) => {
-					if (!actions) {
-						return [...prevBlocks, { userId: profile.id, blockedId: memberid }];
-					} else {
-						return prevBlocks.filter((block) => block.blockedId !== memberid);
+		console.log('toUnBlock', toUnBlock);
+		console.log('memberId', memberId);
+
+		chatsSocket.emit('blockUser', { memberId, action: toUnBlock }, (response: boolean) => {
+			if (response === true) {
+				if (toUnBlock) {
+					setBlocks((prevBlocks) => prevBlocks.filter((block) => block.blockedId !== memberId));
+				} else {
+					const blockToFind = blocks.find((block) => block.blockedId === memberId);
+					const newBlock = {
+						userId: profile.id,
+						blockedId: memberId,
+					};
+
+					if (!blockToFind) {
+						setBlocks((prevBlocks) => [...prevBlocks, newBlock]);
 					}
-				});
-				if (!actions)
-					setMessages((prevMessages) => prevMessages.filter((message) => message.userId !== memberid));
+					setMessages((prevMessages) => prevMessages.filter((message) => message.userId !== memberId));
+				}
+				enqueueSnackbar(`User ${toUnBlock ? 'unblocked' : 'blocked'} successfully`, { variant: 'success' });
 			}
 		});
 	};
+
 
 	const handleKick = (memberid: number, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
-		}, (response: boolean) => {
-			if (response)
-				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid))
+		}, (response: { userid: number, roomId: number }) => {
+			if (response.userid !== profile?.id && response.roomId === parseInt(chatId || '', 10)) {
+				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid));
+				enqueueSnackbar(`User kicked successfully from the channel`, { variant: 'success' });
+			}
 		})
 	}
 
@@ -378,7 +394,7 @@ export function ChatBox() {
 			owner: role === 'Owner' ? true : false,
 			admin: role === 'Admin' ? true : false,
 		}, (response: boolean) => {
-			if (response) {
+			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
 					if (member.userId === memberid) {
 						member.owner = role === 'Owner' ? true : false;
@@ -396,6 +412,7 @@ export function ChatBox() {
 						return prevMemberstatus;
 					});
 				}
+				enqueueSnackbar(`User role changed successfully`, { variant: 'success' });
 			}
 		});
 	}
@@ -406,13 +423,16 @@ export function ChatBox() {
 				roomId: chatId,
 				password: newPassword
 			}, (response: boolean) => {
-				if (response) {
+				if (response === true) {
 					setNewPassword('');
 					setnewPasswordSucess(true);
 					setPasswordStatus(true);
+					enqueueSnackbar(`Password changed successfully`, { variant: 'success', preventDuplicate: false });
 				}
-				else
+				else {
 					setnewPasswordSucess(false);
+					enqueueSnackbar(`Error while changing password`, { variant: 'error', preventDuplicate: false });
+				}
 			})
 		}
 	}
@@ -422,21 +442,39 @@ export function ChatBox() {
 			roomId: chatId,
 			password: ''
 		}, (response: boolean) => {
-			if (response) {
+			if (response === true) {
 				setPasswordStatus(false);
 				setnewPasswordSucess(undefined);
 				setNewPassword('');
+				enqueueSnackbar(`Password deleted successfully`, { variant: 'success', preventDuplicate: false });
 			}
 		})
 	}
 
 	const handleDeleteChannel = () => {
 		chatsSocket.emit('deleteChannel', chatId, (response: boolean) => {
-			if (response) {
+			if (response === true) {
 				navigate('/chat');
 			}
 		});
 	}
+
+	const handlePlayClick = (userId: number, username: string) => {
+		enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
+			variant: 'info',
+			persist: true,
+			action: (key: any) => (
+				<div>
+					<Link to={`/game/${userId}`}>
+						<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
+							<strong>Play</strong>
+						</button>
+					</Link>
+					<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
+				</div>
+			),
+		});
+	};
 
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
@@ -446,15 +484,30 @@ export function ChatBox() {
 			message.username = profile.username;
 		}
 
+		const handlePlayClickinMess = (userId: number, username: string) => {
+			enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
+				variant: 'info',
+				persist: true,
+				action: (key: any) => (
+					<div>
+						<Link to={`/game/${userId}`}>
+							<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
+								<strong>Play</strong>
+							</button>
+						</Link>
+						<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
+					</div>
+				),
+			});
+		};
+
 		return (
 			<li className="message-container" key={message.id}>
 				<div className={`d-flex ${classuser}`}>
 					{message.userId !== profile.id && (
-						<Link to={`/game/${message.userId}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
-							<span style={{ marginRight: '20px' }}>
-								<FontAwesomeIcon icon={faPlay} />
-							</span>
-						</Link>
+						<span style={{ marginRight: '20px', cursor: 'pointer' }} onClick={() => handlePlayClickinMess(message.userId, message.username)}>
+							<FontAwesomeIcon icon={faPlay} />
+						</span>
 					)}
 					<Link to={`/search/${message.username}`} style={{ textDecoration: 'none', color: 'inherit', border: 'none', outline: 'none', cursor: 'pointer' }}>
 						<strong className='user-header'>
@@ -502,9 +555,11 @@ export function ChatBox() {
 								memberstatus
 									? memberstatus.ban || (memberstatus.mute !== null && new Date(memberstatus.mute) > new Date())
 										? true
-										: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+										: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
 											? true
-											: false
+											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
+												? true
+												: false
 									: true
 							}
 							placeholder={
@@ -515,7 +570,9 @@ export function ChatBox() {
 											? 'You are muted...'
 											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
 												? 'You are blocking this user...'
-												: 'Write a message...'
+												: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
+													? 'You are blocked...'
+													: 'Write your message...'
 									: ''
 							}
 						/>
@@ -602,14 +659,21 @@ export function ChatBox() {
 							.filter((member) => member.userId !== profile?.id)
 							.map((member) => (
 								<li key={member.id} className="member d-flex flex-wrap">
-									<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
-										<div className="member-details">
-											<span className="member-username">{member.username}</span>
-											{roomChannel && (<span className="member-role">
-												{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
-											</span>)}
-										</div>
-									</Link>
+									<div className='d-flex align-items-center'>
+										{member.userId !== profile?.id && !blocks.find((block) => block.blockedId === member.userId)?.blockedId && (
+											<span style={{ cursor: 'pointer', margin: 0 }} onClick={() => handlePlayClick(member.userId, member.username)}>
+												<FontAwesomeIcon icon={faPlay} />
+											</span>
+										)}
+										<Link to={`/search/${member.username}`} style={{ textDecoration: 'none' }}>
+											<div className="member-details">
+												<span className="member-username">{member.username}</span>
+												{roomChannel && (<span className="member-role">
+													{member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
+												</span>)}
+											</div>
+										</Link>
+									</div>
 									<div className="member-actions d-flex flex-wrap">
 										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <select
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
@@ -688,34 +752,57 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 
 	const handleCreateGroup = () => {
 		if (create.trim() === '') return;
-
 		const password = !isPublic ? '' : createPassword;
 		const roomdata = {
 			roomTitle: create,
 			isPublic: isPublic,
 			password: password,
 		};
+
 		chatsSocket.emit('createChannelRoom', roomdata, (response: number) => {
 			if (response > 0) {
+				const roomType = isPublic ? 'public' : 'private';
+				const passwordInfo = isPublic && createPassword.trim() !== '' ? ` with a password` : '';
+
 				setPage('chatList');
 				navigate(`/chat/${response}`);
 			} else {
-				alert(`Error while creating room ${create}`);
-				setCreate('');
+				const action = (key: SnackbarKey | undefined) => (
+					<>
+						<button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
+							<strong>Close</strong>
+						</button>
+					</>
+				);
+
+				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action, preventDuplicate: false });
 			}
 		});
-	}
+	};
 
 	const handlePrivateMessage = () => {
 		if (nick.trim() === '') return;
+
 		chatsSocket.emit('createPrivateRoom', nick, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
-			} else {
-				alert(`Error while creating room with ${nick}`);
-				setNick('');
+			} else if (response === -1) {
+				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error', preventDuplicate: false });
 			}
+			else if (response === -2) {
+				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error', preventDuplicate: false });
+			}
+			else if (response === -3) {
+				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error', preventDuplicate: false });
+			}
+			else if (response === -4) {
+				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+			}
+			else if (response === -5) {
+				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+			}
+			setNick('');
 		});
 	}
 
@@ -726,9 +813,10 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 			roomid: roomId,
 			password: password,
 		};
+
 		chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
 			if (response === false) {
-				alert('Wrong Name or Room ID or Password or you\'re already in the room');
+				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error', preventDuplicate: false });
 				setJoin('');
 				setRoomId('');
 				setPassword('');
@@ -857,6 +945,8 @@ export function ChatList() {
 	const [profile, setProfile] = useState<Profile>();
 	const [pvrooms, setPvrooms] = useState<Pvrooms[]>();
 	const [blocks, setBlocks] = useState<Block[]>([]);
+	const { chatId } = useParams();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		chatsSocket.emit('getProfileForUser', (profile: Profile) => {
@@ -879,6 +969,17 @@ export function ChatList() {
 				const roomExists = rooms.find((room) => room.id === response.id);
 				if (!roomExists) {
 					setRooms((prevRooms) => [response, ...prevRooms]);
+					const action = (key: SnackbarKey | undefined) => (
+						<>
+							<button onClick={() => { closeSnackbar(key); navigate(`/chat/${response.id}`); }} style={{ color: 'white' }}>
+								<strong>Go</strong>
+							</button>
+						</>
+					);
+					if (!response.isChannel)
+						enqueueSnackbar(`You received a new private message from ${response.title}`, { variant: 'info', action });
+					else
+						enqueueSnackbar(`You joined the room ${response.title} with roomid ${response.id}`, { variant: 'success', action });
 				}
 			}
 		};
@@ -900,15 +1001,26 @@ export function ChatList() {
 			const newRooms = [...rooms];
 			if (newMessage.userId === blocks.find((block) => block.blockedId === newMessage.userId)?.blockedId) return;
 			const targetRoom = newRooms.find((room) => room.id === newMessage.roomId);
+			const action = (key: SnackbarKey | undefined) => (
+				<>
+					<button onClick={() => { closeSnackbar(key); navigate(`/chat/${newMessage.roomId}`); }} style={{ color: 'white' }}>
+						<strong>Go</strong>
+					</button>
+				</>
+			);
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
 				setRooms([targetRoom, ...filteredRooms]);
+				if (newMessage.userId !== profile?.id && (chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined) {
+					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action});
+				}
 			}
 		};
 
 		const handleUserLeaveChannel = (response: { userid: number, roomId: number }) => {
 			if (response && response.userid === profile?.id) {
 				setRooms((prevRooms) => prevRooms.filter((room) => room.id !== response.roomId));
+				enqueueSnackbar(`You left a channel (roomId: ${response.roomId})`, { variant: 'info' });
 			}
 		};
 
@@ -926,6 +1038,7 @@ export function ChatList() {
 		const handledeleteRoom = (response: number) => {
 			if (response) {
 				setRooms((prevRooms) => prevRooms.filter((room) => room.id !== response));
+				enqueueSnackbar(`A channel has been deleted (roomId: ${response})`, { variant: 'info' });
 			}
 		}
 
@@ -945,7 +1058,7 @@ export function ChatList() {
 				chatsSocket.off(event, handler);
 			});
 		};
-	}, [rooms]);
+	}, [rooms, chatId]);
 
 
 	const myMap = (room: Room, pvrooms: Pvrooms[], profile: Profile) => {

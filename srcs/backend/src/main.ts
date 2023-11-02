@@ -9,16 +9,6 @@ async function bootstrap() {
 	});
 	app.useGlobalPipes(new ValidationPipe());
 	app.enableCors();
-	// app.enableCors({
-	// 	origin: [
-	// 		'http://localhost:3000',
-	// 		'http://localhost:3000/42/callback',
-	// 		// we have to add all the subdomain here
-	// 		// whenever we fetch
-	// 		// it's a problem of cors
-	// 	],
-	// 	methods: ["GET", "POST"],
-	// });
 	app.useWebSocketAdapter(new AuthIoAdapter(app));
 	await app.listen(4000);
 }

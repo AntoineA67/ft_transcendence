@@ -158,6 +158,10 @@ select option:hover {
 	color: grey;
 }
 
+.green-text {
+	color: greenyellow;
+}
+
 .white-text {
 	color: white;
 }
