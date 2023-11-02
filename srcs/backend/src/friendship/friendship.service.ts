@@ -132,4 +132,13 @@ export class FriendshipService {
 		myFriends = myFriends.filter((friend) => (friend.id == otherId))
 		return (myFriends.length != 0 ? true : false);
 	}
+
+	// return all users that's not friends
+	async getOthers(id: number): Promise<UserDto[]> {
+		const all: UserDto[] = await this.usersService.getAllUsers();
+		const friends: UserDto[] = await this.findAllFriendsIncludeBlocks(id);
+		const others: UserDto[] = all.filter((a) => !friends.map(f => f.id).includes(a.id));
+		return (others.filter((x) => (x.id != id)));
+	}
+
 }

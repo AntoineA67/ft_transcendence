@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 export function FriendList() {
 	const [ friends, setFriends ] = useState<userType[]>([]);
+	const [ search, setSearch] = useState('');
 	
 	const findAllFriends = () => {
 		friendsSocket.emit('findAllFriends', (res: userType[]) => {
@@ -40,14 +41,27 @@ export function FriendList() {
 			</li>
 		)
 	}
+
+	const myFilter = (user: userType) => {
+		return (user.username.toLowerCase().includes(search.toLowerCase()));
+	}
 	return (
-		(friends.length == 0) ? (
-			<h5 className='grey-text p-2'>No friends yet :(</h5>
-		) : (
-			<ul className='p-0 m-0'>
-				{friends.map(myMap)}
-			</ul>
-		)
+		<div className="w-100">
+			<div className='px-3 py-2'>
+				{friends.length > 0 && <input 
+					onChange={(e) => {setSearch(e.target.value)}}
+					autoFocus 
+					placeholder="search a friend"
+				/>}
+			</div>
+			{(friends.length == 0) ? (
+				<h5 className='grey-text p-2'>No friends yet :(</h5>
+			 ) : (
+				<ul className='p-0 m-0'>
+					{friends.filter(myFilter).map(myMap) }
+				</ul>)}
+			
+		</div>
 	);
 }
 
