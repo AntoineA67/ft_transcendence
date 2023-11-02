@@ -31,7 +31,7 @@ export class UsersService {
 	// 	});
 	// }
 
-	async createUser(username: string, email: string, password: string) {
+	async createUser(username: string, email: string, password: string, avatar: string = null) {
 		// const hashPassword = await argon.hash(password);
 		// 💀
 		let hashPassword;
@@ -45,6 +45,7 @@ export class UsersService {
 					username: username,
 					email: email,
 					hashPassword: hashPassword,
+					avatar
 				},
 			});
 			return user;
