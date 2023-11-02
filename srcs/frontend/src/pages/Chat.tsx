@@ -240,19 +240,19 @@ export function ChatBox() {
 			}, (response: number) => {
 				if (response > 0) {
 					setinviteUsernameSuccess(true);
-					enqueueSnackbar(`User invited successfully`, { variant: 'success', preventDuplicate: false })
+					enqueueSnackbar(`User invited successfully`, { variant: 'success' })
 				} else if (response === -1) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error' })
 				} else if (response === -2) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error' })
 				} else if (response === -3) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error' })
 				} else if (response === -4) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error' })
 				}
 			});
 		}
@@ -427,11 +427,11 @@ export function ChatBox() {
 					setNewPassword('');
 					setnewPasswordSucess(true);
 					setPasswordStatus(true);
-					enqueueSnackbar(`Password changed successfully`, { variant: 'success', preventDuplicate: false });
+					enqueueSnackbar(`Password changed successfully`, { variant: 'success' });
 				}
 				else {
 					setnewPasswordSucess(false);
-					enqueueSnackbar(`Error while changing password`, { variant: 'error', preventDuplicate: false });
+					enqueueSnackbar(`Error while changing password`, { variant: 'error' });
 				}
 			})
 		}
@@ -446,7 +446,7 @@ export function ChatBox() {
 				setPasswordStatus(false);
 				setnewPasswordSucess(undefined);
 				setNewPassword('');
-				enqueueSnackbar(`Password deleted successfully`, { variant: 'success', preventDuplicate: false });
+				enqueueSnackbar(`Password deleted successfully`, { variant: 'success' });
 			}
 		})
 	}
@@ -775,7 +775,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					</>
 				);
 
-				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action, preventDuplicate: false });
+				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action });
 			}
 		});
 	};
@@ -788,19 +788,19 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 				setPage('chatList');
 				navigate(`/chat/${response}`);
 			} else if (response === -1) {
-				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error' });
 			}
 			else if (response === -2) {
-				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error' });
 			}
 			else if (response === -3) {
-				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error' });
 			}
 			else if (response === -4) {
-				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error' });
 			}
 			else if (response === -5) {
-				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error' });
 			}
 			setNick('');
 		});
@@ -816,7 +816,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 
 		chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
 			if (response === false) {
-				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error' });
 				setJoin('');
 				setRoomId('');
 				setPassword('');
