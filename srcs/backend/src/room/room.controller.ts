@@ -24,10 +24,12 @@ export class RoomController {
       throw new HttpException('You are banned or not a member', HttpStatus.FORBIDDEN);
     }
     const roomData = await this.roomService.getRoomData(roomId, userId);
+		const profile = await this.roomService.getProfileForUser(userId);
     return {
       ...roomData,
       members,
       memberStatus,
+      profile
     };
   }
 

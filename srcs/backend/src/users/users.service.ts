@@ -306,4 +306,22 @@ export class UsersService {
 		});
 		return (avatar);
 	}
+
+	async changePassword(id: number, oldPassword: string, newPassword: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: id }
+		});
+
+		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
+		if (passwordMatch) {
+			const hashNewPassword = await argon.hash(newPassword);
+			await this.prisma.user.update({
+				where: { id: id },
+				data: { hashPassword: hashNewPassword }
+			});
+			return (true);
+		}
+		return (false);
+	}
+
 }

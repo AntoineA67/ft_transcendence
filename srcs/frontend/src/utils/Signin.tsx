@@ -10,11 +10,15 @@ type newUser = {
 
 type login = {
 	email: string,
-	password: string
+	password: string,
+	token2FA?: string,
 }
 
 type loginContext = {
-	handleSubmit: (e: React.FormEvent<HTMLFormElement>, user: newUser | login, setErr: React.Dispatch<React.SetStateAction<string>>) => void,
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>, 
+		user: newUser | login, 
+		setErr: React.Dispatch<React.SetStateAction<string>>, 
+		set2FA: React.Dispatch<React.SetStateAction<boolean>>, ) => void,
 	togglePassword: () => void,
 }
 
@@ -26,7 +30,20 @@ export function Signin() {
 	const [email, setEmail] = useState<string>('');
 	const [pass, setPass] = useState<string>('');
 	const [check, setCheck] = useState<string>('true');
+	const [_2fa, set2FA] = useState<boolean>(false);
+	const [twoFACode, setTwoFACode] = useState<string>('');
 	const [err, setErr] = useState('');
+
+	// async function sendToken() {
+	// 	localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
+	// 	const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
+	// 	const data = await response.json();
+	// 	if (data._2fa === 'success') {
+	// 		window.location.href = oauth42Url;
+	// 	} else {
+	// 		setInvalidToken(true);
+	// 	}
+	// }
 	
 	return (
 		<div className='container'>
@@ -36,7 +53,7 @@ export function Signin() {
 					<Link to='..'>
 						<button className="leftArrow my-4"></button>
 					</Link>
-					<form className="w-100" onSubmit={(e) => (handleSubmit(e, { email: email, password: pass }, setErr))}>
+					<form className="w-100" onSubmit={(e) => {console.log(twoFACode); (handleSubmit(e, { email: email, password: pass, token2FA: twoFACode }, setErr, set2FA))}}>
 						<h3 className='white-text'>Welcome back!</h3>
 
 						<div className="mt-4">
@@ -64,6 +81,17 @@ export function Signin() {
 								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
 							<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
 						</div>
+
+						{_2fa == true && <div className="mt-4">
+							<label htmlFor='twoFACode'>Two factor authentication code</label>
+							<input id='twoFACode' required type="text" placeholder="twoFACode"
+								value={twoFACode} onChange={
+									(e) => setTwoFACode(e.target.value)}/>
+						</div>}
+
+						{/* {_2fa == true && <div id='_2fa' className='red-text mt-4'>
+							coucou : { _2fa.toString() }
+						</div>} */}
 						
 						<div id='error-message' className='red-text mt-4'>
 							{err}
