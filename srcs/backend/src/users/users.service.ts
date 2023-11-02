@@ -327,8 +327,9 @@ export class UsersService {
 		const user = await this.prisma.user.findUnique({
 			where: { id: id }
 		});
-		const hasOldPassword = await argon.hash(oldPassword);
-		if (user.hashPassword === hasOldPassword) {
+
+		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
+		if (passwordMatch) {
 			const hashNewPassword = await argon.hash(newPassword);
 			await this.prisma.user.update({
 				where: { id: id },
