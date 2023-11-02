@@ -21,8 +21,8 @@ export function UserProfile() {
 
 	return (
 		<>
-			{location.pathname.startsWith('/friends/')
-				&& !profile.friend && <Navigate to={`/search/${userNick}`} replace={true} />}
+			{/* {location.pathname.startsWith('/friends/')
+				&& !profile.friend && <Navigate to={`/search/${userNick}`} replace={true} />} */}
 			<div className='w-100 h-100 d-flex flex-column align-items-center'>
 				<GoUp />
 				<div
