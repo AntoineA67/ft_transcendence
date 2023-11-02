@@ -13,13 +13,14 @@ import { ProfileDto } from 'src/dto/profile.dto';
 import { PlayerService } from 'src/player/player.service';
 import { AchievementService } from 'src/achievement/achievement.service';
 import { UserDto } from 'src/dto/user.dto';
+import * as argon from 'argon2';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {
-	
+
 	constructor(
-		private readonly usersService: UsersService, 
+		private readonly usersService: UsersService,
 	) { }
 
 	private logger: Logger = new Logger('UsersGateway');
@@ -30,9 +31,9 @@ export class UsersGateway
 		// client join a room 
 		client.join(id.toString())
 		//emit to everyone
-		client.broadcast.emit('online', id);	
+		client.broadcast.emit('online', id);
 	}
-	
+
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
 		await this.usersService.updateUser(id, { status: 'OFFLINE' });
@@ -46,7 +47,7 @@ export class UsersGateway
 	async handleGetAllUsers(): Promise<UserDto[]> {
 		return (await this.usersService.getAllUsers());
 	}
-	
+
 	// @SubscribeMessage('MyProfile')
 	// async handleMyProfile(@ConnectedSocket() client: Socket) {
 	// 	const id: number = client.data.user.id;
@@ -66,7 +67,7 @@ export class UsersGateway
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
-		
+
 		const fileCheck = async (file: Buffer) => {
 			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
 			const type = await fileTypeFromBuffer(file);
@@ -78,7 +79,7 @@ export class UsersGateway
 			if (file.byteLength >= 10485760) {
 				return (false);
 			}
-			return (await this.usersService.updateUser(id, {avatar: file}));
+			return (await this.usersService.updateUser(id, { avatar: file }));
 		};
 		// this.logger.log('newAvatar')
 		return (await fileCheck(file));
@@ -130,12 +131,23 @@ export class UsersGateway
 		}
 		return (false);
 	}
-	
+
 	@SubscribeMessage('myAvatar')
 	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string | null> {
 		const id: number = client.data.user.id;
 
 		return (await this.usersService.getAvatar(id))
+	}
+
+	@SubscribeMessage('ChangePassword')
+	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
+		if (data.oldPassowrd === '' || data.newPassword === '') {
+			return (false)
+		}
+		const passwordRespond = await this.usersService.changePassword(
+			client.data.user.id, data.oldPassword, data.newPassword
+		);
+		return (passwordRespond);
 	}
 
 } 
