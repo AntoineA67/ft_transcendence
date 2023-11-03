@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Box, ContactShadows, Plane, Text } from "@react-three/drei"
+import { Box, CameraShake, ContactShadows, Plane, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
@@ -318,7 +318,7 @@ export default function Game() {
 
 				// <main className={"bright"}>
 
-				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 100, 200], fov: 60, near: 60, far: 250 }}>
 					<pointLight position={[100, 100, 50]} intensity={0.5} />
 					<Box position={[100, 100, 25]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
 					<Box position={[0, 0, 0]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
@@ -351,6 +351,16 @@ export default function Game() {
 						<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
 						< ContactShadows rotation-x={Math.PI / 2} position={[0, -5, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
 					</group>
+					<CameraShake
+						maxYaw={0.1} // Max amount camera can yaw in either direction
+						maxPitch={0.1} // Max amount camera can pitch in either direction
+						maxRoll={0.1} // Max amount camera can roll in either direction
+						yawFrequency={0.1} // Frequency of the the yaw rotation
+						pitchFrequency={0.1} // Frequency of the pitch rotation
+						rollFrequency={0.1} // Frequency of the roll rotation
+						intensity={1} // initial intensity of the shake
+						decayRate={0.65} // if decay = true this is the rate at which intensity will reduce at />
+					/>
 				</Canvas>
 				// </main>
 
