@@ -5,6 +5,7 @@ import {
     IsEmail,
     IsBoolean,
     IsNumber,
+    isBoolean,
  } from "class-validator";
 
 // The DTO (Data Transfer Object) for authentication operations
@@ -14,4 +15,5 @@ export class Signin42Dto {
     @IsNotEmpty() @IsString()               token2FA: string;
     @IsNotEmpty() @IsBoolean()              activated2FA: boolean;
                                             user: any;
+    @IsBoolean()                            firstConnexion: boolean;
 }

@@ -1,11 +1,9 @@
 
 // import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
-import { jwtConstants } from '../constants';
+import { Injectable } from '@nestjs/common';
 import { Strategy } from 'passport-42';
-import passport from 'passport';
-import { User, UsersService } from '../../users/users.service';
+import { UsersService } from '../../users/users.service';
 import { AuthService } from '../auth.service';
 
 
@@ -52,7 +50,8 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 				'profileUrl': 'url',
 				'emails.0.value': 'email',
 				'phoneNumbers.0.value': 'phone',
-				'photos.0.value': 'image_url'
+				'photos.0.value': 'image_url',
+				// firstConnexion: true,
 			}
 			// }, (accessToken: string, refreshToken: string, profile: any, cb: any) => {
 			// 	console.log('FortyTwoStrategy', accessToken, refreshToken, profile);

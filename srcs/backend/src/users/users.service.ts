@@ -39,6 +39,10 @@ export class UsersService {
 			hashPassword = "nopass";
 		else
 			hashPassword = await argon.hash(password);
+		if (profileUrl !== null) {
+			// use the 42 profile picture if not null
+			const avatarUrl = profileUrl;
+		}
 		try {
 			const user = await this.prisma.user.create({
 				data: {
@@ -66,6 +70,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 			}
 		});
@@ -78,14 +83,14 @@ export class UsersService {
 		//     if (!valid || empty == null) return (false)
 		// }
 		console.log("PASS ==", data.password);
-		let user: User;
 		if (data.password) {
 			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
+		// let user: User;
 		try {
-			user = await this.prisma.user.update({
+			const user = await this.prisma.user.update({
 				where: { id },
 				data
 			});
@@ -109,7 +114,6 @@ export class UsersService {
 		return (true);
 	}
 
-	//dont touch
 	async getUserByEmail(email: string) {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
@@ -136,20 +140,6 @@ export class UsersService {
 		return (user.username);
 	}
 
-	// async getUserBasic(id: number) {
-	// 	return (
-	// 		await this.prisma.user.findUnique({
-	// 			where: { id },
-	// 			select: {
-	// 				id: true,
-	// 				username: true,
-	// 				avatar: true,
-	// 				status: true,
-	// 			}
-	// 		})
-	// 	)
-	// }
-
 	async getUserById(id: number): Promise<UserDto> {
 		return await this.prisma.user.findUnique({
 			where: { id },
@@ -158,6 +148,7 @@ export class UsersService {
 				email: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 				activated2FA: true,
 			}
@@ -173,6 +164,7 @@ export class UsersService {
 				hashPassword: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 				activated2FA: true,
@@ -197,6 +189,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 			}
@@ -215,6 +208,7 @@ export class UsersService {
 				id: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				status: true,
 			}
 		})
@@ -270,6 +264,7 @@ export class UsersService {
 				hashPassword: true,
 				username: true,
 				avatar: true,
+				avatar42: true,
 				bio: true,
 				status: true,
 				activated2FA: true,
@@ -303,6 +298,7 @@ export class UsersService {
 			where: { id },
 			select: {
 				avatar: true,
+				// avatar42: true,
 			}
 		});
 		return (avatar);

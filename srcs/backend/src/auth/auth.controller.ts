@@ -37,28 +37,15 @@ export class AuthController {
     @Post('signup')
 	@HttpCode(HttpStatus.CREATED)
     async signup(@Body() dto: SignupDto) {
-		// this.logger.log("coucou", dto);
-		// let response = await this.authService.signup(dto, res);
-        // res.status(HttpStatus.OK).json(response);
 		return await this.authService.signup(dto);
-
     }
 
     @Public()
     @Post('signin')
 	@HttpCode(HttpStatus.OK)
 	async signin(@Body() dto: SigninDto) {
-		// const response = await this.authService.signin(dto, res, req);
-        // res.status(HttpStatus.OK).json(response);
         return this.authService.signin(dto);
     }
-
-	// @Public()
-    // @Post('signout') 
-    // async signout(@Req() req: Request, @Res() res: Response) {
-    //     const response = await this.authService.signout(req);
-	// 	res.status(HttpStatus.OK).json(response);
-    // }
 
 	@Public()
 	@Post('signout')
@@ -71,7 +58,6 @@ export class AuthController {
 	@UseGuards(FortyTwoAuthGuard)
 	@Get('/42/callback')
 	@HttpCode(HttpStatus.OK)
-	// async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 	async fortyTwoCallback(@Req() req, @Res() res): Promise<any> {
 		const dto: Signin42Dto = {
 			id: req.user.id,
@@ -79,9 +65,8 @@ export class AuthController {
 			token2FA: req.query._2fa,
 			activated2FA: req.user.activated2FA,
 			user: req.user,
+			firstConnexion: req.user.firstConnexion,
 		}
-		// const response = await this.authService.signin42(dto, res, req);
-		// return response;
 		return await this.authService.signin42(dto, res, req);
 	}
 
@@ -101,25 +86,18 @@ export class AuthController {
 		}
 	}
 
-	@Public()
-    @Get('42Url')
-    async get42Url() {
-        const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.FORTYTWO_APP_ID + "&redirect_uri=" + process.env.FORTYTWO_APP_CALLBACK_URL + "response_type=code";
-        return (url);
-    }
-
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')
-    async isTokenValid(@Req() req: Request, @Res() res: Response) {
-		return res.status(200).json({ valid: true, message: "Token is valid" });
+	@HttpCode(HttpStatus.OK)
+    async isTokenValid() {
+		return { valid: true, message: "Token is valid" };
     }
 
 	@Post('refreshToken')
-	async refreshToken(@Req() req: Request, @Res() res: Response)
+	@HttpCode(HttpStatus.CREATED)
+	async refreshToken(@Req() req: Request)
 	{
-		console.log("passing by refreshToken");
-		const ret = await this.authService.refreshToken(req.body.refreshToken, req, res);
-		console.log('refersh token: ', ret)
-		return res.status(201).json(ret);
+		const refreshToken = req.body.refreshToken;
+		return await this.authService.refreshToken(refreshToken);
 	}
 }
