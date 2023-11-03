@@ -1,9 +1,10 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { set } from 'lodash-es';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -12,7 +13,8 @@ export function CallBack42() {
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
 
 	const cb = async () => {
-		if (!code) {setStatus('done')
+		if (!code) {
+			setStatus('done')
 			return;
 		};
 		let response;
@@ -26,7 +28,7 @@ export function CallBack42() {
 			const data = await response.json();
 			console.log('data: ', data)
 			if (data._2fa) {
-				localStorage.setItem('_2fa', JSON.stringify({id: data.id, activated : true}));
+				localStorage.setItem('_2fa', JSON.stringify({ id: data.id, activated: true }));
 				setStatus('2fa');
 				return;
 			}
@@ -43,20 +45,21 @@ export function CallBack42() {
 
 	return (
 		<>
-		  {status === '2fa' && <Navigate to='/login/2fa' replace />}
-		  {status === 'loading' && (
-			<div style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
-			  <FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '0.5rem' }} />
-			  Loading...
-			</div>
-		  )}
-		  {status === 'done' && <Navigate to='/' replace />}
+			{status === '2fa' && <Navigate to='/login/2fa' replace />}
+			{status === 'loading' && (
+				<div style={{ color: 'white', display: 'flex', alignItems: 'center' }}>
+					<FontAwesomeIcon icon={faSpinner} spin style={{ marginRight: '0.5rem' }} />
+					Loading...
+				</div>
+			)}
+			{status === 'done' && <Navigate to='/' replace />}
 		</>
-	  );
+	);
 }
 
 export function Protected() {
 	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
+	const connectedSockets = useRef<number>(0);
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
@@ -70,8 +73,12 @@ export function Protected() {
 		gamesSocket.connect();
 		//socket io regitsre event
 		function onConnect() {
-			setStatus('connect')
-			console.log('connect')
+			connectedSockets.current += 1;
+			setStatus('loading')
+			if (connectedSockets.current === 4) {
+				setStatus('connect')
+				console.log('connect')
+			}
 		}
 		function onDisconnect() {
 			console.log('reconnecting ...')
@@ -81,33 +88,39 @@ export function Protected() {
 			setStatus('error')
 			console.log('err', err)
 			// if (localStorage.getItem('token')) {
-				// axios.post("http://localhost:4000/auth/signout", {}, {
-				// 	headers: {
-				// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
-				// 	}
-				// });
-				// localStorage.removeItem('token');
+			// axios.post("http://localhost:4000/auth/signout", {}, {
+			// 	headers: {
+			// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
+			// 	}
+			// });
+			// localStorage.removeItem('token');
 			// }
 			// localStorage.removeItem('random');
 			// localStorage.removeItem('email');
 			// localStorage.removeItem('refreshToken');
 		}
 		socket.on('connect', onConnect);
+		friendsSocket.on('connect', onConnect);
+		chatsSocket.on('connect', onConnect);
+		gamesSocket.on('connect', onConnect);
 		socket.on('disconnect', onDisconnect);
 		socket.on('connect_error', onError);
 		return () => {
 			socket.off('connect', onConnect);
 			socket.off('disconnect', onDisconnect);
 			socket.off('connect_error', onError);
+			friendsSocket.off('connect', onConnect);
+			chatsSocket.off('connect', onConnect);
+			gamesSocket.off('connect', onConnect);
 		};
 	}, []);
 
 	return (
 		<>
-			<Outlet />
-			{/* {status == 'loading' && <p className='white-text'> loading ... </p>}
+			{/* <Outlet /> */}
+			{status == 'loading' && <p className='white-text'> loading ... </p>}
 			{status == 'connect' && <Outlet />}
-			{status == 'error' && <Navigate to="/login" replace />} */}
+			{status == 'error' && <Navigate to="/login" replace />}
 		</>
 	);
 }
