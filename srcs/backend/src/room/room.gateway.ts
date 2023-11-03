@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
-import { ChannelCreationDto, MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -76,22 +76,38 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('createChannelRoom')
-	async handleCreateChannelRoom(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() dto: ChannelCreationDto
-		// @MessageBody() data: { roomTitle: string, isPublic: boolean, password: string },
-	): Promise<Number> {
-		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createChannelRoom(dto.roomTitle, dto.isPublic, dto.password, userId);
-		if (createdRoom) {
-			const roomName = "room_" + createdRoom.id.toString();
-			client.join(roomName);
-			client.emit('newRoom', createdRoom);
-			return (createdRoom.id);
-		} else {
-			return (0);
+	async handleCreateChannelRoom(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+		try {
+			if (!data || typeof data.roomTitle !== 'string' || data.roomTitle.trim().length < 4 || data.roomTitle.trim().length > 16) {
+				throw new Error('Room Title must be between 4 and 16 characters');
+			}
+
+			if (typeof data.isPublic !== 'boolean') {
+				throw new Error('Room must be either Public or Private');
+			}
+
+			if (data.password) {
+				if (typeof data.password !== 'string' || data.password.length < 8 || data.password.length > 20 || !(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/).test(data.password)) {
+					throw new Error('Password must be between 8 and 20 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+				}
+			}
+
+			const userId: number = client.data.user.id;
+			const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
+
+			if (createdRoom) {
+				const roomName = 'room_' + createdRoom.id.toString();
+				client.join(roomName);
+				client.emit('newRoom', createdRoom);
+				return { success: true, roomId: createdRoom.id };
+			} else {
+				throw new Error('Failed to create room');
+			}
+		} catch (error) {
+			return { success: false, error: error.message };
 		}
 	}
+
 
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(

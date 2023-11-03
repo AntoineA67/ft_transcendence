@@ -68,7 +68,7 @@ export type ChatBoxData = {
 	profile: Profile,
 };
 
-interface ChannelCreationResponse {
+export interface ChannelCreationResponse {
 	success: boolean;
 	roomId?: number;
 	error?: string;
