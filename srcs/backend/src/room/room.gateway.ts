@@ -8,7 +8,7 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
-import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import { ChannelCreationDto, MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -78,10 +78,11 @@ export class RoomGateway
 	@SubscribeMessage('createChannelRoom')
 	async handleCreateChannelRoom(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() data: { roomTitle: string, isPublic: boolean, password: string },
+		@MessageBody() dto: ChannelCreationDto
+		// @MessageBody() data: { roomTitle: string, isPublic: boolean, password: string },
 	): Promise<Number> {
 		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
+		const createdRoom = await this.roomService.createChannelRoom(dto.roomTitle, dto.isPublic, dto.password, userId);
 		if (createdRoom) {
 			const roomName = "room_" + createdRoom.id.toString();
 			client.join(roomName);
@@ -95,13 +96,13 @@ export class RoomGateway
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() roomdata: { roomname: string, roomid: string, password: string },
+		@MessageBody() roomdata: { roomTitle: string, roomid: string, password: string },
 	): Promise<boolean> {
 		const userId: number = client.data.user.id;
 		const roomId = parseInt(roomdata.roomid, 10);
 		if (Number.isNaN(roomId))
 			return false;
-		const room = await this.roomService.joinRoom(roomdata.roomname, roomId, roomdata.password, userId);
+		const room = await this.roomService.joinRoom(roomdata.roomTitle, roomId, roomdata.password, userId);
 		const roomName = "room_" + roomId.toString();
 		if (room) {
 			client.join(roomName);
