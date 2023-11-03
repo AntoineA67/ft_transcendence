@@ -50,7 +50,8 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 				'profileUrl': 'url',
 				'emails.0.value': 'email',
 				'phoneNumbers.0.value': 'phone',
-				'photos.0.value': 'image_url'
+				'photos.0.value': 'image_url',
+				// firstConnexion: true,
 			}
 			// }, (accessToken: string, refreshToken: string, profile: any, cb: any) => {
 			// 	console.log('FortyTwoStrategy', accessToken, refreshToken, profile);

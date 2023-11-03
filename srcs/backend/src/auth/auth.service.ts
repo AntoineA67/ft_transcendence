@@ -51,7 +51,7 @@ export class AuthService {
 					hashPassword,
 				},
 		});
-		return this.signJwtTokens(user.id, user.email);
+		return this.signJwtTokens(user.id, user.email, true);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -90,7 +90,7 @@ export class AuthService {
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
-		return await this.signJwtTokens(user.id, user.email);
+		return await this.signJwtTokens(user.id, user.email, false);
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -113,18 +113,18 @@ export class AuthService {
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
-				response = await this.signJwtTokens(dto.id, dto.email);
+				response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 		// no 2fa
 		} else 
-			response = await this.signJwtTokens(dto.id, dto.email);
+			response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
 
-	async signJwtTokens(userId: number, userEmail: string,) {
+	async signJwtTokens(userId: number, userEmail: string, firstConnexion: boolean) {
 		let payload = {
 			id: userId,
 			email: userEmail,
@@ -139,6 +139,7 @@ export class AuthService {
 		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
+			firstConnexion: firstConnexion,
 			token: token,
 			refreshToken: refreshToken
 		};
@@ -152,6 +153,7 @@ export class AuthService {
 		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
 			userExists = await this.registerUser42(user);
+		userExists.firstConnexion = false;
 		return (userExists);
 	}
 
@@ -213,7 +215,7 @@ export class AuthService {
 		if (!user)
 			throw new UnauthorizedException("Invalid refresh token");
 	  
-		return await this.signJwtTokens(user.id, user.email);
+		return await this.signJwtTokens(user.id, user.email, user.firstConnexion);
 	  }
 	  
 

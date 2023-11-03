@@ -88,14 +88,14 @@ export class UsersService {
 		//     if (!valid || empty == null) return (false)
 		// }
 		console.log("PASS ==", data.password);
-		let user: User;
 		if (data.password) {
 			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
+		// let user: User;
 		try {
-			user = await this.prisma.user.update({
+			const user = await this.prisma.user.update({
 				where: { id },
 				data
 			});
@@ -145,20 +145,6 @@ export class UsersService {
 		if (!user) return (null);
 		return (user.username);
 	}
-
-	// async getUserBasic(id: number) {
-	// 	return (
-	// 		await this.prisma.user.findUnique({
-	// 			where: { id },
-	// 			select: {
-	// 				id: true,
-	// 				username: true,
-	// 				avatar: true,
-	// 				status: true,
-	// 			}
-	// 		})
-	// 	)
-	// }
 
 	async getUserById(id: number): Promise<UserDto> {
 		let user = await this.prisma.user.findUnique({
