@@ -759,25 +759,26 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 			password: password,
 		};
 
-		chatsSocket.emit('createChannelRoom', roomdata, (response: number) => {
-			if (response > 0) {
-				const roomType = isPublic ? 'public' : 'private';
-				const passwordInfo = isPublic && createPassword.trim() !== '' ? ` with a password` : '';
-
-				setPage('chatList');
-				navigate(`/chat/${response}`);
+		chatsSocket.emit('createChannelRoom', roomdata, (response: ChannelCreationResponse) => {
+			if (response.success) {
+			  const roomType = isPublic ? 'public' : 'private';
+			  const passwordInfo = isPublic && createPassword.trim() !== '' ? ` with a password` : '';
+		  
+			  setPage('chatList');
+			  navigate(`/chat/${response.roomId}`);
 			} else {
-				const action = (key: SnackbarKey | undefined) => (
-					<>
-						<button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
-							<strong>Close</strong>
-						</button>
-					</>
-				);
-
-				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action });
+			  const action = (key: SnackbarKey | undefined) => (
+				<>
+				  <button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
+					<strong>Close</strong>
+				  </button>
+				</>
+			  );
+		  
+			  enqueueSnackbar(`Error while creating room: ${response.error}`, { variant: 'error', action });
 			}
-		});
+		  });
+		  
 	};
 
 	const handlePrivateMessage = () => {

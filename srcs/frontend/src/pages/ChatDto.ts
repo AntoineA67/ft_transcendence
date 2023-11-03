@@ -67,3 +67,10 @@ export type ChatBoxData = {
 	password: boolean,
 	profile: Profile,
 };
+
+interface ChannelCreationResponse {
+	success: boolean;
+	roomId?: number;
+	error?: string;
+  }
+  
