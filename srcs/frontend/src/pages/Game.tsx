@@ -1,11 +1,10 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas } from "@react-three/fiber"
-import { Box, Plane, Text } from "@react-three/drei"
+import { Box, ContactShadows, Plane, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
-// import { Grid } from "@react-three/postprocessing"
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
 import { WebcamPong } from "./WebcamPong"
@@ -94,14 +93,6 @@ const PaddleWheel = ({ currentColor }: any) => {
 				/>
 			</Card.Body>
 		</Card>
-		// <Wheel
-		// 	style={{ marginLeft: 20 }}
-		// 	color={hex}
-		// 	onChange={(color) => {
-		// 		gamesSocket.emit('changeColor', color.hex);
-		// 		setHex(color.hex);
-		// 	}}
-		// />
 	);
 }
 
@@ -154,17 +145,6 @@ export default function Game() {
 			console.log("MyColor", res.paddleColor);
 			setPaddleColor(res.paddleColor);
 		});
-		// console.log("Id", id);
-		// gamesSocket.on('connect', function () {
-		// 	console.log('connect')
-		// })
-		// gamesSocket.on('disconnect', function (message: any) {
-		// 	console.log('disconnect ' + message)
-		// })
-
-		// gamesSocket.on('id', (newId: any) => {
-		// 	setId(newId)
-		// })
 		gamesSocket.on('startGame', (newId: any) => {
 			const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
 				console.log("MyColor", res.paddleColor);
@@ -187,9 +167,7 @@ export default function Game() {
 			}
 
 			if (handPos.current === -1) return
-			// if (Date.now() - keysPressed.current.time < 100) return
 			for (const client of Object.keys(newClients.clients)) {
-				// console.log(client, id.current)
 				if (client == id.current) {
 					const pos = 100 - handPos.current * 100;
 					// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()])
@@ -229,7 +207,6 @@ export default function Game() {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
 		gamesSocket.emit("keyPresses", keysPressed.current);
-		// console.log("sendPressed", keysPressed.current)
 	}
 	const onkeydown = (event: KeyboardEvent) => {
 		if (event.repeat) return
@@ -311,65 +288,72 @@ export default function Game() {
 				</div>
 			}
 			{gameStatus === GameStatus.Started &&
-				// <Canvas gl={{ logarithmicDepthBuffer: true }} shadows camera={{ position: [0, 0, 50], fov: 25 }}>
-				// 	<fog attach="fog" args={['black', 15, 21.5]} />
-				// 	<Stage intensity={0.5} environment="city" shadows={{ type: 'accumulative', bias: -0.001 }} adjustCamera={false}>
-				// 		{Object.keys(clients.current)
-				// 			.map((client) => {
-				// 				// const { y, dir, score } = clients[client]
-				// 				const { y, dir, score } = clients.current[client]
-				// 				const pos = [client === id ? -10 : 10, y * 20 - 10, 0]
-				// 				return (
-				// 					<UserWrapper
-				// 						key={client}
-				// 						id={client}
-				// 						score={score}
-				// 						position={pos}
-				// 						rotation={[0, dir, 0]}
-				// 					/>
-				// 				)
-				// 			})}
-				// 		{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
-				// 		{clients.current[id] !== undefined && < BallWrapper ball={ball.current} client={clients.current[id]} />}
-				// 	</Stage>
-				// 	{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
-				// 	{/* <OrbitControls autoRotate autoRotateSpeed={0.05} enableZoom={false} makeDefault minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} /> */}
-				// 	<EffectComposer disableNormalPass>
-				// 		<Bloom luminanceThreshold={1} mipmapBlur />
-				// 	</EffectComposer>
-				// 	<Environment background preset="sunset" blur={0.8} />
+				// <Canvas style={{ zIndex: -1 }} shadows camera={{ position: [0, 50, 200], fov: 60 }}>
+				// 	<Timer time={time} />
+				// 	{Object.keys(clients)
+				// 		.map((client) => {
+				// 			const { y, dir, score, xDistance } = clients[client]
+				// 			// console.log(client, id, client === id);
+				// 			const pos = [client == id.current ? -97.5 : 97.5, y, 0]
+				// 			const myPaddleColor = client == id.current ? paddleColor : '#fff';
+				// 			// console.log(pos);
+				// 			return (
+				// 				<UserWrapper
+				// 					key={client}
+				// 					id={client}
+				// 					score={score}
+				// 					position={pos}
+				// 					rotation={[0, dir, 0]}
+				// 					paddleColor={myPaddleColor}
+				// 				/>
+				// 			)
+				// 		})}
+				// 	{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
+				// 	< color attach="background" args={["#171720"]} />
+				// 	<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
+				// 	<ambientLight intensity={0.5} />
+				// 	<pointLight position={[-100, -100, -10]} />
+				// 	<spotLight position={[100, 100, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
 				// </Canvas>
-				<Canvas style={{ zIndex: -1 }} shadows camera={{ position: [0, 50, 200], fov: 60 }}>
-					<Timer time={time} />
-					{Object.keys(clients)
-						.map((client) => {
-							const { y, dir, score, xDistance } = clients[client]
-							// console.log(client, id, client === id);
-							const pos = [client == id.current ? -97.5 : 97.5, y, 0]
-							// const pos = [client == id ? -97.5 : 97.5, y, 0]
-							// const myPaddleColor = client == id ? paddleColor : '#fff';
-							const myPaddleColor = client == id.current ? paddleColor : '#fff';
-							// console.log(pos);
-							return (
-								<UserWrapper
-									key={client}
-									id={client}
-									score={score}
-									position={pos}
-									rotation={[0, dir, 0]}
-									paddleColor={myPaddleColor}
-								/>
-							)
-						})}
-					{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
-					{/* {clients[id] !== undefined && < BallWrapper ball={ball} client={clients[id]} />} */}
-					< color attach="background" args={["#171720"]} />
-					<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
-					<ambientLight intensity={0.5} />
-					<pointLight position={[-100, -100, -10]} />
-					<spotLight position={[100, 100, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
-					{/* <Grid renderOrder={-1} position={[0, -1.85, 0]} infiniteGrid cellSize={0.6} cellThickness={0.6} sectionSize={3.3} sectionThickness={1.5} sectionColor={[0.5, 0.5, 10]} fadeDistance={30} /> */}
+
+				// <main className={"bright"}>
+
+				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+					<pointLight position={[100, 100, 50]} intensity={0.5} />
+					<Box position={[100, 100, 25]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
+					<Box position={[0, 0, 0]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
+					<pointLight position={[-100, -100, -100]} intensity={1.5} color={"#00ffff"} />
+					<Box position={[-100, -100, -100]} scale={10} />
+					{/* <pointLight position={[-100, -100, -100]} intensity={1.5} color={snap.dark ? "#ccffcc" : "#00ffff"} /> */}
+					<ambientLight intensity={0.8} />
+					<group position-y={2}>
+						<Timer time={time} />
+						{Object.keys(clients)
+							.map((client) => {
+								const { y, dir, score, xDistance } = clients[client]
+								// console.log(client, id, client === id);
+								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
+								const myPaddleColor = client == id.current ? paddleColor : '#fff';
+								// console.log(pos);
+								return (
+									<UserWrapper
+										key={client}
+										id={client}
+										score={score}
+										position={pos}
+										rotation={[0, dir, 0]}
+										paddleColor={myPaddleColor}
+									/>
+								)
+							})}
+						{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
+						< color attach="background" args={["#171720"]} />
+						<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
+						< ContactShadows rotation-x={Math.PI / 2} position={[0, -5, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
+					</group>
 				</Canvas>
+				// </main>
+
 			}
 		</>
 	)
