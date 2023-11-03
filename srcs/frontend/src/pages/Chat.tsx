@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData, ChannelCreationResponse } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
@@ -146,7 +146,7 @@ export function ChatBox() {
 				setBlocks(response.blocks);
 				setMessages([]);
 				setMemberList([]);
-				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error'});
+				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error' });
 			}
 			else if (roominfo && roominfo?.blocked === false) {
 				setProfile(response);
@@ -269,7 +269,7 @@ export function ChatBox() {
 	const handleSendMessage = () => {
 		if (profile === undefined) return;
 		if (mess.length > 10000) {
-			enqueueSnackbar('Message too long', { variant: 'error'});
+			enqueueSnackbar('Message too long', { variant: 'error' });
 			return;
 		}
 		const messageOptions = {
@@ -549,7 +549,11 @@ export function ChatBox() {
 						<input
 							className={`${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
 							value={mess}
-							onChange={(e) => setMess(e.target.value)}
+							onChange={(e) => {
+								if (e.target.value.length <= 10005) {
+									setMess(e.target.value);
+								}
+							}}
 							onKeyDown={handleKeyDown}
 							disabled={
 								memberstatus
@@ -603,10 +607,14 @@ export function ChatBox() {
 									type="text"
 									placeholder="New Room name"
 									value={newRoomTitle}
-									onChange={(e) => setNewRoomTitle(e.target.value)}
+									onChange={(e) => {
+										if (e.target.value.length <= 30) {
+											setNewRoomTitle(e.target.value);
+										}
+									}}
 									disabled={!memberstatus?.admin}
 								/>
-								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim() || newRoomTitle.length > 25}>Valider</button>
+								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim() || newRoomTitle.length > 30}>Valider</button>
 								{memberstatus?.owner && !privateStatus && (
 									<input
 										id="Newpassword"
@@ -614,8 +622,11 @@ export function ChatBox() {
 										type="text"
 										placeholder="New Password"
 										value={newPassword}
-										onChange={(e) => setNewPassword(e.target.value)}
-
+										onChange={(e) => {
+											if (e.target.value.length <= 30) {
+												setNewPassword(e.target.value);
+											}
+										}}
 										disabled={!memberstatus?.owner}
 									/>)}
 								<div style={{ display: 'flex', alignItems: 'center', margin: 'auto' }}>
@@ -646,7 +657,11 @@ export function ChatBox() {
 									type="text"
 									placeholder="Invite user by username"
 									value={inviteUsername}
-									onChange={(e) => setInviteUsername(e.target.value)}
+									onChange={(e) => {
+										if (e.target.value.length <= 30) {
+											setInviteUsername(e.target.value);
+										}
+									}}
 								/>
 								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={(e) => handleInviteUser(e)} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
@@ -751,8 +766,30 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	const navigate = useNavigate();
 
 	const handleCreateGroup = () => {
-		if (create.trim() === '') return;
+		if (create.trim() === '' || create.length < 4 || create.length > 16) {
+			enqueueSnackbar("Room Title must be between 4 and 16 characters.", { variant: 'error' });
+			return;
+		}
+
 		const password = !isPublic ? '' : createPassword;
+
+		if (password) {
+			if (password.length < 8 || password.length > 20) {
+				enqueueSnackbar("Password must be between 8 and 20 characters.", { variant: 'error', autoHideDuration: 3000 });
+				return;
+			}
+
+			if (!(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/).test(password)) {
+				enqueueSnackbar("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.", { variant: 'error', autoHideDuration: 5000 });
+				return;
+			}
+		}
+
+		if (typeof isPublic !== 'boolean') {
+			enqueueSnackbar("Room must be either Public or Private.", { variant: 'error' });
+			return;
+		}
+
 		const roomdata = {
 			roomTitle: create,
 			isPublic: isPublic,
@@ -761,25 +798,24 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 
 		chatsSocket.emit('createChannelRoom', roomdata, (response: ChannelCreationResponse) => {
 			if (response.success) {
-			  const roomType = isPublic ? 'public' : 'private';
-			  const passwordInfo = isPublic && createPassword.trim() !== '' ? ` with a password` : '';
-		  
-			  setPage('chatList');
-			  navigate(`/chat/${response.roomId}`);
+				setPage('chatList');
+				navigate(`/chat/${response.roomId}`);
 			} else {
-			  const action = (key: SnackbarKey | undefined) => (
-				<>
-				  <button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
-					<strong>Close</strong>
-				  </button>
-				</>
-			  );
-		  
-			  enqueueSnackbar(`Error while creating room: ${response.error}`, { variant: 'error', action });
+				const action = (key: SnackbarKey | undefined) => (
+					<>
+						<button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
+							<strong>Close</strong>
+						</button>
+					</>
+				);
+
+				enqueueSnackbar(response.error, { variant: 'error', action });
 			}
-		  });
-		  
+		});
 	};
+
+
+
 
 	const handlePrivateMessage = () => {
 		if (nick.trim() === '') return;
@@ -842,7 +878,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='private-message'
 						value={nick}
-						onChange={(e) => setNick(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setNick(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Username'
 					/>
@@ -861,7 +901,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='groupname'
 						value={join}
-						onChange={(e) => setJoin(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setJoin(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Group Name'
 					/>
@@ -869,7 +913,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 						type='text'
 						id='roomID'
 						value={roomId}
-						onChange={(e) => setRoomId(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setRoomId(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Room ID'
 					/>
@@ -877,11 +925,15 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 						type='password'
 						id='password'
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setPassword(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Password'
 					/>
-					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!roomId.trim()}>
+					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!roomId.trim() || !join.trim()}>
 						Join
 					</button>
 				</form>
@@ -908,12 +960,21 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='groupnamecreate'
 						value={create}
-						onChange={(e) => setCreate(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setCreate(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Group Name'
 					/>
+
 					{!isPublic ? (
-						<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
+						<button
+							type='submit'
+							className='btn btn-outline-secondary w-75'
+							disabled={!create.trim()}
+						>
 							Create
 						</button>
 					) : (
@@ -922,7 +983,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 								type='password'
 								id='createPassword'
 								value={createPassword}
-								onChange={(e) => setCreatePassword(e.target.value)}
+								onChange={(e) => {
+									if (e.target.value.length <= 30) {
+										setCreatePassword(e.target.value);
+									}
+								}}
 								className='w-75 form-control with-white-placeholder'
 								placeholder='Password ?'
 							/>
@@ -1013,7 +1078,7 @@ export function ChatList() {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
 				setRooms([targetRoom, ...filteredRooms]);
 				if (newMessage.userId !== profile?.id && (chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined) {
-					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action});
+					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action });
 				}
 			}
 		};
