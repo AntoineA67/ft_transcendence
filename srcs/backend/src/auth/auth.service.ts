@@ -127,6 +127,7 @@ export class AuthService {
 		let payload = {
 			id: userId,
 			email: userEmail,
+			firstConnexion: firstConnexion
 		}
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(

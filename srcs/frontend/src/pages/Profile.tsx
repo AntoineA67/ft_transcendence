@@ -98,7 +98,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		if (!file) return;
 		if (file.size >= 1048576) {
 			// console.log('file size limit: 1MB');
-			enqueueSnackbar("Oups, la limite est d'1 MB !", {
+			enqueueSnackbar("Oups, la taille limite de la photo est d'1 MB !", {
 				variant: 'error',
 				autoHideDuration: 3000,
 			})
