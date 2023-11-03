@@ -14,7 +14,7 @@ export class UpdateUserDto {
 
 	@IsNotEmpty()
 	@IsString()
-	@MaxLength(20, { message: "Password must be less than 20 characters long" })
+	@MaxLength(20, { message: "Username must be less than 20 characters long" })
 	@MinLength(4, { message: "Username must be at least 4 characters long" })
 	@Matches(/^(?=.*[a-zA-Z])([^\s])*$/,
         { message: "Username must contain at least one alphabetic character and must not contain spaces" })
