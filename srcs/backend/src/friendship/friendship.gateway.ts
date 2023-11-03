@@ -58,4 +58,10 @@ export class FriendshipGateway {
 
 		return (await this.friendshipService.unFriend(id, otherId))	
 	}
+
+	@SubscribeMessage('findOthers')
+	async handleFindOthers(@ConnectedSocket() client: Socket) {
+		const id: number = client.data.user.id;
+		return (await this.friendshipService.getOthers(id));
+	}
 }

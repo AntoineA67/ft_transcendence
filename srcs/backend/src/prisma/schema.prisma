@@ -63,7 +63,6 @@ model User {
   recvFriendReq   FriendRequest[] @relation("recvFriendReq")
   block           Block[]         @relation("block")
   blocked         Block[]         @relation("blocked")
-
   refreshToken RefreshToken[] @relation("refreshToken")
 }
 

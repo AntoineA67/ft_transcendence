@@ -7,6 +7,7 @@ import {
 	BadRequestException,
 	InternalServerErrorException,
 	Req,
+
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
@@ -23,17 +24,19 @@ import { randomBytes } from 'crypto';
 export class AuthService {
 	private readonly JWT_SECRET: string | any;
 
+	private logger = new Logger('auth');
+
 	constructor(
 		private usersService: UsersService,
 		private prisma: PrismaService,
 		public jwtService: JwtService,
 		// private jwt: JwtService,
-    ) {
-        this.JWT_SECRET = jwtConstants.secret;
-        if (!this.JWT_SECRET) {
-            throw new Error("JWT_SECRET environment variable not set!");
-        }
-    }
+	) {
+		this.JWT_SECRET = jwtConstants.secret;
+		if (!this.JWT_SECRET) {
+			throw new Error("JWT_SECRET environment variable not set!");
+		}
+	}
 
 	async signup(dto: SignupDto) {
 		if (await this.usersService.getUserByEmail(dto.email))
@@ -57,13 +60,13 @@ export class AuthService {
 				console.log(error)
 				if (error.code === 'P2002') {
 					console.log("error hereeee");
-				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
+					throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
+				}
 			}
+			throw error;
 		}
-		throw error;
-		}
-	  }
-  
+	}
+
 	async signin(dto: SigninDto) {
 		// find user with email
 		const user = await this.usersService.getUserByEmail(dto.email);
@@ -86,22 +89,21 @@ export class AuthService {
 			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
 
 			if (!_2FAValid) {
-			  // If 2FA token is invalid, throw an exception
-			  throw new UnauthorizedException('2FA token invalid or required');
+				// If 2FA token is invalid, throw an exception
+				throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
 		return await this.signJwtTokens(user.id, user.email, false);
-		// return this.signJwtTokens(user.id, user.email);
 	}
-  
-	  async validateUser(email: string): Promise <any> {
+
+	async validateUser(email: string): Promise<any> {
 		const user = await this.usersService.getUserByEmail(email);
 		if (!user)
-		  throw new UnauthorizedException();      
+			throw new UnauthorizedException();
 		return user;
-	  }
+	}
 
-	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+	async signin42(dto: Signin42Dto, res: Response, @Req() req) {
 		// if 2fa is activated and user have not sent token
 		let response;
 		if (!dto.token2FA && dto.activated2FA) {
@@ -109,7 +111,7 @@ export class AuthService {
 				id: dto.id,
 				_2fa: true
 			};
-		// if 2fa is activated and user have sent token
+			// if 2fa is activated and user have sent token
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
@@ -131,8 +133,8 @@ export class AuthService {
 		}
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(
-			payload, 
-			{ 
+			payload,
+			{
 				expiresIn: '15m',
 				secret: secret,
 			});
@@ -143,8 +145,7 @@ export class AuthService {
 			token: token,
 			refreshToken: refreshToken
 		};
-	}
-	
+	}	
 	async login42(user: any): Promise<User>  {
 		if (!user || !user.emails || !user.emails.length || !user.emails[0].value) {
 			throw new BadRequestException('Invalid user data');
@@ -180,18 +181,18 @@ export class AuthService {
 	}
 
 	async createRefreshToken(userId: number): Promise<string> {
-        const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
-        const expiration = new Date();
-        expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
-        await this.prisma.refreshToken.create({
-            data: {
-                token: refreshToken,
-                userId: userId,
-                expiresAt: expiration
-            }
-        });
-        return refreshToken;
-    }
+		const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
+		const expiration = new Date();
+		expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
+		await this.prisma.refreshToken.create({
+			data: {
+				token: refreshToken,
+				userId: userId,
+				expiresAt: expiration
+			}
+		});
+		return refreshToken;
+	}
 
 	async refreshToken(refreshToken: string): Promise<any> {
 		if (!refreshToken) {
@@ -200,13 +201,11 @@ export class AuthService {
 	  
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({
 		  where: { token: refreshToken },
-		});
-	  
+		});	  
 		if (!userRefreshToken || !this.isRefreshTokenValid(refreshToken)) {
 		  await this.deleteRefreshTokenForUser(userRefreshToken?.userId);
 		  throw new UnauthorizedException("Invalid refresh token");
 		}
-
 		const user = await this.prisma.user.findUnique({
 			where: {
 				id: userRefreshToken.userId,
@@ -214,13 +213,10 @@ export class AuthService {
 		});
 		if (!user)
 			throw new UnauthorizedException("Invalid refresh token");
-	  
 		return await this.signJwtTokens(user.id, user.email, user.firstConnexion);
 	  }
-	  
 
-	async isRefreshTokenValid(tokenReq: string)
-	{
+	async isRefreshTokenValid(tokenReq: string) {
 		if (!tokenReq)
 			return false;
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({

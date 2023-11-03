@@ -37,10 +37,10 @@ export class FriendshipService {
 				}
 			}
 		})
-		let myFriends: UserDto[] = friendships.map((x) => {
-			let ret = (x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
-		})
+		let myFriends: UserDto[] = friendships.map((x) => (
+			(x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
+			// return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
+		))
 		// filter does not work with async
 		const promises = await Promise.all(myFriends.map(async (x) => (
 			await this.blockService.isBlocked(id, x.id) == false
@@ -68,10 +68,10 @@ export class FriendshipService {
 				}
 			}
 		})
-		let myFriends: UserDto[] = friendships.map((x) => {
-			let ret = (x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
-		})
+		let myFriends: UserDto[] = friendships.map((x) => (
+			(x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
+			// return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
+		))
 		return (myFriends)
 	}
 
@@ -132,4 +132,13 @@ export class FriendshipService {
 		myFriends = myFriends.filter((friend) => (friend.id == otherId))
 		return (myFriends.length != 0 ? true : false);
 	}
+
+	// return all users that's not friends
+	async getOthers(id: number): Promise<UserDto[]> {
+		const all: UserDto[] = await this.usersService.getAllUsers();
+		const friends: UserDto[] = await this.findAllFriendsIncludeBlocks(id);
+		const others: UserDto[] = all.filter((a) => !friends.map(f => f.id).includes(a.id));
+		return (others.filter((x) => (x.id != id)));
+	}
+
 }

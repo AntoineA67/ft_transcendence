@@ -49,13 +49,9 @@ export function Avatar({ size, user }: avatarProp) {
 		if (!user.avatar) {
 			setAvatar(DefaultAvatar);
 		} else {
-			// const base64 = Buffer.from(user.avatar).toString('base64');
-			// console.log('tostring : ', user.avatar.toString());
-			var base64 = user.avatar;
-			// console.log('user.avatar: ', user.avatar)
-			// console.log('avatar bin: ', base64)
-			// no need to decide file type, idk it just works
-			setAvatar(`data:image/jpeg;base64,${base64}`)
+			setAvatar(user.avatar);
+			// var base64 = user.avatar;
+			// setAvatar(`data:image/jpeg;base64,${base64}`)
 		}
 	}, [user])
 

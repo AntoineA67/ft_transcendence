@@ -130,10 +130,6 @@ export const InputToken = ({ handleChange }: any) => {
 	);
 };
 
-// let url42 = () => {
-// 	return axios.get(process.env.REACT_APP_BACKEND_URL + '/auth/42Url')
-// }
-
 export function TwoFAPage() {
 
 	const oauth42Url = Oauth42();

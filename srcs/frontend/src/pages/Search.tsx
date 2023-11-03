@@ -36,10 +36,8 @@ export function SearchBar() {
 				<input 
 					value={search} 
 					onChange={(e) => {setSearch(e.target.value)}}
-					type="text" 
 					placeholder='Search by username'
 					autoFocus
-					className="w-100"
 				/>
 			</div>
 			{!search && <h5 className='p-3 grey-text'>Type something</h5>}

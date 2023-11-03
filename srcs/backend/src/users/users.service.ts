@@ -31,7 +31,7 @@ export class UsersService {
 	// 	});
 	// }
 
-	async createUser(username: string, email: string, password: string, profileUrl: string) {
+	async createUser(username: string, email: string, password: string, avatar: string = null) {
 		// const hashPassword = await argon.hash(password);
 		// 💀
 		let hashPassword;
@@ -49,7 +49,7 @@ export class UsersService {
 					username: username,
 					email: email,
 					hashPassword: hashPassword,
-					avatar42: profileUrl,
+					avatar
 				},
 			});
 			return user;
@@ -65,7 +65,7 @@ export class UsersService {
 	}
 
 	async getAllUsers(): Promise<UserDto[]> {
-		const users = await this.prisma.user.findMany({
+		return await this.prisma.user.findMany({
 			select: {
 				id: true,
 				username: true,
@@ -74,11 +74,6 @@ export class UsersService {
 				status: true,
 			}
 		});
-		let ret: UserDto[] = [];
-		for (let user of users) {
-			ret.push({ ...user, avatar: this.bufferToBase64(user.avatar) })
-		}
-		return ret;
 	}
 
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
@@ -119,7 +114,6 @@ export class UsersService {
 		return (true);
 	}
 
-	//dont touch
 	async getUserByEmail(email: string) {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
@@ -147,7 +141,7 @@ export class UsersService {
 	}
 
 	async getUserById(id: number): Promise<UserDto> {
-		let user = await this.prisma.user.findUnique({
+		return await this.prisma.user.findUnique({
 			where: { id },
 			select: {
 				id: true,
@@ -159,8 +153,6 @@ export class UsersService {
 				activated2FA: true,
 			}
 		})
-
-		return ({ ...user, avatar: this.bufferToBase64(user.avatar) })
 	}
 
 	// the freind, block, blocked should be given by other services
@@ -185,7 +177,6 @@ export class UsersService {
 		}
 		return ({
 			...profile,
-			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
@@ -205,14 +196,13 @@ export class UsersService {
 		});
 		return ({
 			...profile,
-			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
 	}
 
 	async getUserByNick(nick: string): Promise<UserDto> {
-		const user = await this.prisma.user.findUnique({
+		return await this.prisma.user.findUnique({
 			where: { username: nick },
 			select: {
 				id: true,
@@ -221,12 +211,6 @@ export class UsersService {
 				avatar42: true,
 				status: true,
 			}
-		})
-		if (user == null) {
-			return (null)
-		}
-		return ({
-			...user, avatar: this.bufferToBase64(user.avatar)
 		})
 	}
 
@@ -297,18 +281,17 @@ export class UsersService {
 		delete profile.hashPassword;
 		return ({
 			...profile,
-			avatar: this.bufferToBase64(profile.avatar),
 			friend: null, block: null, blocked: null, sent: null,
 			gameHistory: [], achieve: null
 		})
 	}
 
-	bufferToBase64(buf: Buffer | null): string {
-		if (buf == null) {
-			return (null)
-		}
-		return (buf.toString('base64'));
-	}
+	// bufferToBase64(buf: Buffer | null): string {
+	// 	if (buf == null) {
+	// 		return (null)
+	// 	}
+	// 	return (buf.toString('base64'));
+	// }
 
 	async getAvatar(id: number): Promise<string | null> {
 		let { avatar } = await this.prisma.user.findUnique({
@@ -318,7 +301,24 @@ export class UsersService {
 				// avatar42: true,
 			}
 		});
-		return (this.bufferToBase64(avatar));
-		// return (this.bufferToBase64(avatar));
+		return (avatar);
 	}
+
+	async changePassword(id: number, oldPassword: string, newPassword: string) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: id }
+		});
+
+		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
+		if (passwordMatch) {
+			const hashNewPassword = await argon.hash(newPassword);
+			await this.prisma.user.update({
+				where: { id: id },
+				data: { hashPassword: hashNewPassword }
+			});
+			return (true);
+		}
+		return (false);
+	}
+
 }

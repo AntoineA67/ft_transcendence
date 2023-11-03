@@ -28,12 +28,13 @@ export class BlockService {
 				}
 			}
 		})
-		let blocked = data.map((x) => (x.blocked));
-		let ret: UserDto[] = [];
-		for (let x of blocked) {
-			ret.push({ ...x, avatar: this.usersService.bufferToBase64(x.avatar) })
-		}
-		return (ret);
+		const blocked = data.map((x) => (x.blocked));
+		return (blocked);
+		// let ret: UserDto[] = [];
+		// for (let x of blocked) {
+		// 	ret.push({ ...x, avatar: this.usersService.bufferToBase64(x.avatar) })
+		// }
+		// return (ret);
 	}
 
 	async createBlock(id: number, otherId: number): Promise<Boolean> {
