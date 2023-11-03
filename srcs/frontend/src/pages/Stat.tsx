@@ -46,9 +46,9 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 				</div>
 				<div className={`${color} d-flex flex-row justify-content-between`}>
 					<div>{text}</div>
-					<div> {x.score} </div>	
+					<div> {x.score} </div>
 				</div>
-				
+
 			</li>
 		);
 	}
@@ -94,14 +94,14 @@ type pieProp = {
 
 function PieChart({ win, lose, draw }: pieProp) {
 
-	function gradientDoghnut(win: number, lose: number, draw: number) {
+	function gradientDoghnut(win: number, lose: number) {
 		const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 		const ctx = canvas?.getContext("2d") as CanvasRenderingContext2D || null;
 		if (!ctx) return;
 		const xc = 100;
 		const yc = 100;
 		const r = 60;
-		let total: number = win + lose + draw;
+		let total: number = win + lose;
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
 		// if total == 0 , draw a grey circle
@@ -118,7 +118,7 @@ function PieChart({ win, lose, draw }: pieProp) {
 		const cyan = '#34fafa';
 		const winDegree = (2 * Math.PI) * (win / total);
 		const loseDegree = (2 * Math.PI) * (lose / total);
-		const drawDegree = (2 * Math.PI) * (draw / total);
+		// const drawDegree = (2 * Math.PI) * (draw / total);
 		const tran = winDegree < loseDegree ? winDegree / 2 : loseDegree / 2;
 		const degree = [loseDegree - tran, tran, winDegree - tran, tran];
 		const color = [cyan, cyan, magenta, magenta];
@@ -151,8 +151,8 @@ function PieChart({ win, lose, draw }: pieProp) {
 	}
 
 	useEffect(() => {
-		gradientDoghnut(win, lose, draw);
-	}, [win, lose, draw]);
+		gradientDoghnut(win, lose);
+	}, [win, lose]);
 
 	return (
 		<div className='container my-5'>
