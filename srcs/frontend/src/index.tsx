@@ -106,13 +106,13 @@ const router = createBrowserRouter(
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 
-					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
+					<Route path='/' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
 						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 
-					<Route index element={<Game />} />
+					<Route path='game' element={<Game />} />
 					<Route path=":userId" element={<Game />} />
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
