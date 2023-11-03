@@ -22,7 +22,7 @@ const BallWrapper = ({ ball, client }: any) => {
 				position={ballClientPosition}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry(2, 2, 2)}
-				material={new THREE.MeshBasicMaterial()}
+				material={new THREE.MeshStandardMaterial()}
 			>
 			</mesh>
 		</>
@@ -32,14 +32,14 @@ const BallWrapper = ({ ball, client }: any) => {
 const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 	return (
 		<>
-			<Box position={position} />
+			{/* <Box position={position} /> */}
 			<mesh
 				position={position}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry(5, 20, 2)}
-				material={new THREE.MeshBasicMaterial({ color: paddleColor })}
+				material={new THREE.MeshStandardMaterial({ color: paddleColor })}
 			>
-				<Text
+				{/* <Text
 					position={[0, 20, 0]}
 					color="white"
 					anchorX="center"
@@ -47,7 +47,7 @@ const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 					scale={[10, 10, 10]}
 				>
 					{score}
-				</Text>
+				</Text> */}
 			</mesh>
 		</>
 	)
@@ -59,11 +59,11 @@ const Timer = ({ time }: any) => {
 	return (
 		<>
 			<Text
-				position={[0, 100, 10]}
+				position={[0, 130, 10]}
 				color="white"
 				anchorX="center"
 				anchorY="middle"
-				scale={[10, 10, 10]}
+				scale={[30, 30, 30]}
 			>
 				{minutes}:{seconds.toString().padStart(2, '0')}
 			</Text>
@@ -142,12 +142,12 @@ export default function Game() {
 			}
 		});
 		const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
-			console.log("MyColor", res.paddleColor);
+			// console.log("MyColor", res.paddleColor);
 			setPaddleColor(res.paddleColor);
 		});
 		gamesSocket.on('startGame', (newId: any) => {
 			const paddleColor = gamesSocket.emit('getMyPaddleColor', (res: any) => {
-				console.log("MyColor", res.paddleColor);
+				// console.log("MyColor", res.paddleColor);
 				setPaddleColor(res.paddleColor);
 			});
 			console.log('startGame: ', newId)
@@ -310,7 +310,7 @@ export default function Game() {
 				// 		})}
 				// 	{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
 				// 	< color attach="background" args={["#171720"]} />
-				// 	<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
+				// 	<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshStandardMaterial({ color: 'blue' })} />
 				// 	<ambientLight intensity={0.5} />
 				// 	<pointLight position={[-100, -100, -10]} />
 				// 	<spotLight position={[100, 100, 10]} angle={0.4} penumbra={1} intensity={1} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0001} />
@@ -318,14 +318,17 @@ export default function Game() {
 
 				// <main className={"bright"}>
 
-				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 100, 200], fov: 60, near: 60, far: 250 }}>
-					<pointLight position={[100, 100, 50]} intensity={0.5} />
-					<Box position={[100, 100, 25]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
-					<Box position={[0, 0, 0]} scale={10} material={new THREE.MeshBasicMaterial({ color: 'red' })} />
-					<pointLight position={[-100, -100, -100]} intensity={1.5} color={"#00ffff"} />
+				// <Canvas resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 100, 200], fov: 60, near: 60, far: 250 }}>
+				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+					{/* <pointLight color={['#f0f0f0', '#d25578'])} position={[100, 100, 25]} intensity={0.5} /> */}
+					<pointLight color={'#f0f0f0'} position={[100, 100, 25]} intensity={1.5} />
+					<Box position={[50, 50, 25]} scale={10} material={new THREE.MeshStandardMaterial({ color: 'red' })} />
+					<Box position={[0, 0, 0]} scale={10} material={new THREE.MeshStandardMaterial({ color: 'red' })} />
+					{/* <pointLight position={[-100, -100, -100]} intensity={1.5} color={"#00ffff"} /> */}
+
 					<Box position={[-100, -100, -100]} scale={10} />
 					{/* <pointLight position={[-100, -100, -100]} intensity={1.5} color={snap.dark ? "#ccffcc" : "#00ffff"} /> */}
-					<ambientLight intensity={0.8} />
+					<ambientLight intensity={0.1} />
 					<group position-y={2}>
 						<Timer time={time} />
 						{Object.keys(clients)
@@ -334,24 +337,37 @@ export default function Game() {
 								// console.log(client, id, client === id);
 								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
 								const myPaddleColor = client == id.current ? paddleColor : '#fff';
-								// console.log(pos);
+								// if (client == id.current) {
+								// 	console.log(y, pos);
+								// }
 								return (
-									<UserWrapper
-										key={client}
-										id={client}
-										score={score}
-										position={pos}
-										rotation={[0, dir, 0]}
-										paddleColor={myPaddleColor}
-									/>
+									<>
+										<UserWrapper
+											key={client}
+											id={client}
+											score={score}
+											position={pos}
+											rotation={[0, dir, 0]}
+											paddleColor={myPaddleColor}
+										/>
+										<Text
+											position={[pos[0] > 0 ? pos[0] + 20 : pos[0] - 20, 50, 0]}
+											color="white"
+											anchorX="center"
+											anchorY="middle"
+											scale={[20, 20, 20]}
+										>
+											{score}
+										</Text>
+									</>
 								)
 							})}
 						{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
 						< color attach="background" args={["#171720"]} />
-						<Plane receiveShadow args={[200, 100]} position={[0, 50, -5]} material={new THREE.MeshBasicMaterial({ color: 'blue' })} />
-						< ContactShadows rotation-x={Math.PI / 2} position={[0, -5, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
+						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ color: 'blue' })} />
+						< ContactShadows position={[0, -2, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
 					</group>
-					<CameraShake
+					{/* <CameraShake
 						maxYaw={0.1} // Max amount camera can yaw in either direction
 						maxPitch={0.1} // Max amount camera can pitch in either direction
 						maxRoll={0.1} // Max amount camera can roll in either direction
@@ -360,7 +376,7 @@ export default function Game() {
 						rollFrequency={0.1} // Frequency of the roll rotation
 						intensity={1} // initial intensity of the shake
 						decayRate={0.65} // if decay = true this is the rate at which intensity will reduce at />
-					/>
+					/> */}
 				</Canvas>
 				// </main>
 
