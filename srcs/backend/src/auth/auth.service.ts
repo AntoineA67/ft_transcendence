@@ -16,7 +16,7 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
-import { SigninDto, SignupDto, Signin42Dto } from '../dto';
+import { SigninDto, SignupDto, Intra42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 
@@ -104,7 +104,7 @@ export class AuthService {
 		return user;
 	  }
 
-	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+	  async signin42(dto: Intra42Dto, res: Response, @Req() req) {
 		// if 2fa is activated and user have not sent token
 		let response;
 		if (!dto.token2FA && dto.activated2FA) {
@@ -159,7 +159,6 @@ export class AuthService {
 
 	async registerUser42(user: any): Promise<User | undefined> {
 		try {
-			// this.logger.log('42user', user._json.image.link);
 			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass", user._json.image.link)
 			return newUser;
 		} catch {
