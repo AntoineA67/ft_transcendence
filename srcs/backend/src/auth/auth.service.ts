@@ -24,8 +24,6 @@ import { randomBytes } from 'crypto';
 export class AuthService {
 	private readonly JWT_SECRET: string | any;
 
-	private logger = new Logger('auth');
-
 	constructor(
 		private usersService: UsersService,
 		private prisma: PrismaService,
