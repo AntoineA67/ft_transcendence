@@ -15,12 +15,12 @@ body {
 	min-height: 100vh; 
 	color: white;
 	background: linear-gradient(to top, #0a0a0a, #181a1a, #2d2d2f);
-	font-family: monospace !important;
+	/* font-family: monospace !important; */
 }
 
-h1, h2, h3, h4, h5 {
+/* h1, h2, h3, h4, h5 {
 	font-family: 'Press Start 2P' !important;
-}
+} */
 
 button {
 	font-family: inherit !important;
