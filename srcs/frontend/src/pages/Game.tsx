@@ -1,6 +1,6 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Canvas } from "@react-three/fiber"
+import { Canvas, useThree } from "@react-three/fiber"
 import { Box, CameraShake, ContactShadows, Plane, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
@@ -32,6 +32,15 @@ const BallWrapper = ({ ball, client }: any) => {
 const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 	return (
 		<>
+			<Text
+				position={[0, 20, 0]}
+				color="white"
+				anchorX="center"
+				anchorY="middle"
+				scale={[10, 10, 10]}
+			>
+				{score}
+			</Text>
 			{/* <Box position={position} /> */}
 			<mesh
 				position={position}
@@ -39,15 +48,6 @@ const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 				geometry={new THREE.BoxGeometry(5, 20, 2)}
 				material={new THREE.MeshStandardMaterial({ color: paddleColor })}
 			>
-				{/* <Text
-					position={[0, 20, 0]}
-					color="white"
-					anchorX="center"
-					anchorY="middle"
-					scale={[10, 10, 10]}
-				>
-					{score}
-				</Text> */}
 			</mesh>
 		</>
 	)
@@ -63,7 +63,7 @@ const Timer = ({ time }: any) => {
 				color="white"
 				anchorX="center"
 				anchorY="middle"
-				scale={[30, 30, 30]}
+				scale={[20, 20, 20]}
 			>
 				{minutes}:{seconds.toString().padStart(2, '0')}
 			</Text>
@@ -101,6 +101,45 @@ enum GameStatus {
 	Matching = 'matching',
 	Started = 'started',
 	Finished = 'finished',
+}
+
+const Test = () => {
+	const { camera, gl } = useThree() as any
+
+	const onWindowResize = () => {
+
+		camera.aspect = window.innerWidth / window.innerHeight;
+		// console.log(window.innerWidth, window.innerHeight)
+		let newFov = (2000 / window.innerWidth) * 30 + (window.innerWidth * .015)
+		if (window.innerWidth < 400) {
+			newFov = 120
+		} else if (window.innerWidth < 800) {
+			newFov = 90
+		} else if (window.innerWidth < 1600) {
+			newFov = 70
+		} else {
+			newFov = 60
+		}
+		// const horizontalFOV = 2 * Math.atan(Math.tan((60 / 2) * (Math.PI / 180))) * (180 / Math.PI);
+		// console.log(newFov)
+		camera.fov = newFov
+		// camera.position.set(camera.position.x, camera.position.y, camera.position.z * (1000 / camera.innerWidth))
+		camera.updateProjectionMatrix();
+
+		gl.setSize(window.innerWidth, window.innerHeight);
+
+	}
+	onWindowResize()
+	useEffect(() => {
+		window.addEventListener('resize', onWindowResize, false);
+		return () => {
+			window.removeEventListener('resize', onWindowResize, false);
+		}
+	}, [])
+
+	return (
+		<></>
+	)
 }
 
 export default function Game() {
@@ -203,6 +242,25 @@ export default function Game() {
 			console.log("Game unmounted");
 		}
 	}, [gamesSocket])
+
+	// const setCanvasSize = () => {
+	// 	let scale = 0;
+	// 	if (window.innerHeight * 0.003921569 / 2 >= window.innerWidth * 0.001666667 / 2) {
+	// 		scale = window.innerWidth * 0.001666667 / 2;
+	// 	}
+	// 	else {
+	// 		scale = window.innerHeight * 0.003921569 / 2;
+	// 	}
+	// 	if (scale > 1) {
+	// 		scale = 1;
+	// 	}
+
+	// 	let gameCanvas = document.getElementById('game-canvas');
+	// 	if (gameCanvas) {
+	// 		console.log("test")
+	// 		gameCanvas.style.transform = `scale(${scale})`;
+	// 	}
+	// }
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
@@ -219,9 +277,11 @@ export default function Game() {
 	}
 	useEffect(() => {
 		if (gameStatus === GameStatus.Started) {
+			// window.addEventListener("resize", setCanvasSize);
 			window.addEventListener('keydown', onkeydown);
 			window.addEventListener('keyup', onkeyup);
 			return () => {
+				// window.removeEventListener("resize", setCanvasSize);
 				window.removeEventListener('keydown', onkeydown);
 				window.removeEventListener('keyup', onkeyup);
 			};
@@ -237,6 +297,7 @@ export default function Game() {
 		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
+
 
 	return (
 		<>
@@ -319,7 +380,10 @@ export default function Game() {
 				// <main className={"bright"}>
 
 				// <Canvas resize={{ polyfill: ResizeObserver }} camera={{ position: [0, 100, 200], fov: 60, near: 60, far: 250 }}>
-				<Canvas style={{ backgroundColor: "beige" }} resize={{ polyfill: ResizeObserver }} camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+				// <div style={{ width: "50vw", height: "100vh" }}>
+
+				// <Canvas style={{ width: "1200px", height: "500px" }} id="game-canvas" camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+				<Canvas id="game-canvas" camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
 					{/* <pointLight color={['#f0f0f0', '#d25578'])} position={[100, 100, 25]} intensity={0.5} /> */}
 					<pointLight color={'#f0f0f0'} position={[100, 100, 25]} intensity={1.5} />
 					<Box position={[50, 50, 25]} scale={10} material={new THREE.MeshStandardMaterial({ color: 'red' })} />
@@ -329,6 +393,7 @@ export default function Game() {
 					<Box position={[-100, -100, -100]} scale={10} />
 					{/* <pointLight position={[-100, -100, -100]} intensity={1.5} color={snap.dark ? "#ccffcc" : "#00ffff"} /> */}
 					<ambientLight intensity={0.1} />
+					<Test />
 					<group position-y={2}>
 						<Timer time={time} />
 						{Object.keys(clients)
@@ -341,32 +406,33 @@ export default function Game() {
 								// 	console.log(y, pos);
 								// }
 								return (
-									<>
-										<UserWrapper
-											key={client}
-											id={client}
-											score={score}
-											position={pos}
-											rotation={[0, dir, 0]}
-											paddleColor={myPaddleColor}
-										/>
-										<Text
-											position={[pos[0] > 0 ? pos[0] + 20 : pos[0] - 20, 50, 0]}
-											color="white"
-											anchorX="center"
-											anchorY="middle"
-											scale={[20, 20, 20]}
-										>
-											{score}
-										</Text>
-									</>
+									// <>
+									<UserWrapper
+										key={client}
+										id={client}
+										score={score}
+										position={pos}
+										rotation={[0, dir, 0]}
+										paddleColor={myPaddleColor}
+									/>
+									// 		<Text
+									// 			key={client + "score"}
+									// 			position={[pos[0] > 0 ? pos[0] + 20 : pos[0] - 20, 50, 0]}
+									// 			color="white"
+									// 			anchorX="center"
+									// 			anchorY="middle"
+									// 			scale={[20, 20, 20]}
+									// 		> 
+									// { score }
+									// 		</Text>
+									// </>
 								)
 							})}
 						{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
 						< color attach="background" args={["#171720"]} />
 						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ color: 'blue' })} />
 						< ContactShadows position={[0, -2, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
-					</group>
+					</group >
 					{/* <CameraShake
 						maxYaw={0.1} // Max amount camera can yaw in either direction
 						maxPitch={0.1} // Max amount camera can pitch in either direction
@@ -377,7 +443,9 @@ export default function Game() {
 						intensity={1} // initial intensity of the shake
 						decayRate={0.65} // if decay = true this is the rate at which intensity will reduce at />
 					/> */}
-				</Canvas>
+				</Canvas >
+				// </div>
+
 				// </main>
 
 			}
