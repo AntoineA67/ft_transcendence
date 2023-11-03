@@ -4,10 +4,9 @@ import {
 	NotFoundException, 
 	ForbiddenException, 
 	UnauthorizedException, 
-	BadRequestException, 
-	InternalServerErrorException, 
-	Req, 
-	Logger
+	BadRequestException,
+	InternalServerErrorException,
+	Req,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
@@ -235,7 +234,7 @@ export class AuthService {
 			return true;
 	}
 
-	async signout(req: Request): Promise<{ message: string }> {        // Invalidate the refresh token to make the signout more secure
+	async signout(req: Request): Promise<{ message: string }> { // Invalidate the refresh token to make the signout more secure
 		const refreshToken = req.body.refreshToken;
 		if (!refreshToken) {
 			throw new UnauthorizedException("Refresh token is missing");
