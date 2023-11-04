@@ -99,7 +99,7 @@ export class RoomGateway
 			}
 
 			if (data.password) {
-				if (typeof data.password !== 'string' || data.password.length < 8 || data.password.length > 20 || !checkUserRoomName(data.password)) {
+				if (typeof data.password !== 'string' || data.password.length < 8 || data.password.length > 20 || !checkPassword(data.password)) {
 					throw new Error('Password must be between 8 and 20 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
 				}
 			}
