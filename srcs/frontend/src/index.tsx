@@ -42,7 +42,6 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { WebcamPong } from './pages/WebcamPong';
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -108,7 +107,7 @@ const router = createBrowserRouter(
 				<Route path="/" element={<Sidebar />}>
 
 					<Route index element={<Game />} />
-					<Route path=":userId" element={<Game />} />
+					<Route path="/game/:userId" element={<Game />} />
 
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>

@@ -15,7 +15,23 @@ import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
 import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
 import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
-import { set } from "lodash-es";
+
+export const handlePlayClickinMess = (userId: number, username: string) => {
+	enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
+		variant: 'info',
+		persist: true,
+		action: (key: any) => (
+			<div>
+				<Link to={`/game/${userId}`}>
+					<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
+						<strong>Play</strong>
+					</button>
+				</Link>
+				<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
+			</div>
+		),
+	});
+};
 
 
 export function ChatBox() {
@@ -146,7 +162,7 @@ export function ChatBox() {
 				setBlocks(response.blocks);
 				setMessages([]);
 				setMemberList([]);
-				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error'});
+				enqueueSnackbar(`You have been blocked by this user`, { variant: 'error' });
 			}
 			else if (roominfo && roominfo?.blocked === false) {
 				setProfile(response);
@@ -269,7 +285,7 @@ export function ChatBox() {
 	const handleSendMessage = () => {
 		if (profile === undefined) return;
 		if (mess.length > 10000) {
-			enqueueSnackbar('Message too long', { variant: 'error'});
+			enqueueSnackbar('Message too long', { variant: 'error' });
 			return;
 		}
 		const messageOptions = {
@@ -484,22 +500,7 @@ export function ChatBox() {
 			message.username = profile.username;
 		}
 
-		const handlePlayClickinMess = (userId: number, username: string) => {
-			enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
-				variant: 'info',
-				persist: true,
-				action: (key: any) => (
-					<div>
-						<Link to={`/game/${userId}`}>
-							<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
-								<strong>Play</strong>
-							</button>
-						</Link>
-						<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
-					</div>
-				),
-			});
-		};
+
 
 		return (
 			<li className="message-container" key={message.id}>
@@ -1012,7 +1013,7 @@ export function ChatList() {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
 				setRooms([targetRoom, ...filteredRooms]);
 				if (newMessage.userId !== profile?.id && (chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined) {
-					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action});
+					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action });
 				}
 			}
 		};
