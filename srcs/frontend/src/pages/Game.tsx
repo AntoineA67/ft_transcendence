@@ -18,11 +18,6 @@ const BallWrapper = ({ ball, client, graphicEffects }: any) => {
 		const invertedX = client.invertedSide ? ball.x * -1 : ball.x;
 		return new THREE.Vector3(invertedX, ball.y, 0);
 	}, [ball, client]);
-	const ballMaterial = useRef<THREE.Material>()
-
-	useEffect(() => {
-		ballMaterial.current = new THREE.MeshBasicMaterial();
-	}, [])
 	return (
 		<>
 			<Box position={ballClientPosition} />
@@ -30,13 +25,7 @@ const BallWrapper = ({ ball, client, graphicEffects }: any) => {
 				position={ballClientPosition}
 				geometry={new THREE.BoxGeometry(2, 2, 2)}
 				material={graphicEffects ? new THREE.MeshStandardMaterial({ color: [3, 3, 3] as any, toneMapped: false }) : new THREE.MeshBasicMaterial()}
-			// material={ballMaterial.current}
 			>
-				{/* {graphicEffects ? <meshStandardMaterial color={[2, 2, 2]} toneMapped={false} />
-					:
-				} */}
-				{/* <meshBasicMaterial toneMapped={false} color={'white'} /> */}
-				{/* <meshStandardMaterial color={[2, 2, 2]} toneMapped={false} /> */}
 			</mesh>
 		</>
 	)
