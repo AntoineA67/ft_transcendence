@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData, ChannelCreationResponse } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData, ChannelCreationResponse, checkUserRoomName, checkPassword } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
@@ -206,21 +206,30 @@ export function ChatBox() {
 	}, [messages, showSettings, profile]);
 
 	const handleChangeRoomTitle = () => {
-		if (newRoomTitle && newRoomTitle.trim() !== '') {
-			chatsSocket.emit('changeRoomTitle', {
-				roomId: chatId,
-				roomtitle: newRoomTitle
-			}, (response: boolean) => {
-				if (response === true) {
-					setroomTitle(newRoomTitle);
-					setnewRoomTitleSuccess(true);
-				}
-				else
-					setnewRoomTitleSuccess(false);
-			})
+		if (!newRoomTitle || newRoomTitle.trim() === '') {
+			return;
 		}
+
+		if (!checkUserRoomName(newRoomTitle, enqueueSnackbar, 'Room Title')) {
+			setNewRoomTitle('');
+			return;
+		}
+
+		chatsSocket.emit('changeRoomTitle', {
+			roomId: chatId,
+			roomtitle: newRoomTitle
+		}, (response: boolean) => {
+			if (response === true) {
+				setroomTitle(newRoomTitle);
+				setnewRoomTitleSuccess(true);
+			} else {
+				setnewRoomTitleSuccess(false);
+			}
+		});
+
 		setNewRoomTitle('');
 	}
+
 
 	const displayRoomTitle = () => {
 		if (window.innerWidth < 780) {
@@ -233,7 +242,12 @@ export function ChatBox() {
 
 	const handleInviteUser = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
+
 		if (inviteUsername && inviteUsername.trim() !== '') {
+			if (!checkUserRoomName(inviteUsername, enqueueSnackbar, 'Username')) {
+				setInviteUsername('');
+				return;
+			}
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
@@ -272,6 +286,7 @@ export function ChatBox() {
 			enqueueSnackbar('Message too long', { variant: 'error' });
 			return;
 		}
+
 		const messageOptions = {
 			content: mess,
 			roomId: chatId,
@@ -293,8 +308,9 @@ export function ChatBox() {
 	};
 
 	const handleLeaveChannel = (usertoKick: number) => {
-		if (profile === undefined)
+		if (profile === undefined || !Number.isInteger(usertoKick) || usertoKick <= 0) {
 			return;
+		}
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: usertoKick,
 			roomId: chatId,
@@ -305,11 +321,22 @@ export function ChatBox() {
 		});
 	}
 
+
 	const handleMuteDurationChange = (memberid: number, time: number, bool: boolean | null) => {
-		if (!memberid || (time === undefined && (bool === null || !bool)))
+		if (memberid <= 0 || (time === undefined && (bool === null || !bool))) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
 			return;
-		if (bool && bool == true)
+		}
+
+		if (bool && bool === true) {
 			time = 0;
+		}
+
+		if (time < 0) {
+			enqueueSnackbar('Mute duration cannot be negative', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('muteMember', {
 			memberId: memberid,
 			duration: time,
@@ -317,8 +344,9 @@ export function ChatBox() {
 		}, (response: boolean) => {
 			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
-					if (member.userId === memberid)
+					if (member.userId === memberid) {
 						member.mute = time > 0 ? new Date(Date.now() + time * 1000) : null;
+					}
 					return member;
 				}));
 				enqueueSnackbar(`User ${time > 0 ? 'muted' : 'unmuted'} successfully`, { variant: 'success' });
@@ -326,7 +354,13 @@ export function ChatBox() {
 		});
 	};
 
+
 	const handleBan = (memberid: number, actions: boolean) => {
+		if (memberid <= 0 || actions === undefined) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('banMember', {
 			memberId: memberid,
 			roomId: chatId,
@@ -334,23 +368,22 @@ export function ChatBox() {
 		}, (response: boolean) => {
 			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
-					if (member.userId === memberid)
+					if (member.userId === memberid) {
 						member.ban = !actions;
+					}
 					return member;
 				}));
 				enqueueSnackbar(`User ${actions ? 'unbanned' : 'banned'} successfully`, { variant: 'success' });
 			}
-		}
-		);
+		});
 	};
 
+
 	const handleBlock = (memberId: number, toUnBlock: boolean) => {
-		if (profile === undefined) {
+		if (profile === undefined || memberId <= 0 || toUnBlock === undefined) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
 			return;
 		}
-
-		console.log('toUnBlock', toUnBlock);
-		console.log('memberId', memberId);
 
 		chatsSocket.emit('blockUser', { memberId, action: toUnBlock }, (response: boolean) => {
 			if (response === true) {
@@ -376,18 +409,29 @@ export function ChatBox() {
 
 	const handleKick = (memberid: number, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
+
+		if (profile === undefined || !chatId || isNaN(memberid) || memberid <= 0) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
 		}, (response: { userid: number, roomId: number }) => {
-			if (response.userid !== profile?.id && response.roomId === parseInt(chatId || '', 10)) {
+			if (response.userid !== profile.id && response.roomId === parseInt(chatId, 10)) {
 				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid));
 				enqueueSnackbar(`User kicked successfully from the channel`, { variant: 'success' });
 			}
-		})
-	}
+		});
+	};
+
 
 	const handleRoleChange = (memberid: number, role: string) => {
+		if (memberid <= 0 || !role || (role !== 'Owner' && role !== 'Admin' && role !== 'Member')) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
 		chatsSocket.emit('changeRole', {
 			memberId: memberid,
 			roomid: chatId,
@@ -418,29 +462,38 @@ export function ChatBox() {
 	}
 
 	const handleChangePassword = () => {
-		if (newPassword && newPassword.trim() !== '') {
-			chatsSocket.emit('changePassword', {
-				roomId: chatId,
-				password: newPassword
-			}, (response: boolean) => {
-				if (response === true) {
-					setNewPassword('');
-					setnewPasswordSucess(true);
-					setPasswordStatus(true);
-					enqueueSnackbar(`Password changed successfully`, { variant: 'success' });
-				}
-				else {
-					setnewPasswordSucess(false);
-					enqueueSnackbar(`Error while changing password`, { variant: 'error' });
-				}
-			})
+		if (!newPassword || newPassword.trim() === '') {
+			return;
 		}
+
+		if (!checkPassword(newPassword, enqueueSnackbar)) {
+			setNewPassword('');
+			return;
+		}
+
+		chatsSocket.emit('changePassword', {
+			roomId: chatId,
+			password: newPassword,
+			delPass: false
+		}, (response: boolean) => {
+			if (response === true) {
+				setNewPassword('');
+				setnewPasswordSucess(true);
+				setPasswordStatus(true);
+				enqueueSnackbar(`Password changed successfully`, { variant: 'success' });
+			}
+			else {
+				setnewPasswordSucess(false);
+				enqueueSnackbar(`Error while changing password`, { variant: 'error' });
+			}
+		});
 	}
 
 	const handleDeletePassword = () => {
 		chatsSocket.emit('changePassword', {
 			roomId: chatId,
-			password: ''
+			password: '',
+			delPass: true
 		}, (response: boolean) => {
 			if (response === true) {
 				setPasswordStatus(false);
@@ -460,6 +513,11 @@ export function ChatBox() {
 	}
 
 	const handlePlayClick = (userId: number, username: string) => {
+		if (userId <= 0 || !username) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+	
 		enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 			variant: 'info',
 			persist: true,
@@ -475,6 +533,7 @@ export function ChatBox() {
 			),
 		});
 	};
+	
 
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
@@ -766,27 +825,22 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	const navigate = useNavigate();
 
 	const handleCreateGroup = () => {
-		if (create.trim() === '' || create.length < 4 || create.length > 16) {
-			enqueueSnackbar("Room Title must be between 4 and 16 characters.", { variant: 'error' });
+		// Room Title validation
+		if (!checkUserRoomName(create, enqueueSnackbar, 'Room Title')) {
 			return;
 		}
 
-		const password = !isPublic ? '' : createPassword;
+		const password = !isPublic ? "" : createPassword;
 
+		// Password validation
 		if (password) {
-			if (password.length < 8 || password.length > 20) {
-				enqueueSnackbar("Password must be between 8 and 20 characters.", { variant: 'error', autoHideDuration: 3000 });
-				return;
-			}
-
-			if (!(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/).test(password)) {
-				enqueueSnackbar("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.", { variant: 'error', autoHideDuration: 5000 });
+			if (!checkPassword(password, enqueueSnackbar)) {
 				return;
 			}
 		}
 
-		if (typeof isPublic !== 'boolean') {
-			enqueueSnackbar("Room must be either Public or Private.", { variant: 'error' });
+		if (typeof isPublic !== "boolean") {
+			enqueueSnackbar("Room must be either Public or Private.", { variant: "error" });
 			return;
 		}
 
@@ -796,29 +850,34 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 			password: password,
 		};
 
-		chatsSocket.emit('createChannelRoom', roomdata, (response: ChannelCreationResponse) => {
+		chatsSocket.emit("createChannelRoom", roomdata, (response: ChannelCreationResponse) => {
 			if (response.success) {
-				setPage('chatList');
+				setPage("chatList");
 				navigate(`/chat/${response.roomId}`);
 			} else {
 				const action = (key: SnackbarKey | undefined) => (
 					<>
-						<button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
+						<button
+							onClick={() => {
+								closeSnackbar(key);
+								setCreate("");
+							}}
+							style={{ color: "white" }}
+						>
 							<strong>Close</strong>
 						</button>
 					</>
 				);
 
-				enqueueSnackbar(response.error, { variant: 'error', action });
+				enqueueSnackbar(response.error, { variant: "error", action });
 			}
 		});
 	};
 
-
-
-
 	const handlePrivateMessage = () => {
-		if (nick.trim() === '') return;
+		if (!checkUserRoomName(nick, enqueueSnackbar, 'Username')) {
+			return;
+		}
 
 		chatsSocket.emit('createPrivateRoom', nick, (response: number) => {
 			if (response > 0) {
@@ -843,8 +902,39 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 		});
 	}
 
+
 	const handleJoinGroup = () => {
-		if (join.trim() === '' || roomId.trim() === '') return;
+		if (join.trim() === '' || roomId.trim() === '') {
+			enqueueSnackbar(
+				"Please provide both Room Title and Room ID.",
+				{ variant: "error" }
+			);
+			setJoin('');
+			setRoomId('');
+			setPassword('');
+			return;
+		}
+
+		if (!/^[0-9]+$/.test(roomId)) {
+			enqueueSnackbar(
+				"Room ID must contain only numerics.",
+				{ variant: "error" }
+			);
+			setRoomId('');
+			return;
+		}
+
+		if (!checkUserRoomName(join, enqueueSnackbar, 'Room Title')) {
+			setJoin('');
+			setPassword('');
+			return;
+		}
+
+		if (password.length > 0 && !checkPassword(password, enqueueSnackbar)) {
+			setPassword('');
+			return;
+		}
+
 		const roomdata = {
 			roomTitle: join,
 			roomid: roomId,
@@ -863,6 +953,8 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 			}
 		});
 	}
+
+
 
 	return (
 		<div className='h-100 d-flex flex-column p-1 pb-5 white-text overflow-y-auto'>

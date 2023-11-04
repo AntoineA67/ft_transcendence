@@ -46,3 +46,28 @@ export interface ChannelCreationResponse {
     error?: string;
 }
 
+export function containsUnprintableCharacters(input: string) {
+    const unprintableCharacterPattern = /[\x00-\x08\x0B\x0C\x0E-\x1F]/;
+    if (unprintableCharacterPattern.test(input)) {
+        return true;
+    }
+    return false;
+}
+
+export function checkUserRoomName(newRoomTitle: string) {
+	const printable = containsUnprintableCharacters(newRoomTitle);
+	if (printable) {
+		return false;
+	}
+	const bool = newRoomTitle && /^[A-Za-z0-9-]{4,16}$/.test(newRoomTitle);
+	return bool;
+}
+
+export function checkPassword(newPassword: string) {
+	const printable = containsUnprintableCharacters(newPassword);
+	if (printable) {
+		return false;
+	}
+	const bool = newPassword && newPassword.length >= 8 && newPassword.length <= 20 && /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/.test(newPassword);
+	return (bool);
+}
