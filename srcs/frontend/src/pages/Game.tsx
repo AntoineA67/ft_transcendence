@@ -1,13 +1,16 @@
 import * as THREE from "three"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Canvas, useThree } from "@react-three/fiber"
-import { Box, CameraShake, ContactShadows, Plane, Text } from "@react-three/drei"
+import { Canvas, useLoader, useThree } from "@react-three/fiber"
+import { Box, CameraShake, ContactShadows, Plane, SoftShadows, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
 import { Card } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
 import { WebcamPong } from "./WebcamPong"
+import { Bloom, EffectComposer } from "@react-three/postprocessing"
+import { TextureLoader } from 'three/src/loaders/TextureLoader'
+import pongMapTexture from '../assets/game/pongMapRounded.png'
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -18,26 +21,33 @@ const BallWrapper = ({ ball, client }: any) => {
 	return (
 		<>
 			<Box position={ballClientPosition} />
+
 			<mesh
 				position={ballClientPosition}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry(2, 2, 2)}
-				material={new THREE.MeshStandardMaterial()}
+			// material={new THREE.MeshBasicMaterial({ color=[2, 0, 0], emissiveIntensity: 1, toneMapped: false })}
 			>
+				<meshBasicMaterial color={[2, 2, 2]} toneMapped={false} />
 			</mesh>
 		</>
 	)
 }
 
 const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
+	const baseNeon = useRef<any>()
+	useEffect(() => {
+		if (baseNeon.current === undefined) return
+		baseNeon.current.material.color.r = 10
+	}, [])
 	return (
 		<>
 			<Text
-				position={[0, 20, 0]}
+				position={[position[0] > 0 ? position[0] + 20 : position[0] - 20, 50, 0]}
 				color="white"
 				anchorX="center"
 				anchorY="middle"
-				scale={[10, 10, 10]}
+				scale={[20, 20, 20]}
 			>
 				{score}
 			</Text>
@@ -46,9 +56,11 @@ const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 				position={position}
 				// rotation={rotation}
 				geometry={new THREE.BoxGeometry(5, 20, 2)}
-				material={new THREE.MeshStandardMaterial({ color: paddleColor })}
+				material={new THREE.MeshStandardMaterial({ color: new THREE.Color(10, 0, 0), emissive: 'red', emissiveIntensity: 2, toneMapped: false })}
+				ref={baseNeon}
+			// material={new THREE.MeshStandardMaterial({ color: paddleColor })}
 			>
-			</mesh>
+			</mesh >
 		</>
 	)
 }
@@ -155,6 +167,7 @@ export default function Game() {
 	// const [handPos, setHandPos] = useState(-1);
 	const handPos = useRef<number>(-1)
 	let params = useParams();
+	const pongMap = useLoader(TextureLoader, pongMapTexture)
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
@@ -383,7 +396,19 @@ export default function Game() {
 				// <div style={{ width: "50vw", height: "100vh" }}>
 
 				// <Canvas style={{ width: "1200px", height: "500px" }} id="game-canvas" camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
-				<Canvas id="game-canvas" camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}>
+				<Canvas id="game-canvas" camera={{ rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}
+
+					dpr={1}
+					shadows
+					gl={{
+						powerPreference: "high-performance",
+						antialias: false,
+						stencil: false,
+						depth: false,
+					}}>
+
+					<SoftShadows samples={20} />
+
 					{/* <pointLight color={['#f0f0f0', '#d25578'])} position={[100, 100, 25]} intensity={0.5} /> */}
 					<pointLight color={'#f0f0f0'} position={[100, 100, 25]} intensity={1.5} />
 					<Box position={[50, 50, 25]} scale={10} material={new THREE.MeshStandardMaterial({ color: 'red' })} />
@@ -392,7 +417,7 @@ export default function Game() {
 
 					<Box position={[-100, -100, -100]} scale={10} />
 					{/* <pointLight position={[-100, -100, -100]} intensity={1.5} color={snap.dark ? "#ccffcc" : "#00ffff"} /> */}
-					<ambientLight intensity={0.1} />
+					<ambientLight intensity={0.5} />
 					<Test />
 					<group position-y={2}>
 						<Timer time={time} />
@@ -430,8 +455,8 @@ export default function Game() {
 							})}
 						{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} />}
 						< color attach="background" args={["#171720"]} />
-						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ color: 'blue' })} />
-						< ContactShadows position={[0, -2, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} />
+						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ map: pongMap, emissiveMap: pongMap, emissive: 'white', emissiveIntensity: .7, toneMapped: false })} />
+						{/* < ContactShadows position={[0, -2, 0]} opacity={0.4} width={30} height={30} blur={1} far={15} /> */}
 					</group >
 					{/* <CameraShake
 						maxYaw={0.1} // Max amount camera can yaw in either direction
@@ -443,6 +468,11 @@ export default function Game() {
 						intensity={1} // initial intensity of the shake
 						decayRate={0.65} // if decay = true this is the rate at which intensity will reduce at />
 					/> */}
+					<EffectComposer multisampling={4} disableNormalPass>
+						{/* <Bloom luminanceThreshold={1} intensity={0.8} levels={2} mipmapBlur /> */}
+						<Bloom luminanceThreshold={1} intensity={0.3} levels={5} mipmapBlur />
+						<Bloom luminanceThreshold={1} intensity={0.1} levels={6} mipmapBlur />
+					</EffectComposer>
 				</Canvas >
 				// </div>
 
