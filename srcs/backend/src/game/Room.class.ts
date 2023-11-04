@@ -94,6 +94,7 @@ export default class Room {
 
 		if (winner == -1) {
 			this.wss.to(this.roomId).emit('gameOver', { winner: null, loser: null });
+			// console.log("GameOver")
 			const newGame = await this.gameService.create({});
 			this.gameId = newGame.id;
 			const players = Object.values(this.players);
@@ -115,6 +116,7 @@ export default class Room {
 		const loserPlayer = this.players[loser];
 		const winnerPlayer = this.players[winner];
 		this.wss.to(this.roomId).emit('gameOver', { winner: winnerPlayer.userId, loser: loserPlayer.userId });
+		console.log("GameOver")
 
 		const newGame = await this.gameService.create({});
 		this.gameId = newGame.id;
