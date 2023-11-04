@@ -84,4 +84,27 @@ export class GameSettingsService {
       },
     });
   }
+
+  async setGraphicEffects(userId: number, checked: boolean): Promise<GameSettings> {
+    const gameSettings = await this.prisma.gameSettings.findUnique({
+      where: {
+        userId,
+      },
+    });
+    if (!gameSettings) {
+      return this.prisma.gameSettings.create({
+        data: {
+          userId,
+          graphicEffects: checked,
+        },
+      })
+      // throw new NotFoundException('GameSettings item not found');
+    }
+    return this.prisma.gameSettings.update({
+      where: { userId },
+      data: {
+        graphicEffects: checked,
+      },
+    });
+  }
 }
