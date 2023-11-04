@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useLoader, useThree } from "@react-three/fiber"
 import { Box, CameraShake, ContactShadows, Plane, SoftShadows, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
-import { Card, Container, Modal } from "react-bootstrap"
+import { Card, Container, Modal, Image } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
@@ -33,11 +33,11 @@ const BallWrapper = ({ ball, client, graphicEffects }: any) => {
 
 const UserWrapper = ({ position, rotation, id, score, paddleColor }: any) => {
 	// const baseNeon = useRef<any>()
-	useEffect(() => {
-		// if (baseNeon.current === undefined) return
-		// baseNeon.current.material.color.r = 10
-		console.log(paddleColor)
-	}, [])
+	// useEffect(() => {
+	// if (baseNeon.current === undefined) return
+	// baseNeon.current.material.color.r = 10
+	// console.log(paddleColor)
+	// }, [])
 	return (
 		<>
 			<Text
@@ -171,7 +171,7 @@ const CameraFOVHandler = () => {
 	)
 }
 
-function RulesPopup() {
+function RulesModal() {
 	const [show, setShow] = useState(false);
 
 	const handleClose = () => setShow(false);
@@ -201,6 +201,53 @@ function RulesPopup() {
 	);
 }
 
+function GameSummaryModal({ summary }: any) {
+	const [show, setShow] = useState(false);
+
+	const handleClose = () => setShow(false);
+	const handleShow = () => setShow(true);
+
+	useEffect(() => {
+		if (summary) {
+			handleShow();
+			console.log(summary);
+		}
+	}, [summary]);
+
+	return (
+		<>
+			{summary &&
+				<Modal size="lg"
+					aria-labelledby="contained-modal-title-vcenter"
+					centered show={show} onHide={handleClose}>
+					<Modal.Header closeButton>
+						{summary.winner ?
+							<>
+
+								<Image style={{ objectFit: "cover", marginRight: "1rem" }} src={summary.winner.avatar} height={50} width={50} roundedCircle />
+								<Modal.Title className="text-black" >{summary.winner.username} won the game !</Modal.Title>
+							</> : <Modal.Title className="text-black" >It's a draw !</Modal.Title>
+						}
+					</Modal.Header>
+					<Modal.Body className="text-black" >
+						{
+							summary.winner ?
+								`Score : ${summary.winner.score} - ${summary.loser.score}`
+								:
+								"No one won this game"
+						}
+					</Modal.Body>
+					<Modal.Footer>
+						<button className="btn btn-primary" onClick={handleClose}>
+							Close
+						</button>
+					</Modal.Footer>
+				</Modal>
+			}
+		</>
+	);
+}
+
 type GameWaitingRoomProps = {
 	gameStatus: GameStatus,
 	startMatchmaking: () => void,
@@ -222,7 +269,7 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 						<br></br>
 						<Container className="d-flex justify-content-center gap-3">
 							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
-							<RulesPopup />
+							<RulesModal />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
 						<GraphicEffectsSettings currentSettings={graphicEffectsSettings} />
@@ -246,14 +293,14 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 						<br></br>
 						<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
 					</>}
-					{gameStatus === GameStatus.Finished && <>
+					{/* {gameStatus === GameStatus.Finished && <>
 						<Card.Title>Game over !</Card.Title>
 						<Card.Text>
 							You lost or maybe you won, who knows...
 						</Card.Text>
 						<br></br>
 						<button onClick={startMatchmaking} className="btn btn-primary"><b>Replay</b></button>
-					</>}
+					</>} */}
 				</Card.Body>
 			</Card>
 		</div>
@@ -274,6 +321,7 @@ export default function Game() {
 	const pongMap = useLoader(TextureLoader, pongMapTexture)
 	const cameraShakeRef = useRef<any>()
 	const [graphicEffects, setGraphicEffects] = useState<boolean>(false);
+	const [summary, setSummary] = useState<any>(null);
 
 
 	const changeHandPos = (pos: number = -1) => {
@@ -282,29 +330,29 @@ export default function Game() {
 
 	useEffect(() => {
 		globalSocket.emit('MyProfile', (res: any) => {
-			console.log("MyProfile", res);
+			// console.log("MyProfile", res);
 			id.current = res.id;
 			if (params.userId && params.userId != res.id) {
-				console.log("Matching against", params.userId);
+				// console.log("Matching against", params.userId);
 				gamesSocket.emit('matchAgainst', params.userId);
 				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
 				setGameStatus(GameStatus.Matching);
 			}
 		});
 		gamesSocket.emit('getMyGameSettings', (res: any) => {
-			console.log(res)
+			// console.log(res)
 			setPaddleColor(res.paddleColor);
 			setGraphicEffects(res.graphicEffects);
 		});
 		gamesSocket.on('startGame', (newId: any) => {
 			gamesSocket.emit('getMyGameSettings', (res: any) => {
-				console.log("MyColor", res.paddleColor);
+				// console.log("MyColor", res.paddleColor);
 				setPaddleColor(res.paddleColor);
 				setGraphicEffects(res.graphicEffects);
 			});
-			console.log('startGame: ', newId)
+			// console.log('startGame: ', newId)
 			setGameStatus(GameStatus.Started);
-			console.log('Game Started!')
+			// console.log('Game Started!')
 		})
 
 		let indexTime = 0;
@@ -350,13 +398,15 @@ export default function Game() {
 			}
 
 		})
-		gamesSocket.on('gameOver', (winner: any) => {
-			console.log('Game Over! Winner: ', winner);
-			setGameStatus(GameStatus.Finished);
+		gamesSocket.on('gameOver', (summary: any) => {
+			// console.log('Game Over! Winner: ', winner);
+			setSummary(summary);
+			setGameStatus(GameStatus.Idle);
+			// setGameStatus(GameStatus.Finished);
 		})
 		return () => {
 			cancelMatchmaking();
-			console.log("Game unmounted");
+			// console.log("Game unmounted");
 		}
 	}, [gamesSocket])
 	const sendPressed = (key: string, pressed: boolean) => {
@@ -390,6 +440,7 @@ export default function Game() {
 		setTime(0);
 		sendPressed("up", false)
 		sendPressed("down", false)
+		setSummary(null);
 		gamesSocket.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
@@ -401,6 +452,7 @@ export default function Game() {
 	return (
 		<>
 			<WebcamPong changeHandPos={changeHandPos} />
+			<GameSummaryModal summary={summary} />
 
 			{gameStatus !== GameStatus.Started &&
 				<GameWaitingRoom
