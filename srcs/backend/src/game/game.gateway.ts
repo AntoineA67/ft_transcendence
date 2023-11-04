@@ -100,13 +100,14 @@ export class GameGateway
         this.gameSettingsService.handleColor(socket.data.user.id, payload);
     }
 
-    // @SubscribeMessage('getMyPaddleColor')
-    // async getColor(socket: Socket, payload: string): Promise<void> {
-    //     this.gameSettingsService.handleColor(socket.data.user.id, payload);
-    // }
-    @SubscribeMessage('getMyPaddleColor')
+    @SubscribeMessage('setGraphicEffects')
+    async handleGraphicEffects(socket: Socket, payload: boolean): Promise<void> {
+        this.gameSettingsService.setGraphicEffects(socket.data.user.id, payload);
+    }
+
+    @SubscribeMessage('getMyGameSettings')
     async handleMyProfile(@ConnectedSocket() client: Socket) {
-        this.logger.log('getMyPaddleColor')
+        this.logger.log('getMyGameSettings')
         const userId: number = client.data.user.id;
         return (await this.gameSettingsService.getUserGameSettings(userId))
     }
