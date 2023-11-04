@@ -16,15 +16,21 @@ import {
 	FilesetResolver,
 	DrawingUtils
 } from "@mediapipe/tasks-vision";
-import { useEffect } from "react";
+import { MutableRefObject, useEffect, useRef } from "react";
 
 export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webcam: boolean }) => {
 	let handLandmarker: HandLandmarker;
+	let stream: MutableRefObject<MediaStream | null> = useRef<MediaStream | null>(null);
 
 	useEffect(() => {
 		console.log("webcam pong", webcam)
-		if (!webcam && handLandmarker) {
-			handLandmarker.close();
+		if (!webcam) {
+			handLandmarker?.close();
+			console.log(stream)
+			stream.current?.getTracks().forEach((track: MediaStreamTrack) => {
+				console.log(track);
+				track.stop()
+			});
 		}
 	}, [webcam]);
 
@@ -111,9 +117,10 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			// Call this function again to keep predicting when the browser is ready.
 			if (webcamRunning === true) {
 				window.requestAnimationFrame(predictWebcam);
-				// onFinishedLoading();
 			}
 		}
+
+
 
 		// Enable the live webcam view and start detection.
 		function enableCam(event: any) {
@@ -125,6 +132,9 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			if (webcamRunning === true) {
 				webcamRunning = false;
 				enableWebcamButton.innerText = "ENABLE PREDICTIONS";
+				if (stream.current) {
+					stream.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+				}
 			} else {
 				webcamRunning = true;
 				enableWebcamButton.innerText = "DISABLE PREDICTIONS";
@@ -132,13 +142,15 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 
 			// getUsermedia parameters.
 			const constraints = {
-				video: true
+				video: true,
 			};
 
 			// Activate the webcam stream.
-			navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+			navigator.mediaDevices.getUserMedia(constraints).then(function (s) {
 				if (video) {
-					video.srcObject = stream;
+					video.srcObject = s;
+					stream.current = s;
+					console.log(s, stream);
 					video.addEventListener("loadeddata", predictWebcam);
 				}
 			});
@@ -154,31 +166,28 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			console.log("getUserMedia() is not supported by your browser");
 		}
 		return () => {
-			handLandmarker.close();
+			handLandmarker?.close();
 		}
 	}, []);
 
 
 
 	return (
-		<> {1 &&
-			<>
-				<section style={{ position: "fixed" }} id="demos" className="invisible">
-					<div id="liveView" className="videoView">
-						{/* <button id="webcamButton" className="mdc-button mdc-button--raised">
+		<>
+			<section style={{ position: "fixed" }} id="demos" className="invisible">
+				<div id="liveView" className="videoView">
+					{/* <button id="webcamButton" className="mdc-button mdc-button--raised">
 							<span className="mdc-button__ripple"></span>
 							<span className="mdc-button__label">ENABLE WEBCAM</span>
 						</button> */}
-						<div style={{ position: "fixed", opacity: .2 }}>
-							<video id="webcam" autoPlay playsInline></video>
-							<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
-							{/* <p id='gesture_output' className="output" /> */}
-						</div>
+					<div style={{ position: "fixed", opacity: .2 }}>
+						<video id="webcam" autoPlay playsInline></video>
+						<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
+						{/* <p id='gesture_output' className="output" /> */}
 					</div>
-				</section >
+				</div>
+			</section >
 
-			</>
-		}
 		</>
 	);
 };
