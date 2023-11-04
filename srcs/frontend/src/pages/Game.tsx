@@ -255,7 +255,7 @@ type GameWaitingRoomProps = {
 	cancelMatchmaking: () => void,
 	paddleColor: string,
 	graphicEffectsSettings: boolean,
-	playUsingWebcam: () => void,
+	playUsingWebcam: (e: any) => void,
 	cancelCamera: () => void,
 };
 
@@ -484,10 +484,11 @@ export default function Game() {
 		setGameStatus(GameStatus.Idle);
 	};
 
-	const playUsingWebcam = () => {
-		if (webcam) {
+	const playUsingWebcam = (e: any) => {
+		if (webcam || e === 'cancel') {
 			setWebcamRunning(false);
 			setWebcam(false);
+			setGameStatus(GameStatus.Idle);
 			return
 		}
 		setWebcam(true);
@@ -512,7 +513,7 @@ export default function Game() {
 					gameStatus={gameStatus}
 					graphicEffectsSettings={graphicEffects}
 					playUsingWebcam={playUsingWebcam}
-					cancelCamera={() => setWebcam(false)}
+					cancelCamera={() => playUsingWebcam('cancel')}
 				/>
 			}
 			{gameStatus === GameStatus.Started &&
