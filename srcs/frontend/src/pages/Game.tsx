@@ -134,6 +134,7 @@ enum GameStatus {
 	Matching = 'matching',
 	Started = 'started',
 	Finished = 'finished',
+	Loading = 'loading',
 }
 
 const CameraFOVHandler = () => {
@@ -254,9 +255,11 @@ type GameWaitingRoomProps = {
 	cancelMatchmaking: () => void,
 	paddleColor: string,
 	graphicEffectsSettings: boolean,
+	playUsingWebcam: () => void,
+	cancelCamera: () => void,
 };
 
-const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, paddleColor, graphicEffectsSettings }: GameWaitingRoomProps) => {
+const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, paddleColor, graphicEffectsSettings, playUsingWebcam, cancelCamera }: GameWaitingRoomProps) => {
 	return (
 		<div className="d-flex align-items-center justify-content-center h-100">
 			<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
@@ -272,6 +275,7 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 							<RulesModal />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
+						<button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button>
 						<GraphicEffectsSettings currentSettings={graphicEffectsSettings} />
 					</>}
 					{gameStatus === GameStatus.Matching && <>
@@ -293,11 +297,32 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 						<br></br>
 						<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
 					</>}
+					{gameStatus === GameStatus.Loading && <>
+						<Card.Title>Loading</Card.Title>
+						<Card.Text>
+							Loading camera, please wait ! It can take up to 1min...
+						</Card.Text>
+						<FidgetSpinner
+							visible={gamesSocket.connected}
+							height="80"
+							width="80"
+							ariaLabel="dna-loading"
+							wrapperStyle={{}}
+							wrapperClass="dna-wrapper"
+							ballColors={['#ff0000', '#00ff00', '#0000ff']}
+							backgroundColor="#F4442E"
+						/>
+						<br></br>
+						<br></br>
+						<button onClick={cancelCamera} className="btn btn-primary"><b>Cancel</b></button>
+					</>}
 				</Card.Body>
 			</Card>
 		</div>
 	)
 }
+
+
 
 export default function Game() {
 
@@ -315,11 +340,20 @@ export default function Game() {
 	const [graphicEffects, setGraphicEffects] = useState<boolean>(false);
 	const [summary, setSummary] = useState<any>(null);
 	const location = useLocation();
+	const [webcam, setWebcam] = useState<boolean>(false);
+	const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
 
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
 	}
+
+	// const onWebcamFinishedLoading = () => {
+	// 	if (webcamRunning === true) {
+
+	// 		console.log("Webcam finished loading")
+	// 	}
+	// }
 
 	useEffect(() => {
 		gamesSocket.emit('getMyGameSettings', (res: any) => {
@@ -450,9 +484,24 @@ export default function Game() {
 		setGameStatus(GameStatus.Idle);
 	};
 
+	const playUsingWebcam = () => {
+		if (webcam) {
+			setWebcamRunning(false);
+			setWebcam(false);
+			return
+		}
+		setWebcam(true);
+		const video = document.getElementById("webcam") as any;
+		video.addEventListener("loadeddata", () => {
+			setWebcamRunning(true);
+			setGameStatus(GameStatus.Idle)
+		});
+		setGameStatus(GameStatus.Loading);
+	}
+
 	return (
 		<>
-			<WebcamPong changeHandPos={changeHandPos} />
+			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} />
 			<GameSummaryModal summary={summary} />
 
 			{gameStatus !== GameStatus.Started &&
@@ -461,7 +510,10 @@ export default function Game() {
 					cancelMatchmaking={cancelMatchmaking}
 					paddleColor={paddleColor}
 					gameStatus={gameStatus}
-					graphicEffectsSettings={graphicEffects} />
+					graphicEffectsSettings={graphicEffects}
+					playUsingWebcam={playUsingWebcam}
+					cancelCamera={() => setWebcam(false)}
+				/>
 			}
 			{gameStatus === GameStatus.Started &&
 				<Canvas style={{ background: "black" }} id="game-canvas" camera={{ isOrthographicCamera: true, rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}
