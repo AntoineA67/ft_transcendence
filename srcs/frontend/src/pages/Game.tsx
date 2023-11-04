@@ -6,7 +6,7 @@ import { FidgetSpinner } from "react-loader-spinner"
 import { Card, Container, Modal, Image } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { Wheel } from '@uiw/react-color';
-import { useParams } from "react-router-dom"
+import { useLocation, useParams } from "react-router-dom"
 import { WebcamPong } from "./WebcamPong"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
@@ -293,14 +293,6 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 						<br></br>
 						<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
 					</>}
-					{/* {gameStatus === GameStatus.Finished && <>
-						<Card.Title>Game over !</Card.Title>
-						<Card.Text>
-							You lost or maybe you won, who knows...
-						</Card.Text>
-						<br></br>
-						<button onClick={startMatchmaking} className="btn btn-primary"><b>Replay</b></button>
-					</>} */}
 				</Card.Body>
 			</Card>
 		</div>
@@ -322,6 +314,7 @@ export default function Game() {
 	const cameraShakeRef = useRef<any>()
 	const [graphicEffects, setGraphicEffects] = useState<boolean>(false);
 	const [summary, setSummary] = useState<any>(null);
+	const location = useLocation();
 
 
 	const changeHandPos = (pos: number = -1) => {
@@ -329,16 +322,6 @@ export default function Game() {
 	}
 
 	useEffect(() => {
-		globalSocket.emit('MyProfile', (res: any) => {
-			// console.log("MyProfile", res);
-			id.current = res.id;
-			if (params.userId && params.userId != res.id) {
-				// console.log("Matching against", params.userId);
-				gamesSocket.emit('matchAgainst', params.userId);
-				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
-				setGameStatus(GameStatus.Matching);
-			}
-		});
 		gamesSocket.emit('getMyGameSettings', (res: any) => {
 			// console.log(res)
 			setPaddleColor(res.paddleColor);
@@ -406,9 +389,27 @@ export default function Game() {
 		})
 		return () => {
 			cancelMatchmaking();
+
 			// console.log("Game unmounted");
 		}
 	}, [gamesSocket])
+
+	useEffect(() => {
+		let gameUserId = location.state?.gameUserId
+		globalSocket.emit('MyProfile', (res: any) => {
+			// console.log("MyProfile", res);
+			id.current = res.id;
+			if (gameUserId && gameUserId != res.id) {
+				// console.log("Matching against", gameUserId);
+				gamesSocket.emit('matchAgainst', gameUserId);
+				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
+				setGameStatus(GameStatus.Matching);
+				// location.state.gameUserId = null
+				window.history.replaceState({}, document.title)
+			}
+		});
+	}, [location])
+
 	const sendPressed = (key: string, pressed: boolean) => {
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()

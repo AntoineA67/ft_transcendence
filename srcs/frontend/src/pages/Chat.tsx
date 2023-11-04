@@ -16,19 +16,36 @@ import { CiLock, CiUnlock } from 'react-icons/ci';
 import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
 import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
 
+// export const handlePlayClickinMess = (userId: number, username: string) => {
+// 	enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
+// 		variant: 'info',
+// 		persist: true,
+// 		action: (key: any) => (
+// 			<div>
+// 				<Link to={`/game/${userId}`}>
+// 					<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
+// 						<strong>Play</strong>
+// 					</button>
+// 				</Link>
+// 				<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
+// 			</div>
+// 		),
+// 	});
+// };
+
 export const handlePlayClickinMess = (userId: number, username: string) => {
 	enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 		variant: 'info',
 		persist: true,
 		action: (key: any) => (
 			<div>
-				<Link to={`/game/${userId}`}>
+				<Link to={'/'} state={{ gameUserId: userId }}>
 					<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
 						<strong>Play</strong>
 					</button>
 				</Link>
 				<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
-			</div>
+			</div >
 		),
 	});
 };
