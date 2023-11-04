@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useLoader, useThree } from "@react-three/fiber"
 import { Box, CameraShake, ContactShadows, Plane, SoftShadows, Text } from "@react-three/drei"
 import { FidgetSpinner } from "react-loader-spinner"
-import { Card } from "react-bootstrap"
+import { Card, Container, Modal } from "react-bootstrap"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
@@ -171,6 +171,36 @@ const CameraFOVHandler = () => {
 	)
 }
 
+function RulesPopup() {
+	const [show, setShow] = useState(false);
+
+	const handleClose = () => setShow(false);
+	const handleShow = () => setShow(true);
+
+	return (
+		<>
+			<button className="btn btn-info" onClick={handleShow}>
+				Show Rules
+			</button>
+
+			<Modal size="lg"
+				aria-labelledby="contained-modal-title-vcenter"
+				centered show={show} onHide={handleClose}>
+				<Modal.Header closeButton>
+					<Modal.Title className="text-black" >Rules</Modal.Title>
+				</Modal.Header>
+				<Modal.Body className="text-black" >Pong is one of the first computer games ever created. This simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent by being the first one to gain 10 points, a player gets a point once the opponent misses a ball. The game can be played with two human players, or one player against a computer controlled paddle.
+					Use the up and down arrows to move your paddle. You can also play with your hands, using your computer camera.</Modal.Body>
+				<Modal.Footer>
+					<button className="btn btn-primary" onClick={handleClose}>
+						Close
+					</button>
+				</Modal.Footer>
+			</Modal>
+		</>
+	);
+}
+
 type GameWaitingRoomProps = {
 	gameStatus: GameStatus,
 	startMatchmaking: () => void,
@@ -190,7 +220,10 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 							You are about to play a game against another player. Get ready to compete and have fun!
 						</Card.Text>
 						<br></br>
-						<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
+						<Container className="d-flex justify-content-center gap-3">
+							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
+							<RulesPopup />
+						</Container>
 						<PaddleWheel currentColor={paddleColor} />
 						<GraphicEffectsSettings currentSettings={graphicEffectsSettings} />
 					</>}
