@@ -18,8 +18,16 @@ import {
 } from "@mediapipe/tasks-vision";
 import { useEffect } from "react";
 
-export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
+export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webcam: boolean }) => {
+
 	useEffect(() => {
+		console.log("webcam pong", webcam)
+
+	}, [webcam]);
+
+	useEffect(() => {
+		// console.log("webcam pong", webcam)
+		// if (!webcam) return;
 		const demosSection = document.getElementById("demos");
 		let handLandmarker: HandLandmarker;
 		let runningMode = "IMAGE";
@@ -44,6 +52,7 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 				runningMode: runningMode as any
 			});
 			demosSection?.classList.remove("invisible");
+			// onFinishedLoading();
 		};
 
 		/********************************************************************
@@ -103,6 +112,7 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 			// Call this function again to keep predicting when the browser is ready.
 			if (webcamRunning === true) {
 				window.requestAnimationFrame(predictWebcam);
+				// onFinishedLoading();
 			}
 		}
 
@@ -144,27 +154,33 @@ export const WebcamPong = ({ changeHandPos }: { changeHandPos: any }) => {
 		} else {
 			console.warn("getUserMedia() is not supported by your browser");
 		}
+		// enableCam(null);
+		// console.log("webcam pong");
 	}, []);
 
 
 
 	return (
-		<>
-			{/* <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet" />
+		<> {1 &&
+			<>
+				{/* <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet" />
 			<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script> */}
-			<section style={{ position: "fixed" }} id="demos" className="invisible">
-				<div id="liveView" className="videoView">
-					<button id="webcamButton" className="mdc-button mdc-button--raised">
-						<span className="mdc-button__ripple"></span>
-						<span className="mdc-button__label">ENABLE WEBCAM</span>
-					</button>
-					<div style={{ position: "fixed", opacity: .2 }}>
-						<video id="webcam" autoPlay playsInline></video>
-						<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
-						<p id='gesture_output' className="output" />
+				<section style={{ position: "fixed" }} id="demos" className="invisible">
+					<div id="liveView" className="videoView">
+						{/* <button id="webcamButton" className="mdc-button mdc-button--raised">
+							<span className="mdc-button__ripple"></span>
+							<span className="mdc-button__label">ENABLE WEBCAM</span>
+						</button> */}
+						<div style={{ position: "fixed", opacity: .2 }}>
+							<video id="webcam" autoPlay playsInline></video>
+							<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
+							<p id='gesture_output' className="output" />
+						</div>
 					</div>
-				</div>
-			</section >
+				</section >
+
+			</>
+		}
 		</>
 	);
 };
