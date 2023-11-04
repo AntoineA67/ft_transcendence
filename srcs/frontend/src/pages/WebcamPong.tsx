@@ -19,17 +19,17 @@ import {
 import { useEffect } from "react";
 
 export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webcam: boolean }) => {
+	let handLandmarker: HandLandmarker;
 
 	useEffect(() => {
 		console.log("webcam pong", webcam)
-
+		if (!webcam && handLandmarker) {
+			handLandmarker.close();
+		}
 	}, [webcam]);
 
 	useEffect(() => {
-		// console.log("webcam pong", webcam)
-		// if (!webcam) return;
 		const demosSection = document.getElementById("demos");
-		let handLandmarker: HandLandmarker;
 		let runningMode = "IMAGE";
 		let enableWebcamButton: HTMLButtonElement;
 		let webcamRunning: Boolean = false;
@@ -46,7 +46,6 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			handLandmarker = await HandLandmarker.createFromOptions(vision, {
 				baseOptions: {
 					modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-
 					delegate: "GPU"
 				},
 				runningMode: runningMode as any
@@ -152,10 +151,11 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			enableWebcamButton = document.getElementById("webcamButton") as HTMLButtonElement;
 			enableWebcamButton.addEventListener("click", enableCam);
 		} else {
-			console.warn("getUserMedia() is not supported by your browser");
+			console.log("getUserMedia() is not supported by your browser");
 		}
-		// enableCam(null);
-		// console.log("webcam pong");
+		return () => {
+			handLandmarker.close();
+		}
 	}, []);
 
 
@@ -163,8 +163,6 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 	return (
 		<> {1 &&
 			<>
-				{/* <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet" />
-			<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script> */}
 				<section style={{ position: "fixed" }} id="demos" className="invisible">
 					<div id="liveView" className="videoView">
 						{/* <button id="webcamButton" className="mdc-button mdc-button--raised">
@@ -174,7 +172,7 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 						<div style={{ position: "fixed", opacity: .2 }}>
 							<video id="webcam" autoPlay playsInline></video>
 							<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
-							<p id='gesture_output' className="output" />
+							{/* <p id='gesture_output' className="output" /> */}
 						</div>
 					</div>
 				</section >

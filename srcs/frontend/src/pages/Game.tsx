@@ -272,10 +272,10 @@ const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, padd
 						<br></br>
 						<Container className="d-flex justify-content-center gap-3">
 							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
+							<button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button>
 							<RulesModal />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
-						<button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button>
 						<GraphicEffectsSettings currentSettings={graphicEffectsSettings} />
 					</>}
 					{gameStatus === GameStatus.Matching && <>
@@ -419,6 +419,8 @@ export default function Game() {
 			// console.log('Game Over! Winner: ', winner);
 			setSummary(summary);
 			setGameStatus(GameStatus.Idle);
+			setWebcam(false);
+			setWebcamRunning(false);
 			// setGameStatus(GameStatus.Finished);
 		})
 		return () => {
@@ -495,7 +497,7 @@ export default function Game() {
 		const video = document.getElementById("webcam") as any;
 		video.addEventListener("loadeddata", () => {
 			setWebcamRunning(true);
-			setGameStatus(GameStatus.Idle)
+			startMatchmaking();
 		});
 		setGameStatus(GameStatus.Loading);
 	}
