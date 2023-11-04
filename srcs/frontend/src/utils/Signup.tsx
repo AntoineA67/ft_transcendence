@@ -80,15 +80,8 @@ export function Signup() {
 									className="togglePassword" />
 							</div>
 						</div>
-						<div id='error-message' className='white-text'>
+						<div id='error-message' className='red-text'>
 							{err}
-						</div>
-
-						<div className="mt-4">
-							<input required type="checkbox" id="accept-terms" className='d-inline w-auto'/>
-							<label htmlFor="accept-terms" className='d-inline ms-3'>
-								I accept terms and conditions
-							</label>
 						</div>
 
 						<button type="submit" className="btn btn-secondary w-100 mt-4" >
