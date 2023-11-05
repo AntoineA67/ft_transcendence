@@ -18,9 +18,11 @@ import {
 } from "@mediapipe/tasks-vision";
 import { MutableRefObject, useEffect, useRef } from "react";
 
-export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webcam: boolean }) => {
+export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: { changeHandPos: any, webcam: boolean, onWebcamFinishedLoading: () => void }) => {
 	let handLandmarker: HandLandmarker;
 	let stream: MutableRefObject<MediaStream | null> = useRef<MediaStream | null>(null);
+	let video: MutableRefObject<HTMLVideoElement | null> = useRef<HTMLVideoElement | null>(null);
+
 
 	useEffect(() => {
 		console.log("webcam pong", webcam)
@@ -31,10 +33,28 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 				console.log(track);
 				track.stop()
 			});
+			if (video.current) {
+				video.current.srcObject = null;
+			}
+		} else {
+			const createHandLandmarker = async () => {
+				const vision = await FilesetResolver.forVisionTasks(
+					"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+				);
+				handLandmarker = await HandLandmarker.createFromOptions(vision, {
+					baseOptions: {
+						modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+						delegate: "GPU"
+					},
+					runningMode: "IMAGE"
+				});
+			};
+			createHandLandmarker();
 		}
 	}, [webcam]);
 
 	useEffect(() => {
+		video.current = document.getElementById("webcam") as any
 		const demosSection = document.getElementById("demos");
 		let runningMode = "IMAGE";
 		let enableWebcamButton: HTMLButtonElement;
@@ -57,14 +77,12 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 				runningMode: runningMode as any
 			});
 			demosSection?.classList.remove("invisible");
-			// onFinishedLoading();
 		};
 
 		/********************************************************************
 		 // Demo 2: Continuously grab image from webcam stream and detect it.
 		 ********************************************************************/
 
-		const video = document.getElementById("webcam") as any;
 		const canvasElement: any = document.getElementById("output_canvas");
 		const canvasCtx = canvasElement?.getContext("2d");
 
@@ -77,10 +95,11 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 		}
 
 		async function predictWebcam() {
-			canvasElement.style.width = video.videoWidth;;
-			canvasElement.style.height = video.videoHeight;
-			canvasElement.width = video.videoWidth;
-			canvasElement.height = video.videoHeight;
+			if (!handLandmarker || !canvasCtx || !video.current || !video.current.srcObject) return;
+			canvasElement.style.width = video.current?.videoWidth;;
+			canvasElement.style.height = video.current?.videoHeight;
+			canvasElement.width = video.current?.videoWidth;
+			canvasElement.height = video.current?.videoHeight;
 			const drawingUtils = new DrawingUtils(canvasCtx);
 
 			// Now let's start detecting the stream.
@@ -89,9 +108,9 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 				await handLandmarker.setOptions({ runningMode: "VIDEO" });
 			}
 			let startTimeMs = performance.now();
-			if (lastVideoTime !== video.currentTime) {
-				lastVideoTime = video.currentTime;
-				results = handLandmarker.detectForVideo(video, startTimeMs);
+			if (lastVideoTime !== video.current?.currentTime && video.current) {
+				lastVideoTime = video.current?.currentTime;
+				results = handLandmarker.detectForVideo(video.current, startTimeMs);
 			}
 			canvasCtx.save();
 			canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -120,8 +139,6 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 			}
 		}
 
-
-
 		// Enable the live webcam view and start detection.
 		function enableCam(event: any) {
 			if (!handLandmarker) {
@@ -147,26 +164,30 @@ export const WebcamPong = ({ changeHandPos, webcam }: { changeHandPos: any, webc
 
 			// Activate the webcam stream.
 			navigator.mediaDevices.getUserMedia(constraints).then(function (s) {
-				if (video) {
-					video.srcObject = s;
+				if (video.current) {
+					video.current.srcObject = s;
 					stream.current = s;
 					console.log(s, stream);
-					video.addEventListener("loadeddata", predictWebcam);
+					video.current.addEventListener("loadeddata", predictWebcam);
 				}
 			});
 		}
+
+		video.current?.addEventListener("loadeddata", onWebcamFinishedLoading);
 
 		createHandLandmarker();
 		// If webcam supported, add event listener to button for when user
 		// wants to activate it.
 		if (hasGetUserMedia()) {
 			enableWebcamButton = document.getElementById("webcamButton") as HTMLButtonElement;
-			enableWebcamButton.addEventListener("click", enableCam);
+			enableWebcamButton?.addEventListener("click", enableCam);
 		} else {
 			console.log("getUserMedia() is not supported by your browser");
 		}
 		return () => {
 			handLandmarker?.close();
+			video.current?.removeEventListener("loadeddata", onWebcamFinishedLoading);
+			video.current?.addEventListener("loadeddata", predictWebcam);
 		}
 	}, []);
 

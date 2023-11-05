@@ -348,13 +348,6 @@ export default function Game() {
 		handPos.current = pos
 	}
 
-	// const onWebcamFinishedLoading = () => {
-	// 	if (webcamRunning === true) {
-
-	// 		console.log("Webcam finished loading")
-	// 	}
-	// }
-
 	useEffect(() => {
 		gamesSocket.emit('getMyGameSettings', (res: any) => {
 			// console.log(res)
@@ -486,6 +479,12 @@ export default function Game() {
 		setGameStatus(GameStatus.Idle);
 	};
 
+	const onWebcamFinishedLoading = () => {
+		console.log("loadeddata")
+		setWebcamRunning(true);
+		startMatchmaking();
+	}
+
 	const playUsingWebcam = (e: any) => {
 		if (webcam || e === 'cancel') {
 			setWebcamRunning(false);
@@ -494,17 +493,18 @@ export default function Game() {
 			return
 		}
 		setWebcam(true);
-		const video = document.getElementById("webcam") as any;
-		video.addEventListener("loadeddata", () => {
-			setWebcamRunning(true);
-			startMatchmaking();
-		});
+		// const video = document.getElementById("webcam") as any;
+		// video.addEventListener("loadeddata", () => {
+		// 	console.log("loadeddata")
+		// 	setWebcamRunning(true);
+		// 	startMatchmaking();
+		// });
 		setGameStatus(GameStatus.Loading);
 	}
 
 	return (
 		<>
-			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} />
+			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
 			<GameSummaryModal summary={summary} />
 
 			{gameStatus !== GameStatus.Started &&
