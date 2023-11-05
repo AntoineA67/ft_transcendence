@@ -85,7 +85,7 @@ export default function GamePage() {
 		for (const client of Object.keys(newClients.clients)) {
 			if (client == id.current) {
 				const pos = 100 - handPos.current * 100;
-				console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()]);
+				// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()]);
 				const currentPos = newClients.clients[id.current.toString()].y;
 				if (indexTime++ % 10 !== 0) return;
 				if (Math.abs(pos - currentPos) > 5) {
@@ -126,7 +126,7 @@ export default function GamePage() {
 		gamesSocket.off('gameOver', onMessageGameOver)
 	}
 	const sendPressed = (key: string, pressed: boolean) => {
-		console.log("sendPressed", key, pressed)
+		// console.log("sendPressed", key, pressed)
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
 		gamesSocket.emit("keyPresses", keysPressed.current);

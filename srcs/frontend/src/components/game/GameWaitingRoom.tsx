@@ -15,6 +15,7 @@ type GameWaitingRoomProps = {
 	playUsingWebcam: (e: any) => void;
 	cancelCamera: () => void;
 };
+
 export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, paddleColor, graphicEffectsSettings, playUsingWebcam, cancelCamera }: GameWaitingRoomProps) => {
 	return (
 		<div className="d-flex align-items-center justify-content-center h-100">
@@ -28,50 +29,61 @@ export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, p
 						<br></br>
 						<Container className="d-flex justify-content-center gap-3">
 							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
-							{/* <button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button> */}
+							<button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button>
 							<RulesModal />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
 						<GraphicEffectsSettingsCard currentSettings={graphicEffectsSettings} />
 					</>}
-					{gameStatus === GameStatus.Matching && <>
-						<Card.Title>Matchmaking in progress</Card.Title>
-						<Card.Text>
-							Looking for another player
-						</Card.Text>
-						<FidgetSpinner
-							visible={gamesSocket.connected}
-							height="80"
-							width="80"
-							ariaLabel="dna-loading"
-							wrapperStyle={{}}
-							wrapperClass="dna-wrapper"
-							ballColors={['#ff0000', '#00ff00', '#0000ff']}
-							backgroundColor="#F4442E" />
-						<br></br>
-						<br></br>
-						<button onClick={cancelOrLeave} className="btn btn-primary"><b>Cancel</b></button>
-					</>}
-					{gameStatus === GameStatus.Loading && <>
-						<Card.Title>Loading</Card.Title>
-						<Card.Text>
-							Loading camera, please wait ! It can take up to 1min...
-						</Card.Text>
-						<FidgetSpinner
-							visible={gamesSocket.connected}
-							height="80"
-							width="80"
-							ariaLabel="dna-loading"
-							wrapperStyle={{}}
-							wrapperClass="dna-wrapper"
-							ballColors={['#ff0000', '#00ff00', '#0000ff']}
-							backgroundColor="#F4442E" />
-						<br></br>
-						<br></br>
-						<button onClick={cancelCamera} className="btn btn-primary"><b>Cancel</b></button>
-					</>}
+					{gameStatus === GameStatus.Matching && <MatchingScreen cancelOrLeave={cancelOrLeave} />}
+					{gameStatus === GameStatus.Loading && <LoadingScreen cancelCamera={cancelCamera} />}
 				</Card.Body>
 			</Card>
 		</div>
 	);
 };
+
+const LoadingScreen = ({ cancelCamera }: { cancelCamera: () => void }) => {
+	return (
+		<>
+			<Card.Title>Loading</Card.Title>
+			<Card.Text>
+				Loading camera, please wait ! It can take up to 1min...
+			</Card.Text>
+			<FidgetSpinner
+				visible={gamesSocket.connected}
+				height="80"
+				width="80"
+				ariaLabel="dna-loading"
+				wrapperStyle={{}}
+				wrapperClass="dna-wrapper"
+				ballColors={['#ff0000', '#00ff00', '#0000ff']}
+				backgroundColor="#F4442E" />
+			<br></br>
+			<br></br>
+			<button onClick={cancelCamera} className="btn btn-primary"><b>Cancel</b></button>
+		</>
+	);
+}
+
+const MatchingScreen = ({ cancelOrLeave }: { cancelOrLeave: () => void }) => {
+	return <>
+		<Card.Title>Matchmaking in progress</Card.Title>
+		<Card.Text>
+			Looking for another player
+		</Card.Text>
+		<FidgetSpinner
+			visible={gamesSocket.connected}
+			height="80"
+			width="80"
+			ariaLabel="dna-loading"
+			wrapperStyle={{}}
+			wrapperClass="dna-wrapper"
+			ballColors={['#ff0000', '#00ff00', '#0000ff']}
+			backgroundColor="#F4442E" />
+		<br></br>
+		<br></br>
+		<button onClick={cancelOrLeave} className="btn btn-primary"><b>Cancel</b></button>
+	</>;
+}
+
