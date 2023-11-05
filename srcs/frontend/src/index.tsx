@@ -107,7 +107,6 @@ const router = createBrowserRouter(
 				<Route path="/" element={<Sidebar />}>
 
 					<Route index element={<GamePage />} />
-					{/* <Route path="/game/:userId" element={<GamePage />} /> */}
 
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
@@ -140,9 +139,6 @@ const router = createBrowserRouter(
 							loader={({ params }) => (loader('rooms', params.chatId))}
 						/>
 					</Route>
-					{/* 
-					<Route path="/game" element={<Game />}></Route>
-					<Route path="/game/:userId" element={<Game />}></Route> */}
 				</Route>
 			</Route>
 		</Route>
