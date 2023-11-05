@@ -12,7 +12,7 @@
  * @property {string} Loading - The game is currently loading.
  */
 import * as THREE from "three"
-import { useEffect, useRef, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { Canvas, useLoader } from "@react-three/fiber"
 import { Plane, ShakeController } from "@react-three/drei"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
@@ -225,55 +225,57 @@ export default function GamePage() {
 
 	return (
 		<>
-			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
-			<GameSummaryModal summary={summary} />
-			{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
+			<Suspense fallback={<div>Loading...</div>}>
+				<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
+				<GameSummaryModal summary={summary} />
+				{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
 
-			{gameStatus !== GameStatus.Started ?
-				<GameWaitingRoom
-					startMatchmaking={startMatchmaking}
-					cancelOrLeave={cancelOrLeave}
-					paddleColor={paddleColor}
-					gameStatus={gameStatus}
-					graphicEffectsSettings={graphicEffects}
-					playUsingWebcam={playUsingWebcam}
-				/>
-				:
-				<Canvas style={{ background: "black" }} id="game-canvas" camera={{ isOrthographicCamera: true, rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}
-					dpr={1}
-					gl={{
-						powerPreference: "high-performance",
-						antialias: false,
-						stencil: false,
-						depth: false,
-					}}>
-					<CameraFOVHandler />
-					<pointLight color={'#f0f0f0'} position={[100, 100, 25]} intensity={1.5} />
-					<ambientLight intensity={0.5} />
-					<group position-y={2}>
-						<Timer time={time} />
-						{Object.keys(clients)
-							.map((client) => {
-								const { y, dir, score, xDistance } = clients[client]
-								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
-								const myPaddleColor = client == id.current ? paddleColor : '#fff';
-								return (
-									<UserWrapper
-										key={client}
-										id={client}
-										score={score}
-										position={pos}
-										rotation={[0, dir, 0]}
-										paddleColor={myPaddleColor}
-									/>
-								)
-							})}
-						{clients[id.current] !== undefined && <BallWrapper ball={ball} client={clients[id.current]} graphicEffects={graphicEffects} />}
-						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ map: pongMap, emissiveMap: pongMap, emissive: 'white', emissiveIntensity: .7, toneMapped: false })} />
-					</group >
-					{graphicEffects && <CanvasGraphicEffects cameraShakeRef={cameraShakeRef} />}
-				</Canvas >
-			}
+				{gameStatus !== GameStatus.Started ?
+					<GameWaitingRoom
+						startMatchmaking={startMatchmaking}
+						cancelOrLeave={cancelOrLeave}
+						paddleColor={paddleColor}
+						gameStatus={gameStatus}
+						graphicEffectsSettings={graphicEffects}
+						playUsingWebcam={playUsingWebcam}
+					/>
+					:
+					<Canvas style={{ background: "black" }} id="game-canvas" camera={{ isOrthographicCamera: true, rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}
+						dpr={1}
+						gl={{
+							powerPreference: "high-performance",
+							antialias: false,
+							stencil: false,
+							depth: false,
+						}}>
+						<CameraFOVHandler />
+						<pointLight color={'#f0f0f0'} position={[100, 100, 25]} intensity={1.5} />
+						<ambientLight intensity={0.5} />
+						<group position-y={2}>
+							<Timer time={time} />
+							{Object.keys(clients)
+								.map((client) => {
+									const { y, dir, score, xDistance } = clients[client]
+									const pos = [client == id.current ? -97.5 : 97.5, y, 0]
+									const myPaddleColor = client == id.current ? paddleColor : '#fff';
+									return (
+										<UserWrapper
+											key={client}
+											id={client}
+											score={score}
+											position={pos}
+											rotation={[0, dir, 0]}
+											paddleColor={myPaddleColor}
+										/>
+									)
+								})}
+							{clients[id.current] !== undefined && <BallWrapper ball={ball} client={clients[id.current]} graphicEffects={graphicEffects} />}
+							<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ map: pongMap, emissiveMap: pongMap, emissive: 'white', emissiveIntensity: .7, toneMapped: false })} />
+						</group >
+						{graphicEffects && <CanvasGraphicEffects cameraShakeRef={cameraShakeRef} />}
+					</Canvas >
+				}
+			</Suspense>
 		</>
 	)
 }
