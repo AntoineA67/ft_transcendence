@@ -23,7 +23,8 @@ import pongMapTexture from '../assets/game/pongMapRounded.png'
 import { Timer } from "../components/game/Timer"
 import { CameraFOVHandler } from "../components/game/CameraFOVHandler"
 import { GameSummaryModal } from "../components/game/GameSummaryModal"
-import { GameWaitingRoom, WebcamConfirmModal } from "../components/game/GameWaitingRoom"
+import { GameWaitingRoom } from "../components/game/GameWaitingRoom"
+import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
@@ -87,8 +88,8 @@ export default function GamePage() {
 				const pos = 100 - handPos.current * 100;
 				// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()]);
 				const currentPos = newClients.clients[id.current.toString()].y;
-				if (indexTime++ % 10 !== 0) return;
-				if (Math.abs(pos - currentPos) > 5) {
+				if (indexTime++ % 5 !== 0) return;
+				if (Math.abs(pos - currentPos) > 3) {
 					if (pos < currentPos) {
 						// console.log("Going up !")
 						sendPressed("down", true);
@@ -228,7 +229,6 @@ export default function GamePage() {
 					gameStatus={gameStatus}
 					graphicEffectsSettings={graphicEffects}
 					playUsingWebcam={playUsingWebcam}
-					cancelCamera={cancelOrLeave}
 				/>
 				:
 				<Canvas style={{ background: "black" }} id="game-canvas" camera={{ isOrthographicCamera: true, rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}
