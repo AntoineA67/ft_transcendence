@@ -90,7 +90,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	// get everything needed to run.
 	const createHandLandmarker = async () => {
 		demosRef.current?.classList.remove("invisible");
-		console.log("createHandLandmarker loaded", demosRef.current)
+		// console.log("createHandLandmarker loaded", demosRef.current)
 		// setwebcamConfirmModalOpen(true);
 		if (!vision.current || !handLandmarker.current) {
 
@@ -138,7 +138,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 			if (videoRef.current) {
 				videoRef.current.srcObject = s;
 				stream.current = s;
-				console.log(s, stream);
+				// console.log(s, stream);
 			}
 		});
 	}
@@ -154,9 +154,9 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 		} else {
 			handLandmarker.current?.close();
 			handLandmarker.current = null;
-			console.log(stream)
+			// console.log(stream)
 			stream.current?.getTracks().forEach((track: MediaStreamTrack) => {
-				console.log(track);
+				// console.log(track);
 				track.stop()
 			});
 			if (videoRef.current) {
