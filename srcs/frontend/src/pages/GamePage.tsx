@@ -23,7 +23,7 @@ import pongMapTexture from '../assets/game/pongMapRounded.png'
 import { Timer } from "../components/game/Timer"
 import { CameraFOVHandler } from "../components/game/CameraFOVHandler"
 import { GameSummaryModal } from "../components/game/GameSummaryModal"
-import { GameWaitingRoom } from "../components/game/GameWaitingRoom"
+import { GameWaitingRoom, WebcamConfirmModal } from "../components/game/GameWaitingRoom"
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
@@ -52,7 +52,7 @@ export default function GamePage() {
 	const [summary, setSummary] = useState<any>(null);
 	const location = useLocation();
 	const [webcam, setWebcam] = useState<boolean>(false);
-	const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
+
 	let indexTime = 0;
 
 	const changeHandPos = (pos: number = -1) => {
@@ -113,7 +113,6 @@ export default function GamePage() {
 		setSummary(summary);
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
-		setWebcamRunning(false);
 	};
 	const subscribeToGamesSocketMessages = () => {
 		gamesSocket.on('startGame', onMessageStartGame);
@@ -152,18 +151,18 @@ export default function GamePage() {
 		setGameStatus(GameStatus.Matching);
 	};
 	const cancelOrLeave = () => {
+		playUsingWebcam('cancel')
 		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
 	const onWebcamFinishedLoading = () => {
 		console.log("loadeddata")
-		setWebcamRunning(true);
+
 		startMatchmaking();
 	}
 
 	const playUsingWebcam = (e: any) => {
 		if (webcam || e === 'cancel') {
-			setWebcamRunning(false);
 			setWebcam(false);
 			setGameStatus(GameStatus.Idle);
 			return
@@ -171,8 +170,7 @@ export default function GamePage() {
 		setWebcam(true);
 		// const video = document.getElementById("webcam") as any;
 		// video.addEventListener("loadeddata", () => {
-		// 	console.log("loadeddata")
-		// 	setWebcamRunning(true);
+		// 	console.log("loadeddata")=
 		// 	startMatchmaking();
 		// });
 		setGameStatus(GameStatus.Loading);
@@ -220,6 +218,7 @@ export default function GamePage() {
 		<>
 			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
 			<GameSummaryModal summary={summary} />
+			{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
 
 			{gameStatus !== GameStatus.Started ?
 				<GameWaitingRoom

@@ -18,6 +18,7 @@ import {
 } from "@mediapipe/tasks-vision";
 import { useEffect, useRef } from "react";
 
+
 export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: { changeHandPos: any, webcam: boolean, onWebcamFinishedLoading: () => void }) => {
 	const stream = useRef<MediaStream | null>(null);
 	const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -25,7 +26,6 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const vision = useRef<FilesetResolver | null>(null);
 	const handLandmarker = useRef<HandLandmarker | null>(null);
-	const webcamButtonRef = useRef<HTMLButtonElement | null>(null);
 
 	let runningMode = "IMAGE";
 	let webcamRunning: Boolean = false;
@@ -89,30 +89,35 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	// loading. Machine Learning models can be large and take a moment to
 	// get everything needed to run.
 	const createHandLandmarker = async () => {
-		if (vision.current && handLandmarker.current) return;
-		vision.current = await FilesetResolver.forVisionTasks(
-			"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
-		);
-		// if (handLandmarker) {
-		// 	return;
-		// }
-		handLandmarker.current = await HandLandmarker.createFromOptions(vision.current as any, {
-			baseOptions: {
-				modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
-				delegate: "GPU",
-
-			},
-			runningMode: runningMode as any,
-		});
-		console.log("createHandLandmarker loaded", demosRef.current)
 		demosRef.current?.classList.remove("invisible");
+		console.log("createHandLandmarker loaded", demosRef.current)
+		// setwebcamConfirmModalOpen(true);
+		if (!vision.current || !handLandmarker.current) {
+
+			vision.current = await FilesetResolver.forVisionTasks(
+				"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+			);
+			// if (handLandmarker) {
+			// 	return;
+			// }
+			handLandmarker.current = await HandLandmarker.createFromOptions(vision.current as any, {
+				baseOptions: {
+					modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
+					delegate: "GPU",
+
+				},
+				runningMode: runningMode as any,
+			});
+		} else {
+			// onLoadedData();
+		}
 	};
 	// Check if webcam access is supported.
 	function hasGetUserMedia() {
 		return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 	}
 	// Enable the live webcam view and start detection.
-	function enableCam(event: any) {
+	function enableCam() {
 		if (!handLandmarker.current) {
 			alert("Please wait for handLandmarker to load");
 			return;
@@ -120,16 +125,12 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 
 		if (webcamRunning === true) {
 			webcamRunning = false;
-			if (webcamButtonRef.current)
-				webcamButtonRef.current.innerText = "ENABLE PREDICTIONS";
 			changeHandPos(-1);
 			if (stream.current) {
 				stream.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 			}
 		} else {
 			webcamRunning = true;
-			if (webcamButtonRef.current)
-				webcamButtonRef.current.innerText = "DISABLE PREDICTIONS";
 		}
 
 		// Activate the webcam stream.
@@ -143,9 +144,12 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	}
 
 	useEffect(() => {
-		console.log("webcam pong", webcam)
-		if (!webcam) {
+		console.log("webcam pong", webcam, vision.current, handLandmarker.current)
+		if (webcam) {
+			createHandLandmarker().then(enableCam);
+		} else {
 			handLandmarker.current?.close();
+			handLandmarker.current = null;
 			console.log(stream)
 			stream.current?.getTracks().forEach((track: MediaStreamTrack) => {
 				console.log(track);
@@ -154,8 +158,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 			if (videoRef.current) {
 				videoRef.current.srcObject = null;
 			}
-		} else {
-			createHandLandmarker();
+			demosRef.current?.classList.add("invisible");
 		}
 	}, [webcam]);
 
@@ -168,10 +171,6 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 		<>
 			<section style={{ position: "fixed" }} ref={demosRef} className="invisible">
 				<div id="liveView" className="videoView">
-					<button onClick={enableCam} ref={webcamButtonRef} id="webcamButton" className="mdc-button mdc-button--raised">
-						<span className="mdc-button__ripple"></span>
-						<span className="mdc-button__label">ENABLE WEBCAM</span>
-					</button>
 					<div style={{ position: "fixed", opacity: .2 }}>
 						<video id="webcam" ref={videoRef} onLoadedData={onLoadedData} autoPlay playsInline></video>
 						<canvas ref={canvasRef} className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>
