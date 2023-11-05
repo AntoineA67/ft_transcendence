@@ -9,13 +9,13 @@ import { GameStatus } from "../../pages/GamePage";
 type GameWaitingRoomProps = {
 	gameStatus: GameStatus;
 	startMatchmaking: () => void;
-	cancelMatchmaking: () => void;
+	cancelOrLeave: () => void;
 	paddleColor: string;
 	graphicEffectsSettings: boolean;
 	playUsingWebcam: (e: any) => void;
 	cancelCamera: () => void;
 };
-export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmaking, paddleColor, graphicEffectsSettings, playUsingWebcam, cancelCamera }: GameWaitingRoomProps) => {
+export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, paddleColor, graphicEffectsSettings, playUsingWebcam, cancelCamera }: GameWaitingRoomProps) => {
 	return (
 		<div className="d-flex align-items-center justify-content-center h-100">
 			<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
@@ -50,7 +50,7 @@ export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelMatchmakin
 							backgroundColor="#F4442E" />
 						<br></br>
 						<br></br>
-						<button onClick={cancelMatchmaking} className="btn btn-primary"><b>Cancel</b></button>
+						<button onClick={cancelOrLeave} className="btn btn-primary"><b>Cancel</b></button>
 					</>}
 					{gameStatus === GameStatus.Loading && <>
 						<Card.Title>Loading</Card.Title>
