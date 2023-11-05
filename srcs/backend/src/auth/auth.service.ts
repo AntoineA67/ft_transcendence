@@ -1,13 +1,12 @@
-import {
-	HttpStatus,
-	Injectable,
-	NotFoundException,
-	ForbiddenException,
-	UnauthorizedException,
+import { 
+	HttpStatus, 
+	Injectable, 
+	NotFoundException, 
+	ForbiddenException, 
+	UnauthorizedException, 
 	BadRequestException,
 	InternalServerErrorException,
 	Req,
-	Logger
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { UsersService } from '../users/users.service';
@@ -24,19 +23,16 @@ import { randomBytes } from 'crypto';
 export class AuthService {
 	private readonly JWT_SECRET: string | any;
 
-	private logger = new Logger('auth');
-
 	constructor(
 		private usersService: UsersService,
 		private prisma: PrismaService,
 		public jwtService: JwtService,
-		// private jwt: JwtService,
-	) {
-		this.JWT_SECRET = jwtConstants.secret;
-		if (!this.JWT_SECRET) {
-			throw new Error("JWT_SECRET environment variable not set!");
-		}
-	}
+    ) {
+        this.JWT_SECRET = jwtConstants.secret;
+        if (!this.JWT_SECRET) {
+            throw new Error("JWT_SECRET environment variable not set!");
+        }
+    }
 
 	async signup(dto: SignupDto) {
 		if (await this.usersService.getUserByEmail(dto.email))
@@ -53,20 +49,20 @@ export class AuthService {
 					username: dto.username,
 					hashPassword,
 				},
-			});
-			return this.signJwtTokens(user.id, user.email);
+		});
+		return this.signJwtTokens(user.id, user.email, true);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
 				if (error.code === 'P2002') {
 					console.log("error hereeee");
-					throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
-				}
+				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
 			}
-			throw error;
 		}
-	}
-
+		throw error;
+		}
+	  }
+  
 	async signin(dto: SigninDto) {
 		// find user with email
 		const user = await this.usersService.getUserByEmail(dto.email);
@@ -89,22 +85,22 @@ export class AuthService {
 			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
 
 			if (!_2FAValid) {
-				// If 2FA token is invalid, throw an exception
-				throw new UnauthorizedException('2FA token invalid or required');
+			  // If 2FA token is invalid, throw an exception
+			  throw new UnauthorizedException('2FA token invalid or required');
 			}
-		}
-		return await this.signJwtTokens(user.id, user.email);
+		  }
+		return await this.signJwtTokens(user.id, user.email, false);
 		// return this.signJwtTokens(user.id, user.email);
 	}
-
-	async validateUser(email: string): Promise<any> {
+  
+	  async validateUser(email: string): Promise <any> {
 		const user = await this.usersService.getUserByEmail(email);
 		if (!user)
-			throw new UnauthorizedException();
+		  throw new UnauthorizedException();      
 		return user;
-	}
+	  }
 
-	async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
 		// if 2fa is activated and user have not sent token
 		let response;
 		if (!dto.token2FA && dto.activated2FA) {
@@ -112,55 +108,61 @@ export class AuthService {
 				id: dto.id,
 				_2fa: true
 			};
-			// if 2fa is activated and user have sent token
+		// if 2fa is activated and user have sent token
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
-				response = await this.signJwtTokens(dto.id, dto.email);
+				response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
-			// no 2fa
-		} else
-			response = await this.signJwtTokens(dto.id, dto.email);
+		// no 2fa
+		} else 
+			response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
 
-	async signJwtTokens(userId: number, userEmail: string,) {
+	async signJwtTokens(userId: number, userEmail: string, firstConnexion: boolean) {
 		let payload = {
 			id: userId,
 			email: userEmail,
 		}
 		const secret = this.JWT_SECRET;
 		const token = this.jwtService.sign(
-			payload,
-			{
+			payload, 
+			{ 
 				expiresIn: '15m',
 				secret: secret,
 			});
-		console.log("Payload=", payload)
 		const refreshToken = await this.createRefreshToken(userId);
 		return {
 			message: 'Authentication successful',
 			token: token,
-			refreshToken: refreshToken
+			refreshToken: refreshToken,
+			firstConnexion: firstConnexion,
 		};
 	}
-
-	async login42(user: any) {
-		if (!user)
-			throw new BadRequestException('Unauthenticated');
-		let userExists: any = await this.usersService.getUserByEmail(user.emails[0].value);
+	
+	async login42(user: any): Promise<User>  {
+		if (!user || !user.emails || !user.emails.length || !user.emails[0].value) {
+			throw new BadRequestException('Invalid user data');
+		  }
+		const email = user.emails[0].value;
+		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
 			userExists = await this.registerUser42(user);
+		userExists.firstConnexion = false;
 		return (userExists);
 	}
 
-	async registerUser42(user: any): Promise<User | undefined> {
+	async registerUser42(user: any): Promise<User> {
+		if (!user || !user.username || !user.emails || !user.emails.length || !user.emails[0].value) {
+		  throw new BadRequestException('Invalid user data for registration');
+		}
+		const email = user.emails[0].value;
 		try {
-			// this.logger.log('42user', user._json.image.link);
-			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass", user._json.image.link)
+			const newUser = await this.usersService.createUser(user.username, email, "nopass", user.profileUrl)
 			return newUser;
 		} catch {
 			try {
@@ -168,7 +170,7 @@ export class AuthService {
 					length: 6,
 					charset: 'numeric'
 				});
-				const newUser = await this.usersService.createUser(userName, user.emails[0].value, "nopass")
+				const newUser = await this.usersService.createUser(userName, email, "nopass", user.profileUrl)
 				return newUser;
 			} catch {
 				throw new InternalServerErrorException();
@@ -177,47 +179,47 @@ export class AuthService {
 	}
 
 	async createRefreshToken(userId: number): Promise<string> {
-		const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
-		const expiration = new Date();
-		expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
-		await this.prisma.refreshToken.create({
-			data: {
-				token: refreshToken,
-				userId: userId,
-				expiresAt: expiration
-			}
-		});
-		return refreshToken;
-	}
+        const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
+        const expiration = new Date();
+        expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
+        await this.prisma.refreshToken.create({
+            data: {
+                token: refreshToken,
+                userId: userId,
+                expiresAt: expiration
+            }
+        });
+        return refreshToken;
+    }
 
-	async refreshToken(refreshToken: string, req: Request, res: Response) {
-		if (!refreshToken)
-			return res.status(401).json({ valid: false, message: "Empty refresh token" });
-		const userRefreshToken = await this.prisma.refreshToken.findUnique({
-			where: {
-				token: refreshToken,
-			},
-		});
-		if (!userRefreshToken) {
-			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
+	async refreshToken(refreshToken: string): Promise<any> {
+		if (!refreshToken) {
+		  throw new UnauthorizedException("Empty refresh token");
 		}
+	  
+		const userRefreshToken = await this.prisma.refreshToken.findUnique({
+		  where: { token: refreshToken },
+		});
+	  
+		if (!userRefreshToken || !this.isRefreshTokenValid(refreshToken)) {
+		  await this.deleteRefreshTokenForUser(userRefreshToken?.userId);
+		  throw new UnauthorizedException("Invalid refresh token");
+		}
+
 		const user = await this.prisma.user.findUnique({
 			where: {
 				id: userRefreshToken.userId,
 			}
 		});
 		if (!user)
-			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-		if (!this.isRefreshTokenValid(refreshToken)) {
-			await this.deleteRefreshTokenForUser(user.id);
-			return res.status(401).json({ valid: false, message: "Invalid refresh token" });
-		}
-		// delete refreshToken from DB to make a new one
-		// return this.signJwtTokens(req.user.id, req.user.email);
-		return await this.signJwtTokens(user.id, user.email);
-	}
+			throw new UnauthorizedException("Invalid refresh token");
+	  
+		return await this.signJwtTokens(user.id, user.email, user.firstConnexion);
+	  }
+	  
 
-	async isRefreshTokenValid(tokenReq: string) {
+	async isRefreshTokenValid(tokenReq: string)
+	{
 		if (!tokenReq)
 			return false;
 		const userRefreshToken = await this.prisma.refreshToken.findUnique({
@@ -233,7 +235,7 @@ export class AuthService {
 			return true;
 	}
 
-	async signout(req: Request): Promise<{ message: string }> {        // Invalidate the refresh token to make the signout more secure
+	async signout(req: Request): Promise<{ message: string }> { // Invalidate the refresh token to make the signout more secure
 		const refreshToken = req.body.refreshToken;
 		if (!refreshToken) {
 			throw new UnauthorizedException("Refresh token is missing");

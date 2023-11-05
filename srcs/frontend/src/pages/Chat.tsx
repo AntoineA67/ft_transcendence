@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { chatsSocket, socket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
-import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData } from './ChatDto';
+import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData, ChannelCreationResponse, checkUserRoomName, checkPassword } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
@@ -239,21 +239,30 @@ export function ChatBox() {
 	}, [messages, showSettings, profile]);
 
 	const handleChangeRoomTitle = () => {
-		if (newRoomTitle && newRoomTitle.trim() !== '') {
-			chatsSocket.emit('changeRoomTitle', {
-				roomId: chatId,
-				roomtitle: newRoomTitle
-			}, (response: boolean) => {
-				if (response === true) {
-					setroomTitle(newRoomTitle);
-					setnewRoomTitleSuccess(true);
-				}
-				else
-					setnewRoomTitleSuccess(false);
-			})
+		if (!newRoomTitle || newRoomTitle.trim() === '') {
+			return;
 		}
+
+		if (!checkUserRoomName(newRoomTitle, enqueueSnackbar, 'Room Title')) {
+			setNewRoomTitle('');
+			return;
+		}
+
+		chatsSocket.emit('changeRoomTitle', {
+			roomId: chatId,
+			roomtitle: newRoomTitle
+		}, (response: boolean) => {
+			if (response === true) {
+				setroomTitle(newRoomTitle);
+				setnewRoomTitleSuccess(true);
+			} else {
+				setnewRoomTitleSuccess(false);
+			}
+		});
+
 		setNewRoomTitle('');
 	}
+
 
 	const displayRoomTitle = () => {
 		if (window.innerWidth < 780) {
@@ -266,26 +275,31 @@ export function ChatBox() {
 
 	const handleInviteUser = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
+
 		if (inviteUsername && inviteUsername.trim() !== '') {
+			if (!checkUserRoomName(inviteUsername, enqueueSnackbar, 'Username')) {
+				setInviteUsername('');
+				return;
+			}
 			chatsSocket.emit('inviteUser', {
 				roomId: chatId,
 				username: inviteUsername,
 			}, (response: number) => {
 				if (response > 0) {
 					setinviteUsernameSuccess(true);
-					enqueueSnackbar(`User invited successfully`, { variant: 'success', preventDuplicate: false })
+					enqueueSnackbar(`User invited successfully`, { variant: 'success' })
 				} else if (response === -1) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. Please reach the support.`, { variant: 'error' })
 				} else if (response === -2) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. The user doesn't exist.`, { variant: 'error' })
 				} else if (response === -3) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. You or the other user is blocking this action.`, { variant: 'error' })
 				} else if (response === -4) {
 					setinviteUsernameSuccess(false);
-					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error', preventDuplicate: false })
+					enqueueSnackbar(`Error while inviting the user. The user is already in the channel`, { variant: 'error' })
 				}
 			});
 		}
@@ -305,6 +319,7 @@ export function ChatBox() {
 			enqueueSnackbar('Message too long', { variant: 'error' });
 			return;
 		}
+
 		const messageOptions = {
 			content: mess,
 			roomId: chatId,
@@ -326,8 +341,9 @@ export function ChatBox() {
 	};
 
 	const handleLeaveChannel = (usertoKick: number) => {
-		if (profile === undefined)
+		if (profile === undefined || !Number.isInteger(usertoKick) || usertoKick <= 0) {
 			return;
+		}
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: usertoKick,
 			roomId: chatId,
@@ -338,11 +354,22 @@ export function ChatBox() {
 		});
 	}
 
+
 	const handleMuteDurationChange = (memberid: number, time: number, bool: boolean | null) => {
-		if (!memberid || (time === undefined && (bool === null || !bool)))
+		if (memberid <= 0 || (time === undefined && (bool === null || !bool))) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
 			return;
-		if (bool && bool == true)
+		}
+
+		if (bool && bool === true) {
 			time = 0;
+		}
+
+		if (time < 0) {
+			enqueueSnackbar('Mute duration cannot be negative', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('muteMember', {
 			memberId: memberid,
 			duration: time,
@@ -350,8 +377,9 @@ export function ChatBox() {
 		}, (response: boolean) => {
 			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
-					if (member.userId === memberid)
+					if (member.userId === memberid) {
 						member.mute = time > 0 ? new Date(Date.now() + time * 1000) : null;
+					}
 					return member;
 				}));
 				enqueueSnackbar(`User ${time > 0 ? 'muted' : 'unmuted'} successfully`, { variant: 'success' });
@@ -359,7 +387,13 @@ export function ChatBox() {
 		});
 	};
 
+
 	const handleBan = (memberid: number, actions: boolean) => {
+		if (memberid <= 0 || actions === undefined) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('banMember', {
 			memberId: memberid,
 			roomId: chatId,
@@ -367,23 +401,22 @@ export function ChatBox() {
 		}, (response: boolean) => {
 			if (response === true) {
 				setMemberList((prevMembersList) => prevMembersList.map((member) => {
-					if (member.userId === memberid)
+					if (member.userId === memberid) {
 						member.ban = !actions;
+					}
 					return member;
 				}));
 				enqueueSnackbar(`User ${actions ? 'unbanned' : 'banned'} successfully`, { variant: 'success' });
 			}
-		}
-		);
+		});
 	};
 
+
 	const handleBlock = (memberId: number, toUnBlock: boolean) => {
-		if (profile === undefined) {
+		if (profile === undefined || memberId <= 0 || toUnBlock === undefined) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
 			return;
 		}
-
-		console.log('toUnBlock', toUnBlock);
-		console.log('memberId', memberId);
 
 		chatsSocket.emit('blockUser', { memberId, action: toUnBlock }, (response: boolean) => {
 			if (response === true) {
@@ -409,18 +442,29 @@ export function ChatBox() {
 
 	const handleKick = (memberid: number, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
+
+		if (profile === undefined || !chatId || isNaN(memberid) || memberid <= 0) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+
 		chatsSocket.emit('UserLeaveChannel', {
 			usertoKick: memberid,
 			roomId: chatId
 		}, (response: { userid: number, roomId: number }) => {
-			if (response.userid !== profile?.id && response.roomId === parseInt(chatId || '', 10)) {
+			if (response.userid !== profile.id && response.roomId === parseInt(chatId, 10)) {
 				setMemberList((prevMembersList) => prevMembersList.filter((member) => member.userId !== memberid));
 				enqueueSnackbar(`User kicked successfully from the channel`, { variant: 'success' });
 			}
-		})
-	}
+		});
+	};
+
 
 	const handleRoleChange = (memberid: number, role: string) => {
+		if (memberid <= 0 || !role || (role !== 'Owner' && role !== 'Admin' && role !== 'Member')) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
 		chatsSocket.emit('changeRole', {
 			memberId: memberid,
 			roomid: chatId,
@@ -451,35 +495,44 @@ export function ChatBox() {
 	}
 
 	const handleChangePassword = () => {
-		if (newPassword && newPassword.trim() !== '') {
-			chatsSocket.emit('changePassword', {
-				roomId: chatId,
-				password: newPassword
-			}, (response: boolean) => {
-				if (response === true) {
-					setNewPassword('');
-					setnewPasswordSucess(true);
-					setPasswordStatus(true);
-					enqueueSnackbar(`Password changed successfully`, { variant: 'success', preventDuplicate: false });
-				}
-				else {
-					setnewPasswordSucess(false);
-					enqueueSnackbar(`Error while changing password`, { variant: 'error', preventDuplicate: false });
-				}
-			})
+		if (!newPassword || newPassword.trim() === '') {
+			return;
 		}
+
+		if (!checkPassword(newPassword, enqueueSnackbar)) {
+			setNewPassword('');
+			return;
+		}
+
+		chatsSocket.emit('changePassword', {
+			roomId: chatId,
+			password: newPassword,
+			delPass: false
+		}, (response: boolean) => {
+			if (response === true) {
+				setNewPassword('');
+				setnewPasswordSucess(true);
+				setPasswordStatus(true);
+				enqueueSnackbar(`Password changed successfully`, { variant: 'success' });
+			}
+			else {
+				setnewPasswordSucess(false);
+				enqueueSnackbar(`Error while changing password`, { variant: 'error' });
+			}
+		});
 	}
 
 	const handleDeletePassword = () => {
 		chatsSocket.emit('changePassword', {
 			roomId: chatId,
-			password: ''
+			password: '',
+			delPass: true
 		}, (response: boolean) => {
 			if (response === true) {
 				setPasswordStatus(false);
 				setnewPasswordSucess(undefined);
 				setNewPassword('');
-				enqueueSnackbar(`Password deleted successfully`, { variant: 'success', preventDuplicate: false });
+				enqueueSnackbar(`Password deleted successfully`, { variant: 'success' });
 			}
 		})
 	}
@@ -493,6 +546,11 @@ export function ChatBox() {
 	}
 
 	const handlePlayClick = (userId: number, username: string) => {
+		if (userId <= 0 || !username) {
+			enqueueSnackbar('Invalid input values', { variant: 'error' });
+			return;
+		}
+	
 		enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 			variant: 'info',
 			persist: true,
@@ -508,6 +566,7 @@ export function ChatBox() {
 			),
 		});
 	};
+	
 
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
@@ -567,7 +626,11 @@ export function ChatBox() {
 						<input
 							className={`${memberstatus ? (memberstatus.ban ? 'banned-text' : '') : ''}`}
 							value={mess}
-							onChange={(e) => setMess(e.target.value)}
+							onChange={(e) => {
+								if (e.target.value.length <= 10005) {
+									setMess(e.target.value);
+								}
+							}}
 							onKeyDown={handleKeyDown}
 							disabled={
 								memberstatus
@@ -621,10 +684,14 @@ export function ChatBox() {
 									type="text"
 									placeholder="New Room name"
 									value={newRoomTitle}
-									onChange={(e) => setNewRoomTitle(e.target.value)}
+									onChange={(e) => {
+										if (e.target.value.length <= 30) {
+											setNewRoomTitle(e.target.value);
+										}
+									}}
 									disabled={!memberstatus?.admin}
 								/>
-								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim() || newRoomTitle.length > 25}>Valider</button>
+								<button className='btn btn-outline-secondary my-3 ' type='submit' onClick={handleChangeRoomTitle} disabled={!newRoomTitle.trim() || newRoomTitle.length > 30}>Valider</button>
 								{memberstatus?.owner && !privateStatus && (
 									<input
 										id="Newpassword"
@@ -632,8 +699,11 @@ export function ChatBox() {
 										type="text"
 										placeholder="New Password"
 										value={newPassword}
-										onChange={(e) => setNewPassword(e.target.value)}
-
+										onChange={(e) => {
+											if (e.target.value.length <= 30) {
+												setNewPassword(e.target.value);
+											}
+										}}
 										disabled={!memberstatus?.owner}
 									/>)}
 								<div style={{ display: 'flex', alignItems: 'center', margin: 'auto' }}>
@@ -664,7 +734,11 @@ export function ChatBox() {
 									type="text"
 									placeholder="Invite user by username"
 									value={inviteUsername}
-									onChange={(e) => setInviteUsername(e.target.value)}
+									onChange={(e) => {
+										if (e.target.value.length <= 30) {
+											setInviteUsername(e.target.value);
+										}
+									}}
 								/>
 								<button className='btn btn-outline-secondary w-20 my-3' type='submit' onClick={(e) => handleInviteUser(e)} disabled={!inviteUsername.trim()}>Invite</button>
 							</>
@@ -769,63 +843,116 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	const navigate = useNavigate();
 
 	const handleCreateGroup = () => {
-		if (create.trim() === '') return;
-		const password = !isPublic ? '' : createPassword;
+		// Room Title validation
+		if (!checkUserRoomName(create, enqueueSnackbar, 'Room Title')) {
+			return;
+		}
+
+		const password = !isPublic ? "" : createPassword;
+
+		// Password validation
+		if (password) {
+			if (!checkPassword(password, enqueueSnackbar)) {
+				return;
+			}
+		}
+
+		if (typeof isPublic !== "boolean") {
+			enqueueSnackbar("Room must be either Public or Private.", { variant: "error" });
+			return;
+		}
+
 		const roomdata = {
 			roomTitle: create,
 			isPublic: isPublic,
 			password: password,
 		};
 
-		chatsSocket.emit('createChannelRoom', roomdata, (response: number) => {
-			if (response > 0) {
-				const roomType = isPublic ? 'public' : 'private';
-				const passwordInfo = isPublic && createPassword.trim() !== '' ? ` with a password` : '';
-
-				setPage('chatList');
-				navigate(`/chat/${response}`);
+		chatsSocket.emit("createChannelRoom", roomdata, (response: ChannelCreationResponse) => {
+			if (response.success) {
+				setPage("chatList");
+				navigate(`/chat/${response.roomId}`);
 			} else {
 				const action = (key: SnackbarKey | undefined) => (
 					<>
-						<button onClick={() => { closeSnackbar(key); setCreate(''); }} style={{ color: 'white' }}>
+						<button
+							onClick={() => {
+								closeSnackbar(key);
+								setCreate("");
+							}}
+							style={{ color: "white" }}
+						>
 							<strong>Close</strong>
 						</button>
 					</>
 				);
 
-				enqueueSnackbar(`Error while creating room ${create}`, { variant: 'error', action, preventDuplicate: false });
+				enqueueSnackbar(response.error, { variant: "error", action });
 			}
 		});
 	};
 
 	const handlePrivateMessage = () => {
-		if (nick.trim() === '') return;
+		if (!checkUserRoomName(nick, enqueueSnackbar, 'Username')) {
+			return;
+		}
 
 		chatsSocket.emit('createPrivateRoom', nick, (response: number) => {
 			if (response > 0) {
 				setPage('chatList');
 				navigate(`/chat/${response}`);
 			} else if (response === -1) {
-				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. Please reach the support.`, { variant: 'error' });
 			}
 			else if (response === -2) {
-				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. The user doesn't exist. (${nick})`, { variant: 'error' });
 			}
 			else if (response === -3) {
-				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You can't create a private room with yourself.`, { variant: 'error' });
 			}
 			else if (response === -4) {
-				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error' });
 			}
 			else if (response === -5) {
-				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error' });
 			}
 			setNick('');
 		});
 	}
 
+
 	const handleJoinGroup = () => {
-		if (join.trim() === '' || roomId.trim() === '') return;
+		if (join.trim() === '' || roomId.trim() === '') {
+			enqueueSnackbar(
+				"Please provide both Room Title and Room ID.",
+				{ variant: "error" }
+			);
+			setJoin('');
+			setRoomId('');
+			setPassword('');
+			return;
+		}
+
+		if (!/^[0-9]+$/.test(roomId)) {
+			enqueueSnackbar(
+				"Room ID must contain only numerics.",
+				{ variant: "error" }
+			);
+			setRoomId('');
+			return;
+		}
+
+		if (!checkUserRoomName(join, enqueueSnackbar, 'Room Title')) {
+			setJoin('');
+			setPassword('');
+			return;
+		}
+
+		if (password.length > 0 && !checkPassword(password, enqueueSnackbar)) {
+			setPassword('');
+			return;
+		}
+
 		const roomdata = {
 			roomTitle: join,
 			roomid: roomId,
@@ -834,7 +961,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 
 		chatsSocket.emit('joinRoom', roomdata, (response: boolean) => {
 			if (response === false) {
-				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error', preventDuplicate: false });
+				enqueueSnackbar(`Failed to join the room ${join} with roomid ${roomId}`, { variant: 'error' });
 				setJoin('');
 				setRoomId('');
 				setPassword('');
@@ -844,6 +971,8 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 			}
 		});
 	}
+
+
 
 	return (
 		<div className='h-100 d-flex flex-column p-1 pb-5 white-text overflow-y-auto'>
@@ -859,7 +988,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='private-message'
 						value={nick}
-						onChange={(e) => setNick(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setNick(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Username'
 					/>
@@ -878,7 +1011,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='groupname'
 						value={join}
-						onChange={(e) => setJoin(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setJoin(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Group Name'
 					/>
@@ -886,7 +1023,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 						type='text'
 						id='roomID'
 						value={roomId}
-						onChange={(e) => setRoomId(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setRoomId(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Room ID'
 					/>
@@ -894,11 +1035,15 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 						type='password'
 						id='password'
 						value={password}
-						onChange={(e) => setPassword(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setPassword(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Password'
 					/>
-					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!roomId.trim()}>
+					<button type='submit' className='btn btn-outline-secondary w-75' disabled={!roomId.trim() || !join.trim()}>
 						Join
 					</button>
 				</form>
@@ -925,12 +1070,21 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 					<input
 						id='groupnamecreate'
 						value={create}
-						onChange={(e) => setCreate(e.target.value)}
+						onChange={(e) => {
+							if (e.target.value.length <= 30) {
+								setCreate(e.target.value);
+							}
+						}}
 						className='w-75 form-control with-white-placeholder'
 						placeholder='Group Name'
 					/>
+
 					{!isPublic ? (
-						<button type='submit' className='btn btn-outline-secondary w-75' disabled={!create.trim()}>
+						<button
+							type='submit'
+							className='btn btn-outline-secondary w-75'
+							disabled={!create.trim()}
+						>
 							Create
 						</button>
 					) : (
@@ -939,7 +1093,11 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 								type='password'
 								id='createPassword'
 								value={createPassword}
-								onChange={(e) => setCreatePassword(e.target.value)}
+								onChange={(e) => {
+									if (e.target.value.length <= 30) {
+										setCreatePassword(e.target.value);
+									}
+								}}
 								className='w-75 form-control with-white-placeholder'
 								placeholder='Password ?'
 							/>
