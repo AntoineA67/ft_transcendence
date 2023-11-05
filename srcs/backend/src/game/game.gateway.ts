@@ -22,13 +22,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    private matches = {};
 
     constructor(
         private readonly gamesService: GamesService,
-        private jwtService: JwtService,
         private readonly gameSettingsService: GameSettingsService,
-        private readonly prisma: PrismaService,
     ) { }
 
     private logger: Logger = new Logger('Game Gateway');
@@ -57,37 +54,20 @@ export class GameGateway
     }
     @SubscribeMessage('matchAgainst')
     async handleMatchAgainst(socket: Socket, payload: string): Promise<void> {
-        console.log(`Trying match ${socket.data.user.id} against ${payload}`)
-        const sockets = await this.wss.fetchSockets();
-        // if (socket.data.user.id == payload) {
-        //     return;
-        // }
-        if (this.matches[payload] == socket.data.user.id) {
-            delete this.matches[payload];
-            console.log("LAUNCHING MATCH " + payload + " " + socket.data.user.id)
-            for (let s of sockets) {
-                if (s.data.user.id == payload) {
-                    this.gamesService.matchmakePlayers(this.wss, socket, s as unknown as Socket);
-                    break;
-                }
-            }
-        } else {
-            for (let s of sockets) {
-                if (s.data.user.id == payload) {
-                    s.emit('ponged', { nick: "", id: socket.data.user.id })
-                    this.matches[socket.data.user.id] = payload;
-                    console.log(`Matched ${socket.data.user.id} with ${payload}, now matches are ${this.matches.toString()}`)
-                    break;
-                }
-            }
-        }
+        this.gamesService.matchAgainst(socket, this.wss, payload);
     }
 
 
     @SubscribeMessage('cancel')
-    async handleLeave(socket: Socket, payload: string): Promise<void> {
+    async handleLeave(socket: Socket): Promise<void> {
         this.gamesService.disconnect(socket);
     }
+
+    // @SubscribeMessage('cancelMatchmake')
+    // async handleCancelMatchmake(socket: Socket): Promise<void> {
+    //     this.gamesService.disconnect(socket);
+    // }
+
 
     @SubscribeMessage('keyPresses')
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
