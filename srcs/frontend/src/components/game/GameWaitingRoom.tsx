@@ -1,10 +1,50 @@
 import { FidgetSpinner } from "react-loader-spinner";
-import { Card, Container } from "react-bootstrap";
+import { Card, Container, Modal } from "react-bootstrap";
 import { gamesSocket } from '../../utils/socket';
 import { PaddleWheel } from "./PaddleWheel";
 import { GraphicEffectsSettingsCard } from "./GraphicEffectsSettingsCard";
 import { RulesModal } from "./RulesModal";
 import { GameStatus } from "../../pages/GamePage";
+import { useState, useEffect } from "react";
+
+export const WebcamConfirmModal = ({ confirmAction, cancelAction }: { confirmAction: (e: any) => void, cancelAction: (e: any) => void }) => {
+	const [show, setShow] = useState(false);
+
+	const handleClose = () => setShow(false);
+	const handleShow = () => setShow(true);
+
+	// useEffect(() => {
+	// 	if (showProps) {
+	// 		handleShow();
+	// 		console.log(showProps);
+	// 	}
+	// }, [showProps]);
+
+	return (
+		<>
+			<button id="webcamButton" className="btn btn-secondary" onClick={handleShow}>Play using webcam !</button>
+			<Modal size="sm"
+				aria-labelledby="contained-modal-title-vcenter"
+				centered show={show} onHide={handleClose}>
+				<Modal.Header closeButton>
+					<Modal.Title className="text-black">B</Modal.Title>
+				</Modal.Header>
+				<Modal.Body className="text-black">
+					C
+				</Modal.Body>
+				<Modal.Footer>
+					<button className="btn btn-primary" onClick={(e: any) => { handleClose(); confirmAction(e); }}>
+						Yes !
+					</button>
+					<button className="btn btn-danger" onClick={(e: any) => { handleClose(); cancelAction(e); }}>
+						Cancel
+					</button>
+				</Modal.Footer>
+			</Modal>
+		</>
+	);
+};
+
 
 type GameWaitingRoomProps = {
 	gameStatus: GameStatus;
@@ -29,8 +69,9 @@ export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, p
 						<br></br>
 						<Container className="d-flex justify-content-center gap-3">
 							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
-							<button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button>
+							{/* <button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button> */}
 							<RulesModal />
+							<WebcamConfirmModal confirmAction={playUsingWebcam} cancelAction={cancelCamera} />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
 						<GraphicEffectsSettingsCard currentSettings={graphicEffectsSettings} />
