@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
     ConnectedSocket,
     OnGatewayConnection,
@@ -10,14 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
-import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
-// import { WsJwtGuard } from 'src/auth/ws-auth.guard';
-import { AuthService } from 'src/auth/auth.service';
-import { JwtService } from '@nestjs/jwt';
-import { jwtConstants } from 'src/auth/constants';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
-import { UsersService } from 'src/users/users.service';
-import { PrismaService } from 'src/prisma/prisma.service';
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
@@ -42,18 +35,22 @@ export class GameGateway
     }
 
     handleConnection(socket: Socket, ...args: any[]) {
-        console.log(`Client successfully connected! 🆔  ${socket.data.user.id}`)
-        socket.emit('id', socket.data.user.id)
+        try {
+            console.log(`Client successfully connected! 🆔${socket.data.user.id}`)
+            socket.emit('id', socket.data.user.id)
+        } catch (error) {
+            socket.disconnect();
+        }
     }
 
     @SubscribeMessage('match')
-    async handleMatch(socket: Socket, payload: string): Promise<void> {
+    async handleMatch(socket: Socket): Promise<void> {
         if (!this.gamesService.isInQueue(socket)) {
             this.gamesService.addToQueue(socket, this.wss);
         }
     }
     @SubscribeMessage('matchAgainst')
-    async handleMatchAgainst(socket: Socket, payload: string): Promise<void> {
+    async handleMatchAgainst(socket: Socket, payload: { id: string }): Promise<void> {
         this.gamesService.matchAgainst(socket, this.wss, payload);
     }
 
@@ -63,11 +60,6 @@ export class GameGateway
         this.gamesService.disconnect(socket);
     }
 
-    // @SubscribeMessage('cancelMatchmake')
-    // async handleCancelMatchmake(socket: Socket): Promise<void> {
-    //     this.gamesService.disconnect(socket);
-    // }
-
 
     @SubscribeMessage('keyPresses')
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
@@ -76,17 +68,17 @@ export class GameGateway
     }
 
     @SubscribeMessage('changeColor')
-    async handleColor(socket: Socket, payload: string): Promise<void> {
+    async changeColor(socket: Socket, payload: string): Promise<void> {
         this.gameSettingsService.handleColor(socket.data.user.id, payload);
     }
 
     @SubscribeMessage('setGraphicEffects')
-    async handleGraphicEffects(socket: Socket, payload: boolean): Promise<void> {
+    async setGraphicEffects(socket: Socket, payload: boolean): Promise<void> {
         this.gameSettingsService.setGraphicEffects(socket.data.user.id, payload);
     }
 
     @SubscribeMessage('getMyGameSettings')
-    async handleMyProfile(@ConnectedSocket() client: Socket) {
+    async getMyGameSettings(@ConnectedSocket() client: Socket) {
         this.logger.log('getMyGameSettings')
         const userId: number = client.data.user.id;
         return (await this.gameSettingsService.getUserGameSettings(userId))
