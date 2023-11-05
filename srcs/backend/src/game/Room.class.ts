@@ -31,7 +31,6 @@ export default class Room {
 
 	public async leave(id: string) {
 		if (this.players[id]) {
-
 			let winner;
 			for (const playerId in this.players) {
 				if (playerId != id) {
@@ -40,9 +39,6 @@ export default class Room {
 				}
 			}
 			this.playerLeft = winner;
-			// this.endGame(winner).then(() => {
-			// delete this.players[id];
-			// });
 		}
 	}
 

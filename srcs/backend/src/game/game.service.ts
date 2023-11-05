@@ -15,26 +15,33 @@ export class GamesService {
   private matches: { senderId: { receiverId: string, sender: Socket, receiver: Socket } } | {} = {};
 
 
-  async matchAgainst(socket: Socket, wss: Server, payload: string) {
-    // console.log(`Trying match ${socket.data.user.id} against ${payload}`)
+  async matchAgainst(socket: Socket, wss: Server, otherIdDTO: { id: string }) {
+    const otherId = otherIdDTO.id;
+    try {
+      const otherIdNumber = parseInt(otherId);
+      if (this.prisma.user.findUnique({ where: { id: otherIdNumber } }) == null) return;
+    } catch (error) {
+      socket.emit('cancelledMatchmake');
+      return;
+    }
     const sockets = await wss.fetchSockets();
-    if (this.matches[payload] && this.matches[payload].receiverId == socket.data.user.id) {
-      delete this.matches[payload];
-      // console.log("LAUNCHING MATCH " + payload + " " + socket.data.user.id)
+    if (this.matches[otherId] && this.matches[otherId].receiverId == socket.data.user.id) {
+      delete this.matches[otherId];
+      // console.log("LAUNCHING MATCH " + otherId + " " + socket.data.user.id)
       for (let s of sockets) {
-        if (s.data.user.id == payload) {
+        if (s.data.user.id == otherId) {
           this.matchmakePlayers(wss, socket, s as unknown as Socket);
           break;
         }
       }
     } else {
       for (let s of sockets) {
-        if (s.data.user.id == payload) {
+        if (s.data.user.id == otherId) {
           console.log(socket.data.user)
           const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
           s.emit('ponged', { nick: username, id: socket.data.user.id })
-          this.matches[socket.data.user.id] = { receiverId: payload, sender: socket, receiver: s };
-          console.log(`Matched ${socket.data.user.id} with ${payload}, now matches are ${this.matches.toString()}`)
+          this.matches[socket.data.user.id] = { receiverId: otherId, sender: socket, receiver: s };
+          console.log(`Matched ${socket.data.user.id} with ${otherId}, now matches are ${this.matches.toString()}`)
           break;
         }
       }
@@ -42,12 +49,7 @@ export class GamesService {
   }
 
   addToQueue(socket: Socket, wss: Server) {
-    for (let i = 0; i < this.matchmakingQueue.length; i++) {
-      if (this.matchmakingQueue[i].data.user.id === socket.data.user.id) {
-        // console.log('already in queue')
-        return;
-      }
-    }
+    if (this.isInQueue(socket)) return;
     this.matchmakingQueue.push(socket);
     this.tryMatchPlayers(wss);
   }
@@ -95,20 +97,24 @@ export class GamesService {
     while (this.matchmakingQueue.length >= 2) {
       const player1 = this.matchmakingQueue.pop();
       const player2 = this.matchmakingQueue.pop();
+      if (!player1 || !player2) return;
 
       // Create a new room for the clients
       const roomId = uuidv4();
-      console.log('roomId', roomId)
+      // console.log('roomId', roomId)
 
-      player1.join(roomId);
-      player2.join(roomId);
+      try {
+        player1.join(roomId);
+        player2.join(roomId);
+        this.clients[player1.data.user.id] = roomId;
+        this.clients[player2.data.user.id] = roomId;
+      } catch (error) {
+        player1.disconnect();
+        player2.disconnect();
+      }
 
-      this.clients[player1.data.user.id] = roomId;
-      this.clients[player2.data.user.id] = roomId;
-
-      console.log('player1', player1.id, player1.data.user.id)
-      console.log('player2', player2.id, player2.data.user.id)
-
+      // console.log('player1', player1.id, player1.data.user.id)
+      // console.log('player2', player2.id, player2.data.user.id)
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
   }
