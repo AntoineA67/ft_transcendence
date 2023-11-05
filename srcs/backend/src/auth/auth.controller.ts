@@ -51,6 +51,7 @@ export class AuthController {
 			token2FA: req.query._2fa,
 			activated2FA: req.user.activated2FA,
 			user: req.user,
+			firstConnexion: true,
 		}
 		return await this.authService.signin42(dto, res, req);
 	}
@@ -77,11 +78,13 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('isTokenValid')
+	@HttpCode(HttpStatus.OK)
 	async isTokenValid(@Req() req: Request, @Res() res: Response) {
 		return res.status(200).json({ valid: true, message: "Token is valid" });
 	}
 
 	@Post('refreshToken')
+	@HttpCode(HttpStatus.CREATED)
 	async refreshToken(@Req() req: Request, @Res() res: Response) {
 		if (req.body.refreshToken === undefined) {
 			return res.status(401).json({ message: "refresh token is undefined" });

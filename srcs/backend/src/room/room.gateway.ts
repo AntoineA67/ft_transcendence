@@ -8,7 +8,8 @@ import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
 import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
-import { MessageWithUsername, ProfileTest, Pvrooms } from './roomDto';
+import { MessageWithUsername, ProfileTest, Pvrooms, checkPassword, checkUserRoomName } from './roomDto';
+import { type } from 'os';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
@@ -52,6 +53,17 @@ export class RoomGateway
 	@SubscribeMessage('getRoomData')
 	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member, private: boolean, password: boolean }> {
 		const userId: number = client.data.user.id;
+		if (!roomId.trim() || !/^[0-9]+$/.test(roomId) || typeof roomId !== 'string') {
+			return {
+				messages: [],
+				roomTitle: '',
+				roomChannel: false,
+				members: [],
+				memberStatus: null,
+				private: false,
+				password: false,
+			};
+		}
 		const roomid = parseInt(roomId, 10);
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
 		const members = await this.memberService.getMembersByRoomId(roomid);
@@ -76,33 +88,64 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('createChannelRoom')
-	async handleCreateChannelRoom(
-		@ConnectedSocket() client: Socket,
-		@MessageBody() data: { roomTitle: string, isPublic: boolean, password: string },
-	): Promise<Number> {
-		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
-		if (createdRoom) {
-			const roomName = "room_" + createdRoom.id.toString();
-			client.join(roomName);
-			client.emit('newRoom', createdRoom);
-			return (createdRoom.id);
-		} else {
-			return (0);
+	async handleCreateChannelRoom(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+		try {
+			if (!data || typeof data.roomTitle !== 'string' || !checkUserRoomName(data.roomTitle)) {
+				throw new Error('Room Title must be between 4 and 16 characters, alphanumeric only, and "-"');
+			}
+
+			if (typeof data.isPublic !== 'boolean') {
+				throw new Error('Room must be either Public or Private');
+			}
+
+			if (data.password) {
+				if (typeof data.password !== 'string' || data.password.length < 8 || data.password.length > 20 || !checkPassword(data.password)) {
+					throw new Error('Password must be between 8 and 20 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+				}
+			}
+
+			const userId: number = client.data.user.id;
+			const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
+
+			if (createdRoom) {
+				const roomName = 'room_' + createdRoom.id.toString();
+				client.join(roomName);
+				client.emit('newRoom', createdRoom);
+				return { success: true, roomId: createdRoom.id };
+			} else {
+				throw new Error('Failed to create room');
+			}
+		} catch (error) {
+			return { success: false, error: error.message };
 		}
 	}
 
 	@SubscribeMessage('joinRoom')
 	async handleJoinRoom(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() roomdata: { roomname: string, roomid: string, password: string },
+		@MessageBody() roomdata: { roomTitle: string, roomid: string, password: string },
 	): Promise<boolean> {
 		const userId: number = client.data.user.id;
 		const roomId = parseInt(roomdata.roomid, 10);
-		if (Number.isNaN(roomId))
+
+		if (Number.isNaN(roomId) ||
+			!roomdata.roomTitle.trim() || !roomdata.roomid.trim() ||
+			!/^[0-9]+$/.test(roomdata.roomid) || typeof roomdata.roomid !== 'string' ||
+			typeof roomdata.roomTitle !== 'string') {
 			return false;
-		const room = await this.roomService.joinRoom(roomdata.roomname, roomId, roomdata.password, userId);
-		const roomName = "room_" + roomId.toString();
+		}
+
+		if (!checkUserRoomName(roomdata.roomTitle)) {
+			return false;
+		}
+
+		if (roomdata.password && !checkPassword(roomdata.password)) {
+			return false;
+		}
+
+		const room = await this.roomService.joinRoom(roomdata.roomTitle, roomId, roomdata.password, userId);
+		const roomName = 'room_' + roomId.toString();
+
 		if (room) {
 			client.join(roomName);
 			client.emit('newRoom', room);
@@ -117,51 +160,60 @@ export class RoomGateway
 		@ConnectedSocket() client: Socket,
 		@MessageBody() username: string,
 	): Promise<Number> {
-		const userId: number = client.data.user.id;
-		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
-
-		if (createdRoom && createdRoom.id) {
-			const pvroomuser1 = {
-				id: createdRoom.id,
-				isChannel: false,
-				title: username,
-				private: true,
-				password: '',
-				messages: [],
-			};
-			const roomName = "room_" + createdRoom.id.toString();
-			client.join(roomName);
-			client.emit('newRoom', pvroomuser1);
-
-			const user1 = await this.roomService.getMemberDatabyId(userId);
-			const user2 = await this.roomService.getMemberDatabyUsername(username);
-			if (user2) {
-				const socketUser2 = this.clients[user2.id.toString()];
-				if (socketUser2) {
-					const pvroomuser2 = {
-						id: createdRoom.id,
-						isChannel: false,
-						title: user1.username,
-						private: true,
-						password: '',
-						messages: [],
-					};
-					const roomNameUser2 = "room_" + createdRoom.id.toString();
-					socketUser2.join(roomNameUser2);
-					socketUser2.emit('newRoom', pvroomuser2);
-				}
+			if (!checkUserRoomName(username)) {
+				console.error('Username must be between 4 and 16 characters, alphanumeric only, and "-"');
+				return -1;
 			}
 
-			return createdRoom.id;
-		} else {
-			return createdRoom;
-		}
+			const userId: number = client.data.user.id;
+			const createdRoom = await this.roomService.createPrivateRoom(userId, username);
+
+			if (createdRoom && createdRoom.id) {
+				const pvroomuser1 = {
+					id: createdRoom.id,
+					isChannel: false,
+					title: username,
+					private: true,
+					password: '',
+					messages: [],
+				};
+				const roomName = "room_" + createdRoom.id.toString();
+				client.join(roomName);
+				client.emit('newRoom', pvroomuser1);
+
+				const user1 = await this.roomService.getMemberDatabyId(userId);
+				const user2 = await this.roomService.getMemberDatabyUsername(username);
+
+				if (user2) {
+					const socketUser2 = this.clients[user2.id.toString()];
+					if (socketUser2) {
+						const pvroomuser2 = {
+							id: createdRoom.id,
+							isChannel: false,
+							title: user1.username,
+							private: true,
+							password: '',
+							messages: [],
+						};
+						const roomNameUser2 = "room_" + createdRoom.id.toString();
+						socketUser2.join(roomNameUser2);
+						socketUser2.emit('newRoom', pvroomuser2);
+					}
+				}
+
+				return createdRoom.id;
+			} else {
+				return createdRoom;
+			}
 	}
 
 	@SubscribeMessage('sendMessage')
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string }) {
 		const roomid = parseInt(message.roomId, 10);
 		const userid = client.data.user.id;
+		if (Number.isNaN(roomid) || !message.content.trim() || !message.roomId.trim() || !/^[0-9]+$/.test(message.roomId) || typeof message.roomId !== 'string' || typeof message.content !== 'string' || message.content.length > 10000) {
+			return false;
+		}
 		const user = await this.roomService.getUserbyId(userid);
 		this.logger.log('message', message);
 		const member = await this.memberService.getMemberDatabyRoomId(user.id, roomid);
@@ -212,7 +264,13 @@ export class RoomGateway
 	@SubscribeMessage('changeRoomTitle')
 	async handlechangeRoomTitle(@ConnectedSocket() client: Socket, @MessageBody() content: { roomId: string, roomtitle: string }): Promise<boolean> {
 		const userId: number = client.data.user.id;
+		if (!content.roomtitle.trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.roomtitle !== 'string') {
+			return false;
+		}
 		const roomid = parseInt(content.roomId, 10);
+		if (!checkUserRoomName(content.roomtitle)) {
+			return false;
+		}
 		const bool = await this.roomService.changeRoomTitle(userId, roomid, content.roomtitle);
 		this.logger.log(bool);
 		if (bool) {
@@ -232,6 +290,9 @@ export class RoomGateway
 	@SubscribeMessage('UserLeaveChannel')
 	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: { usertoKick: number, roomId: string }): Promise<any> {
 		const userid: number = client.data.user.id;
+		if (!content.usertoKick.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.usertoKick !== 'number') {
+			return false;
+		}
 		const roomid = parseInt(content.roomId, 10);
 		const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
 		this.logger.log(bool);
@@ -262,6 +323,9 @@ export class RoomGateway
 	@SubscribeMessage('muteMember')
 	async handleMuteMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, duration: number }): Promise<boolean> {
 		const userId: number = client.data.user.id;
+		if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.memberId !== 'number' || typeof content.duration !== 'number' || content.duration < 0) {
+			return false;
+		}
 		const roomId = parseInt(content.roomId, 10);
 		const bool = await this.roomService.muteMember(userId, roomId, content.memberId, content.duration);
 		this.logger.log(bool);
@@ -285,6 +349,9 @@ export class RoomGateway
 	@SubscribeMessage('banMember')
 	async handleBanMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, action: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.memberId !== 'number' || typeof content.action !== 'boolean') {
+			return false;
+		}
 		const roomid = parseInt(content.roomId, 10);
 
 		const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
@@ -316,6 +383,9 @@ export class RoomGateway
 	@SubscribeMessage('blockUser')
 	async handleBlockUser(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, action: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!content.memberId.toString().trim() || typeof content.memberId !== 'number' || typeof content.action !== 'boolean') {
+			return false;
+		}
 
 		const bool = await this.roomService.blockUser(userid, content.memberId, content.action);
 		this.logger.log(bool);
@@ -335,6 +405,9 @@ export class RoomGateway
 	@SubscribeMessage('inviteUser')
 	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member | number> {
 		const userid: number = client.data.user.id;
+		if (!content.username.trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.username !== 'string') {
+			return -1;
+		}
 		const roomid = parseInt(content.roomId, 10);
 
 		const nbid = await this.roomService.inviteUser(userid, roomid, content.username);
@@ -365,6 +438,9 @@ export class RoomGateway
 	@SubscribeMessage('changeRole')
 	async handlechangeRole(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomid: string, owner: boolean, admin: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!content.memberId.toString().trim() || !content.roomid.trim() || !/^[0-9]+$/.test(content.roomid) || typeof content.roomid !== 'string' || typeof content.memberId !== 'number' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean') {
+			return false;
+		}
 		const roomId = parseInt(content.roomid, 10);
 
 		const bool = await this.roomService.changeRole(userid, roomId, content.memberId, content.owner, content.admin);
@@ -388,8 +464,17 @@ export class RoomGateway
 	}
 
 	@SubscribeMessage('changePassword')
-	async handlechangePassword(@ConnectedSocket() client: Socket, @MessageBody() content: { roomId: string, password: string }): Promise<boolean> {
+	async handlechangePassword(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() content: { roomId: string, password: string, delPass: boolean }
+	): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!content.roomId.trim()  || typeof content.roomId !== 'string' || typeof content.delPass !== 'boolean') {
+			return false;
+		}
+		if (!content.delPass && (typeof content.password !== 'string' || !checkPassword(content.password))) {
+			return false;
+		}
 		const roomId = parseInt(content.roomId, 10);
 
 		const bool = await this.roomService.changePassword(userid, roomId, content.password);
@@ -401,8 +486,12 @@ export class RoomGateway
 		return false;
 	}
 
+
 	@SubscribeMessage('deleteChannel')
 	async handledeleteRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<boolean> {
+		if (!roomId.trim() || !/^[0-9]+$/.test(roomId) || typeof roomId !== 'string') {
+			return false;
+		}
 		const roomIdNumber = parseInt(roomId, 10);
 
 		const bool = await this.roomService.deleteRoom(roomIdNumber);
