@@ -30,7 +30,9 @@ export class GamesService {
     } else {
       for (let s of sockets) {
         if (s.data.user.id == payload) {
-          s.emit('ponged', { nick: "", id: socket.data.user.id })
+          console.log(socket.data.user)
+          const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
+          s.emit('ponged', { nick: username, id: socket.data.user.id })
           this.matches[socket.data.user.id] = { receiverId: payload, sender: socket, receiver: s };
           console.log(`Matched ${socket.data.user.id} with ${payload}, now matches are ${this.matches.toString()}`)
           break;
