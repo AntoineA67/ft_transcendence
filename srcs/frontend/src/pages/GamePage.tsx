@@ -1,3 +1,16 @@
+/**
+ * @component GamePage
+ * @description The main component for the game page, which includes the game canvas and logic for gameplay.
+ * @filesource /home/antoine/ft_transcendence/srcs/frontend/src/pages/GamePage.tsx
+ * @requires react, react-router-dom, @react-three/fiber, @react-three/drei, three, ../utils/socket, ../assets/game/pongMapRounded.png, ../components/game/Timer, ../components/game/CameraFOVHandler, ../components/game/GameSummaryModal, ../components/game/GameWaitingRoom, ../components/game/UserWrapper, ../components/game/BallWrapper, ../components/game/CanvasGraphicEffects
+ * @exports default
+ * @enum {string} GameStatus - Enum for the different game statuses.
+ * @property {string} Idle - The game is idle.
+ * @property {string} Matching - The game is currently matching players.
+ * @property {string} Started - The game has started.
+ * @property {string} Finished - The game has finished.
+ * @property {string} Loading - The game is currently loading.
+ */
 import * as THREE from "three"
 import { useEffect, useRef, useState } from "react"
 import { Canvas, useLoader } from "@react-three/fiber"
@@ -42,70 +55,75 @@ export default function GamePage() {
 	const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
 	let indexTime = 0;
 
-
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
 	}
-	const subscribeToGamesSocketMessages = (action: 'on' | 'off') => {
-		const gameSocketAction = action === 'on' ? gamesSocket.on : gamesSocket.off
-		gameSocketAction('startGame', (_newId: any) => {
-			gamesSocket.emit('getMyGameSettings', (res: any) => {
-				setPaddleColor(res.paddleColor);
-				setGraphicEffects(res.graphicEffects);
-			});
-			setGameStatus(GameStatus.Started);
+	const onMessageStartGame = (_newId: any) => {
+		gamesSocket.emit('getMyGameSettings', (res: any) => {
+			setPaddleColor(res.paddleColor);
+			setGraphicEffects(res.graphicEffects);
 		});
-		gameSocketAction('clients', (newClients: any) => {
-			setClients(newClients.clients)
-			setTime(newClients.time);
-			if (newClients.ball) {
-				setBall(newClients.ball)
-			}
+		setGameStatus(GameStatus.Started);
+	};
+	const onMessageClients = (newClients: any) => {
+		setClients(newClients.clients);
+		setTime(newClients.time);
+		if (newClients.ball) {
+			setBall(newClients.ball);
+		}
 
 
-			if (clients && cameraShakeRef.current) {
-				for (const client of Object.values(newClients.clients) as any) {
-					if (client.scoredThisUpdate) {
-						cameraShakeRef.current.setIntensity(1);
-						break;
-					}
-				}
-			}
-			if (handPos.current === -1) return
-			for (const client of Object.keys(newClients.clients)) {
-				if (client == id.current) {
-					const pos = 100 - handPos.current * 100;
-					console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()])
-					const currentPos = newClients.clients[id.current.toString()].y;
-					if (indexTime++ % 10 !== 0) return
-					if (Math.abs(pos - currentPos) > 5) {
-						if (pos < currentPos) {
-							// console.log("Going up !")
-							sendPressed("down", true);
-							sendPressed("up", false);
-						} else if (pos > currentPos) {
-							// console.log("Going down !")
-							sendPressed("up", true);
-							sendPressed("down", false);
-						}
-					} else {
-						sendPressed("up", false);
-						sendPressed("down", false);
-					}
-					indexTime = 0;
+		if (clients && cameraShakeRef.current) {
+			for (const client of Object.values(newClients.clients) as any) {
+				if (client.scoredThisUpdate) {
+					cameraShakeRef.current.setIntensity(1);
 					break;
 				}
 			}
+		}
+		if (handPos.current === -1) return;
+		for (const client of Object.keys(newClients.clients)) {
+			if (client == id.current) {
+				const pos = 100 - handPos.current * 100;
+				console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()]);
+				const currentPos = newClients.clients[id.current.toString()].y;
+				if (indexTime++ % 10 !== 0) return;
+				if (Math.abs(pos - currentPos) > 5) {
+					if (pos < currentPos) {
+						// console.log("Going up !")
+						sendPressed("down", true);
+						sendPressed("up", false);
+					} else if (pos > currentPos) {
+						// console.log("Going down !")
+						sendPressed("up", true);
+						sendPressed("down", false);
+					}
+				} else {
+					sendPressed("up", false);
+					sendPressed("down", false);
+				}
+				indexTime = 0;
+				break;
+			}
+		}
 
-		})
-		gameSocketAction('gameOver', (summary: any) => {
-			// console.log('Game Over! Winner: ', winner);
-			setSummary(summary);
-			setGameStatus(GameStatus.Idle);
-			setWebcam(false);
-			setWebcamRunning(false);
-			// setGameStatus(GameStatus.Finished);
-		})
+	};
+	const onMessageGameOver = (summary: any) => {
+		// console.log('Game Over! Winner: ', winner);
+		setSummary(summary);
+		setGameStatus(GameStatus.Idle);
+		setWebcam(false);
+		setWebcamRunning(false);
+	};
+	const subscribeToGamesSocketMessages = () => {
+		gamesSocket.on('startGame', onMessageStartGame);
+		gamesSocket.on('clients', onMessageClients)
+		gamesSocket.on('gameOver', onMessageGameOver)
+	}
+	const unsubscribeToGamesSocketMessages = () => {
+		gamesSocket.off('startGame', onMessageStartGame);
+		gamesSocket.off('clients', onMessageClients)
+		gamesSocket.off('gameOver', onMessageGameOver)
 	}
 	const sendPressed = (key: string, pressed: boolean) => {
 		console.log("sendPressed", key, pressed)
@@ -133,7 +151,7 @@ export default function GamePage() {
 		gamesSocket.emit('match');
 		setGameStatus(GameStatus.Matching);
 	};
-	const cancelMatchmaking = () => {
+	const cancelOrLeave = () => {
 		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 	};
@@ -161,15 +179,15 @@ export default function GamePage() {
 	}
 
 	useEffect(() => {
-		subscribeToGamesSocketMessages('on');
+		subscribeToGamesSocketMessages();
 		gamesSocket.emit('getMyGameSettings', (res: any) => {
 			setPaddleColor(res.paddleColor);
 			setGraphicEffects(res.graphicEffects);
 		});
 		return () => {
 			// console.log("Game unmounted");
-			cancelMatchmaking();
-			subscribeToGamesSocketMessages('off');
+			cancelOrLeave();
+			unsubscribeToGamesSocketMessages();
 		}
 	}, [gamesSocket])
 
@@ -185,6 +203,7 @@ export default function GamePage() {
 			}
 		});
 	}, [location])
+
 
 	useEffect(() => {
 		if (gameStatus === GameStatus.Started) {
@@ -205,7 +224,7 @@ export default function GamePage() {
 			{gameStatus !== GameStatus.Started ?
 				<GameWaitingRoom
 					startMatchmaking={startMatchmaking}
-					cancelMatchmaking={cancelMatchmaking}
+					cancelOrLeave={cancelOrLeave}
 					paddleColor={paddleColor}
 					gameStatus={gameStatus}
 					graphicEffectsSettings={graphicEffects}
@@ -242,7 +261,7 @@ export default function GamePage() {
 									/>
 								)
 							})}
-						{clients[id.current] !== undefined && < BallWrapper ball={ball} client={clients[id.current]} graphicEffects={graphicEffects} />}
+						{clients[id.current] !== undefined && <BallWrapper ball={ball} client={clients[id.current]} graphicEffects={graphicEffects} />}
 						<Plane receiveShadow args={[200, 100]} position={[0, 50, -3]} material={new THREE.MeshStandardMaterial({ map: pongMap, emissiveMap: pongMap, emissive: 'white', emissiveIntensity: .7, toneMapped: false })} />
 					</group >
 					{graphicEffects && <CanvasGraphicEffects cameraShakeRef={cameraShakeRef} />}
