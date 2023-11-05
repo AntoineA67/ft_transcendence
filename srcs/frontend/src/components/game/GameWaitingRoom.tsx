@@ -1,43 +1,12 @@
 import { FidgetSpinner } from "react-loader-spinner";
-import { Card, Container, Modal } from "react-bootstrap";
+import { Card, Container } from "react-bootstrap";
 import { gamesSocket } from '../../utils/socket';
 import { PaddleWheel } from "./PaddleWheel";
 import { GraphicEffectsSettingsCard } from "./GraphicEffectsSettingsCard";
 import { RulesModal } from "./RulesModal";
 import { GameStatus } from "../../pages/GamePage";
-import { useState, useEffect } from "react";
-
-export const WebcamConfirmModal = ({ confirmAction, cancelAction }: { confirmAction: (e: any) => void, cancelAction: (e: any) => void }) => {
-	const [show, setShow] = useState(false);
-
-	const handleClose = () => setShow(false);
-	const handleShow = () => setShow(true);
-
-	return (
-		<>
-			<button id="webcamButton" className="btn btn-secondary" onClick={handleShow}>Play using webcam !</button>
-			<Modal size="sm"
-				aria-labelledby="contained-modal-title-vcenter"
-				centered show={show} onHide={handleClose}>
-				<Modal.Header closeButton>
-					<Modal.Title className="text-black">B</Modal.Title>
-				</Modal.Header>
-				<Modal.Body className="text-black">
-					C
-				</Modal.Body>
-				<Modal.Footer>
-					<button className="btn btn-primary" onClick={(e: any) => { handleClose(); confirmAction(e); }}>
-						Yes !
-					</button>
-					<button className="btn btn-danger" onClick={(e: any) => { handleClose(); cancelAction(e); }}>
-						Cancel
-					</button>
-				</Modal.Footer>
-			</Modal>
-		</>
-	);
-};
-
+import { useEffect } from "react";
+import { WebcamConfirmModal } from "./WebcamConfirmModal";
 
 type GameWaitingRoomProps = {
 	gameStatus: GameStatus;
@@ -46,10 +15,9 @@ type GameWaitingRoomProps = {
 	paddleColor: string;
 	graphicEffectsSettings: boolean;
 	playUsingWebcam: (e: any) => void;
-	cancelCamera: () => void;
 };
 
-export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, paddleColor, graphicEffectsSettings, playUsingWebcam, cancelCamera }: GameWaitingRoomProps) => {
+export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, paddleColor, graphicEffectsSettings, playUsingWebcam }: GameWaitingRoomProps) => {
 	return (
 		<div className="d-flex align-items-center justify-content-center h-100">
 			<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
@@ -64,13 +32,13 @@ export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, p
 							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
 							{/* <button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button> */}
 							<RulesModal />
-							<WebcamConfirmModal confirmAction={playUsingWebcam} cancelAction={cancelCamera} />
+							<WebcamConfirmModal confirmAction={playUsingWebcam} cancelAction={cancelOrLeave} />
 						</Container>
 						<PaddleWheel currentColor={paddleColor} />
 						<GraphicEffectsSettingsCard currentSettings={graphicEffectsSettings} />
 					</>}
 					{gameStatus === GameStatus.Matching && <MatchingScreen cancelOrLeave={cancelOrLeave} />}
-					{gameStatus === GameStatus.Loading && <LoadingScreen cancelCamera={cancelCamera} />}
+					{gameStatus === GameStatus.Loading && <LoadingScreen cancelCamera={cancelOrLeave} />}
 				</Card.Body>
 			</Card>
 		</div>
