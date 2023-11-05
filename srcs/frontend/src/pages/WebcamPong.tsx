@@ -36,7 +36,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 
 	const predictWebcam = async () => {
 		const canvasCtx = canvasRef.current?.getContext("2d");
-		if (!canvasRef.current || !handLandmarker || !canvasCtx || !videoRef.current || !videoRef.current.srcObject) {
+		if (!webcam || !canvasRef.current || !handLandmarker || !canvasCtx || !videoRef.current || !videoRef.current.srcObject) {
 			changeHandPos(-1);
 			return;
 		};
@@ -146,7 +146,11 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	useEffect(() => {
 		console.log("webcam pong", webcam, vision.current, handLandmarker.current)
 		if (webcam) {
-			createHandLandmarker().then(enableCam);
+			createHandLandmarker().then(() => {
+				if (webcam) {
+					enableCam();
+				}
+			});
 		} else {
 			handLandmarker.current?.close();
 			handLandmarker.current = null;

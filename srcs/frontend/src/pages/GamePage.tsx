@@ -228,7 +228,7 @@ export default function GamePage() {
 					gameStatus={gameStatus}
 					graphicEffectsSettings={graphicEffects}
 					playUsingWebcam={playUsingWebcam}
-					cancelCamera={() => playUsingWebcam('cancel')}
+					cancelCamera={cancelOrLeave}
 				/>
 				:
 				<Canvas style={{ background: "black" }} id="game-canvas" camera={{ isOrthographicCamera: true, rotation: [.005, 0, 0], position: [0, 50, 200], fov: 60, near: 60, far: 250 }}

@@ -13,13 +13,6 @@ export const WebcamConfirmModal = ({ confirmAction, cancelAction }: { confirmAct
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 
-	// useEffect(() => {
-	// 	if (showProps) {
-	// 		handleShow();
-	// 		console.log(showProps);
-	// 	}
-	// }, [showProps]);
-
 	return (
 		<>
 			<button id="webcamButton" className="btn btn-secondary" onClick={handleShow}>Play using webcam !</button>
