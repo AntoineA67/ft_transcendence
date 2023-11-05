@@ -5,7 +5,8 @@ import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
 import { profileType } from '../../types/user';
 import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
-import { closeSnackbar, enqueueSnackbar, SnackbarProvider } from "notistack";
+import { closeSnackbar, enqueueSnackbar } from "notistack";
+import { Container } from 'react-bootstrap';
 
 
 type textProp = {
@@ -14,25 +15,29 @@ type textProp = {
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
 
+
 function Text({ type, profile, setEdit }: textProp) {
-	const classname = "mt-3 w-50 text-center text-wrap text-break";
+	const classname = "mt-3 text-center";
 	const [err, setErr] = useState('');
 
 	return (
 		<>
-			{type == 'nick' ? (
-				<h5 className={`${classname} white-text`}>
-					{profile.username}
-				</h5>
-			) : (
-				<p className={`${classname} white-text`}>
-					{profile.bio}
-				</p>
-			)}
-			<button className="edit-pen" onClick={() => setEdit(type)} />
+			<div className="d-flex justify-content-center align-items-center">
+				{type == 'nick' ? (
+					<h5 className={`${classname} white-text`}>
+						{profile.username}
+					</h5>
+				) : (
+					<p className={`${classname} white-text`}>
+						{profile.bio}
+					</p>
+				)}
+				<button className="edit-pen ml-2" onClick={() => setEdit(type)} />
+			</div>
 		</>
 	);
 }
+
 
 type editTextProp = {
 	type: 'nick' | 'bio',
@@ -138,9 +143,9 @@ function Profile() {
 
 	return (
 		<>
-			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">			
+			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">
 				<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
-			
+
 				<div>
 					<Avatar size={150} user={{
 						id: profile.id,
