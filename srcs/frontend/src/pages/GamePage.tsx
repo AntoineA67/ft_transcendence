@@ -201,7 +201,7 @@ export default function GamePage() {
 		globalSocket.emit('MyProfile', (res: any) => {
 			id.current = res.id;
 			if (gameUserId && gameUserId != res.id) {
-				gamesSocket.emit('matchAgainst', gameUserId);
+				gamesSocket.emit('matchAgainst', { id: gameUserId });
 				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
 				console.log("gameUserId", gameUserId)
 				setOpponent(gameUserId)
