@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHourglass } from '@fortawesome/free-solid-svg-icons';
 import { redirect, useNavigate } from "react-router-dom";
+import { gamesSocket } from "../utils/socket";
+import { enqueueSnackbar } from "notistack";
 
 
 type popupProp = {
@@ -19,8 +21,12 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 			// emit event 
 			setPopup('no')
 		}, 30000);
-
 		setId(timeoutId);
+		gamesSocket.on('cancelledMatchmake', () => {
+			clearTimeout(id);
+			setPopup('no');
+			enqueueSnackbar('Match cancelled', { variant: 'info' });
+		})
 	}, [])
 
 	const onAccept = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

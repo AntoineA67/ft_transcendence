@@ -144,7 +144,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	}
 
 	useEffect(() => {
-		console.log("webcam pong", webcam, vision.current, handLandmarker.current)
+		// console.log("webcam pong", webcam, vision.current, handLandmarker.current)
 		if (webcam) {
 			createHandLandmarker().then(() => {
 				if (webcam) {

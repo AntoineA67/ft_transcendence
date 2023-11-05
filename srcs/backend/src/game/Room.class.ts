@@ -127,7 +127,6 @@ export default class Room {
 			return;
 		}
 
-		// try {
 		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
@@ -140,9 +139,5 @@ export default class Room {
 		} else if (wins.length == 100) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
 		}
-
-		// } catch (error) {
-		// 	console.log(error);
-		// }
 	}
 }
