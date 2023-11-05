@@ -17,7 +17,7 @@ import { Canvas, useLoader } from "@react-three/fiber"
 import { Plane, ShakeController } from "@react-three/drei"
 import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { useLocation } from "react-router-dom"
-import { WebcamPong } from "./WebcamPong"
+import { WebcamPong } from "../components/game/WebcamPong"
 import { TextureLoader } from 'three/src/loaders/TextureLoader'
 import pongMapTexture from '../assets/game/pongMapRounded.png'
 import { Timer } from "../components/game/Timer"
@@ -53,6 +53,7 @@ export default function GamePage() {
 	const [summary, setSummary] = useState<any>(null);
 	const location = useLocation();
 	const [webcam, setWebcam] = useState<boolean>(false);
+	const [opponent, setOpponent] = useState<any>(null);
 
 	let indexTime = 0;
 
@@ -115,15 +116,21 @@ export default function GamePage() {
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
+	const onCancelledMatchmake = () => {
+		setGameStatus(GameStatus.Idle);
+		setWebcam(false);
+	};
 	const subscribeToGamesSocketMessages = () => {
 		gamesSocket.on('startGame', onMessageStartGame);
 		gamesSocket.on('clients', onMessageClients)
 		gamesSocket.on('gameOver', onMessageGameOver)
+		gamesSocket.on('cancelledMatchmake', onCancelledMatchmake)
 	}
 	const unsubscribeToGamesSocketMessages = () => {
 		gamesSocket.off('startGame', onMessageStartGame);
 		gamesSocket.off('clients', onMessageClients)
 		gamesSocket.off('gameOver', onMessageGameOver)
+		gamesSocket.off('cancelledMatchmake', onCancelledMatchmake)
 	}
 	const sendPressed = (key: string, pressed: boolean) => {
 		// console.log("sendPressed", key, pressed)
@@ -155,6 +162,10 @@ export default function GamePage() {
 		playUsingWebcam('cancel')
 		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
+		if (opponent) {
+			console.log("opponent", opponent)
+			gamesSocket.emit('cancel');
+		}
 	};
 	const onWebcamFinishedLoading = () => {
 		console.log("loadeddata")
@@ -169,11 +180,6 @@ export default function GamePage() {
 			return
 		}
 		setWebcam(true);
-		// const video = document.getElementById("webcam") as any;
-		// video.addEventListener("loadeddata", () => {
-		// 	console.log("loadeddata")=
-		// 	startMatchmaking();
-		// });
 		setGameStatus(GameStatus.Loading);
 	}
 
@@ -197,6 +203,8 @@ export default function GamePage() {
 			if (gameUserId && gameUserId != res.id) {
 				gamesSocket.emit('matchAgainst', gameUserId);
 				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
+				console.log("gameUserId", gameUserId)
+				setOpponent(gameUserId)
 				setGameStatus(GameStatus.Matching);
 				window.history.replaceState({}, document.title)
 			}
