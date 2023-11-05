@@ -95,7 +95,9 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 		}
 
 		async function predictWebcam() {
-			if (!handLandmarker || !canvasCtx || !video.current || !video.current.srcObject) return;
+			if (!handLandmarker || !canvasCtx || !video.current || !video.current.srcObject) {
+				changeHandPos(-1);
+			};
 			canvasElement.style.width = video.current?.videoWidth;;
 			canvasElement.style.height = video.current?.videoHeight;
 			canvasElement.width = video.current?.videoWidth;
@@ -149,6 +151,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 			if (webcamRunning === true) {
 				webcamRunning = false;
 				enableWebcamButton.innerText = "ENABLE PREDICTIONS";
+				changeHandPos(-1);
 				if (stream.current) {
 					stream.current.getTracks().forEach((track: MediaStreamTrack) => track.stop());
 				}
@@ -197,10 +200,10 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 		<>
 			<section style={{ position: "fixed" }} id="demos" className="invisible">
 				<div id="liveView" className="videoView">
-					{/* <button id="webcamButton" className="mdc-button mdc-button--raised">
-							<span className="mdc-button__ripple"></span>
-							<span className="mdc-button__label">ENABLE WEBCAM</span>
-						</button> */}
+					<button id="webcamButton" className="mdc-button mdc-button--raised">
+						<span className="mdc-button__ripple"></span>
+						<span className="mdc-button__label">ENABLE WEBCAM</span>
+					</button>
 					<div style={{ position: "fixed", opacity: .2 }}>
 						<video id="webcam" autoPlay playsInline></video>
 						<canvas className="output_canvas" id="output_canvas" width="1280" height="720" style={{ position: "absolute", left: "0px", top: "0px" }}></canvas>

@@ -17,7 +17,7 @@ import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
 // import { Home } from './pages/Home';
-import Game from './pages/Game';
+import GamePage from './pages/GamePage';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
@@ -106,8 +106,8 @@ const router = createBrowserRouter(
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 
-					<Route index element={<Game />} />
-					<Route path="/game/:userId" element={<Game />} />
+					<Route index element={<GamePage />} />
+					{/* <Route path="/game/:userId" element={<GamePage />} /> */}
 
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
