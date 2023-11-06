@@ -79,7 +79,7 @@ export default function Sidebar() {
 						<div className="col-sm-auto sticky-bottom order-sm-first bg-black">
 							<ul className="nav navbar navbar-expand flex-sm-column justify-content-around gap-sm-4" id="sidebar-ul" role="navigation">
 								<li className={`nav-item ${page === '/' ? 'magenta' : ''}`}>
-									<Link to="/"><img src={Game} alt="Game" /></Link>
+									<Link to="game"><img src={Game} alt="Game" /></Link>
 								</li>
 								<li className={`nav-item ${page === '/me' ? 'magenta' : ''}`}>
 									<Link to="me"><img src={Me} alt="Home" /></Link>

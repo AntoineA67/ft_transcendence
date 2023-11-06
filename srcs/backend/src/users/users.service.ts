@@ -45,7 +45,7 @@ export class UsersService {
 					username: username,
 					email: email,
 					hashPassword: hashPassword,
-					avatar
+					avatar: avatar,
 				},
 			});
 			return user;
