@@ -4,9 +4,9 @@ import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
 import { profileType } from '../../types/user';
-import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
-import { closeSnackbar, enqueueSnackbar } from "notistack";
-import { Container } from 'react-bootstrap';
+// import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
+import { enqueueSnackbar } from "notistack";
+// import { Container } from 'react-bootstrap';
 
 
 type textProp = {
@@ -14,7 +14,6 @@ type textProp = {
 	profile: profileType,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
 }
-
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 text-center";
@@ -28,7 +27,6 @@ function Text({ type, profile, setEdit }: textProp) {
 
 	return (
 		<div className='w-75'>
-			
 				{type == 'nick' ? (
 					<h5 className={`${classname} white-text`}>
 						{profile.username}
