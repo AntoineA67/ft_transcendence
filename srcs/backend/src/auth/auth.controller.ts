@@ -51,7 +51,7 @@ export class AuthController {
 			token2FA: req.query._2fa,
 			activated2FA: req.user.activated2FA,
 			user: req.user,
-			firstConnexion: true,
+			firstConnexion: req.user.firstConnexion,
 		}
 		return await this.authService.signin42(dto, res, req);
 	}
