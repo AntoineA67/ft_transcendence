@@ -114,6 +114,9 @@ const router = createBrowserRouter(
 						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 
+					<Route path='game' element={<GamePage />} />
+					<Route path=":userId" element={<GamePage />} />
+
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route index element={<DefaultSearchPage />} />
 						<Route
