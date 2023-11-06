@@ -567,7 +567,7 @@ export function ChatBox() {
 		return (
 			<li className="message-container" key={message.id}>
 				<div className={`d-flex ${classuser}`}>
-					{message.userId !== profile.id && (
+					{message.userId !== profile.id && profile.status === 'ONLINE' && (
 						<span style={{ marginRight: '20px', cursor: 'pointer' }} onClick={() => handlePlayClickinMess(message.userId, message.username)}>
 							<FontAwesomeIcon icon={faPlay} />
 						</span>

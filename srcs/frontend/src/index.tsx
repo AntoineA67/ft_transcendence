@@ -106,7 +106,7 @@ const router = createBrowserRouter(
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 
-					<Route index element={<GamePage />} />
+					<Route index element={<GamePage />} loader={() => (loader('auth', 'isTokenValid'))} />
 
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
