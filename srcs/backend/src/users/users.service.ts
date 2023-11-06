@@ -77,7 +77,6 @@ export class UsersService {
 		//     let empty = data.username.match(/^(?!\s*$).+/i);
 		//     if (!valid || empty == null) return (false)
 		// }
-		console.log("PASS ==", data.password);
 		let user: User;
 		if (data.password) {
 			console.log("PASS ==", data.password);

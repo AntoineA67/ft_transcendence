@@ -13,6 +13,7 @@ body {
 	min-height: 100vh; 
 	color: white;
 	background: linear-gradient(to top, #0a0a0a, #181a1a, #2d2d2f);
+	font-family: monospace !important;
 }
 
 button {
