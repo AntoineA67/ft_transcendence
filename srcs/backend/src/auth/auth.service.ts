@@ -50,7 +50,7 @@ export class AuthService {
 					hashPassword,
 				},
 		});
-		return this.signJwtTokens(user.id, user.email, true);
+		return this.signJwtTokens(user.id, user.email, "true");
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -89,7 +89,7 @@ export class AuthService {
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
-		return await this.signJwtTokens(user.id, user.email, false);
+		return await this.signJwtTokens(user.id, user.email, "false");
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -123,7 +123,7 @@ export class AuthService {
 		res.status(HttpStatus.OK).json(response);
 	}
 
-	async signJwtTokens(userId: number, userEmail: string, firstConnexion: boolean) {
+	async signJwtTokens(userId: number, userEmail: string, firstConnexion: string) {
 		let payload = {
 			id: userId,
 			email: userEmail,
@@ -153,7 +153,7 @@ export class AuthService {
 		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
 			userExists = await this.registerUser42(user);
-		userExists.firstConnexion = false;
+		userExists.firstConnexion = "false";
 		return (userExists);
 	}
 
