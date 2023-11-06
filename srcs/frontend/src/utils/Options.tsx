@@ -18,7 +18,7 @@ export function Options({ profile, setProfile }: OptionsProp) {
 		<div className='d-flex flex-row'>
 			<AddOption profile={{ ...profile }} setProfile={setProfile} />
 			<ChatOption profile={{ ...profile }} setProfile={setProfile} />
-			<PongOption profile={{ ...profile }} setProfile={setProfile} />
+			{profile.status === 'ONLINE' && <PongOption profile={{ ...profile }} setProfile={setProfile} />}
 			<BlockOption profile={{ ...profile }} setProfile={setProfile} />
 		</div>
 	)
@@ -198,8 +198,8 @@ export function PongOption({ profile, setProfile }: optionProp) {
 
 	return (
 		<div className='d-flex flex-column align-items-center'>
-			<button className='pongOption' onClick={handleClick} />
-			<p className='magenta-text'>{text}</p>
+			<button disabled={profile.status !== 'ONLINE'} className='pongOption' onClick={handleClick} />
+			<p className={profile.status !== 'ONLINE' ? 'grey-text' : 'magenta-text'}>{text}</p>
 		</div>
 	)
 }

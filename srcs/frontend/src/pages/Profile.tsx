@@ -21,20 +21,24 @@ function Text({ type, profile, setEdit }: textProp) {
 	const [err, setErr] = useState('');
 
 	return (
-		<>
-			<div className="d-flex justify-content-center align-items-center">
+		<div className='w-75'>
+			
 				{type == 'nick' ? (
 					<h5 className={`${classname} white-text`}>
 						{profile.username}
+						<span>
+							<button className="edit-pen" onClick={() => setEdit(type)} />
+						</span>
 					</h5>
 				) : (
 					<p className={`${classname} white-text`}>
 						{profile.bio}
+						<span>
+							<button className="edit-pen" onClick={() => setEdit(type)} />
+						</span>
 					</p>
 				)}
-				<button className="edit-pen ml-2" onClick={() => setEdit(type)} />
-			</div>
-		</>
+		</div>
 	);
 }
 
@@ -103,7 +107,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		if (!file) return;
 		if (file.size >= 1048576) {
 			// console.log('file size limit: 1MB');
-			enqueueSnackbar("Oups, la limite est d'1 MB !", {
+			enqueueSnackbar("Oups, la taille limite de la photo est d'1 MB !", {
 				variant: 'error',
 				autoHideDuration: 3000,
 			})
@@ -143,7 +147,7 @@ function Profile() {
 
 	return (
 		<>
-			<div className="container my-5 pb-sm-5 d-flex flex-column align-items-center white-text">
+			<div className="container-fluid my-5 pb-sm-5 d-flex flex-column align-items-center white-text " >
 				<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
 				<div>
