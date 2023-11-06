@@ -19,9 +19,10 @@ export class GamesService {
     const otherId = otherIdDTO.id;
     try {
       const otherIdNumber = parseInt(otherId);
-      if (this.prisma.user.findUnique({ where: { id: otherIdNumber } }) == null) return;
+      const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
+      if (otherUser == null || otherUser.status !== 'ONLINE') throw new Error('User not online');
     } catch (error) {
-      socket.emit('cancelledMatchmake');
+      socket.emit('cancelledMatchmake', { reason: error.message });
       return;
     }
     const sockets = await wss.fetchSockets();
