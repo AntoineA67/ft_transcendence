@@ -78,12 +78,14 @@ async function loader(route: string, param?: string, refresh = false) {
 		if (res.status != 201) {
 			localStorage.removeItem('token');
 			localStorage.removeItem('refreshToken');
+			localStorage.removeItem('firstConnexion');
 			return redirect("/login");
 			// throw new Response(res.statusText, { status: res.status })
 		}
 		const newTokens = await res.json();
 		localStorage.setItem('token', newTokens.token);
 		localStorage.setItem('refreshToken', newTokens.refreshToken);
+		localStorage.setItem('firstConnexion', newTokens.firstConnexion);
 		return loader(route, param, true);
 	})
 
