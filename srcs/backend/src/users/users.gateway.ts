@@ -3,10 +3,11 @@ import { OnGatewayConnection } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UsersService } from './users.service';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
+import { validate, validateOrReject } from 'class-validator';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -43,12 +44,27 @@ export class UsersGateway
 
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
-		if (!client.data.user.id || client.data.user.id.length > 6) {
-			return (null);
+		try {
+			if (!data) {
+				console.error('Data is missing or undefined.');
+				return null;
+			}
+
+			if (!client.data.user || !client.data.user.id || String(client.data.user.id).length > 6) {
+				console.error('User data is missing or the user ID is invalid.');
+				return null;
+			}
+
+			const id: number = client.data.user.id;
+			this.logger.log(data);
+
+			const result = await this.usersService.updateUser(id, data);
+
+			return result;
+		} catch (error) {
+			console.error(error);
+			return false;
 		}
-		const id: number = client.data.user.id;
-		this.logger.log(data);
-		return (await this.usersService.updateUser(id, data))
 	}
 
 	@SubscribeMessage('newAvatar')
@@ -69,7 +85,7 @@ export class UsersGateway
 			// transform to base64
 			let base64 = file.toString('base64');
 			base64 = `data:image/jpeg;base64,${base64}`;
-			return (await this.usersService.updateUser(id, {avatar: base64}));
+			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
 		return (await fileCheck(file));
 	}

@@ -5,8 +5,9 @@ import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
 import { profileType } from '../../types/user';
 import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
-import { closeSnackbar, enqueueSnackbar } from "notistack";
+import { EnqueueSnackbar, closeSnackbar, enqueueSnackbar } from "notistack";
 import { Container } from 'react-bootstrap';
+import { checkBio, checkUserRoomName, containsUnprintableCharacters } from './ChatDto';
 
 
 type textProp = {
@@ -44,10 +45,11 @@ type editTextProp = {
 	profile: profileType,
 	setProfile: React.Dispatch<React.SetStateAction<profileType>>,
 	setEdit: React.Dispatch<React.SetStateAction<"bio" | "done" | "nick">>,
+	enqueueSnackbar: EnqueueSnackbar,
 }
 
-function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
-	const [mod, setMod] = useState(type == 'nick' ? profile.username : profile.bio);
+function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editTextProp) {
+	const [mod, setMod] = useState(type === 'nick' ? profile.username : profile.bio);
 
 	useEffect(() => {
 		const el = document.getElementsByTagName('textarea')[0] as HTMLTextAreaElement;
@@ -61,16 +63,29 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 
 	async function handleSubmit(
 		e: React.FormEvent<HTMLFormElement>,
-		type: string, profile: profileType,
+		type: string,
+		profile: profileType,
 		setProfile: React.Dispatch<React.SetStateAction<profileType>>
 	) {
-		const content = (type == 'nick') ? profile.username : profile.bio;
-		const obj = (type == 'nick') ? { username: mod } : { bio: mod };
+		const content = type === 'nick' ? profile.username : profile.bio;
+		const obj = type === 'nick' ? { username: mod } : { bio: mod };
 		e.preventDefault();
-		if (mod == content) {
+
+		if (mod === content) {
 			setEdit('done');
 			return;
 		}
+
+		// Validate the Username input using the utility function
+		if (type === 'nick' && !checkUserRoomName(mod, enqueueSnackbar, 'Username')) {
+			return;
+		}
+
+		// Validate the Bio input using the utility function
+		if (type === 'bio' && !checkBio(mod, enqueueSnackbar)) {
+			return;
+		}
+
 		let data = (type == 'nick') ? { username: mod } : { bio: mod };
 		socket.emit('UpdateProfile', data, (success: boolean) => {
 			console.log('success: ', success)
@@ -85,8 +100,23 @@ function EditText({ type, profile, setProfile, setEdit }: editTextProp) {
 		<form className="my-3 w-50 d-flex flex-column align-items-center"
 			onSubmit={(e) => handleSubmit(e, type, profile, setProfile)}>
 			<label htmlFor={`edit-${type}`}></label>
-			<textarea id={`edit-${type}`} className="w-100 text-center my-1 edit-text-area"
-				autoFocus value={mod} onChange={(e) => setMod(e.target.value)}></textarea>
+			<textarea
+				id={`edit-${type}`}
+				className="w-100 text-center my-1 edit-text-area"
+				autoFocus
+				value={mod}
+				onChange={(e) => {
+					const text = e.target.value;
+
+					// Check the character count while typing
+					if (text.length <= 201) {
+						setMod(text);
+					} else {
+						enqueueSnackbar('Character count exceeds the limit (200 characters)', { variant: 'error' });
+					}
+				}}
+				maxLength={201} // Set the maxLength to enforce the character limit
+			></textarea>
 			<button type="submit" className="ok" />
 		</form>
 	);
@@ -158,13 +188,13 @@ function Profile() {
 
 				{(edit == 'nick'
 				) ? (
-					<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} />
+					<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (
 					<Text type='nick' profile={profile} setEdit={setEdit} />)}
 
 				{(edit == 'bio'
 				) ? (
-					<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} />
+					<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (
 					<Text type='bio' profile={profile} setEdit={setEdit} />)}
 			</div>

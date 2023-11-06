@@ -1,31 +1,33 @@
-import {    
-	IsNumber,
-	IsNotEmpty,
-    IsString,
-    IsEmail,
-    MinLength,
-    Matches,
- } from "class-validator";
+import { IsNumber, IsEmail, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
-	@IsNumber()								id?: number;
-	@IsNotEmpty() @IsString() @IsEmail() 	email?: string;
+	@IsNumber({}, { message: "Invalid user ID" })
+	id?: number;
 
-	@IsNotEmpty()
+	@IsEmail({}, { message: "Invalid email format" })
+	email?: string;
+
+	@IsString({ message: "Invalid username" })
 	@MinLength(4, { message: "Username must be at least 4 characters long" })
-	@IsString()
+	@MaxLength(16, { message: "Username must be at most 16 characters long" })
 	username?: string;
 
-	@IsNotEmpty()
-	@IsString()
+	@IsString({ message: "Invalid password" })
 	@MinLength(8, { message: "Password must be at least 8 characters long" })
-	@Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/,
-		{ message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character" })
+	@MaxLength(20, { message: "Password must be at most 20 characters long" })
+	@Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/, { message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character" })
 	password?: string;
 
-	@IsString() 							bio?: string;
-											avatar?: string;
-											status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
-											otpHash?: string;
-											activated2FA?: boolean;
+	@IsString({ message: "Invalid bio" })
+	@MinLength(10, { message: "Bio must be at least 0 characters long" })
+	@MaxLength(200, { message: "Bio must be less than 200 characters long" })
+	bio?: string;
+
+	avatar?: string;
+
+	status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
+
+	otpHash?: string;
+
+	activated2FA?: boolean;
 }

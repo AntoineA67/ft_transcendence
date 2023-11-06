@@ -59,7 +59,7 @@ export function checkUserRoomName(newRoomTitle: string) {
 	if (printable) {
 		return false;
 	}
-	const bool = newRoomTitle && /^[A-Za-z0-9-]{4,16}$/.test(newRoomTitle);
+	const bool = newRoomTitle && /^[A-Za-z0-9-]{3,16}$/.test(newRoomTitle);
 	return bool;
 }
 
