@@ -147,7 +147,7 @@ function Profile() {
 
 	return (
 		<>
-			<div className="container-fluid my-5 pb-sm-5 d-flex flex-column align-items-center white-text " style={{border: '1px solid red'}}>
+			<div className="container-fluid my-5 pb-sm-5 d-flex flex-column align-items-center white-text " >
 				<Link to="setting"><button className="setting m-3 position-absolute top-0 end-0" /></Link>
 
 				<div>
