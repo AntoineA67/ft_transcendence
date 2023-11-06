@@ -16,7 +16,8 @@ type newUser = {
 
 type login = {
 	email: string,
-	password: string
+	password: string,
+	// firstConnexion: boolean,
 }
 
 export function Login() {
