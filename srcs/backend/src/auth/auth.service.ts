@@ -155,8 +155,17 @@ export class AuthService {
 		const email = user.emails[0].value;
 		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
+		{
 			userExists = await this.registerUser42(user);
-		userExists.firstConnexion = "false";
+			const data = { firstConnexion: "true"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
+		else
+		{
+			const data = { firstConnexion: "false"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
+		console.log("USEREXISTS=====", userExists);
 		return (userExists);
 	}
 

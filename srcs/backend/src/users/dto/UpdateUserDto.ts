@@ -28,4 +28,5 @@ export class UpdateUserDto {
 											status?: 'ONLINE' | 'OFFLINE' | 'INGAME';
 											otpHash?: string;
 											activated2FA?: boolean;
+	@IsString()								firstConnexion?: string;
 }

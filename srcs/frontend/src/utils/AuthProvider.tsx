@@ -34,6 +34,7 @@ export function CallBack42() {
 			}
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
+			localStorage.setItem('firstConnexion', data.firstConnexion);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log('response: ', response)
