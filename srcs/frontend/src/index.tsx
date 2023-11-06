@@ -17,7 +17,7 @@ import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
 // import { Home } from './pages/Home';
-import Game from './pages/Game';
+import GamePage from './pages/GamePage';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
 import { Search } from './pages/Search';
@@ -42,7 +42,6 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-import { WebcamPong } from './pages/WebcamPong';
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
@@ -107,14 +106,16 @@ const router = createBrowserRouter(
 			<Route element={<Protected />} loader={() => (loader('auth', 'isTokenValid'))}>
 				<Route path="/" element={<Sidebar />}>
 
-					<Route path='/' element={<Profile />} loader={() => (loader('profile', 'me'))} />
+					<Route index element={<GamePage />} />
+
+					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
 						<Route index element={<SettingMenu />}></Route>
 						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 
-					<Route path='game' element={<Game />} />
-					<Route path=":userId" element={<Game />} />
+					<Route path='game' element={<GamePage />} />
+					<Route path=":userId" element={<GamePage />} />
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route index element={<DefaultSearchPage />} />
@@ -141,9 +142,6 @@ const router = createBrowserRouter(
 							loader={({ params }) => (loader('rooms', params.chatId))}
 						/>
 					</Route>
-					{/* 
-					<Route path="/game" element={<Game />}></Route>
-					<Route path="/game/:userId" element={<Game />}></Route> */}
 				</Route>
 			</Route>
 		</Route>
