@@ -7,7 +7,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 // import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 
-@Controller('users')
+@Controller('api/users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) { }
 
