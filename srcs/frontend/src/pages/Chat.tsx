@@ -15,7 +15,23 @@ import { MdPublic, MdPublicOff } from 'react-icons/md';
 import { CiLock, CiUnlock } from 'react-icons/ci';
 import { FaChessKing, FaChessKnight, FaChessPawn } from 'react-icons/fa';
 import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
-import { set } from "lodash-es";
+
+export const handlePlayClickinMess = (userId: number, username: string) => {
+	enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
+		variant: 'info',
+		persist: true,
+		action: (key: any) => (
+			<div>
+				<Link to={'/'} state={{ gameUserId: userId }}>
+					<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
+						<strong>Play</strong>
+					</button>
+				</Link>
+				<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
+			</div >
+		),
+	});
+};
 
 
 export function ChatBox() {
@@ -517,23 +533,26 @@ export function ChatBox() {
 			enqueueSnackbar('Invalid input values', { variant: 'error' });
 			return;
 		}
-	
+
 		enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
 			variant: 'info',
 			persist: true,
 			action: (key: any) => (
 				<div>
-					<Link to={`/game/${userId}`}>
-						<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
-							<strong>Play</strong>
-						</button>
-					</Link>
+
+					<button onClick={() => {
+						closeSnackbar(key)
+						navigate(`/`, { state: { gameUserId: userId }, replace: true });
+					}
+					} style={{ color: 'white' }}>
+						<strong>Play</strong>
+					</button>
 					<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
 				</div>
 			),
 		});
 	};
-	
+
 
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
@@ -543,22 +562,7 @@ export function ChatBox() {
 			message.username = profile.username;
 		}
 
-		const handlePlayClickinMess = (userId: number, username: string) => {
-			enqueueSnackbar(`Want to play with ${username.substring(0, 8)} ?`, {
-				variant: 'info',
-				persist: true,
-				action: (key: any) => (
-					<div>
-						<Link to={`/game/${userId}`}>
-							<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>
-								<strong>Play</strong>
-							</button>
-						</Link>
-						<button onClick={() => closeSnackbar(key)} style={{ color: 'red' }}>X</button>
-					</div>
-				),
-			});
-		};
+
 
 		return (
 			<li className="message-container" key={message.id}>

@@ -31,7 +31,6 @@ export default class Room {
 
 	public async leave(id: string) {
 		if (this.players[id]) {
-
 			let winner;
 			for (const playerId in this.players) {
 				if (playerId != id) {
@@ -40,9 +39,6 @@ export default class Room {
 				}
 			}
 			this.playerLeft = winner;
-			// this.endGame(winner).then(() => {
-			// delete this.players[id];
-			// });
 		}
 	}
 
@@ -94,6 +90,7 @@ export default class Room {
 
 		if (winner == -1) {
 			this.wss.to(this.roomId).emit('gameOver', { winner: null, loser: null });
+			// console.log("GameOver")
 			const newGame = await this.gameService.create({});
 			this.gameId = newGame.id;
 			const players = Object.values(this.players);
@@ -114,7 +111,10 @@ export default class Room {
 		}
 		const loserPlayer = this.players[loser];
 		const winnerPlayer = this.players[winner];
-		this.wss.to(this.roomId).emit('gameOver', { winner: winnerPlayer.userId, loser: loserPlayer.userId });
+		const winnerUser = await this.prisma.user.findUnique({ where: { id: winner }, select: { username: true, avatar: true, } });
+		const loserUser = await this.prisma.user.findUnique({ where: { id: loser }, select: { username: true, avatar: true, } });
+		this.wss.to(this.roomId).emit('gameOver', { winner: { ...winnerUser, score: winnerPlayer.score }, loser: { ...loserUser, score: loserPlayer.score } });
+		console.log("GameOver")
 
 		const newGame = await this.gameService.create({});
 		this.gameId = newGame.id;
@@ -123,7 +123,6 @@ export default class Room {
 			return;
 		}
 
-		// try {
 		await this.playerService.createPlayer({ win: Result.WIN, gameId: this.gameId, userId: winner });
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
@@ -136,9 +135,5 @@ export default class Room {
 		} else if (wins.length == 100) {
 			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
 		}
-
-		// } catch (error) {
-		// 	console.log(error);
-		// }
 	}
 }
