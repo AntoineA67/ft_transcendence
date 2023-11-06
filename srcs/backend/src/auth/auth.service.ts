@@ -192,7 +192,7 @@ export class AuthService {
         return refreshToken;
     }
 
-	async refreshToken(refreshToken: string): Promise<any> {
+	async refreshToken(refreshToken: string, req: Request, res: Response) {
 		if (!refreshToken) {
 		  throw new UnauthorizedException("Empty refresh token");
 		}
