@@ -36,11 +36,11 @@ services:
   db:
     image: postgres:15.3
     environment:
-        - POSTGRES_HOST=${POSTGRES_HOST}
-        - POSTGRES_PORT=${POSTGRES_PORT}
-        - POSTGRES_USERNAME=${POSTGRES_USERNAME}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_NAME=${POSTGRES_NAME}
     restart: always
     user: postgres
     container_name: db
@@ -61,10 +61,10 @@ services:
       context: frontend
       target: ${ENV}
     environment:
-        - REACT_APP_FRONTEND_URL=${REACT_APP_FRONTEND_URL}
-        - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
-        - REACT_APP_FORTYTWO_APP_ID=${REACT_APP_FORTYTWO_APP_ID}
-        - REACT_APP_GITHUB_LINK=${REACT_APP_GITHUB_LINK}
+      - REACT_APP_FRONTEND_URL=${REACT_APP_FRONTEND_URL}
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
+      - REACT_APP_FORTYTWO_APP_ID=${REACT_APP_FORTYTWO_APP_ID}
+      - REACT_APP_GITHUB_LINK=${REACT_APP_GITHUB_LINK}
     restart: always
     container_name: frontend
     ports:
@@ -81,6 +81,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  proxy:
+    build:
+      context: proxy
+      target: ${ENV}
+    restart: always
+    container_name: proxy
+    ports:
+      - 80:80
+      - 443:443
+    env_file:
+      - .env
 
 volumes:
   db_data:
