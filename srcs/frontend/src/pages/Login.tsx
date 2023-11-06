@@ -12,14 +12,11 @@ type newUser = {
 	username: string,
 	email: string,
 	password: string,
-	firstConnexion: string,
-
 }
 
 type login = {
 	email: string,
 	password: string,
-	firstConnexion: string,
 }
 
 export function Login() {
@@ -30,7 +27,7 @@ export function Login() {
 		localStorage.setItem('token', data.token);
 		localStorage.setItem('refreshToken', data.refreshToken);
 		localStorage.setItem('email', user.email);
-		localStorage.setItem('firstConnexion', user.firstConnexion);
+		localStorage.setItem('firstConnexion', data.firstConnexion);
 		navigate('/');
 	}
 

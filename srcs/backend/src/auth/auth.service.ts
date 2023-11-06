@@ -18,6 +18,7 @@ import * as randomstring from 'randomstring';
 import { SigninDto, SignupDto, Signin42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
+import { first } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -48,9 +49,10 @@ export class AuthService {
 					email: dto.email,
 					username: dto.username,
 					hashPassword,
+					firstConnexion: "true",
 				},
 		});
-		return this.signJwtTokens(user.id, user.email, "true");
+		return this.signJwtTokens(user.id, user.email, user.firstConnexion);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -137,6 +139,7 @@ export class AuthService {
 				secret: secret,
 			});
 		const refreshToken = await this.createRefreshToken(userId);
+		console.log("firstCOnnecion ===", firstConnexion);
 		return {
 			message: 'Authentication successful',
 			token: token,
