@@ -28,6 +28,7 @@ import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
+import { enqueueSnackbar } from "notistack";
 
 export enum GameStatus {
 	Idle = 'idle',
@@ -117,6 +118,7 @@ export default function GamePage() {
 		setWebcam(false);
 	};
 	const onCancelledMatchmake = () => {
+		enqueueSnackbar("Match cancelled, other player not online", { variant: 'info', autoHideDuration: 4000 })
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
@@ -224,8 +226,7 @@ export default function GamePage() {
 	}, [gameStatus])
 
 	return (
-		<>
-			{/* <Suspense fallback={<div>Loading...</div>}> */}
+		<Suspense fallback={<div>Loading...</div>}>
 			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
 			<GameSummaryModal summary={summary} />
 			{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
@@ -275,8 +276,7 @@ export default function GamePage() {
 					{graphicEffects && <CanvasGraphicEffects cameraShakeRef={cameraShakeRef} />}
 				</Canvas >
 			}
-			{/* </Suspense> */}
-		</>
+		</Suspense>
 	)
 }
 
