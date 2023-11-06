@@ -5,7 +5,6 @@ import {
 	createRoutesFromElements,
 	Route,
 	RouterProvider,
-	LoaderFunctionArgs,
 	Outlet,
 	redirect
 } from 'react-router-dom';
@@ -57,6 +56,7 @@ async function loader(route: string, param?: string, refresh = false) {
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
+
 	const res = await fetch(fetchUrl, {
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
