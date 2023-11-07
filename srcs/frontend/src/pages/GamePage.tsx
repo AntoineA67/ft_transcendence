@@ -68,11 +68,10 @@ export default function GamePage() {
                 <button onClick={() => { closeSnackbar(key);navigate('/me'); }} style={{ color: 'white' }}>
                     <strong>GO</strong>
                 </button>
-				{/* </Link> */}
 				<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>X</button>
             </>
         );
-        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: false });
+        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: true });
     }
 
 
