@@ -108,9 +108,11 @@ const router = createBrowserRouter(
 
 					<Route index element={<GamePage />} loader={() => (loader('auth', 'isTokenValid'))} />
 
+					
+					
 					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
 					<Route path="/me/setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
+						<Route index element={<SettingMenu />} loader={() => (loader('profile', 'me'))} />
 						<Route path='2fa' element={<TwoFactorAuth />}></Route>
 					</Route>
 
