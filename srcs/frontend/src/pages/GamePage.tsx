@@ -28,7 +28,8 @@ import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
-import { enqueueSnackbar } from "notistack";
+import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { useNavigate } from 'react-router-dom';
 
 export enum GameStatus {
 	Idle = 'idle',
@@ -57,6 +58,21 @@ export default function GamePage() {
 	const [opponent, setOpponent] = useState<any>(null);
 
 	let indexTime = 0;
+
+	const navigate = useNavigate();
+    const firstConnexion = localStorage.getItem('firstConnexion') || null;
+    if (firstConnexion === 'true' ) {
+        localStorage.setItem('firstConnexion', 'false');
+        const action = (key: SnackbarKey | undefined) => (
+            <>
+                <button onClick={() => { closeSnackbar(key);navigate('/me'); }} style={{ color: 'white' }}>
+                    <strong>GO</strong>
+                </button>
+            </>
+        );
+        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: true });
+    }
+
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
