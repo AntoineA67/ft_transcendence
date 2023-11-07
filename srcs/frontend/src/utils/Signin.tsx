@@ -33,17 +33,6 @@ export function Signin() {
 	const [_2fa, set2FA] = useState<boolean>(false);
 	const [twoFACode, setTwoFACode] = useState<string>('');
 	const [err, setErr] = useState('');
-
-	// async function sendToken() {
-	// 	localStorage.setItem('_2fa', JSON.stringify({ id: _2fa.id, token: token, activated: _2fa.activated })); // set access token and refresh token
-	// 	const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
-	// 	const data = await response.json();
-	// 	if (data._2fa === 'success') {
-	// 		window.location.href = oauth42Url;
-	// 	} else {
-	// 		setInvalidToken(true);
-	// 	}
-	// }
 	
 	return (
 		<div className='container'>

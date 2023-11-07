@@ -42,28 +42,28 @@ model GameSettings {
 }
 
 model User {
-  id            Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique @default(autoincrement())
-  status        OnlineStatus    @default(ONLINE)
-  username      String          @unique @db.VarChar // @autoincrement?
-  email         String          @unique(sort: Asc) @db.VarChar
-  firstConnexion  Boolean       @default(true)
-  hashPassword  String?         @db.VarChar // To hashPassword
-  u2fHash       String?         @db.VarChar
-  otpHash       String?         @db.VarChar // try removing all the db.VarChar
-  activated2FA  Boolean         @default(false)
-  avatar        String?
-  avatar42      String?
-  bio           String          @default("")
-  gameSettings  GameSettings?
-  achieve       Achievement?
-  gameHistory   Player[]
-  membership    Member[]
-  message       Message[]
-  friend        Friendship[]
-  sendFriendReq FriendRequest[] @relation("sendFriendReq")
-  recvFriendReq FriendRequest[] @relation("recvFriendReq")
-  block         Block[]         @relation("block")
-  blocked       Block[]         @relation("blocked")
+  id              Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique @default(autoincrement())
+  status          OnlineStatus    @default(ONLINE)
+  username        String          @unique @db.VarChar // @autoincrement?
+  email           String          @unique(sort: Asc) @db.VarChar
+  firstConnexion  String          @default("true")
+  hashPassword    String?         @db.VarChar // To hashPassword
+  u2fHash         String?         @db.VarChar
+  otpHash         String?         @db.VarChar // try removing all the db.VarChar
+  activated2FA    Boolean         @default(false)
+  avatar          String?
+  avatar42        String?
+  bio             String          @default("")
+  gameSettings    GameSettings?
+  achieve         Achievement?
+  gameHistory     Player[]
+  membership      Member[]
+  message         Message[]
+  friend          Friendship[]
+  sendFriendReq   FriendRequest[] @relation("sendFriendReq")
+  recvFriendReq   FriendRequest[] @relation("recvFriendReq")
+  block           Block[]         @relation("block")
+  blocked         Block[]         @relation("blocked")
 
   refreshToken RefreshToken[] @relation("refreshToken")
 }
@@ -75,14 +75,14 @@ enum OnlineStatus {
 }
 
 model Achievement {
-  id            Int     @id @default(autoincrement())
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int     @unique
-  firstWin      Boolean @default(false)
-  win10Games    Boolean @default(false)
-  win100Games   Boolean @default(false)
-  play100Games  Boolean @default(false)
-  play1000Games Boolean @default(false)
+  id              Int     @id @default(autoincrement())
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          Int     @unique
+  firstWin        Boolean @default(false)
+  win10Games      Boolean @default(false)
+  win100Games     Boolean @default(false)
+  play100Games    Boolean @default(false)
+  play1000Games   Boolean @default(false)
 }
 
 // latest message first

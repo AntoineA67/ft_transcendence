@@ -216,7 +216,7 @@ export function SettingMenu() {
 			}, {
 				headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
 			});
-			['token', 'random', 'email', 'refreshToken'].forEach(item => localStorage.removeItem(item));
+			['token', 'random', 'email', 'refreshToken', 'firstConnexion'].forEach(item => localStorage.removeItem(item));
 			window.location.href = '/';
 		} catch (err: any) {
 			console.log(err);
