@@ -6,6 +6,7 @@ import { UserDto } from 'src/dto/user.dto';
 import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
 import * as argon from 'argon2';
+import { checkPassword } from 'src/room/roomDto';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -20,19 +21,7 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
-	// async createUser(username: string, email: string, hashPassword: string) {
-	// 	return await this.prisma.user.create({
-	// 		data: {
-	// 			username,
-	// 			email,
-	// 			password
-	// 		},
-	// 	});
-	// }
-
 	async createUser(username: string, email: string, password: string, avatar: string = null) {
-		// const hashPassword = await argon.hash(password);
-		// 💀
 		let hashPassword;
 		if (password == "nopass")
 			hashPassword = "nopass";
@@ -139,7 +128,6 @@ export class UsersService {
 			return false;
 		let user: User;
 		if (data.password) {
-			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
@@ -169,7 +157,6 @@ export class UsersService {
 		return (true);
 	}
 
-	//dont touch
 	async getUserByEmail(email: string) {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
@@ -196,20 +183,6 @@ export class UsersService {
 		return (user.username);
 	}
 
-	// async getUserBasic(id: number) {
-	// 	return (
-	// 		await this.prisma.user.findUnique({
-	// 			where: { id },
-	// 			select: {
-	// 				id: true,
-	// 				username: true,
-	// 				avatar: true,
-	// 				status: true,
-	// 			}
-	// 		})
-	// 	)
-	// }
-
 	async getUserById(id: number): Promise<UserDto> {
 		return await this.prisma.user.findUnique({
 			where: { id },
@@ -224,7 +197,6 @@ export class UsersService {
 		})
 	}
 
-	// the freind, block, blocked should be given by other services
 	async getUserProfileById(id: number): Promise<ProfileDto | null> {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
@@ -351,13 +323,6 @@ export class UsersService {
 		})
 	}
 
-	// bufferToBase64(buf: Buffer | null): string {
-	// 	if (buf == null) {
-	// 		return (null)
-	// 	}
-	// 	return (buf.toString('base64'));
-	// }
-
 	async getAvatar(id: number): Promise<string | null> {
 		let { avatar } = await this.prisma.user.findUnique({
 			where: { id },
@@ -375,6 +340,8 @@ export class UsersService {
 
 		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
 		if (passwordMatch) {
+			if (!checkPassword(newPassword))
+				return false;
 			const hashNewPassword = await argon.hash(newPassword);
 			await this.prisma.user.update({
 				where: { id: id },
