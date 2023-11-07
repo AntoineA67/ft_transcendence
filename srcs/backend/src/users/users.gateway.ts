@@ -1,13 +1,11 @@
-import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { OnGatewayConnection } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UsersService } from './users.service';
-import { BadRequestException, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
-import { validate, validateOrReject } from 'class-validator';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -44,27 +42,12 @@ export class UsersGateway
 
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
-		try {
-			if (!data) {
-				console.error('Data is missing or undefined.');
-				return null;
-			}
-
-			if (!client.data.user || !client.data.user.id || String(client.data.user.id).length > 6) {
-				console.error('User data is missing or the user ID is invalid.');
-				return null;
-			}
-
-			const id: number = client.data.user.id;
-			this.logger.log(data);
-
-			const result = await this.usersService.updateUser(id, data);
-
-			return result;
-		} catch (error) {
-			console.error(error);
-			return false;
+		if (!client.data.user.id || client.data.user.id.length > 6) {
+			return (null);
 		}
+		const id: number = client.data.user.id;
+		this.logger.log(data);
+		return (await this.usersService.updateUser(id, data))
 	}
 
 	@SubscribeMessage('newAvatar')
