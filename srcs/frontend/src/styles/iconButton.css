@@ -83,11 +83,17 @@
 }
 
 .edit-pen {
+	margin-left: 1rem;
+	width: 1rem;
+	height: 1rem;
 	background: url(../assets/EditPen.svg) no-repeat;
 	background-position: center;
 }
 
 .edit-pen:hover {
+	margin-left: 1rem;
+	width: 1rem;
+	height: 1rem;
 	filter: brightness(3);
 	transition: all 0.3s;
 }
