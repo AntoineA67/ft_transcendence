@@ -8,6 +8,7 @@ import { profileType } from '../../types/user';
 import { enqueueSnackbar } from "notistack";
 // import { Container } from 'react-bootstrap';
 
+import React from 'react';
 
 type textProp = {
 	type: 'nick' | 'bio',
@@ -18,12 +19,6 @@ type textProp = {
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 text-center";
 	const [err, setErr] = useState('');
-	const firstConnexion = localStorage.getItem('firstConnexion');
-
-	if (firstConnexion === 'true' ) {
-		enqueueSnackbar('You can update your avatar and your username anytime here !', { variant: "info" });
-		localStorage.setItem('firstConnexion', 'false');
-	}
 
 	return (
 		<div className='w-75'>
@@ -144,7 +139,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		</form>
 	);
 }
-
+  
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
