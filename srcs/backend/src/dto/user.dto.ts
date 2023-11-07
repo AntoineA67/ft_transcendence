@@ -13,8 +13,8 @@ export class UserDto {
 	@IsNotEmpty() @IsString() @IsEmail() 	email?: string;
 
 	@IsNotEmpty()
-	@MaxLength(20, { message: "Username must be less than 20 characters long" })
-	@MinLength(4, { message: "Username must be at least 4 characters long" })
+	@MaxLength(16, { message: "Username must be less than 20 characters long" })
+	@MinLength(3, { message: "Username must be at least 4 characters long" })
 	@Matches(/^(?=.*[a-zA-Z])([^\s])*$/,
         { message: "Username must contain at least one alphabetic character and must not contain spaces" })
 	@IsString()
