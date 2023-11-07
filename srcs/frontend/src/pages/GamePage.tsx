@@ -57,22 +57,10 @@ export default function GamePage() {
 	const [webcam, setWebcam] = useState<boolean>(false);
 	const [opponent, setOpponent] = useState<any>(null);
 
-	let indexTime = 0;
-
 	const navigate = useNavigate();
-    const firstConnexion = localStorage.getItem('firstConnexion') || null;
-    if (firstConnexion === 'true' ) {
-        localStorage.setItem('firstConnexion', 'false');
-        const action = (key: SnackbarKey | undefined) => (
-            <>
-                <button onClick={() => { closeSnackbar(key);navigate('/me'); }} style={{ color: 'white' }}>
-                    <strong>GO</strong>
-                </button>
-				<button onClick={() => closeSnackbar(key)} style={{ color: 'white' }}>X</button>
-            </>
-        );
-        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: true });
-    }
+
+
+	let indexTime = 0;
 
 
 	const changeHandPos = (pos: number = -1) => {
@@ -214,6 +202,15 @@ export default function GamePage() {
 			unsubscribeToGamesSocketMessages();
 		}
 	}, [gamesSocket])
+
+	useEffect(() => {
+		const firstConnexion = localStorage.getItem('firstConnexion') || null;
+		if (firstConnexion === 'true') {
+			localStorage.setItem('firstConnexion', 'false');
+			enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', persist: false });
+			navigate('/me');
+		}
+	}, [])
 
 	useEffect(() => {
 		const gameUserId = location.state?.gameUserId
