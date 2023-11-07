@@ -8,6 +8,12 @@ import { gamesSocket, socket as globalSocket } from '../utils/socket';
 import { Wheel } from '@uiw/react-color';
 import { useParams } from "react-router-dom"
 import { WebcamPong } from "./WebcamPong"
+import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { useNavigate } from 'react-router-dom';
+// import { first } from "lodash-es"
+import {
+	redirect
+} from 'react-router-dom';
 
 
 const BallWrapper = ({ ball, client }: any) => {
@@ -116,6 +122,20 @@ export default function Game() {
 	// const [handPos, setHandPos] = useState(-1);
 	const handPos = useRef<number>(-1)
 	let params = useParams();
+
+	const navigate = useNavigate();
+	const firstConnexion = localStorage.getItem('firstConnexion') || null;
+	if (firstConnexion === 'true' ) {
+		localStorage.setItem('firstConnexion', 'false');
+		const action = (key: SnackbarKey | undefined) => (
+			<>
+				<button onClick={() => { closeSnackbar(key);navigate('/me'); }} style={{ color: 'white' }}>
+					<strong>GO</strong>
+				</button>
+			</>
+		);
+		enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: true });
+	}
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
