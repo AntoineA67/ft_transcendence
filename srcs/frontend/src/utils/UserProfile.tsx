@@ -41,9 +41,11 @@ export function UserProfile() {
 						{profile.username}
 					</h5>
 
-					<p className='white-text'>
-						{profile.bio}
-					</p>
+					<div className='w-75'>
+						<p className='white-text text-center'>
+							{profile.bio}
+						</p>
+					</div>
 				</div>
 				<Options profile={{...profile}} setProfile={setProfile} />
 				<Stat gameHistory={profile.gameHistory.map((a) => ({ ...a }))} achieve={{ ...(profile.achieve) }} />

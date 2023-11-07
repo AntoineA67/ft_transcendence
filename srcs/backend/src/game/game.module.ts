@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { GameController as GameController } from './game.controller';
 import { GamesService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -16,6 +15,5 @@ import { AchievementService } from 'src/achievement/achievement.service';
 @Module({
   imports: [PrismaModule],
   providers: [GamesService, GameGateway, JwtService, GameSettingsService, ProfileService, UsersService, FriendshipService, FriendRequestService, BlockService, PlayerService, AchievementService],
-  controllers: [GameController],
 })
 export class GameModule { }

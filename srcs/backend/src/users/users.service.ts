@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
@@ -6,7 +6,6 @@ import { UserDto } from 'src/dto/user.dto';
 import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
 import * as argon from 'argon2';
-import { userInfo } from 'os';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -45,7 +44,7 @@ export class UsersService {
 					username: username,
 					email: email,
 					hashPassword: hashPassword,
-					avatar
+					avatar: avatar,
 				},
 			});
 			return user;
@@ -71,13 +70,73 @@ export class UsersService {
 		});
 	}
 
+	async checkDataforUserUpdate(data: UpdateUserDto): Promise<boolean> {
+		try {
+			const printableCharactersRegex = /^[ -~]*$/;
+			for (const prop in data) {
+				if (data[prop] !== undefined && typeof data[prop] === 'string') {
+					if (!printableCharactersRegex.test(data[prop])) {
+						return false;
+					}
+				}
+			}
+
+			if (data && data.id && data.id !== undefined) {
+				if (typeof data.id !== 'number') {
+					return false;
+				}
+			}
+
+			if (data && data.email && data.email !== undefined) {
+				if (typeof data.email !== 'string') {
+					return false;
+				}
+			}
+
+			if (data && data.username && data.username !== undefined) {
+				if (typeof data.username !== 'string') {
+					return false;
+				}
+
+				const validUsernameRegex = /^[A-Za-z0-9-]{3,16}$/;
+				if (!validUsernameRegex.test(data.username)) {
+					return false;
+				}
+			}
+
+			if (data && data.password && data.password !== undefined) {
+				if (typeof data.password !== 'string') {
+					return false;
+				}
+				if (data.password.length < 8 || data.password.length > 20) {
+					return false;
+				}
+				const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
+				if (!passwordRegex.test(data.password)) {
+					return false;
+				}
+			}
+
+			if (data && data.bio && data.bio !== undefined) {
+				if (typeof data.bio !== 'string') {
+					return false;
+				}
+				if (data.bio.length > 200) {
+					return false;
+				}
+			}
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
+
+
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		// if (data.username || data.username === "") {
-		// 	let valid = data.username.match(/^[a-z0-9\-_]+$/i);
-		//     let empty = data.username.match(/^(?!\s*$).+/i);
-		//     if (!valid || empty == null) return (false)
-		// }
-		console.log("PASS ==", data.password);
+		const bool = await this.checkDataforUserUpdate(data);
+		if (!bool)
+			return false;
 		let user: User;
 		if (data.password) {
 			console.log("PASS ==", data.password);
@@ -90,6 +149,7 @@ export class UsersService {
 				data
 			});
 		} catch (err: any) {
+			Logger.log(err);
 			return (false);
 		}
 		return (true);
