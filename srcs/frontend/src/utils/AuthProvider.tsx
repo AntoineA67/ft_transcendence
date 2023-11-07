@@ -7,7 +7,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { set } from 'lodash-es';
 
 export function CallBack42() {
-	const [status, setStatus] = useState<'loading' | 'done' | 'firstConnexion' |'2fa'>('loading');
+	const [status, setStatus] = useState<'loading' | 'done' |'2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -54,7 +54,6 @@ export function CallBack42() {
 					Loading...
 				</div>
 			)}
-			{status === 'firstConnexion' && <Navigate to='/me' replace />}
 			{status === 'done' && <Navigate to='/' replace />}
 		</>
 	);

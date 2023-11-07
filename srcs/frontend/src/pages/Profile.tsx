@@ -4,12 +4,8 @@ import Stat from './Stat';
 import { socket } from '../utils/socket';
 import { Avatar } from '../utils/Avatar';
 import { profileType } from '../../types/user';
-import { validatePassword, validateUsername } from "../utils/CredentialsRegex";
-import { EnqueueSnackbar, closeSnackbar, enqueueSnackbar } from "notistack";
-import { Container } from 'react-bootstrap';
-import { checkBio, checkUserRoomName, containsUnprintableCharacters } from './ChatDto';
-
-import React from 'react';
+import { EnqueueSnackbar, enqueueSnackbar } from "notistack";
+import { checkBio, checkUserRoomName } from './ChatDto';
 
 type textProp = {
 	type: 'nick' | 'bio',
