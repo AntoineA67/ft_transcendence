@@ -1,11 +1,10 @@
 import { FidgetSpinner } from "react-loader-spinner";
-import { Card, Container } from "react-bootstrap";
+import { Button, Card, Container } from "react-bootstrap";
 import { gamesSocket } from '../../utils/socket';
 import { PaddleWheel } from "./PaddleWheel";
 import { GraphicEffectsSettingsCard } from "./GraphicEffectsSettingsCard";
 import { RulesModal } from "./RulesModal";
 import { GameStatus } from "../../pages/GamePage";
-import { useEffect } from "react";
 import { WebcamConfirmModal } from "./WebcamConfirmModal";
 
 type GameWaitingRoomProps = {
@@ -17,33 +16,33 @@ type GameWaitingRoomProps = {
 	playUsingWebcam: (e: any) => void;
 };
 
+
+
 export const GameWaitingRoom = ({ gameStatus, startMatchmaking, cancelOrLeave, paddleColor, graphicEffectsSettings, playUsingWebcam }: GameWaitingRoomProps) => {
 	return (
-		<div className="d-flex align-items-center justify-content-center h-100">
-			<Card border="none" text="white" className="w-75 p-3 border-0" style={{ background: "transparent" }}>
-				<Card.Body className="text-center">
-					{gameStatus === GameStatus.Idle && <>
-						<Card.Title>Player vs player</Card.Title>
-						<Card.Text>
-							You are about to play a game against another player. Get ready to compete and have fun!
-						</Card.Text>
-						<br></br>
-						<Container className="d-flex justify-content-center gap-3">
-							<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
-							{/* <button id="webcamButton" className="btn btn-secondary" onClick={playUsingWebcam}>Play using webcam !</button> */}
-							<RulesModal />
-							<WebcamConfirmModal confirmAction={playUsingWebcam} cancelAction={cancelOrLeave} />
-						</Container>
-						<PaddleWheel currentColor={paddleColor} />
-						<GraphicEffectsSettingsCard currentSettings={graphicEffectsSettings} />
-					</>}
-					{gameStatus === GameStatus.Matching && <MatchingScreen cancelOrLeave={cancelOrLeave} />}
-					{gameStatus === GameStatus.Loading && <LoadingScreen cancelCamera={cancelOrLeave} />}
-				</Card.Body>
-			</Card>
-		</div>
+		<Card border="none" text="white" className="w-100 w-md-75 p-3 border-0" style={{ background: "transparent" }}>
+			<Card.Body className="text-center">
+				{gameStatus === GameStatus.Idle && <>
+					<Card.Title>Player vs player</Card.Title>
+					<Card.Text>
+						You are about to play a game against another player. Get ready to compete and have fun!
+					</Card.Text>
+					<br></br>
+					<Container className="d-flex flex-column flex-md-row justify-content-center gap-3">
+						<button onClick={startMatchmaking} disabled={!gamesSocket.connected} className="btn btn-primary"><b>Play</b></button>
+						<RulesModal />
+						<WebcamConfirmModal confirmAction={playUsingWebcam} cancelAction={cancelOrLeave} />
+					</Container>
+					<PaddleWheel currentColor={paddleColor} />
+					<GraphicEffectsSettingsCard currentSettings={graphicEffectsSettings} />
+				</>}
+				{gameStatus === GameStatus.Matching && <MatchingScreen cancelOrLeave={cancelOrLeave} />}
+				{gameStatus === GameStatus.Loading && <LoadingScreen cancelCamera={cancelOrLeave} />}
+			</Card.Body>
+		</Card>
 	);
 };
+
 
 const LoadingScreen = ({ cancelCamera }: { cancelCamera: () => void }) => {
 	return (
