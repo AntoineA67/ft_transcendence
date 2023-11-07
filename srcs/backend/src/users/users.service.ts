@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
@@ -6,7 +6,7 @@ import { UserDto } from 'src/dto/user.dto';
 import { ProfileDto } from 'src/dto/profile.dto';
 import { authenticator } from 'otplib';
 import * as argon from 'argon2';
-import { userInfo } from 'os';
+import { checkPassword } from 'src/room/roomDto';
 
 const user = Prisma.validator<Prisma.UserDefaultArgs>()({})
 export type User = Prisma.UserGetPayload<typeof user>
@@ -21,19 +21,7 @@ export type Player = Prisma.PlayerGetPayload<typeof player>
 export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
-	// async createUser(username: string, email: string, hashPassword: string) {
-	// 	return await this.prisma.user.create({
-	// 		data: {
-	// 			username,
-	// 			email,
-	// 			password
-	// 		},
-	// 	});
-	// }
-
 	async createUser(username: string, email: string, password: string, avatar: string = null) {
-		// const hashPassword = await argon.hash(password);
-		// 💀
 		let hashPassword;
 		if (password == "nopass")
 			hashPassword = "nopass";
@@ -71,16 +59,75 @@ export class UsersService {
 		});
 	}
 
+	async checkDataforUserUpdate(data: UpdateUserDto): Promise<boolean> {
+		try {
+			const printableCharactersRegex = /^[ -~]*$/;
+			for (const prop in data) {
+				if (data[prop] !== undefined && typeof data[prop] === 'string') {
+					if (!printableCharactersRegex.test(data[prop])) {
+						return false;
+					}
+				}
+			}
+
+			if (data && data.id && data.id !== undefined) {
+				if (typeof data.id !== 'number') {
+					return false;
+				}
+			}
+
+			if (data && data.email && data.email !== undefined) {
+				if (typeof data.email !== 'string') {
+					return false;
+				}
+			}
+
+			if (data && data.username && data.username !== undefined) {
+				if (typeof data.username !== 'string') {
+					return false;
+				}
+
+				const validUsernameRegex = /^[A-Za-z0-9-]{3,16}$/;
+				if (!validUsernameRegex.test(data.username)) {
+					return false;
+				}
+			}
+
+			if (data && data.password && data.password !== undefined) {
+				if (typeof data.password !== 'string') {
+					return false;
+				}
+				if (data.password.length < 8 || data.password.length > 20) {
+					return false;
+				}
+				const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).+$/;
+				if (!passwordRegex.test(data.password)) {
+					return false;
+				}
+			}
+
+			if (data && data.bio && data.bio !== undefined) {
+				if (typeof data.bio !== 'string') {
+					return false;
+				}
+				if (data.bio.length > 200) {
+					return false;
+				}
+			}
+			return true;
+		} catch (error) {
+			console.error(error);
+			return false;
+		}
+	}
+
+
 	async updateUser(id: number, data: UpdateUserDto): Promise<boolean> {
-		// if (data.username || data.username === "") {
-		// 	let valid = data.username.match(/^[a-z0-9\-_]+$/i);
-		//     let empty = data.username.match(/^(?!\s*$).+/i);
-		//     if (!valid || empty == null) return (false)
-		// }
-		console.log("PASS ==", data.password);
+		const bool = await this.checkDataforUserUpdate(data);
+		if (!bool)
+			return false;
 		let user: User;
 		if (data.password) {
-			console.log("PASS ==", data.password);
 			const hashPassword = await argon.hash(data.password);
 			data.password = hashPassword;
 		}
@@ -90,6 +137,7 @@ export class UsersService {
 				data
 			});
 		} catch (err: any) {
+			Logger.log(err);
 			return (false);
 		}
 		return (true);
@@ -109,7 +157,6 @@ export class UsersService {
 		return (true);
 	}
 
-	//dont touch
 	async getUserByEmail(email: string) {
 		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
@@ -136,20 +183,6 @@ export class UsersService {
 		return (user.username);
 	}
 
-	// async getUserBasic(id: number) {
-	// 	return (
-	// 		await this.prisma.user.findUnique({
-	// 			where: { id },
-	// 			select: {
-	// 				id: true,
-	// 				username: true,
-	// 				avatar: true,
-	// 				status: true,
-	// 			}
-	// 		})
-	// 	)
-	// }
-
 	async getUserById(id: number): Promise<UserDto> {
 		return await this.prisma.user.findUnique({
 			where: { id },
@@ -164,7 +197,6 @@ export class UsersService {
 		})
 	}
 
-	// the freind, block, blocked should be given by other services
 	async getUserProfileById(id: number): Promise<ProfileDto | null> {
 		let profile = await this.prisma.user.findUnique({
 			where: { id },
@@ -291,13 +323,6 @@ export class UsersService {
 		})
 	}
 
-	// bufferToBase64(buf: Buffer | null): string {
-	// 	if (buf == null) {
-	// 		return (null)
-	// 	}
-	// 	return (buf.toString('base64'));
-	// }
-
 	async getAvatar(id: number): Promise<string | null> {
 		let { avatar } = await this.prisma.user.findUnique({
 			where: { id },
@@ -315,6 +340,8 @@ export class UsersService {
 
 		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
 		if (passwordMatch) {
+			if (!checkPassword(newPassword))
+				return false;
 			const hashNewPassword = await argon.hash(newPassword);
 			await this.prisma.user.update({
 				where: { id: id },

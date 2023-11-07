@@ -63,7 +63,7 @@ export class GameGateway
 
     @SubscribeMessage('keyPresses')
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
-        console.log(socket.data.user.id, payload);
+        // console.log(socket.data.user.id, payload);
         this.gamesService.handleKeysPresses(socket.data.user.id, payload);
     }
 

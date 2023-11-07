@@ -16,6 +16,8 @@ import { profileType } from '../../types/user';
 import { Alert } from 'react-bootstrap';
 import axios from 'axios';
 import { set } from 'lodash-es';
+import { checkPassword } from './ChatDto';
+import { enqueueSnackbar } from 'notistack';
 
 export function Title({ title }: { title: string }) {
 	return (
@@ -163,11 +165,13 @@ export const InputToken = ({ handleChange }: any) => {
 
 export function SettingMenu() {
 
-	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);	const [oldPassword, setOldPassword] = useState('');
-	const [newPassword, setNewPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
-	const [err, setErr] = useState('');
-	const [success, setSuccess] = useState('');
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
+	const [oldPassword, setOldPassword] = useState<string>('');
+	const [newPassword, setNewPassword] = useState<string>('');
+	const [confirmPassword, setConfirmPassword] = useState<string>('');
+	const [err, setErr] = useState<string>('');
+	const [success, setSuccess] = useState<string>('');
+	const [formSubmitted, setFormSubmitted] = useState(false);
 	const navigate = useNavigate();
 
 	// useEffect(() => {
@@ -178,23 +182,32 @@ export function SettingMenu() {
 	// 	}
 	// }, [profile]);
 
-	const handleChange = (event: any, type: string) => {
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
 		setErr('');
 		setSuccess('');
-		switch (type) {
-			case 'oldPassword':
-				setOldPassword(event.target.value);
-				break;
-			case 'newPassword':
-				setNewPassword(event.target.value);
-				break;
-			case 'confirmPassword':
-				setConfirmPassword(event.target.value);
-				break;
-			default:
-				break;
+		const inputValue = e.target.value;
+
+		if (inputValue.length > 0)
+			setFormSubmitted(false);
+		if (inputValue.length > 20) {
+			setErr('Characters limits is 20.');
+		} else {
+			switch (type) {
+				case 'oldPassword':
+					setOldPassword(inputValue);
+					break;
+				case 'newPassword':
+					setNewPassword(inputValue);
+					break;
+				case 'confirmPassword':
+					setConfirmPassword(inputValue);
+					break;
+				default:
+					break;
+			}
 		}
 	};
+
 
 	const handleLogout = () => {
 		try {
@@ -203,7 +216,7 @@ export function SettingMenu() {
 			}, {
 				headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
 			});
-			['token', 'random', 'email', 'refreshToken'].forEach(item => localStorage.removeItem(item));
+			['token', 'random', 'email', 'refreshToken', 'firstConnexion'].forEach(item => localStorage.removeItem(item));
 			window.location.href = '/';
 		} catch (err: any) {
 			console.log(err);
@@ -213,12 +226,18 @@ export function SettingMenu() {
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		if (newPassword !== confirmPassword) {
-			setErr('New password and confirm password does not match');
+			setErr('New password and confirm password do not match');
 			return;
 		}
+		if (!checkPassword(newPassword, enqueueSnackbar))
+			return;
 		socket.emit('ChangePassword', { newPassword, oldPassword }, (res: any) => {
 			if (res === true) {
-				setSuccess('Password changed successfully !');
+				setSuccess('Password changed successfully!');
+				setOldPassword('');
+				setNewPassword('');
+				setConfirmPassword('');
+				setFormSubmitted(true);
 			} else {
 				setErr('Wrong password !');
 			}
@@ -237,16 +256,38 @@ export function SettingMenu() {
 					<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
 						<div>
 							<label htmlFor='current-password'>Current password</label>
-							<input value={oldPassword} id='current-password' type="password" placeholder="Current password" onChange={(e) => handleChange(e, 'oldPassword')} />
+							<input
+								id='current-password'
+								type="password"
+								placeholder="Current password"
+								onChange={(e) => handleChange(e, 'oldPassword')}
+								maxLength={20}
+								value={formSubmitted ? '' : oldPassword}
+							/>
 						</div>
 						<div>
 							<label htmlFor='new-password'>New password</label>
-							<input value={newPassword} id='new-password' type="password" placeholder="New password" onChange={(e) => handleChange(e, 'newPassword')} />
+							<input
+								id='new-password'
+								type="password"
+								placeholder="New password"
+								onChange={(e) => handleChange(e, 'newPassword')}
+								maxLength={20}
+								value={formSubmitted ? '' : newPassword}
+							/>
 						</div>
 						<div>
 							<label htmlFor='confirm-password'>Confirm password</label>
-							<input value={confirmPassword} id='confirm-password' type="password" placeholder="Password" onChange={(e) => handleChange(e, 'confirmPassword')} />
+							<input
+								id='confirm-password'
+								type="password"
+								placeholder="Password"
+								onChange={(e) => handleChange(e, 'confirmPassword')}
+								maxLength={20}
+								value={formSubmitted ? '' : confirmPassword}
+							/>
 						</div>
+
 						{err !== '' && (
 							<div className='red-text'>{err}</div>
 						)}
