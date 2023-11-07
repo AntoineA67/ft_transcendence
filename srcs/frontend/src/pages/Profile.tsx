@@ -173,7 +173,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		</form>
 	);
 }
-
+  
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
