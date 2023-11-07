@@ -49,14 +49,14 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 		<div className='screen-mask'>
 			<div className='popup'>
 				<FontAwesomeIcon icon={faHourglass} spinPulse size="2xl" style={{ color: "#fa34c3", }} />
-				<p className='mt-5'>Accept the challenge sent from {nick} ? </p>
+				<p className='mt-5'>{nick} sent you a challenge</p>
 				<button className='btn btn-primary my-2'
 					onClick={(e) => onAccept(e)}>
-					Pong!
+					PONG!
 				</button>
 				<button className='btn btn-outline-primary'
 					onClick={(e) => onDecline(e)}>
-					Probably No
+					Chill
 				</button>
 			</div>
 		</div>
