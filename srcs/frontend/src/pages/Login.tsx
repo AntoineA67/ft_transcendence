@@ -11,13 +11,12 @@ import { useNavigate } from 'react-router-dom';
 type newUser = {
 	username: string,
 	email: string,
-	password: string
+	password: string,
 }
 
 type login = {
 	email: string,
 	password: string,
-	// firstConnexion: boolean,
 }
 
 export function Login() {
@@ -28,6 +27,7 @@ export function Login() {
 		localStorage.setItem('token', data.token);
 		localStorage.setItem('refreshToken', data.refreshToken);
 		localStorage.setItem('email', user.email);
+		localStorage.setItem('firstConnexion', data.firstConnexion);
 		navigate('/');
 	}
 

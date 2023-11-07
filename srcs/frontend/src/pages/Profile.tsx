@@ -9,6 +9,7 @@ import { EnqueueSnackbar, closeSnackbar, enqueueSnackbar } from "notistack";
 import { Container } from 'react-bootstrap';
 import { checkBio, checkUserRoomName, containsUnprintableCharacters } from './ChatDto';
 
+import React from 'react';
 
 type textProp = {
 	type: 'nick' | 'bio',
@@ -176,7 +177,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		</form>
 	);
 }
-
+  
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');

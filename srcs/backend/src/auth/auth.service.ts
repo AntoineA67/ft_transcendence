@@ -18,6 +18,7 @@ import * as randomstring from 'randomstring';
 import { SigninDto, SignupDto, Intra42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
+import { first } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -48,9 +49,10 @@ export class AuthService {
 					email: dto.email,
 					username: dto.username,
 					hashPassword,
+					firstConnexion: "true",
 				},
 		});
-		return this.signJwtTokens(user.id, user.email, true);
+		return this.signJwtTokens(user.id, user.email, user.firstConnexion);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -89,7 +91,7 @@ export class AuthService {
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
-		return await this.signJwtTokens(user.id, user.email, false);
+		return await this.signJwtTokens(user.id, user.email, "false");
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -123,7 +125,7 @@ export class AuthService {
 		res.status(HttpStatus.OK).json(response);
 	}
 
-	async signJwtTokens(userId: number, userEmail: string, firstConnexion: boolean) {
+	async signJwtTokens(userId: number, userEmail: string, firstConnexion: string) {
 		let payload = {
 			id: userId,
 			email: userEmail,
@@ -137,6 +139,7 @@ export class AuthService {
 				secret: secret,
 			});
 		const refreshToken = await this.createRefreshToken(userId);
+		console.log("firstCOnnecion ===", firstConnexion);
 		return {
 			message: 'Authentication successful',
 			token: token,
@@ -152,8 +155,17 @@ export class AuthService {
 		const email = user.emails[0].value;
 		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
+		{
 			userExists = await this.registerUser42(user);
-		userExists.firstConnexion = false;
+			const data = { firstConnexion: "true"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
+		else
+		{
+			const data = { firstConnexion: "false"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
+		console.log("USEREXISTS=====", userExists);
 		return (userExists);
 	}
 
