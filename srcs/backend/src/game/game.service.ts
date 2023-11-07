@@ -38,7 +38,7 @@ export class GamesService {
     } else {
       for (let s of sockets) {
         if (s.data.user.id == otherId) {
-          console.log(socket.data.user)
+          // console.log(socket.data.user)
           const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
           s.emit('ponged', { nick: username, id: socket.data.user.id })
           this.matches[socket.data.user.id] = { receiverId: otherId, sender: socket, receiver: s };
@@ -60,7 +60,7 @@ export class GamesService {
   }
 
   disconnect(client: Socket) {
-    console.log('disconnect', client.data.user.id)
+    // console.log('disconnect', client.data.user.id)
     const userId = client.data.user.id;
     const roomId = this.clients[userId];
     if (roomId) {
@@ -82,7 +82,7 @@ export class GamesService {
         this.matchmakingQueue.splice(index, 1);
       }
     } else if (this.matches[userId]) {
-      console.log('cancelledMatchmake', userId, this.matches[userId])
+      // console.log('cancelledMatchmake', userId, this.matches[userId])
       this.matches[userId].receiver.emit('cancelledMatchmake');
       // delete this.matches[this.matches[userId]];
       delete this.matches[userId];
@@ -90,8 +90,12 @@ export class GamesService {
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
-    // console.log(this.clients)
-    this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
+    try {
+      // Will catch if the client is not in a room
+      this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
+    } catch (error) {
+      return;
+    }
   }
 
   private tryMatchPlayers(wss) {
@@ -124,7 +128,7 @@ export class GamesService {
 
     // Create a new room for the clients
     const roomId = uuidv4();
-    console.log('roomId', roomId)
+    // console.log('roomId', roomId)
 
     player1.join(roomId);
     player2.join(roomId);
@@ -132,8 +136,8 @@ export class GamesService {
     this.clients[player1.data.user.id] = roomId;
     this.clients[player2.data.user.id] = roomId;
 
-    console.log('player1', player1.id, player1.data.user.id)
-    console.log('player2', player2.id, player2.data.user.id)
+    // console.log('player1', player1.id, player1.data.user.id)
+    // console.log('player2', player2.id, player2.data.user.id)
 
     this.rooms[roomId] = new Room(roomId, wss, player2, player1);
   }
