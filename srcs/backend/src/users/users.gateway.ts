@@ -1,19 +1,11 @@
-import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { OnGatewayConnection } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UsersService } from './users.service';
-import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
-import { FriendshipService } from 'src/friendship/friendship.service';
-import { BlockService } from 'src/block/block.service';
-import { FriendRequestService } from 'src/friendrequest/friendrequest.service';
-import { ProfileDto } from 'src/dto/profile.dto';
-import { PlayerService } from 'src/player/player.service';
-import { AchievementService } from 'src/achievement/achievement.service';
 import { UserDto } from 'src/dto/user.dto';
-import * as argon from 'argon2';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -48,17 +40,11 @@ export class UsersGateway
 		return (await this.usersService.getAllUsers());
 	}
 
-	// @SubscribeMessage('MyProfile')
-	// async handleMyProfile(@ConnectedSocket() client: Socket) {
-	// 	const id: number = client.data.user.id;
-	// 	const gameHistory = await this.playerService.getHistory(id);
-	// 	const achieve = await this.achieveService.getAchieveById(id);
-	// 	let profile = await this.usersService.getUserProfileById(id);
-	// 	return ({ ...profile, gameHistory, achieve });
-	// }
-
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
+		if (!client.data.user.id || client.data.user.id.length > 6) {
+			return (null);
+		}
 		const id: number = client.data.user.id;
 		this.logger.log(data);
 		return (await this.usersService.updateUser(id, data))
@@ -82,26 +68,10 @@ export class UsersGateway
 			// transform to base64
 			let base64 = file.toString('base64');
 			base64 = `data:image/jpeg;base64,${base64}`;
-			return (await this.usersService.updateUser(id, {avatar: base64}));
+			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
-		// this.logger.log('newAvatar')
 		return (await fileCheck(file));
 	}
-
-	// this function cannot be done in the service, it will create circular dependency
-	// @SubscribeMessage('Profile')
-	// async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string): Promise<ProfileDto> {
-	// 	const id: number = client.data.user.id;
-	// 	let otherprofile = await this.usersService.getUserProfileByNick(otherNick);
-	// 	if (id == otherprofile.id) return (otherprofile);
-	// 	const friend = await this.friendService.isFriend(id, otherprofile.id);
-	// 	const sent = (await this.friendReqService.getPendingReq(id, otherprofile.id)).length == 0 ? false : true;
-	// 	const block = await this.blockService.isBlocked(id, otherprofile.id);
-	// 	const blocked = await this.blockService.isBlocked(otherprofile.id, id);
-	// 	const gameHistory = await this.playerService.getHistory(otherprofile.id);
-	// 	const achieve = await this.achieveService.getAchieveById(otherprofile.id);
-	// 	return ({ ...otherprofile, friend, block, blocked, sent, gameHistory, achieve });
-	// }
 
 	@SubscribeMessage('Create2FA')
 	async handleCreate2FA(@ConnectedSocket() client: Socket) {
@@ -112,9 +82,10 @@ export class UsersGateway
 
 	@SubscribeMessage('Activate2FA')
 	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		console.log(data);
+		if (!client.data.user || data.length > 6) {
+			return (false);
+		}
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
-
 		if (isValid === true) {
 			this.usersService.updateUser(client.data.user.id, { activated2FA: true });
 			return (true);
@@ -124,10 +95,10 @@ export class UsersGateway
 
 	@SubscribeMessage('Disable2FA')
 	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		console.log("Disable2FA --->", data);
+		if (data.length > 6 || !client.data.user) {
+			return (false);
+		}
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
-
-		console.log("ISVALID", isValid);
 		if (isValid === true) {
 			this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
 			return (true);
@@ -137,13 +108,18 @@ export class UsersGateway
 
 	@SubscribeMessage('myAvatar')
 	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string | null> {
+		if (!client.data.user || !client.data.user.id || client.data.user.id.length > 6) {
+			return (null);
+		}
 		const id: number = client.data.user.id;
-
 		return (await this.usersService.getAvatar(id))
 	}
 
 	@SubscribeMessage('ChangePassword')
 	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
+		if (data.oldPassword.length > 100 || data.newPassword.length > 100) {
+			return (false);
+		}
 		if (data.oldPassowrd === '' || data.newPassword === '') {
 			return (false)
 		}
@@ -152,5 +128,4 @@ export class UsersGateway
 		);
 		return (passwordRespond);
 	}
-
 } 

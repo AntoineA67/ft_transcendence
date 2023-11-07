@@ -15,7 +15,7 @@ import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import * as argon from 'argon2';
 import * as randomstring from 'randomstring';
-import { SigninDto, SignupDto, Signin42Dto } from '../dto';
+import { SigninDto, SignupDto, Intra42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
 import { first } from 'rxjs';
@@ -102,7 +102,7 @@ export class AuthService {
 		return user;
 	  }
 
-	  async signin42(dto: Signin42Dto, res: Response, @Req() req) {
+	  async signin42(dto: Intra42Dto, res: Response, @Req() req) {
 		// if 2fa is activated and user have not sent token
 		let response;
 		if (!dto.token2FA && dto.activated2FA) {
@@ -175,7 +175,7 @@ export class AuthService {
 		}
 		const email = user.emails[0].value;
 		try {
-			const newUser = await this.usersService.createUser(user.username, email, "nopass", user.profileUrl)
+			const newUser = await this.usersService.createUser(user.username, user.emails[0].value, "nopass", user._json.image.link)
 			return newUser;
 		} catch {
 			try {
@@ -183,7 +183,7 @@ export class AuthService {
 					length: 6,
 					charset: 'numeric'
 				});
-				const newUser = await this.usersService.createUser(userName, email, "nopass", user.profileUrl)
+				const newUser = await this.usersService.createUser(userName, email, "nopass", user._json.image.link)
 				return newUser;
 			} catch {
 				throw new InternalServerErrorException();
@@ -205,7 +205,7 @@ export class AuthService {
         return refreshToken;
     }
 
-	async refreshToken(refreshToken: string): Promise<any> {
+	async refreshToken(refreshToken: string, req: Request, res: Response) {
 		if (!refreshToken) {
 		  throw new UnauthorizedException("Empty refresh token");
 		}

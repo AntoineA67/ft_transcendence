@@ -12,15 +12,45 @@ export class GamesService {
   private matchmakingQueue: Socket[] = [];
   private clients: Record<string, string> = {};
   private rooms: Record<string, Room> = {};
+  private matches: { senderId: { receiverId: string, sender: Socket, receiver: Socket } } | {} = {};
 
 
-  addToQueue(socket: Socket, wss: Server) {
-    for (let i = 0; i < this.matchmakingQueue.length; i++) {
-      if (this.matchmakingQueue[i].data.user.id === socket.data.user.id) {
-        console.log('already in queue')
-        return;
+  async matchAgainst(socket: Socket, wss: Server, otherIdDTO: { id: string }) {
+    const otherId = otherIdDTO.id;
+    try {
+      const otherIdNumber = parseInt(otherId);
+      const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
+      if (otherUser == null || otherUser.status !== 'ONLINE') throw new Error('User not online');
+    } catch (error) {
+      socket.emit('cancelledMatchmake', { reason: error.message });
+      return;
+    }
+    const sockets = await wss.fetchSockets();
+    if (this.matches[otherId] && this.matches[otherId].receiverId == socket.data.user.id) {
+      delete this.matches[otherId];
+      // console.log("LAUNCHING MATCH " + otherId + " " + socket.data.user.id)
+      for (let s of sockets) {
+        if (s.data.user.id == otherId) {
+          this.matchmakePlayers(wss, socket, s as unknown as Socket);
+          break;
+        }
+      }
+    } else {
+      for (let s of sockets) {
+        if (s.data.user.id == otherId) {
+          // console.log(socket.data.user)
+          const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
+          s.emit('ponged', { nick: username, id: socket.data.user.id })
+          this.matches[socket.data.user.id] = { receiverId: otherId, sender: socket, receiver: s };
+          console.log(`Matched ${socket.data.user.id} with ${otherId}, now matches are ${this.matches.toString()}`)
+          break;
+        }
       }
     }
+  }
+
+  addToQueue(socket: Socket, wss: Server) {
+    if (this.isInQueue(socket)) return;
     this.matchmakingQueue.push(socket);
     this.tryMatchPlayers(wss);
   }
@@ -30,51 +60,66 @@ export class GamesService {
   }
 
   disconnect(client: Socket) {
-    const roomId = this.clients[client.data.user.id];
+    // console.log('disconnect', client.data.user.id)
+    const userId = client.data.user.id;
+    const roomId = this.clients[userId];
     if (roomId) {
       const room = this.rooms[roomId];
       if (room) {
-        console.log('leave room', client.data.user.id)
+        // console.log('leave room', userId)
         if (room.isEmpty()) return;
-        room.leave(client.data.user.id).then(() => {
-          delete this.clients[client.data.user.id];
+        room.leave(userId).then(() => {
+          delete this.clients[userId];
           if (room.isEmpty()) {
             delete this.rooms[roomId];
           }
         });
       }
-    } else {
+    } else if (this.isInQueue(client)) {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
-        console.log('removeFromQueue', client.data.user.id)
+        // console.log('removeFromQueue', userId)
         this.matchmakingQueue.splice(index, 1);
       }
+    } else if (this.matches[userId]) {
+      // console.log('cancelledMatchmake', userId, this.matches[userId])
+      this.matches[userId].receiver.emit('cancelledMatchmake');
+      // delete this.matches[this.matches[userId]];
+      delete this.matches[userId];
     }
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
-    // console.log(this.clients)
-    this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
+    try {
+      // Will catch if the client is not in a room
+      this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
+    } catch (error) {
+      return;
+    }
   }
 
   private tryMatchPlayers(wss) {
     while (this.matchmakingQueue.length >= 2) {
       const player1 = this.matchmakingQueue.pop();
       const player2 = this.matchmakingQueue.pop();
+      if (!player1 || !player2) return;
 
       // Create a new room for the clients
       const roomId = uuidv4();
-      console.log('roomId', roomId)
+      // console.log('roomId', roomId)
 
-      player1.join(roomId);
-      player2.join(roomId);
+      try {
+        player1.join(roomId);
+        player2.join(roomId);
+        this.clients[player1.data.user.id] = roomId;
+        this.clients[player2.data.user.id] = roomId;
+      } catch (error) {
+        player1.disconnect();
+        player2.disconnect();
+      }
 
-      this.clients[player1.data.user.id] = roomId;
-      this.clients[player2.data.user.id] = roomId;
-
-      console.log('player1', player1.id, player1.data.user.id)
-      console.log('player2', player2.id, player2.data.user.id)
-
+      // console.log('player1', player1.id, player1.data.user.id)
+      // console.log('player2', player2.id, player2.data.user.id)
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
     }
   }
@@ -83,7 +128,7 @@ export class GamesService {
 
     // Create a new room for the clients
     const roomId = uuidv4();
-    console.log('roomId', roomId)
+    // console.log('roomId', roomId)
 
     player1.join(roomId);
     player2.join(roomId);
@@ -91,8 +136,8 @@ export class GamesService {
     this.clients[player1.data.user.id] = roomId;
     this.clients[player2.data.user.id] = roomId;
 
-    console.log('player1', player1.id, player1.data.user.id)
-    console.log('player2', player2.id, player2.data.user.id)
+    // console.log('player1', player1.id, player1.data.user.id)
+    // console.log('player2', player2.id, player2.data.user.id)
 
     this.rooms[roomId] = new Room(roomId, wss, player2, player1);
   }
@@ -100,14 +145,6 @@ export class GamesService {
   async findAll(): Promise<any> {
     return await this.prisma.game.findMany();
   }
-
-  // async find(
-  //   gameWhereUniqueInput: Prisma.gameWhereUniqueInput,
-  // ): Promise<game | null> {
-  //   return this.prisma.game.findUnique({
-  //     where: gameWhereUniqueInput,
-  //   });
-  // }
 
   async create(data: Prisma.GameCreateInput): Promise<Game> {
     return await this.prisma.game.create({
@@ -117,7 +154,6 @@ export class GamesService {
     });
   }
 
-  // update
   async update(id: number, data: Prisma.GameUpdateInput): Promise<Game> {
     return await this.prisma.game.update({
       where: { id },

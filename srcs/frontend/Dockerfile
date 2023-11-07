@@ -16,7 +16,7 @@ RUN rm -rf nodes_modules
 
 ENTRYPOINT ["sh", "-c", "npm i && npm start"]
 
-FROM node:lts
+FROM node:lts AS prod
 
 CMD echo "prod"
 

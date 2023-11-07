@@ -38,7 +38,7 @@ export class PlayerService {
 			) : (x.game.players[0].user.username),
 			score: x.game.score
 		}))
-		this.logger.log(history);
+		// this.logger.log(history);
 		return (history);
 	}
 
