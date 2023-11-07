@@ -77,9 +77,9 @@ export interface ChannelCreationResponse {
 }
 
 export function containsUnprintableCharacters(input: string, enqueueSnackbar: EnqueueSnackbar) {
-	const unprintableCharacterPattern = /[\x00-\x08\x0B\x0C\x0E-\x1F]/;
-	if (unprintableCharacterPattern.test(input)) {
-		enqueueSnackbar('Input contains unprintable characters', { variant: 'error' });
+	const printableCharactersRegex = /^[ -~]*$/;
+	if (!printableCharactersRegex.test(input)) {
+		enqueueSnackbar('Input contains unprintable characters (including no line break)', { variant: 'error' });
 		return true;
 	}
 	return false;
@@ -90,7 +90,7 @@ export function checkUserRoomName(newRoomTitle: string, enqueueSnackbar: Enqueue
 	if (printable) {
 		return false;
 	}
-	const bool = newRoomTitle && /^[A-Za-z0-9-]{4,16}$/.test(newRoomTitle);
+	const bool = newRoomTitle && /^[A-Za-z0-9-]{3,16}$/.test(newRoomTitle);
 	if (bool === false) {
 		enqueueSnackbar(type + ' must be between 4 and 16 characters long and contain only alphanumeric characters and dashes', { variant: 'error' });
 	}
@@ -107,4 +107,19 @@ export function checkPassword(newPassword: string, enqueueSnackbar: EnqueueSnack
 		enqueueSnackbar('Password must be between 8 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character', { variant: 'error' });
 	}
 	return (bool);
+}
+
+export function checkBio(newBio: string, enqueueSnackbar: EnqueueSnackbar) {
+	const printable = containsUnprintableCharacters(newBio, enqueueSnackbar);
+	if (printable) {
+		return false;
+	}
+	const bool = newBio && newBio.length <= 200;
+	if (!newBio) {
+		return true;
+	}
+	if (bool === false) {
+		enqueueSnackbar('Bio must be less than 200 characters long', { variant: 'error' });
+	}
+	return bool;
 }
