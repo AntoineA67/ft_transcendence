@@ -145,6 +145,7 @@ function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
 
+	console.log('Profile componenty')
 	return (
 		<>
 			<div className="container-fluid my-5 pb-sm-5 d-flex flex-column align-items-center white-text " >
