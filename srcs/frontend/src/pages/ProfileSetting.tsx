@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
 //import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
@@ -20,7 +20,7 @@ import { set } from 'lodash-es';
 export function Title({ title }: { title: string }) {
 	return (
 		<div className='d-flex w-100 align-items-center bg-black'>
-			<Link to="/me"><button className='leftArrow m-2'></button></Link>
+			<Link to=".."><button className='leftArrow m-2'></button></Link>
 			<h4 className='white-text' >{title}</h4>
 		</div>
 	);
@@ -163,21 +163,20 @@ export const InputToken = ({ handleChange }: any) => {
 
 export function SettingMenu() {
 
-	const [profile, setProfile] = useState<profileType | null>(null);
-	const [oldPassword, setOldPassword] = useState<String>('');
-	const [newPassword, setNewPassword] = useState<String>('');
-	const [confirmPassword, setConfirmPassword] = useState<String>('');
-	const [err, setErr] = useState<String>('');
-	const [success, setSuccess] = useState<String>('');
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);	const [oldPassword, setOldPassword] = useState('');
+	const [newPassword, setNewPassword] = useState('');
+	const [confirmPassword, setConfirmPassword] = useState('');
+	const [err, setErr] = useState('');
+	const [success, setSuccess] = useState('');
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		if (!profile) {
-			socket.emit('MyProfile', profile, (res: profileType) => {
-				setProfile(res);
-			});
-		}
-	}, [profile]);
+	// useEffect(() => {
+	// 	if (!profile) {
+	// 		socket.emit('MyProfile', profile, (res: profileType) => {
+	// 			setProfile(res);
+	// 		});
+	// 	}
+	// }, [profile]);
 
 	const handleChange = (event: any, type: string) => {
 		setErr('');
@@ -238,15 +237,15 @@ export function SettingMenu() {
 					<form className='h-100 d-flex flex-column gap-3' onSubmit={handleSubmit}>
 						<div>
 							<label htmlFor='current-password'>Current password</label>
-							<input id='current-password' type="password" placeholder="Current password" onChange={(e) => handleChange(e, 'oldPassword')} />
+							<input value={oldPassword} id='current-password' type="password" placeholder="Current password" onChange={(e) => handleChange(e, 'oldPassword')} />
 						</div>
 						<div>
 							<label htmlFor='new-password'>New password</label>
-							<input id='new-password' type="password" placeholder="New password" onChange={(e) => handleChange(e, 'newPassword')} />
+							<input value={newPassword} id='new-password' type="password" placeholder="New password" onChange={(e) => handleChange(e, 'newPassword')} />
 						</div>
 						<div>
 							<label htmlFor='confirm-password'>Confirm password</label>
-							<input id='confirm-password' type="password" placeholder="Password" onChange={(e) => handleChange(e, 'confirmPassword')} />
+							<input value={confirmPassword} id='confirm-password' type="password" placeholder="Password" onChange={(e) => handleChange(e, 'confirmPassword')} />
 						</div>
 						{err !== '' && (
 							<div className='red-text'>{err}</div>
@@ -270,7 +269,7 @@ export function SettingMenu() {
 					id="double-auth-switch"
 					label={profile?.activated2FA ? "Disable two-factor authentication" : "Enable two-factor authentication"}
 					onChange={switchActivate}
-					checked={profile?.activated2FA}
+					checked={profile.activated2FA}
 				/>
 				<hr />
 				<br></br>
