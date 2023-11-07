@@ -2,7 +2,7 @@ name: Deploy action
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "prod" ]
 
 permissions:
   contents: read
