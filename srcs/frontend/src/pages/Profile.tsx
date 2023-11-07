@@ -76,23 +76,31 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 			return;
 		}
 
-		// Validate the Username input using the utility function
 		if (type === 'nick' && !checkUserRoomName(mod, enqueueSnackbar, 'Username')) {
 			return;
 		}
 
-		// Validate the Bio input using the utility function
 		if (type === 'bio' && !checkBio(mod, enqueueSnackbar)) {
 			return;
 		}
 
-		let data = (type == 'nick') ? { username: mod } : { bio: mod };
+		let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			console.log('success: ', success)
-			success && setProfile((prev) => (
-				prev ? ({ ...prev, ...obj }) : prev
-			));
-		})
+			console.log('success: ', success);
+			if (success) {
+				setProfile((prev) => {
+					if (prev) {
+						if ('username' in obj && typeof obj.username === 'string') {
+							return { ...prev, username: obj.username.trim() };
+						}
+						if ('bio' in obj && typeof obj.bio === 'string') {
+							return { ...prev, bio: obj.bio.trim() };
+						}
+					}
+					return prev;
+				});
+			}
+		});
 		setEdit('done');
 	}
 
@@ -107,8 +115,6 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 				value={mod}
 				onChange={(e) => {
 					const text = e.target.value;
-
-					// Check the character count while typing
 					if (text.length <= 201) {
 						setMod(text);
 					} else {

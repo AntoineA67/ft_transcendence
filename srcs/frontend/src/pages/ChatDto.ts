@@ -77,9 +77,9 @@ export interface ChannelCreationResponse {
 }
 
 export function containsUnprintableCharacters(input: string, enqueueSnackbar: EnqueueSnackbar) {
-	const unprintableCharacterPattern = /[\x00-\x08\x0B\x0C\x0E-\x1F]/;
-	if (unprintableCharacterPattern.test(input)) {
-		enqueueSnackbar('Input contains unprintable characters', { variant: 'error' });
+	const printableCharactersRegex = /^[ -~]*$/;
+	if (!printableCharactersRegex.test(input)) {
+		enqueueSnackbar('Input contains unprintable characters (including no line break)', { variant: 'error' });
 		return true;
 	}
 	return false;
