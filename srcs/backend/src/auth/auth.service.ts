@@ -91,6 +91,10 @@ export class AuthService {
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
+		const data = { firstConnexion: "false"};
+		await this.usersService.updateUser(user.id, data)
+		// await this.usersService.updateUser(user.id, {"firstConnexion": "false"});
+		console.log("ICI", user.firstConnexion);
 		return await this.signJwtTokens(user.id, user.email, "false");
 		// return this.signJwtTokens(user.id, user.email);
 	}
@@ -114,13 +118,16 @@ export class AuthService {
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
-				response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
+				response = await this.signJwtTokens(dto.id, dto.email, "false");
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 		// no 2fa
 		} else 
 			response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
+			const data = { firstConnexion: "false"};
+			await this.usersService.updateUser(dto.id, data);
+			
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
@@ -139,7 +146,6 @@ export class AuthService {
 				secret: secret,
 			});
 		const refreshToken = await this.createRefreshToken(userId);
-		console.log("firstCOnnecion ===", firstConnexion);
 		return {
 			message: 'Authentication successful',
 			token: token,
@@ -165,7 +171,6 @@ export class AuthService {
 			const data = { firstConnexion: "false"};
 			await this.usersService.updateUser(userExists.id, data)
 		}
-		console.log("USEREXISTS=====", userExists);
 		return (userExists);
 	}
 

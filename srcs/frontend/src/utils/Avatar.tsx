@@ -15,7 +15,7 @@ export function Avatar({ size, user }: avatarProp) {
 	const [avatar, setAvatar] = useState('')
 	const [color, setColor] = useState('')
 	const [status, setStatus] = useState<'ONLINE' | 'OFFLINE' | 'INGAME'>(user.status);
-	
+
 	useEffect(() => {
 		// define behavior to user online status
 		function onOnline(id: number) {
@@ -45,6 +45,9 @@ export function Avatar({ size, user }: avatarProp) {
 	}, [status])
 	
 	useEffect(() => {
+		socket.emit('getUser', user.id, (res: userType) => {
+			setStatus(res.status);
+		})
 		// set Avatar
 		if (!user.avatar) {
 			setAvatar(DefaultAvatar);
