@@ -35,6 +35,10 @@ ul, ol {
 	color: white;
 }
 
+p {
+	overflow-wrap: break-word;
+}
+
 a {
 	color: inherit;
 	text-decoration: none !important;
