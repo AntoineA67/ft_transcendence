@@ -70,7 +70,7 @@ export default function GamePage() {
                 </button>
             </>
         );
-        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: true });
+        enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', action, persist: false });
     }
 
 
