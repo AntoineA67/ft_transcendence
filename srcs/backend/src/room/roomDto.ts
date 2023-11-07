@@ -47,8 +47,8 @@ export interface ChannelCreationResponse {
 }
 
 export function containsUnprintableCharacters(input: string) {
-    const unprintableCharacterPattern = /[\x00-\x08\x0B\x0C\x0E-\x1F]/;
-    if (unprintableCharacterPattern.test(input)) {
+    const printableCharactersRegex = /^[ -~]*$/;
+    if (!printableCharactersRegex.test(input)) {
         return true;
     }
     return false;
@@ -59,7 +59,7 @@ export function checkUserRoomName(newRoomTitle: string) {
 	if (printable) {
 		return false;
 	}
-	const bool = newRoomTitle && /^[A-Za-z0-9-]{4,16}$/.test(newRoomTitle);
+	const bool = newRoomTitle && /^[A-Za-z0-9-]{3,16}$/.test(newRoomTitle);
 	return bool;
 }
 

@@ -1,12 +1,11 @@
-import { OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { OnGatewayConnection } from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UsersService } from './users.service';
-import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -69,7 +68,7 @@ export class UsersGateway
 			// transform to base64
 			let base64 = file.toString('base64');
 			base64 = `data:image/jpeg;base64,${base64}`;
-			return (await this.usersService.updateUser(id, {avatar: base64}));
+			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
 		return (await fileCheck(file));
 	}
