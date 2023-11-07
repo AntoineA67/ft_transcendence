@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col';
 
 import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
-import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
 //import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
@@ -22,7 +22,7 @@ import { enqueueSnackbar } from 'notistack';
 export function Title({ title }: { title: string }) {
 	return (
 		<div className='d-flex w-100 align-items-center bg-black'>
-			<Link to="/me"><button className='leftArrow m-2'></button></Link>
+			<Link to=".."><button className='leftArrow m-2'></button></Link>
 			<h4 className='white-text' >{title}</h4>
 		</div>
 	);
@@ -165,7 +165,7 @@ export const InputToken = ({ handleChange }: any) => {
 
 export function SettingMenu() {
 
-	const [profile, setProfile] = useState<profileType | null>(null);
+	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [oldPassword, setOldPassword] = useState<string>('');
 	const [newPassword, setNewPassword] = useState<string>('');
 	const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -174,13 +174,13 @@ export function SettingMenu() {
 	const [formSubmitted, setFormSubmitted] = useState(false);
 	const navigate = useNavigate();
 
-	useEffect(() => {
-		if (!profile) {
-			socket.emit('MyProfile', profile, (res: profileType) => {
-				setProfile(res);
-			});
-		}
-	}, [profile]);
+	// useEffect(() => {
+	// 	if (!profile) {
+	// 		socket.emit('MyProfile', profile, (res: profileType) => {
+	// 			setProfile(res);
+	// 		});
+	// 	}
+	// }, [profile]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
 		setErr('');
@@ -310,7 +310,7 @@ export function SettingMenu() {
 					id="double-auth-switch"
 					label={profile?.activated2FA ? "Disable two-factor authentication" : "Enable two-factor authentication"}
 					onChange={switchActivate}
-					checked={profile?.activated2FA}
+					checked={profile.activated2FA}
 				/>
 				<hr />
 				<br></br>
