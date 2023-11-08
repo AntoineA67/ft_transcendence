@@ -22,15 +22,12 @@ CMD echo "prod"
 
 WORKDIR /app/
 
-ENV BUILD_PATH="/build/"
-
 COPY . /app/
 
+ENV REACT_APP_FORTYTWO_APP_ID=$REACT_APP_FORTYTWO_APP_ID
 ENV REACT_APP_GITHUB_LINK=$REACT_APP_GITHUB_LINK
 ENV REACT_APP_FRONTEND_URL=$REACT_APP_FRONTEND_URL
 ENV REACT_APP_BACKEND_URL=$REACT_APP_FRONTEND_URL
 
-RUN npm i
-RUN npm run build
 RUN npm install serve -g
-ENTRYPOINT ["sh", "-c", "serve -s build"]
+ENTRYPOINT ["sh", "-c", "npm i && npm run build && serve -s build -l 8000"]
