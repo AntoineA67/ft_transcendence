@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Message } from '@prisma/client';
 import { MessagesService } from './messages.service';
 
-@Controller('messages')
+@Controller('api/messages')
 export default class MessagesController {
   constructor(private readonly messagesService: MessagesService) { }
 
