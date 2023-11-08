@@ -16,10 +16,11 @@ import {
 	FilesetResolver,
 	DrawingUtils,
 } from "@mediapipe/tasks-vision";
+import { enqueueSnackbar } from "notistack";
 import { useEffect, useRef } from "react";
 
 
-export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: { changeHandPos: any, webcam: boolean, onWebcamFinishedLoading: () => void }) => {
+export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onError }: { changeHandPos: any, webcam: boolean, onWebcamFinishedLoading: () => void, onError: () => void }) => {
 	const stream = useRef<MediaStream | null>(null);
 	const videoRef = useRef<HTMLVideoElement | null>(null);
 	const demosRef = useRef<HTMLDivElement | null>(null);
@@ -119,7 +120,8 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 	// Enable the live webcam view and start detection.
 	function enableCam() {
 		if (!handLandmarker.current) {
-			alert("Please wait for handLandmarker to load");
+			enqueueSnackbar("Please try again later or refresh the page", { variant: "error" });
+			onError();
 			return;
 		}
 
@@ -140,6 +142,11 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading }: {
 				stream.current = s;
 				// console.log(s, stream);
 			}
+		}).catch(function (err) {
+			enqueueSnackbar("Please allow access to webcam", { variant: "error" });
+			onError();
+			return;
+			// console.log(err);
 		});
 	}
 
