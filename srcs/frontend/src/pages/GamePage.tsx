@@ -122,8 +122,12 @@ export default function GamePage() {
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
-	const onCancelledMatchmake = () => {
-		enqueueSnackbar("Match cancelled, other player not online", { variant: 'info', autoHideDuration: 4000 })
+	const onCancelledMatchmake = (data: { reason?: string } | undefined) => {
+		if (data?.reason === undefined) {
+			enqueueSnackbar(`Match cancelled`, { variant: 'info', autoHideDuration: 4000 })
+		} else {
+			enqueueSnackbar(`Match cancelled, ${data?.reason}`, { variant: 'info', autoHideDuration: 4000 })
+		}
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
@@ -239,9 +243,14 @@ export default function GamePage() {
 		}
 	}, [gameStatus])
 
+	const onWebcamError = () => {
+		setWebcam(false);
+		setGameStatus(GameStatus.Idle);
+	}
+
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
+			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} onError={onWebcamError} />
 			<GameSummaryModal summary={summary} />
 			{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
 
