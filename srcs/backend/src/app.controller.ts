@@ -12,7 +12,7 @@ export class AppController {
   constructor(private authService: AuthService, private readonly prisma: PrismaService, private readonly appService: AppService) { }
 
   @Public()
-  @Get('/')
+  @Get('api')
   getHello(): string {
     return 'Hello World Controller';
   }

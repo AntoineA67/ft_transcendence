@@ -1,6 +1,11 @@
 version: '3.8'
 services:
 
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./proxy/cert/conf:/etc/letsencrypt
+      - ./proxy/cert/www:/var/www/certbot
   backend:
     build:
       context: backend
@@ -15,19 +20,21 @@ services:
         - DATABASE_URL
     restart: always
     container_name: backend
-    ports:
-      - 4000:4000
-      - 4001:4001
-      - 5555:5555
     volumes:
       - "./${ENVPATH}/backend/:/app"
+    ports:
+      - 4000:4000
     env_file:
       - .env
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:4000/ || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:4000/api/ || exit 1"
+        ]
       start_period: 10s
       interval: 10s
       timeout: 10s
@@ -36,11 +43,11 @@ services:
   db:
     image: postgres:15.3
     environment:
-        - POSTGRES_HOST=${POSTGRES_HOST}
-        - POSTGRES_PORT=${POSTGRES_PORT}
-        - POSTGRES_USERNAME=${POSTGRES_USERNAME}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        - POSTGRES_NAME=${POSTGRES_NAME}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_NAME=${POSTGRES_NAME}
     restart: always
     user: postgres
     container_name: db
@@ -61,26 +68,42 @@ services:
       context: frontend
       target: ${ENV}
     environment:
-        - REACT_APP_FRONTEND_URL=${REACT_APP_FRONTEND_URL}
-        - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
-        - REACT_APP_FORTYTWO_APP_ID=${REACT_APP_FORTYTWO_APP_ID}
-        - REACT_APP_GITHUB_LINK=${REACT_APP_GITHUB_LINK}
+      - REACT_APP_FRONTEND_URL=${REACT_APP_FRONTEND_URL}
+      - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
+      - REACT_APP_FORTYTWO_APP_ID=${REACT_APP_FORTYTWO_APP_ID}
+      - REACT_APP_GITHUB_LINK=${REACT_APP_GITHUB_LINK}
     restart: always
     container_name: frontend
-    ports:
-      - 3000:3000
     volumes:
       - "./frontend/:/app"
-      - "../build/frontend/:/build"
+      - "../build/frontend/:/app/build"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/" ]
       start_period: 10s
       interval: 10s
       timeout: 5s
       retries: 5
+
+  proxy:
+    volumes:
+      - ./proxy/cert/conf:/etc/letsencrypt
+      - ./proxy/cert/www:/var/www/certbot
+    build:
+      context: proxy
+      target: ${ENV}
+    restart: always
+    container_name: proxy
+    ports:
+      - 80:80
+      - 443:443
+    env_file:
+      - .env
+    depends_on:
+      - backend
+      - frontend
 
 volumes:
   db_data:
