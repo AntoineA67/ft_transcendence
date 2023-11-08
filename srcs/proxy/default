@@ -1,5 +1,9 @@
 server {
     listen 80;
+    listen 443 ssl;
+
+    ssl_certificate /etc/ssl/certs/my-site.crt;
+    ssl_certificate_key /etc/ssl/private/my-site.key;
 
     location /socket.io/ {
         proxy_pass http://backend:4000/socket.io/;
