@@ -15,29 +15,52 @@ export class GamesService {
   private matches: { senderId: { receiverId: string, sender: Socket, receiver: Socket } } | {} = {};
 
 
+  async cancelMatchmake(socket: Socket, wss: Server, otherIdDTO: string) {
+    let otherIdNumber;
+    try {
+      otherIdNumber = parseInt(otherIdDTO);
+      const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
+      if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
+    } catch (error) {
+      socket.emit('cancelledMatchmake', { reason: error.message });
+      return;
+    }
+    if (this.matches[otherIdNumber]) {
+      this.matches[otherIdNumber].sender.emit('cancelledMatchmake');
+      delete this.matches[otherIdNumber];
+    }
+  }
+
   async matchAgainst(socket: Socket, wss: Server, otherIdDTO: { id: string }) {
     const otherId = otherIdDTO.id;
+    let otherIdNumber;
     try {
-      const otherIdNumber = parseInt(otherId);
+      otherIdNumber = parseInt(otherId);
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
-      if (otherUser == null || otherUser.status !== 'ONLINE') throw new Error('User not online');
+      if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
     } catch (error) {
       socket.emit('cancelledMatchmake', { reason: error.message });
       return;
     }
     const sockets = await wss.fetchSockets();
-    if (this.matches[otherId] && this.matches[otherId].receiverId == socket.data.user.id) {
+    if (this.matches[otherId] && this.matches[otherId].receiverId === socket.data.user.id) {
       delete this.matches[otherId];
-      // console.log("LAUNCHING MATCH " + otherId + " " + socket.data.user.id)
       for (let s of sockets) {
-        if (s.data.user.id == otherId) {
+        if (s.data.user.id === otherIdNumber) {
           this.matchmakePlayers(wss, socket, s as unknown as Socket);
           break;
         }
       }
     } else {
+      for (let match in this.matches) {
+        if (this.matches[match].receiverId === otherIdNumber) {
+          socket.emit('cancelledMatchmake', { reason: 'user already matched' });
+          return;
+        }
+      }
       for (let s of sockets) {
-        if (s.data.user.id == otherId) {
+        if (s.data.user.id === otherIdNumber) {
+          console.log(typeof socket.data.user.id, typeof otherId, socket.data.user.id, otherId, socket.data.user.id === otherId)
           // console.log(socket.data.user)
           const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
           s.emit('ponged', { nick: username, id: socket.data.user.id })
@@ -59,7 +82,7 @@ export class GamesService {
     return this.matchmakingQueue.includes(client);
   }
 
-  disconnect(client: Socket) {
+  async disconnect(client: Socket) {
     // console.log('disconnect', client.data.user.id)
     const userId = client.data.user.id;
     const roomId = this.clients[userId];
@@ -87,6 +110,7 @@ export class GamesService {
       // delete this.matches[this.matches[userId]];
       delete this.matches[userId];
     }
+    await this.prisma.user.update({ where: { id: client.data.user.id }, data: { status: 'ONLINE' } });
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
@@ -121,10 +145,12 @@ export class GamesService {
       // console.log('player1', player1.id, player1.data.user.id)
       // console.log('player2', player2.id, player2.data.user.id)
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
+      this.prisma.user.update({ where: { id: player1.data.user.id }, data: { status: 'INGAME' } });
+      this.prisma.user.update({ where: { id: player2.data.user.id }, data: { status: 'INGAME' } });
     }
   }
 
-  public matchmakePlayers(wss, player1: Socket, player2: Socket) {
+  public async matchmakePlayers(wss, player1: Socket, player2: Socket) {
 
     // Create a new room for the clients
     const roomId = uuidv4();
@@ -138,6 +164,9 @@ export class GamesService {
 
     // console.log('player1', player1.id, player1.data.user.id)
     // console.log('player2', player2.id, player2.data.user.id)
+    await this.prisma.user.update({ where: { id: player1.data.user.id }, data: { status: 'INGAME' } });
+    await this.prisma.user.update({ where: { id: player2.data.user.id }, data: { status: 'INGAME' } });
+
 
     this.rooms[roomId] = new Room(roomId, wss, player2, player1);
   }

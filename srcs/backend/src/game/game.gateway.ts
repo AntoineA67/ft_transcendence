@@ -53,6 +53,10 @@ export class GameGateway
     async handleMatchAgainst(socket: Socket, payload: { id: string }): Promise<void> {
         this.gamesService.matchAgainst(socket, this.wss, payload);
     }
+    @SubscribeMessage('cancelMatchmake')
+    async handleCancelMatchmake(socket: Socket, payload: string): Promise<void> {
+        this.gamesService.cancelMatchmake(socket, this.wss, payload);
+    }
 
 
     @SubscribeMessage('cancel')
