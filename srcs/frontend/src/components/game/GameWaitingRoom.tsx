@@ -87,4 +87,3 @@ const MatchingScreen = ({ cancelOrLeave }: { cancelOrLeave: () => void }) => {
 		<button onClick={cancelOrLeave} className="btn btn-primary"><b>Cancel</b></button>
 	</>;
 }
-
