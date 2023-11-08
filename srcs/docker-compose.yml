@@ -1,6 +1,11 @@
 version: '3.8'
 services:
 
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./proxy/cert/conf:/etc/letsencrypt
+      - ./proxy/cert/www:/var/www/certbot
   backend:
     build:
       context: backend
@@ -25,7 +30,11 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD-SHELL", "curl -f http://localhost:4000/api/ || exit 1" ]
+      test:
+        [
+          "CMD-SHELL",
+          "curl -f http://localhost:4000/api/ || exit 1"
+        ]
       start_period: 10s
       interval: 10s
       timeout: 10s
@@ -67,7 +76,7 @@ services:
     container_name: frontend
     volumes:
       - "./frontend/:/app"
-      - "../build/frontend/:/build"
+      - "../build/frontend/:/app/build"
     depends_on:
       backend:
         condition: service_healthy
@@ -79,6 +88,9 @@ services:
       retries: 5
 
   proxy:
+    volumes:
+      - ./proxy/cert/conf:/etc/letsencrypt
+      - ./proxy/cert/www:/var/www/certbot
     build:
       context: proxy
       target: ${ENV}
