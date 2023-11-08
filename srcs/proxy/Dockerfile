@@ -1,4 +1,5 @@
-FROM debian:latest
+FROM debian:latest as prod
+FROM debian:latest as dev
 
 RUN apt-get update && apt-get install -y nginx
 
