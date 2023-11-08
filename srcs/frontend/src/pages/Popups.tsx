@@ -39,7 +39,7 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 
 	const onDecline = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-
+		gamesSocket.emit('cancelMatchmake', popupId);
 		// emit event
 		clearTimeout(id);
 		setPopup('no')
