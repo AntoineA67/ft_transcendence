@@ -48,6 +48,7 @@ jobs:
             rm -rf $CLONE_DIR
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
+            echo ${{ secrets.SSH_HOST }}
             echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
             echo "REACT_APP_FRONTEND_URL=$REACT_APP_FRONTEND_URL" >> ./build/.env
             make prod
