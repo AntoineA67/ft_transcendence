@@ -51,5 +51,5 @@ jobs:
             echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
             echo "A=${{ env.FORTYTWO_APP_SECRET }}" >> ./build/.env
             echo "B=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./build/.env
-            #make prod
+            #make prod e
 
