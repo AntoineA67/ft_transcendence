@@ -636,7 +636,7 @@ export function ChatBox() {
 										: memberstatus.mute !== null && new Date(memberstatus.mute) > new Date()
 											? 'You are muted...'
 											: !roomChannel && blocks.find((block) => block.blockedId === membersList.find((member) => member.userId !== profile?.id)?.userId)
-												? 'You are blocking this user...'
+												? 'You blocked this user...'
 												: !roomChannel && profile?.pvrooms.find((room) => room.roomId === parseInt(chatId || '', 10))?.blocked
 													? 'You are blocked...'
 													: 'Write your message...'
@@ -661,8 +661,15 @@ export function ChatBox() {
 					<div className="align-items-center d-flex flex-column p-5">
 						{memberstatus?.admin && roomChannel && (
 							<>
-								<div style={{ display: 'flex', alignItems: 'center' }}>
-									<h4 className='white-text'>Settings of #{chatId}</h4>
+								<div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+									<h4 className='white-text'>
+										{`Settings of ${roomTitle}`}
+									</h4>
+									<div style={{ display: 'flex', alignItems: 'center' }}>
+										<span style={{ flex: 1 }}></span>
+										<span style={{ textAlign: 'center' }}>id: #{chatId}</span>
+										<span style={{ flex: 1 }}></span>
+									</div>
 								</div>
 								<input
 									id="roomTitleInput"
@@ -900,7 +907,7 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 				enqueueSnackbar(`The room has not been created. You are blocked by this user (${nick}).`, { variant: 'error' });
 			}
 			else if (response === -5) {
-				enqueueSnackbar(`The room has not been created. You are blocking this user (${nick}).`, { variant: 'error' });
+				enqueueSnackbar(`The room has not been created. You blocked this user (${nick}).`, { variant: 'error' });
 			}
 			setNick('');
 		});

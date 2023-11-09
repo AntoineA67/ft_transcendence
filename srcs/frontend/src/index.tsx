@@ -5,7 +5,6 @@ import {
 	createRoutesFromElements,
 	Route,
 	RouterProvider,
-	LoaderFunctionArgs,
 	Outlet,
 	redirect
 } from 'react-router-dom';
@@ -56,6 +55,7 @@ async function loader(route: string, param?: string, refresh = false) {
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
+
 	const res = await fetch(fetchUrl, {
 		headers: { 'Authorization': `Bearer ${token}` }
 	})
@@ -77,12 +77,14 @@ async function loader(route: string, param?: string, refresh = false) {
 		if (res.status != 201) {
 			localStorage.removeItem('token');
 			localStorage.removeItem('refreshToken');
+			localStorage.removeItem('firstConnexion');
 			return redirect("/login");
 			// throw new Response(res.statusText, { status: res.status })
 		}
 		const newTokens = await res.json();
 		localStorage.setItem('token', newTokens.token);
 		localStorage.setItem('refreshToken', newTokens.refreshToken);
+		localStorage.setItem('firstConnexion', newTokens.firstConnexion);
 		return loader(route, param, true);
 	})
 
@@ -108,14 +110,13 @@ const router = createBrowserRouter(
 
 					<Route index element={<GamePage />} loader={() => (loader('auth', 'isTokenValid'))} />
 
-					<Route path='me' element={<Profile />} loader={() => (loader('profile', 'me'))} />
-					<Route path="/me/setting" element={<Setting />}>
-						<Route index element={<SettingMenu />}></Route>
-						<Route path='2fa' element={<TwoFactorAuth />}></Route>
+					<Route path='me' element={<Outlet />}>
+						<Route index element={<Profile />} loader={() => (loader('profile', 'me'))} />
+						<Route path="setting" element={<Outlet />}>
+							<Route index element={<SettingMenu />} loader={() => (loader('profile', 'me'))} />
+							<Route path='2fa' element={<TwoFactorAuth />} />
+						</Route>
 					</Route>
-
-					{/* <Route path='game' element={<GamePage />} />
-					<Route path=":userId" element={<GamePage />} /> */}
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>
 						<Route index element={<DefaultSearchPage />} />

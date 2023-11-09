@@ -11,13 +11,12 @@ import { useNavigate } from 'react-router-dom';
 type newUser = {
 	username: string,
 	email: string,
-	password: string
+	password: string,
 }
 
 type login = {
 	email: string,
 	password: string,
-	// firstConnexion: boolean,
 }
 
 export function Login() {
@@ -28,6 +27,7 @@ export function Login() {
 		localStorage.setItem('token', data.token);
 		localStorage.setItem('refreshToken', data.refreshToken);
 		localStorage.setItem('email', user.email);
+		localStorage.setItem('firstConnexion', data.firstConnexion);
 		navigate('/');
 	}
 
@@ -195,14 +195,14 @@ export function LandingPage() {
 
 	return (
 		<>
-			<div className="conatiner text-center">
+			<div className="text-center">
 				<div className="row justify-content-center h-100">
 					<div className='col-sm-6 col-lg-6'>
 						<div className="h-75 d-flex flex-column justify-content-evenly ">
 							<div className="w-75 align-self-center mt-5">
 								<h1 className='magenta-text mt-5'><b>Ping Pang Pong</b></h1>
 								<p className='white-text'>
-									Si vous avez des amis, vous pouvez jouer à ce jeu en multi joueur, sinon, une IA va se charger de vous !
+									Si vous avez des amis, vous pouvez jouer à ce jeu en multi joueur !
 								</p>
 							</div>
 							<div className="mt-4 d-flex flex-column gap-3 justify-content-center align-items-center" >
@@ -221,7 +221,7 @@ export function LandingPage() {
 					</div>
 				</div>
 			</div>
-			<footer className="d-flex flex-column align-items-center grey-text py-3">
+			<footer className="text-center d-flex flex-column align-items-center grey-text py-3">
 				Projet de fin de tronc-commun de l’école 42
 				<a href={github}><img src={githubLogo} /></a>
 				<p></p>

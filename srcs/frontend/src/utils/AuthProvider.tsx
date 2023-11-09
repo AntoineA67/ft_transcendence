@@ -7,7 +7,7 @@ import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { set } from 'lodash-es';
 
 export function CallBack42() {
-	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
+	const [status, setStatus] = useState<'loading' | 'done' |'2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -17,6 +17,7 @@ export function CallBack42() {
 			setStatus('done')
 			return;
 		};
+
 		let response;
 
 		try {
@@ -34,6 +35,7 @@ export function CallBack42() {
 			}
 			localStorage.setItem('token', data.token);
 			localStorage.setItem('refreshToken', data.refreshToken);
+			localStorage.setItem('firstConnexion', data.firstConnexion);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
 			console.log('response: ', response)

@@ -128,4 +128,9 @@ export class UsersGateway
 		);
 		return (passwordRespond);
 	}
+
+	@SubscribeMessage('getUser')
+	async handleGetUser(@MessageBody() data: number): Promise<UserDto> {
+		return await this.usersService.getUserById(data);
+	}
 } 

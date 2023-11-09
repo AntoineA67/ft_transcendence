@@ -28,7 +28,8 @@ import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
-import { enqueueSnackbar } from "notistack";
+import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { useNavigate } from 'react-router-dom';
 
 export enum GameStatus {
 	Idle = 'idle',
@@ -56,7 +57,11 @@ export default function GamePage() {
 	const [webcam, setWebcam] = useState<boolean>(false);
 	const [opponent, setOpponent] = useState<any>(null);
 
+	const navigate = useNavigate();
+
+
 	let indexTime = 0;
+
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
@@ -117,8 +122,12 @@ export default function GamePage() {
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
-	const onCancelledMatchmake = () => {
-		enqueueSnackbar("Match cancelled, other player not online", { variant: 'info', autoHideDuration: 4000 })
+	const onCancelledMatchmake = (data: { reason?: string } | undefined) => {
+		if (data?.reason === undefined) {
+			enqueueSnackbar(`Match cancelled`, { variant: 'info', autoHideDuration: 4000 })
+		} else {
+			enqueueSnackbar(`Match cancelled, ${data?.reason}`, { variant: 'info', autoHideDuration: 4000 })
+		}
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
 	};
@@ -199,6 +208,15 @@ export default function GamePage() {
 	}, [gamesSocket])
 
 	useEffect(() => {
+		const firstConnexion = localStorage.getItem('firstConnexion') || null;
+		if (firstConnexion === 'true') {
+			localStorage.setItem('firstConnexion', 'false');
+			enqueueSnackbar("You can update your avatar and your username anytime here !", { variant: 'info', persist: false });
+			navigate('/me');
+		}
+	}, [])
+
+	useEffect(() => {
 		const gameUserId = location.state?.gameUserId
 		globalSocket.emit('MyProfile', (res: any) => {
 			id.current = res.id;
@@ -225,9 +243,14 @@ export default function GamePage() {
 		}
 	}, [gameStatus])
 
+	const onWebcamError = () => {
+		setWebcam(false);
+		setGameStatus(GameStatus.Idle);
+	}
+
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} />
+			<WebcamPong changeHandPos={changeHandPos} webcam={webcam} onWebcamFinishedLoading={onWebcamFinishedLoading} onError={onWebcamError} />
 			<GameSummaryModal summary={summary} />
 			{/* <WebcamConfirmModal showProps={webcamConfirmModalOpen} confirmAction={enableCam} /> */}
 
