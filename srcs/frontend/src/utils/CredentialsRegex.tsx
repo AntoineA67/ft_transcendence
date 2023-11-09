@@ -37,23 +37,11 @@ import { useState } from 'react';
  */
 
  export const validateUsername = (Username: string): string | null => {
-    if (Username.length < 4) {
-        return 'Username should be at least 4 characters long.';
+    if (Username.length < 3 || Username.length > 16) {
+        return 'Username should be between 4 and 16 characters long.';
     }
-    if (!/[a-z A-Z]/.test(Username)) {
-        return 'Username should contain at least one letter.';
+    if (!/^[A-Za-z0-9-]/.test(Username)) {
+        return 'Username should contain only alphanumeric characters and dashes.';
     }
-    // if (!/[A-Z]/.test(Username)) {
-    //     return 'Username should contain at least one uppercase letter.';
-    // }
-	if (/[\ ]/.test(Username)){
-		return 'Username cannot contain a space character.';
-	}
-    // if (!/[0-9]/.test(Username)) {
-    //     return 'Username should contain at least one digit.';
-    // }
-    // if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/.test(Username)) {
-    //     return 'Username should contain at least one special character (e.g., @, #, $, etc.).';
-    // }
     return null;
 };

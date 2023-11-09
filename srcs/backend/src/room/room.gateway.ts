@@ -339,8 +339,11 @@ export class RoomGateway
 				username: usertomute.username,
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
-			if (SockettoMute)
+			const profileupdated = await this.roomService.getProfileForUser(content.memberId);
+			if (SockettoMute){
 				SockettoMute.emit('newmemberStatus', membertosend);
+				SockettoMute.emit('newProfile', profileupdated);
+			}
 			return true;
 		}
 		return false;
