@@ -11,6 +11,6 @@ echo \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt update
 
-apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin make
 
 ssh-keygen -t ed25519 -C "deploy@github.com
