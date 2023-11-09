@@ -48,3 +48,4 @@ jobs:
             git clone -b master https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git
             cd $CLONE_DIR
             docker compose up
+

@@ -18,6 +18,7 @@ import * as randomstring from 'randomstring';
 import { SigninDto, SignupDto, Intra42Dto } from '../dto';
 import { jwtConstants } from './constants';
 import { randomBytes } from 'crypto';
+import { first } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -48,9 +49,10 @@ export class AuthService {
 					email: dto.email,
 					username: dto.username,
 					hashPassword,
+					firstConnexion: "true",
 				},
 		});
-		return this.signJwtTokens(user.id, user.email, true);
+		return this.signJwtTokens(user.id, user.email, user.firstConnexion);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				console.log(error)
@@ -89,7 +91,11 @@ export class AuthService {
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
-		return await this.signJwtTokens(user.id, user.email, false);
+		const data = { firstConnexion: "false"};
+		await this.usersService.updateUser(user.id, data)
+		// await this.usersService.updateUser(user.id, {"firstConnexion": "false"});
+		console.log("ICI", user.firstConnexion);
+		return await this.signJwtTokens(user.id, user.email, "false");
 		// return this.signJwtTokens(user.id, user.email);
 	}
   
@@ -112,18 +118,21 @@ export class AuthService {
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
-				response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
+				response = await this.signJwtTokens(dto.id, dto.email, "false");
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
 		// no 2fa
 		} else 
 			response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
+			const data = { firstConnexion: "false"};
+			await this.usersService.updateUser(dto.id, data);
+			
 		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
 
-	async signJwtTokens(userId: number, userEmail: string, firstConnexion: boolean) {
+	async signJwtTokens(userId: number, userEmail: string, firstConnexion: string) {
 		let payload = {
 			id: userId,
 			email: userEmail,
@@ -152,8 +161,16 @@ export class AuthService {
 		const email = user.emails[0].value;
 		let userExists: any = await this.usersService.getUserByEmail(email);
 		if (!userExists)
+		{
 			userExists = await this.registerUser42(user);
-		userExists.firstConnexion = false;
+			const data = { firstConnexion: "true"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
+		else
+		{
+			const data = { firstConnexion: "false"};
+			await this.usersService.updateUser(userExists.id, data)
+		}
 		return (userExists);
 	}
 

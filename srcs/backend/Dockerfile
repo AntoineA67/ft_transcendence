@@ -19,5 +19,7 @@ FROM base as DEV
 ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate && npm run start:dev"]
 # npx prisma studio
 FROM base as PROD
-# ENTRYPOINT ["sh", "-c", "npm ci && npm build"]
-CMD [ "node", "dist/main.js" ]
+
+# RUN npm i && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate
+ENTRYPOINT ["sh", "-c", "npm ci  && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate && npm run build && cd ../.. && node dist/main.js"]
+# CMD [ "node", "dist/main.js" ]

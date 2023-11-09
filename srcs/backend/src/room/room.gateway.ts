@@ -370,7 +370,7 @@ export class RoomGateway
 			if (SocketToBan) {
 				SocketToBan.emit('newmemberStatus', membertosend);
 				SocketToBan.emit('newProfile', profileupdated);
-				if (content.action)
+				if (!content.action)
 					SocketToBan.leave("room_" + roomid.toString());
 				else
 					SocketToBan.join("room_" + roomid.toString());
