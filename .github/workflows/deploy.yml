@@ -49,6 +49,7 @@ jobs:
             echo ${{ secrets.SSH_HOST }}
             echo ${{ env.REACT_APP_FRONTEND_URL }}
             echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
-            echo "REACT_APP_FRONTEND_URL=$REACT_APP_FRONTEND_URL" >> ./build/.env
+            echo "A=${{ env.FORTYTWO_APP_SECRET }}" >> ./build/.env
+            echo "A=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./build/.env
             #make prod
 
