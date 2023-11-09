@@ -21,7 +21,7 @@ services:
     restart: always
     container_name: backend
     volumes:
-      - "./${ENVPATH}/backend/:/app"
+      - "./backend/:/app"
     ports:
       - 4000:4000
     env_file:
