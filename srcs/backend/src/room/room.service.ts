@@ -892,7 +892,7 @@ export class RoomService {
 				},
 				data: {
 					owner: true,
-					admin: false,
+					admin: true,
 					ban: false,
 					mute: null,
 				},
