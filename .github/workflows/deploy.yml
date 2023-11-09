@@ -48,11 +48,7 @@ jobs:
             mkdir -p $CLONE_DIR/
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
-            echo "FORTYTWO_APP_SECRET=$FORTYTWO_APP_SECRET" > ./build/.env
-            # echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./build/.env
-            # echo "APP_NAME=${{ env.APP_NAME }}" >> ./build/.env
-            # echo "ENV=${{ env.ENV }}" >> ./build/.env
-            # echo "REACT_APP_BACKEND_URL=${{ env.REACT_APP_BACKEND_URL }}" >> ./build/.env
+            echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }} > ./build/.env
             echo "REACT_APP_FRONTEND_URL=$REACT_APP_FRONTEND_URL" >> ./build/.env
             make prod
 
