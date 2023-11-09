@@ -8,23 +8,23 @@ on:
 #   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pydo
-    - name: Reset droplet
-      env:
-          DO_TOKEN: ${{ secrets.DO_TOKEN }}
-      run: |
-        python .github/rebuild-droplet.py
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python 3.10
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: "3.10"
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install pydo
+  #   - name: Reset droplet
+  #     env:
+  #         DO_TOKEN: ${{ secrets.DO_TOKEN }}
+  #     run: |
+  #       python .github/rebuild-droplet.py
 
   deploy:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
       - name: Clone and run docker
         uses: appleboy/ssh-action@master
         env:
-          CLONE_DIR: /home/ci/docker
+          CLONE_DIR: /home/ci/
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -43,9 +43,9 @@ jobs:
           script: |
             echo "Starting deploy docker ...."
             echo git@github.com:${{github.repository}}.git
-            mkdir $CLONE_DIR/../test/
+            mkdir -p $CLONE_DIR/
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
-            git clone -b master https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git
+            # git clone -b master https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
-            docker compose up
+            make
 
