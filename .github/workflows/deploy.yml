@@ -34,8 +34,6 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           CLONE_DIR: /home/ci/
-          FORTYTWO_APP_SECRET: ${{ secrets.FORTYTWO_APP_SECRET }}
-          REACT_APP_FRONTEND_URL: ${{ env.REACT_APP_FRONTEND_URL }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -49,7 +47,8 @@ jobs:
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
             echo ${{ secrets.SSH_HOST }}
+            echo ${{ env.REACT_APP_FRONTEND_URL }}
             echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
             echo "REACT_APP_FRONTEND_URL=$REACT_APP_FRONTEND_URL" >> ./build/.env
-            make prod
+            #make prod
 
