@@ -5,8 +5,8 @@ import time
 client = Client(token=os.environ.get("DO_TOKEN"))
 req = {
   "type": "restore",
-  "image": 136502792
+  "image": os.environ.get("DO_IMAGE")
 }
 
-resp = client.droplet_actions.post(droplet_id=365187067, body=req)
+resp = client.droplet_actions.post(droplet_id=os.environ.get("DO_DROPLET_ID"), body=req)
 time.sleep(60)
