@@ -34,16 +34,18 @@ jobs:
     steps:
       - name: Clone and run docker
         uses: appleboy/ssh-action@master
+        env:
+          CLONE_DIR: /home/ci/
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PWD }}
+          envs: CLONE_DIR
           port: 22
           script: |
             echo "Starting deploy docker ...."
-            rm -rf /home/ci
-            git clone -b master git@github.com:${{github.repository}}.git /home/ci
-            cd /home/ci
+            git clone -b prod git@github.com:${{github.repository}}.git $CLONE_DIR
+            cd $CLONE_DIR
 
             # GitHub vars
             echo "ENV=${{ vars.ENV }}" > ./srcs/.env
