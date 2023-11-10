@@ -8,9 +8,9 @@ NAME = ft_transcendance
 
 all : $(NAME)
 
-$(NAME) : build
+$(NAME) : dev
 
-build :
+dev :
 	@echo "${GREEN}> Image building 🎉${END}"
 	@docker compose --env-file ./srcs/.env -f ./srcs/docker-compose.yml build
 	@echo "${GREEN}> Turning up images 🎉${END}"
@@ -32,6 +32,12 @@ build :
 		echo "${RED}Health check failed after ${RETRIES} attempts.${END}"; \
 		exit 1; \
 	fi
+
+prod :
+	@echo "${GREEN}> Image building 🎉${END}"
+	@docker compose --env-file=./srcs/.env -f ./srcs/docker-compose.yml build
+	@echo "${GREEN}> Turning up images 🎉${END}"
+	@docker compose -f ./srcs/docker-compose.yml up -d
 	
 down :
 	@echo "${GREEN}> Turning down images ❌${END}"
