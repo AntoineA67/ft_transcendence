@@ -13,4 +13,6 @@ apt update
 
 apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin make
 
-ssh-keygen -t ed25519 -C "deploy@github.com
+ssh-keygen -t ed25519 -C "deploy@github.com"
+
+ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
