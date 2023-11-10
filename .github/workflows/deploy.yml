@@ -43,6 +43,8 @@ jobs:
           script: |
             echo "Starting deploy docker ...."
             rm -rf $CLONE_DIR
+            sleep 5
+            rm -rf $CLONE_DIR
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
 
