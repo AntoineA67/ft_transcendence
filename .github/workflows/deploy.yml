@@ -44,6 +44,7 @@ jobs:
           port: 22
           script: |
             echo "Starting deploy docker ...."
+            ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
             git clone -b prod git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
 
