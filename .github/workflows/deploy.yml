@@ -70,5 +70,5 @@ jobs:
             echo "${{ secrets.PRIVKEY }}" > ./srcs/proxy/cert/privkey.pem
 
             # Make
-            make
+            make prod
 
