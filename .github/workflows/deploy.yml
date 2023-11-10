@@ -3,9 +3,12 @@ name: Deploy action
 on:
   push:
     branches: [ "prod" ]
+  permissions:
+    contents: read
 
-# permissions:
-#   contents: read
+env:
+  # Setting an environment variable with the value of a configuration variable
+  env_var: ${{ vars.APP_NAME }}
 
 jobs:
   # build:
@@ -51,6 +54,6 @@ jobs:
             echo ${{ env.REACT_APP_FRONTEND_URL }}
             echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
             echo "A=$SUPER_SECRET" >> ./build/.env
-            echo "B=${{ env.APP_NAME }}" >> ./build/.env
+            echo "B=$env_var" >> ./build/.env
             #make prod e
 
