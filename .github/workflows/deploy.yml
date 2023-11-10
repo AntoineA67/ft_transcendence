@@ -23,6 +23,8 @@ jobs:
     - name: Reset droplet
       env:
           DO_TOKEN: ${{ secrets.DO_TOKEN }}
+          DO_DROPLET_ID: ${{ secrets.DO_DROPLET_ID }}
+          DO_IMAGE: ${{ secrets.DO_IMAGE }}
       run: |
         python .github/rebuild-droplet.py
 
@@ -33,7 +35,7 @@ jobs:
       - name: Clone and run docker
         uses: appleboy/ssh-action@master
         env:
-          CLONE_DIR: /home/ci/docker
+          CLONE_DIR: /home/ci/
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
@@ -41,11 +43,32 @@ jobs:
           envs: CLONE_DIR
           port: 22
           script: |
-            echo "Starting deploy docker ..."
-            echo git@github.com:${{github.repository}}.git
-            mkdir $CLONE_DIR/../test/
-            git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
-            git clone -b master https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}.git
+            echo "Starting deploy docker ...."
+            git clone -b prod git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
-            docker compose up
+
+            # GitHub vars
+            echo "ENV=${{ vars.ENV }}" > ./srcs/.env
+            echo "APP_NAME=${{ vars.APP_NAME }}" >> ./srcs/.env
+            echo "REACT_APP_FRONTEND_URL=${{ vars.REACT_APP_FRONTEND_URL }}" >> ./srcs/.env
+            echo "REACT_APP_BACKEND_URL=${{ vars.REACT_APP_BACKEND_URL }}" >> ./srcs/.env
+            echo "REACT_APP_GITHUB_LINK=${{ vars.REACT_APP_GITHUB_LINK }}" >> ./srcs/.env
+
+            # GitHub secrets
+            echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./srcs/.env
+            echo "FORTYTWO_APP_SECRET=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./srcs/.env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> ./srcs/.env
+            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> ./srcs/.env
+            echo "POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}" >> ./srcs/.env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ./srcs/.env
+            echo "POSTGRES_NAME=${{ secrets.POSTGRES_NAME }}" >> ./srcs/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./srcs/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./srcs/.env
+
+            # Let's Encrypt
+            echo "${{ secrets.FULLCHAIN }}" > ./srcs/proxy/cert/fullchain.pem
+            echo "${{ secrets.PRIVKEY }}" > ./srcs/proxy/cert/privkey.pem
+
+            # Make
+            make re
 

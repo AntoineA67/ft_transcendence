@@ -1,25 +1,28 @@
 # Base image
 FROM node:lts as base
 
-ARG POSTGRES_HOST=;
-ARG POSTGRES_PORT=;
-ARG POSTGRES_USERNAME=;
-ARG POSTGRES_PASSWORD=;
-ARG POSTGRES_NAME=;
-ARG JWT_SECRET=;
-ARG DATABASE_URL=;
-
 WORKDIR /app
 
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
-FROM base as DEV
+FROM base as dev
 
-ENTRYPOINT ["sh", "-c", "npm i && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate && npm run start:dev"]
-# npx prisma studio
-FROM base as PROD
+ENTRYPOINT ["sh", "-c", "\
+    npm i && \
+    cd src/prisma && \
+    npx prisma db push --accept-data-loss --force-reset && \
+    npx prisma db seed && \
+    npx prisma generate && \
+    npm run start:dev"]
 
-# RUN npm i && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate
-ENTRYPOINT ["sh", "-c", "npm ci  && cd src/prisma && npx prisma db push --accept-data-loss --force-reset && npx prisma db seed && npx prisma generate && npm run build && cd ../.. && node dist/main.js"]
-# CMD [ "node", "dist/main.js" ]
+FROM base as prod
+
+ENTRYPOINT ["sh", "-c", "npm ci && \
+    cd src/prisma && \
+    npx prisma db push --accept-data-loss --force-reset && \
+    npx prisma db seed && \
+    npx prisma generate && \
+    npm run build && \
+    cd ../.. && node dist/main.js"]
+
