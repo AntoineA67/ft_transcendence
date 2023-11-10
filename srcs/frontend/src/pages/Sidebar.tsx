@@ -7,10 +7,12 @@ import Chat from '../assets/Chat.svg';
 import Me from '../assets/Me.svg';
 import Search from '../assets/Search.svg';
 import Friend from '../assets/Friend.svg';
+import Feedbacks from '../assets/Feedbacks.svg';
 
-import { closeSnackbar, enqueueSnackbar, SnackbarProvider } from "notistack";
 
-import { Outlet, useOutletContext, Link, useLocation } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
+
+import { Outlet, Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
 	const location = useLocation();
@@ -92,6 +94,9 @@ export default function Sidebar() {
 								</li>
 								<li className={`nav-item ${page === '/chat' ? 'magenta' : ''}`}>
 									<Link to="chat"><img src={Chat} alt="Chat" /></Link>
+								</li>
+								<li className={`nav-item ${page === '/discord' ? 'magenta' : ''}`}>
+									<Link to="discord"><img src={Feedbacks} alt="Discord" /></Link>
 								</li>
 							</ul>
 						</div>
