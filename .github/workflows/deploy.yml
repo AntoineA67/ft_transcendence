@@ -49,6 +49,8 @@ jobs:
             echo "Starting deploy docker ...."
             echo git@github.com:${{github.repository}}.git
             rm -rf $CLONE_DIR
+            ls /
+            ls /home
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
             echo ${{ secrets.SSH_HOST }}
