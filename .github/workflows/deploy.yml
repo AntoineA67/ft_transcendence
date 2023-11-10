@@ -3,8 +3,9 @@ name: Deploy action
 on:
   push:
     branches: [ "prod" ]
-  permissions:
-    contents: read
+
+permissions:
+  contents: read
 
 env:
   # Setting an environment variable with the value of a configuration variable
