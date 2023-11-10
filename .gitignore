@@ -2,7 +2,6 @@
 node_modules
 .env
 .vscode
-package-lock.json
 test
 build/
 *.pem
