@@ -8,25 +8,25 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pydo
-    - name: Reset droplet
-      env:
-          DO_TOKEN: ${{ secrets.DO_TOKEN }}
-          DO_DROPLET_ID: ${{ secrets.DO_DROPLET_ID }}
-          DO_IMAGE: ${{ secrets.DO_IMAGE }}
-      run: |
-        python .github/rebuild-droplet.py
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - name: Set up Python 3.10
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: "3.10"
+  #   - name: Install dependencies
+  #     run: |
+  #       python -m pip install --upgrade pip
+  #       pip install pydo
+  #   - name: Reset droplet
+  #     env:
+  #         DO_TOKEN: ${{ secrets.DO_TOKEN }}
+  #         DO_DROPLET_ID: ${{ secrets.DO_DROPLET_ID }}
+  #         DO_IMAGE: ${{ secrets.DO_IMAGE }}
+  #     run: |
+  #       python .github/rebuild-droplet.py
 
   deploy:
     runs-on: ubuntu-latest
@@ -44,7 +44,6 @@ jobs:
           port: 22
           script: |
             echo "Starting deploy docker ...."
-            ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts
             git clone -b prod git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
 
