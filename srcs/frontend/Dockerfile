@@ -16,5 +16,5 @@ COPY . /app/
 RUN npm install serve -g
 
 ENTRYPOINT ["sh", "-c", "npm i && \
-    npm run build && \
+    npm run build -- --parallel && \
     serve -s build -l 8000"]
