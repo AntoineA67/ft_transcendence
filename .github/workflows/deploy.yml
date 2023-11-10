@@ -42,6 +42,7 @@ jobs:
           port: 22
           script: |
             echo "Starting deploy docker ...."
+            rm -rf $CLONE_DIR
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
 
