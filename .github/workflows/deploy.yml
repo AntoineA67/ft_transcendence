@@ -43,16 +43,25 @@ jobs:
           port: 22
           script: |
             echo "Starting deploy docker ...."
-            echo git@github.com:${{github.repository}}.git
-            rm -rf /home/
-            ls /
-            ls /home
             git clone -b master git@github.com:${{github.repository}}.git $CLONE_DIR
             cd $CLONE_DIR
-            echo ${{ secrets.SSH_HOST }}
-            echo ${{ env.REACT_APP_FRONTEND_URL }}
-            echo "FORTYTWO_APP_SECRET=${{ secrets.SSH_HOST }}" > ./build/.env
-            echo "A=${{ vars.ENV }}" >> ./build/.env
-            echo "B=${{ env.ENV }}" >> ./build/.env
-            #make prod e
+
+            # GitHub vars
+            echo "ENV=${{ vars.ENV }}" > ./build/.env
+            echo "APP_NAME=${{ vars.APP_NAME }}" >> ./build/.env
+            echo "REACT_APP_FRONTEND_URL=${{ vars.REACT_APP_FRONTEND_URL }}" >> ./build/.env
+            echo "REACT_APP_BACKEND_URL=${{ vars.REACT_APP_BACKEND_URL }}" >> ./build/.env
+            echo "REACT_APP_GITHUB_LINK=${{ vars.REACT_APP_GITHUB_LINK }}" >> ./build/.env
+
+            # GitHub secrets
+            echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./build/.env
+            echo "FORTYTWO_APP_SECRET=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./build/.env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> ./build/.env
+            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> ./build/.env
+            echo "POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}" >> ./build/.env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ./build/.env
+            echo "POSTGRES_NAME=${{ secrets.POSTGRES_NAME }}" >> ./build/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./build/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./build/.env
+            
 
