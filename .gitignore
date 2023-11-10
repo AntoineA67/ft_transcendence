@@ -5,4 +5,8 @@ node_modules
 test
 build/
 *.pem
+<<<<<<< HEAD
 testfslk
+=======
+pifpifpdisfoi
+>>>>>>> 35f3ffb654b7f2ff36dca70eaa3f2e24e2bbb062
