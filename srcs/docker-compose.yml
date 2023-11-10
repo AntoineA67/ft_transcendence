@@ -1,11 +1,6 @@
 version: '3.8'
 services:
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./proxy/cert/conf:/etc/letsencrypt
-      - ./proxy/cert/www:/var/www/certbot
   backend:
     build:
       context: backend
@@ -21,7 +16,7 @@ services:
     restart: always
     container_name: backend
     volumes:
-      - "./${ENVPATH}/backend/:/app"
+      - "./backend/:/app"
     ports:
       - 4000:4000
     env_file:
@@ -89,8 +84,7 @@ services:
 
   proxy:
     volumes:
-      - ./proxy/cert/conf:/etc/letsencrypt
-      - ./proxy/cert/www:/var/www/certbot
+      - ./proxy/cert/:/etc/letsencrypt
     build:
       context: proxy
       target: ${ENV}
