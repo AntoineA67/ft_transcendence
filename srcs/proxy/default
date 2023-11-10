@@ -1,9 +1,9 @@
 server {
     listen 80;
-    #listen 443 ssl;
+    listen 443 ssl;
 
-    #ssl_certificate /etc/letsencrypt/fullchain.pem;
-    #ssl_certificate_key /etc/letsencrypt/privkey.pem;
+    ssl_certificate /etc/letsencrypt/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/privkey.pem;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
