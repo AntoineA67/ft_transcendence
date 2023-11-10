@@ -34,7 +34,6 @@ jobs:
         uses: appleboy/ssh-action@master
         env:
           CLONE_DIR: /home/ci/
-          SUPER_SECRET: ${{ secrets.FORTYTWO_APP_SECRET }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
