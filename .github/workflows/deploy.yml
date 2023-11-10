@@ -47,21 +47,27 @@ jobs:
             cd $CLONE_DIR
 
             # GitHub vars
-            echo "ENV=${{ vars.ENV }}" > ./build/.env
-            echo "APP_NAME=${{ vars.APP_NAME }}" >> ./build/.env
-            echo "REACT_APP_FRONTEND_URL=${{ vars.REACT_APP_FRONTEND_URL }}" >> ./build/.env
-            echo "REACT_APP_BACKEND_URL=${{ vars.REACT_APP_BACKEND_URL }}" >> ./build/.env
-            echo "REACT_APP_GITHUB_LINK=${{ vars.REACT_APP_GITHUB_LINK }}" >> ./build/.env
+            echo "ENV=${{ vars.ENV }}" > ./srcs/.env
+            echo "APP_NAME=${{ vars.APP_NAME }}" >> ./srcs/.env
+            echo "REACT_APP_FRONTEND_URL=${{ vars.REACT_APP_FRONTEND_URL }}" >> ./srcs/.env
+            echo "REACT_APP_BACKEND_URL=${{ vars.REACT_APP_BACKEND_URL }}" >> ./srcs/.env
+            echo "REACT_APP_GITHUB_LINK=${{ vars.REACT_APP_GITHUB_LINK }}" >> ./srcs/.env
 
             # GitHub secrets
-            echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./build/.env
-            echo "FORTYTWO_APP_SECRET=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./build/.env
-            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> ./build/.env
-            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> ./build/.env
-            echo "POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}" >> ./build/.env
-            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ./build/.env
-            echo "POSTGRES_NAME=${{ secrets.POSTGRES_NAME }}" >> ./build/.env
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./build/.env
-            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./build/.env
-            
+            echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./srcs/.env
+            echo "FORTYTWO_APP_SECRET=${{ secrets.FORTYTWO_APP_SECRET }}" >> ./srcs/.env
+            echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> ./srcs/.env
+            echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> ./srcs/.env
+            echo "POSTGRES_USERNAME=${{ secrets.POSTGRES_USERNAME }}" >> ./srcs/.env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> ./srcs/.env
+            echo "POSTGRES_NAME=${{ secrets.POSTGRES_NAME }}" >> ./srcs/.env
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> ./srcs/.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./srcs/.env
+
+            # Let's Encrypt
+            echo "${{ secrets.FULLCHAIN }}" > ./srcs/proxy/cert/fullchain.pem
+            echo "${{ secrets.PRIVKEY }}" > ./srcs/proxy/cert/privkey.pem
+
+            # Make
+            make
 

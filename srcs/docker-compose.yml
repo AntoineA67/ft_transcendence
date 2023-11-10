@@ -89,8 +89,7 @@ services:
 
   proxy:
     volumes:
-      - ./proxy/cert/conf:/etc/letsencrypt
-      - ./proxy/cert/www:/var/www/certbot
+      - ./proxy/cert/:/etc/letsencrypt
     build:
       context: proxy
       target: ${ENV}
