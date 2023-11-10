@@ -27,7 +27,6 @@ jobs:
   #         DO_IMAGE: ${{ secrets.DO_IMAGE }}
   #     run: |
   #       python .github/rebuild-droplet.py
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
