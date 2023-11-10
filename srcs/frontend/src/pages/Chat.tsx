@@ -553,7 +553,6 @@ export function ChatBox() {
 		});
 	};
 
-
 	const myMap = (message: Message, profile: Profile) => {
 		const classname = message.userId === profile.id ? 'messageBlue' : 'messagePink';
 		const classuser = message.userId === profile.id ? 'justify-content-end' : 'justify-content-start';
@@ -760,7 +759,7 @@ export function ChatBox() {
 										</Link>
 									</div>
 									<div className="member-actions d-flex flex-wrap">
-										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <select
+										{roomChannel && !member.owner && !member.ban && (!member.mute || new Date(member.mute) < new Date()) && memberstatus?.admin && <select
 											defaultValue={member.owner || member.admin ? (member.owner ? 'Owner' : 'Admin') : 'Member'}
 											onChange={(e) => handleRoleChange(member.userId, e.target.value)}
 										>
@@ -768,13 +767,13 @@ export function ChatBox() {
 											<option value="Admin">Admin</option>
 											<option value="Member">Member</option>
 										</select>}
-										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
+										{roomChannel && !member.owner && !member.ban && memberstatus?.admin && <button
 											className={`action-button cursor-button ${member.mute && new Date(member.mute) > new Date() ? 'action-disabled' : ''}`}
 											onClick={() => handleMuteDurationChange(member.userId, member.muteduration, member.mute && new Date(member.mute) > new Date())}
 										>
 											{member.mute && new Date(member.mute) > new Date() ? 'Unmute' : 'Mute'}
 										</button>}
-										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && (!member.mute || new Date(member.mute) < new Date()) && (
+										{roomChannel && !member.owner && !member.ban && memberstatus?.admin && (!member.mute || new Date(member.mute) < new Date()) && (
 											<select
 												defaultValue={member.muteduration}
 												onChange={(e) => member.muteduration = parseInt(e.target.value)}
@@ -787,7 +786,7 @@ export function ChatBox() {
 												<option value="86400">24 h</option>
 											</select>
 										)}
-										{roomChannel && !member.owner && (memberstatus?.admin || memberstatus?.owner) && <button
+										{roomChannel && !member.owner && (!member.mute || new Date(member.mute) < new Date()) && (memberstatus?.admin || memberstatus?.owner) && <button
 											className={`action-button cursor-button ${member.ban ? 'action-disabled' : ''}`}
 											onClick={() => handleBan(member.userId, member.ban)}
 										>
