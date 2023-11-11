@@ -27,7 +27,6 @@ export function CallBack42() {
 				response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/42/callback?code=${code}`);
 			}
 			const data = await response.json();
-			console.log('data: ', data)
 			if (data._2fa) {
 				localStorage.setItem('_2fa', JSON.stringify({ id: data.id, activated: true }));
 				setStatus('2fa');
@@ -38,8 +37,6 @@ export function CallBack42() {
 			localStorage.setItem('firstConnexion', data.firstConnexion);
 			localStorage.removeItem('_2fa');
 		} catch (err: any) {
-			console.log('response: ', response)
-			console.log(err.message)
 		}
 		setStatus('done');
 	}
@@ -79,27 +76,13 @@ export function Protected() {
 			setStatus('loading')
 			if (connectedSockets.current === 4) {
 				setStatus('connect')
-				console.log('connect')
 			}
 		}
 		function onDisconnect() {
-			console.log('reconnecting ...')
 			socket.connect()
 		}
 		function onError(err: any) {
 			setStatus('error')
-			console.log('err', err)
-			// if (localStorage.getItem('token')) {
-			// axios.post("http://localhost:4000/auth/signout", {}, {
-			// 	headers: {
-			// 	'Authorization': `Bearer ${localStorage.getItem('token')}`
-			// 	}
-			// });
-			// localStorage.removeItem('token');
-			// }
-			// localStorage.removeItem('random');
-			// localStorage.removeItem('email');
-			// localStorage.removeItem('refreshToken');
 		}
 		socket.on('connect', onConnect);
 		friendsSocket.on('connect', onConnect);

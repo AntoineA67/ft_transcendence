@@ -87,7 +87,6 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 
 		let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
 		socket.emit('UpdateProfile', data, (success: boolean) => {
-			console.log('success: ', success);
 			if (success) {
 				setProfile((prev) => {
 					if (prev) {
@@ -139,7 +138,6 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		const file = input.files ? input.files[0] : null;
 		if (!file) return;
 		if (file.size >= 1048576) {
-			// console.log('file size limit: 1MB');
 			enqueueSnackbar("Oups, la taille limite de la photo est d'1 MB !", {
 				variant: 'error',
 				autoHideDuration: 3000,
@@ -148,7 +146,6 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
-				console.log('fails');
 				return;
 			}
 			socket.emit('myAvatar', (avatar: string) => {

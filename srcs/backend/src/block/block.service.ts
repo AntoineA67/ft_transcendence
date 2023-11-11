@@ -51,7 +51,6 @@ export class BlockService {
 				}
 			})
 		} catch (err: any) {
-			console.log('err: createBlock')
 			return (false);
 		}
 		return (true);
@@ -73,7 +72,6 @@ export class BlockService {
 				}
 			})
 		} catch (err: any) {
-			console.log('err: unBlock')
 			return (false);
 		}
 		return (true);

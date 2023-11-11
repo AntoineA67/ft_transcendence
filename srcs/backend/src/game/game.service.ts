@@ -60,12 +60,9 @@ export class GamesService {
       }
       for (let s of sockets) {
         if (s.data.user.id === otherIdNumber) {
-          console.log(typeof socket.data.user.id, typeof otherId, socket.data.user.id, otherId, socket.data.user.id === otherId)
-          // console.log(socket.data.user)
           const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
           s.emit('ponged', { nick: username, id: socket.data.user.id })
           this.matches[socket.data.user.id] = { receiverId: otherId, sender: socket, receiver: s };
-          console.log(`Matched ${socket.data.user.id} with ${otherId}, now matches are ${this.matches.toString()}`)
           break;
         }
       }
@@ -83,13 +80,11 @@ export class GamesService {
   }
 
   async disconnect(client: Socket) {
-    // console.log('disconnect', client.data.user.id)
     const userId = client.data.user.id;
     const roomId = this.clients[userId];
     if (roomId) {
       const room = this.rooms[roomId];
       if (room) {
-        // console.log('leave room', userId)
         if (room.isEmpty()) return;
         room.leave(userId).then(() => {
           delete this.clients[userId];
@@ -101,11 +96,9 @@ export class GamesService {
     } else if (this.isInQueue(client)) {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
-        // console.log('removeFromQueue', userId)
         this.matchmakingQueue.splice(index, 1);
       }
     } else if (this.matches[userId]) {
-      // console.log('cancelledMatchmake', userId, this.matches[userId])
       this.matches[userId].receiver.emit('cancelledMatchmake');
       // delete this.matches[this.matches[userId]];
       delete this.matches[userId];
@@ -130,7 +123,6 @@ export class GamesService {
 
       // Create a new room for the clients
       const roomId = uuidv4();
-      // console.log('roomId', roomId)
 
       try {
         player1.join(roomId);
@@ -142,8 +134,6 @@ export class GamesService {
         player2.disconnect();
       }
 
-      // console.log('player1', player1.id, player1.data.user.id)
-      // console.log('player2', player2.id, player2.data.user.id)
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
       this.prisma.user.update({ where: { id: player1.data.user.id }, data: { status: 'INGAME' } });
       this.prisma.user.update({ where: { id: player2.data.user.id }, data: { status: 'INGAME' } });
@@ -154,7 +144,6 @@ export class GamesService {
 
     // Create a new room for the clients
     const roomId = uuidv4();
-    // console.log('roomId', roomId)
 
     player1.join(roomId);
     player2.join(roomId);
@@ -162,8 +151,6 @@ export class GamesService {
     this.clients[player1.data.user.id] = roomId;
     this.clients[player2.data.user.id] = roomId;
 
-    // console.log('player1', player1.id, player1.data.user.id)
-    // console.log('player2', player2.id, player2.data.user.id)
     await this.prisma.user.update({ where: { id: player1.data.user.id }, data: { status: 'INGAME' } });
     await this.prisma.user.update({ where: { id: player2.data.user.id }, data: { status: 'INGAME' } });
 

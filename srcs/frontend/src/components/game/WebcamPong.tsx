@@ -66,12 +66,10 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 					lineWidth: 5
 				});
 				drawingUtils.drawLandmarks(landmarks, { color: "#FF0000", lineWidth: 2 });
-				// console.log(landmarks)
 			}
 			if (results.landmarks.length > 0) {
 				const pos = results.landmarks[0][9].y;
 				changeHandPos(pos);
-				// console.log(pos);
 			}
 		} else {
 			changeHandPos(-1);
@@ -91,16 +89,11 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 	// get everything needed to run.
 	const createHandLandmarker = async () => {
 		demosRef.current?.classList.remove("invisible");
-		// console.log("createHandLandmarker loaded", demosRef.current)
-		// setwebcamConfirmModalOpen(true);
 		if (!vision.current || !handLandmarker.current) {
 
 			vision.current = await FilesetResolver.forVisionTasks(
 				"https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
 			);
-			// if (handLandmarker) {
-			// 	return;
-			// }
 			handLandmarker.current = await HandLandmarker.createFromOptions(vision.current as any, {
 				baseOptions: {
 					modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`,
@@ -109,8 +102,6 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 				},
 				runningMode: runningMode as any,
 			});
-		} else {
-			// onLoadedData();
 		}
 	};
 	// Check if webcam access is supported.
@@ -140,18 +131,15 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 			if (videoRef.current) {
 				videoRef.current.srcObject = s;
 				stream.current = s;
-				// console.log(s, stream);
 			}
 		}).catch(function (err) {
 			enqueueSnackbar("Please allow access to webcam", { variant: "error" });
 			onError();
 			return;
-			// console.log(err);
 		});
 	}
 
 	useEffect(() => {
-		// console.log("webcam pong", webcam, vision.current, handLandmarker.current)
 		if (webcam) {
 			createHandLandmarker().then(() => {
 				if (webcam) {
@@ -161,9 +149,7 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 		} else {
 			handLandmarker.current?.close();
 			handLandmarker.current = null;
-			// console.log(stream)
 			stream.current?.getTracks().forEach((track: MediaStreamTrack) => {
-				// console.log(track);
 				track.stop()
 			});
 			if (videoRef.current) {

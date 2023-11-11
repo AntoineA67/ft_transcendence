@@ -14,7 +14,6 @@ export const GameSocketProvider = ({ children, store }: any) => {
   const socket: any = useRef(null)
 
   const handleOnMessage = (message: any) => {
-    console.log(message)
   }
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export const GameSocketProvider = ({ children, store }: any) => {
       })
 
       socket.current.on('error', (err: { message: string }) => {
-        console.log('Socket Error:', err.message)
         if (err.message === 'Invalid token') {
           localStorage.removeItem('token')
           window.location.href = '/login'

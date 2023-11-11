@@ -36,7 +36,6 @@ export class GameGateway
 
     handleConnection(socket: Socket, ...args: any[]) {
         try {
-            console.log(`Client successfully connected! 🆔${socket.data.user.id}`)
             socket.emit('id', socket.data.user.id)
         } catch (error) {
             socket.disconnect();
@@ -67,7 +66,6 @@ export class GameGateway
 
     @SubscribeMessage('keyPresses')
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
-        // console.log(socket.data.user.id, payload);
         this.gamesService.handleKeysPresses(socket.data.user.id, payload);
     }
 

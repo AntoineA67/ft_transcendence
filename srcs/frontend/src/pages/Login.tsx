@@ -23,7 +23,6 @@ export function Login() {
 	const navigate = useNavigate();
 
 	const saveToken = (data: any, user: newUser | login) => {
-		console.log("savetoken ===", data);
 		localStorage.setItem('token', data.token);
 		localStorage.setItem('refreshToken', data.refreshToken);
 		localStorage.setItem('email', user.email);
@@ -32,18 +31,12 @@ export function Login() {
 	}
 
 	const handle2FA = (data: any, set2FA: React.Dispatch<React.SetStateAction<boolean>>) => {
-		console.log("data ===", data);
 		set2FA(data._2fa);
-		// set2FA('this is a code');
-
-		// navigate('/');
 	}
 
 	const dealError = (data: any, setErr: React.Dispatch<React.SetStateAction<string>>) => {
-		// const errMess = document.getElementById("error-message") as HTMLInputElement;
 		setErr(data.message);
 	}
-	// const [require2FA, setRequire2FA] = useState(false);
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
 		user: newUser | login, 
 		setErr: React.Dispatch<React.SetStateAction<string>>, 
@@ -58,24 +51,15 @@ export function Login() {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(user),
 		}
-		// let [searchParams] = useSearchParams();
-		// const _2fa = searchParams.get('_2fa') || null;
+
 		let response;
 		try {
-			// if (!_2fa)
-				response = await fetch(url, fetchObj)
-			// else {
-				// url = url + '&_2fa=${_2fa?.token}';
-				// response = await fetch(url + '&_2fa=${_2fa?.token}', fetchObj);
-			// }
-
-			// if (!response.ok) { throw Error('response not ok'); }
+			response = await fetch(url, fetchObj)
 			data = await response.json();
 			('error' in data) && dealError(data, setErr);
 			('_2fa' in data) && handle2FA(data, set2FA);
 			('token' in data) && saveToken(data, user);
 		} catch (err: any) {
-			console.log(err);
 		}
 	}
 

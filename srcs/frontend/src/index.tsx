@@ -51,7 +51,6 @@ async function loader(route: string, param?: string, refresh = false) {
 	const refreshToken = localStorage.getItem('refreshToken') || null;
 	const fetchUrl = param ? (`${baseUrl}${route}/${param}`) : (`${baseUrl}${route}`);
 
-	console.log('fetch: ', fetchUrl);
 	if (!token && !refreshToken) {
 		return redirect("/login");
 	}
@@ -65,7 +64,6 @@ async function loader(route: string, param?: string, refresh = false) {
 	if (refresh) {
 		throw new Response(res.statusText, { status: res.status });
 	}
-	console.log('refresh')
 	return fetch(process.env.REACT_APP_BACKEND_URL + `/auth/refreshToken`, {
 		method: 'POST',
 		headers: {
