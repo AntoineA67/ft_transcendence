@@ -53,7 +53,7 @@ jobs:
             echo "REACT_APP_FRONTEND_URL=${{ vars.REACT_APP_FRONTEND_URL }}" >> ./srcs/.env
             echo "REACT_APP_BACKEND_URL=${{ vars.REACT_APP_BACKEND_URL }}" >> ./srcs/.env
             echo "REACT_APP_GITHUB_LINK=${{ vars.REACT_APP_GITHUB_LINK }}" >> ./srcs/.env
-            echo "URL_FEEDBACKS=${{ vars.URL_FEEDBACKS }}" >> ./srcs/.env
+            echo "REACT_APP_URL_FEEDBACKS=${{ vars.REACT_APP_URL_FEEDBACKS }}" >> ./srcs/.env
 
             # GitHub secrets
             echo "REACT_APP_FORTYTWO_APP_ID=${{ secrets.REACT_APP_FORTYTWO_APP_ID }}" >> ./srcs/.env

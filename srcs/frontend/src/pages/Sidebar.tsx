@@ -21,7 +21,7 @@ export default function Sidebar() {
 	const [popup, setPopup] = useState<'no' | 'pong' | 'ponged'>('no');
 	const [popupNick, setPopupNick] = useState('');
 	const [popupId, setpopupId] = useState('');
-	const feedbacksURL = process.env.URL_FEEDBACKS;
+	const feedbacksURL = process.env.REACT_APP_URL_FEEDBACKS;
 
 	useEffect(() => {
 		const path = location.pathname;
