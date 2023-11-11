@@ -55,9 +55,7 @@ export class AuthService {
 		return this.signJwtTokens(user.id, user.email, user.firstConnexion);
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
-				console.log(error)
 				if (error.code === 'P2002') {
-					console.log("error hereeee");
 				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
 			}
 		}
@@ -93,10 +91,7 @@ export class AuthService {
 		  }
 		const data = { firstConnexion: "false"};
 		await this.usersService.updateUser(user.id, data)
-		// await this.usersService.updateUser(user.id, {"firstConnexion": "false"});
-		console.log("ICI", user.firstConnexion);
 		return await this.signJwtTokens(user.id, user.email, "false");
-		// return this.signJwtTokens(user.id, user.email);
 	}
   
 	  async validateUser(email: string): Promise <any> {

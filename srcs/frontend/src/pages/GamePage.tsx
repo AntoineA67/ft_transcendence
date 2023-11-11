@@ -93,16 +93,13 @@ export default function GamePage() {
 		for (const client of Object.keys(newClients.clients)) {
 			if (client == id.current) {
 				const pos = 100 - handPos.current * 100;
-				// console.log("changeHandPos", pos, client === id.current.toString(), typeof id.current, newClients.clients[id.current.toString()]);
 				const currentPos = newClients.clients[id.current.toString()].y;
 				if (indexTime++ % 5 !== 0) return;
 				if (Math.abs(pos - currentPos) > 3) {
 					if (pos < currentPos) {
-						// console.log("Going up !")
 						sendPressed("down", true);
 						sendPressed("up", false);
 					} else if (pos > currentPos) {
-						// console.log("Going down !")
 						sendPressed("up", true);
 						sendPressed("down", false);
 					}
@@ -117,7 +114,6 @@ export default function GamePage() {
 
 	};
 	const onMessageGameOver = (summary: any) => {
-		// console.log('Game Over! Winner: ', winner);
 		setSummary(summary);
 		setGameStatus(GameStatus.Idle);
 		setWebcam(false);
@@ -144,7 +140,6 @@ export default function GamePage() {
 		gamesSocket.off('cancelledMatchmake', onCancelledMatchmake)
 	}
 	const sendPressed = (key: string, pressed: boolean) => {
-		// console.log("sendPressed", key, pressed)
 		keysPressed.current[key] = pressed
 		keysPressed.current.time = Date.now()
 		gamesSocket.emit("keyPresses", keysPressed.current);
@@ -174,12 +169,10 @@ export default function GamePage() {
 		gamesSocket.emit('cancel');
 		setGameStatus(GameStatus.Idle);
 		if (opponent) {
-			// console.log("opponent", opponent)
 			gamesSocket.emit('cancel');
 		}
 	};
 	const onWebcamFinishedLoading = () => {
-		// console.log("loadeddata")
 		if (gameStatus === GameStatus.Loading)
 			startMatchmaking();
 	}
@@ -201,7 +194,6 @@ export default function GamePage() {
 			setGraphicEffects(res.graphicEffects);
 		});
 		return () => {
-			// console.log("Game unmounted");
 			cancelOrLeave();
 			unsubscribeToGamesSocketMessages();
 		}
@@ -223,7 +215,6 @@ export default function GamePage() {
 			if (gameUserId && gameUserId != res.id) {
 				gamesSocket.emit('matchAgainst', { id: gameUserId });
 				if (gameStatus === GameStatus.Matching || gameStatus === GameStatus.Started) return
-				console.log("gameUserId", gameUserId)
 				setOpponent(gameUserId)
 				setGameStatus(GameStatus.Matching);
 				window.history.replaceState({}, document.title)

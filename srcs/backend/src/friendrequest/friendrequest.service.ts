@@ -115,7 +115,7 @@ export class FriendRequestService {
 					status: status
 				}
 			})
-		} catch (err: any) { console.log('err: replyFriendReq') };
+		} catch (err: any) { };
 		return (true);
 	}
 

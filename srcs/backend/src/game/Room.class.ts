@@ -90,7 +90,6 @@ export default class Room {
 
 		if (winner == -1) {
 			this.wss.to(this.roomId).emit('gameOver', { winner: null, loser: null });
-			// console.log("GameOver")
 			const newGame = await this.gameService.create({});
 			this.gameId = newGame.id;
 			const players = Object.values(this.players);
@@ -114,7 +113,6 @@ export default class Room {
 		const winnerUser = await this.prisma.user.findUnique({ where: { id: winner }, select: { username: true, avatar: true, } });
 		const loserUser = await this.prisma.user.findUnique({ where: { id: loser }, select: { username: true, avatar: true, } });
 		this.wss.to(this.roomId).emit('gameOver', { winner: { ...winnerUser, score: winnerPlayer.score }, loser: { ...loserUser, score: loserPlayer.score } });
-		console.log("GameOver")
 
 		const newGame = await this.gameService.create({});
 		this.gameId = newGame.id;

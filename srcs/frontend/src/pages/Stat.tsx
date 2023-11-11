@@ -192,7 +192,6 @@ export default function Stat({ gameHistory, achieve }: statProp) {
 		achieveContent.classList.toggle("d-none");
 		historyContent.classList.toggle("d-sm-flex");
 		achieveContent.classList.toggle("d-sm-flex");
-		console.log('gameHistory', gameHistory)
 	}, [show]);
 
 	return (

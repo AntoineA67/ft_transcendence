@@ -98,7 +98,6 @@ export function ChatBox() {
 		};
 
 		const handlenewMember = (newMember: Member) => {
-			console.log(newMember);
 			const memberalreadyin = membersList.find((member) => member.userId === newMember.userId);
 			if (memberalreadyin) return;
 			if (chatId && newMember.roomId !== parseInt(chatId, 10)) return;
@@ -175,7 +174,6 @@ export function ChatBox() {
 				setProfile(response);
 				setBlocks(response.blocks);
 			}
-			console.log('newprofile', response);
 		}
 
 		socketListeners.push({ event: 'UserLeaveChannel', handler: handleUserLeaveChannel });
@@ -187,14 +185,11 @@ export function ChatBox() {
 		socketListeners.push({ event: 'deleteRoom', handler: handleDeleteRoom });
 		socketListeners.push({ event: 'newProfile', handler: handleNewProfile });
 
-		console.log('event listener');
-
 		socketListeners.forEach(({ event, handler }) => {
 			chatsSocket.on(event, handler);
 		});
 
 		return () => {
-			console.log('event listener removed');
 			socketListeners.forEach(({ event, handler }) => {
 				chatsSocket.off(event, handler);
 			});

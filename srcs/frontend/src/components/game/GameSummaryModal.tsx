@@ -10,7 +10,6 @@ export const GameSummaryModal = ({ summary }: any) => {
 	useEffect(() => {
 		if (summary) {
 			handleShow();
-			console.log(summary);
 		}
 	}, [summary]);
 
