@@ -17,7 +17,6 @@ export function FriendList() {
 		})
 	}
 	const handleFriendReqAccept = (replier: userType) => {
-		// console.log('handleaccept: ', replier);
 		setFriends((prev) => ([...prev, replier]));
 	}
 	
@@ -122,11 +121,9 @@ export function BlockList() {
 	useEffect(() => {
 		friendsSocket.emit('findAllBlocks', (res: userType[]) => {
 			setBlocks(res)
-			console.log('res', res);
 		})
 
 		function handleBlock(otherUser: userType) {
-			console.log('blocks', otherUser)
 			setBlocks((prev) => ([...prev, otherUser]))
 		}
 		function handleUnblock(otherUser: userType) {			

@@ -66,7 +66,6 @@ export class PlayerService {
 	}
 
 	async updatePlayer(id: number, data: any): Promise<Player | null> {
-		console.log(await this.prisma.player.findMany(), id, data)
 		if (await this.prisma.player.findUnique({ where: { id } })) {
 			return this.prisma.player.update({
 				where: { id },

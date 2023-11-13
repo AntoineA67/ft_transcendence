@@ -44,7 +44,6 @@ export default function Sidebar() {
 		}
 
 		function handlePonged({ nick, id }: { nick: string, id: string }) {
-			console.log('ponged', nick, id)
 			setPopupNick(nick);
 			setpopupId(id);
 			setPopup('ponged')

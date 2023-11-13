@@ -431,7 +431,6 @@ export class RoomGateway
 				...member,
 				username: usertoadd.username,
 			};
-			console.log('membertosend backend');
 			this.server.to(roomName).emit('newMember', membertosend);
 			return membertosend.id;
 		}

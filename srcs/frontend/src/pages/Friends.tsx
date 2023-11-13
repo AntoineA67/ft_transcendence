@@ -18,7 +18,6 @@ function AddPage({ setPage }: AddPageProp) {
 	
 	useEffect(() => {
 		friendsSocket.emit('findOthers', (res: userType[]) => {
-			console.log('findOthers: ', res)
 			setList(res);
 		})
 	}, [])

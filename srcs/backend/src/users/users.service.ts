@@ -39,7 +39,6 @@ export class UsersService {
 			return user;
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
-				console.log(error)
 				if (error.code === 'P2002') {
 					throw new ForbiddenException('Credentials taken');
 				}
@@ -158,7 +157,6 @@ export class UsersService {
 	}
 
 	async getUserByEmail(email: string) {
-		console.log('getUserByEmail', email);
 		const user = await this.prisma.user.findUnique({
 			where: {
 				email: email,
@@ -282,12 +280,10 @@ export class UsersService {
 		user = await this.prisma.user.findUnique({
 			where: { id: user.id }
 		});
-		console.log('user', user);
-		console.log('token', token);
-		console.log('otp', authenticator.verify({
+		authenticator.verify({
 			token: token,
 			secret: user.otpHash
-		}))
+		})
 		return (authenticator.verify({
 			token: token,
 			secret: user.otpHash

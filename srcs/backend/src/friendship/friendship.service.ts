@@ -89,7 +89,6 @@ export class FriendshipService {
 				}
 			})
 		} catch (err: any) {
-			console.log('err: makeFriend func');
 			return (false)
 		}
 		// this.logger.log('adter create')
@@ -120,7 +119,7 @@ export class FriendshipService {
 		for (let x of friendship) {
 			try {
 				await this.prisma.friendship.delete({ where: { id: x.id } })
-			} catch (err: any) { console.log('err: unFriend func') };
+			} catch (err: any) { };
 		}
 		return (true);
 	}

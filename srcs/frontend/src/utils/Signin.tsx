@@ -42,7 +42,7 @@ export function Signin() {
 					<Link to='..'>
 						<button className="leftArrow my-4"></button>
 					</Link>
-					<form className="w-100" onSubmit={(e) => {console.log(twoFACode); (handleSubmit(e, { email: email, password: pass, token2FA: twoFACode }, setErr, set2FA))}}>
+					<form className="w-100" onSubmit={(e) => {(handleSubmit(e, { email: email, password: pass, token2FA: twoFACode }, setErr, set2FA))}}>
 						<h3 className='white-text'>Welcome back!</h3>
 
 						<div className="mt-4">

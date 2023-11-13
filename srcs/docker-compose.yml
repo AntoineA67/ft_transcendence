@@ -17,8 +17,6 @@ services:
     container_name: backend
     volumes:
       - "./backend/:/app"
-    ports:
-      - 4000:4000
     env_file:
       - .env
     depends_on:
@@ -50,8 +48,6 @@ services:
       - .env
     volumes:
       - db_data:/var/lib/postgresql/data
-    ports:
-      - 5432
     healthcheck:
       test: [ "CMD", "pg_isready" ]
       interval: 10s
