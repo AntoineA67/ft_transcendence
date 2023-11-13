@@ -44,7 +44,6 @@ export function TwoFactorAuth() {
 	async function verify2FASubmit() {
 		if (profile!.activated2FA === false) {
 			socket.emit('Activate2FA', token, (response: any) => {
-				console.log(response);
 				if (response == true) {
 					navigate("/me/setting/");
 				} else {
@@ -53,7 +52,6 @@ export function TwoFactorAuth() {
 			});
 		} else {
 			socket.emit('Disable2FA', token, (response: any) => {
-				console.log(response);
 				if (response == true) {
 					navigate("/me/setting/");
 				} else {
@@ -219,7 +217,6 @@ export function SettingMenu() {
 			['token', 'random', 'email', 'refreshToken', 'firstConnexion'].forEach(item => localStorage.removeItem(item));
 			window.location.href = '/';
 		} catch (err: any) {
-			console.log(err);
 		}
 	}
 
