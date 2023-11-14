@@ -63,13 +63,6 @@ export function Signin() {
 									className="togglePassword" />
 							</div>
 						</div>
-						
-						<div className="mt-4">
-							<input type="checkbox" id="remember me" className='d-inline w-auto'
-								checked={check === 'true'}
-								onChange={(e) => setCheck(e.target.checked ? 'true' : 'false')} />
-							<label htmlFor="remember me" className='d-inline ms-3'>Remember me</label>
-						</div>
 
 						{_2fa == true && <div className="mt-4">
 							<label htmlFor='twoFACode'>Two factor authentication code</label>
@@ -77,10 +70,6 @@ export function Signin() {
 								value={twoFACode} onChange={
 									(e) => setTwoFACode(e.target.value)}/>
 						</div>}
-
-						{/* {_2fa == true && <div id='_2fa' className='red-text mt-4'>
-							coucou : { _2fa.toString() }
-						</div>} */}
 						
 						<div id='error-message' className='red-text mt-4'>
 							{err}
@@ -90,9 +79,6 @@ export function Signin() {
 							Login
 						</button>
 					</form>
-					<button className="btn btn-invisible w-100">
-						Forget password
-					</button>
 				</div>
 			</div>
 		</div>
