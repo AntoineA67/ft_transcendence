@@ -8,14 +8,12 @@ import {
 	Outlet,
 	redirect
 } from 'react-router-dom';
-// import router from './router';
-import React from 'react';
+
 //import component
 import { Login, LandingPage, TwoFAPage } from './pages/Login';
 import { Signin } from './utils/Signin';
 import { Signup } from './utils/Signup';
 import Sidebar from './pages/Sidebar'
-// import { Home } from './pages/Home';
 import GamePage from './pages/GamePage';
 import Profile from './pages/Profile';
 import { Setting, TwoFactorAuth, SettingMenu } from './pages/ProfileSetting';
@@ -26,21 +24,41 @@ import { UserProfile } from './utils/UserProfile';
 import { DefaultErrorPage } from './pages/DefaultErrorPage';
 import { DefaultFriendPage } from './pages/DefaultFriendPage';
 import { DefaultSearchPage } from './pages/DefaultSearchPage';
+
 //bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
+
 // css
 import './styles/index.css';
 import './styles/iconButton.css';
 import './styles/Chat.css';
 import './styles/Stat.css';
 
+// sentry
+import * as Sentry from "@sentry/react";
 
 import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
+
+Sentry.init({
+	dsn: "https://01bf5be943109047867ae54d1eb150a7@o4506224690200576.ingest.sentry.io/4506224693542912",
+	integrations: [
+	  new Sentry.BrowserTracing({
+		// Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+		tracePropagationTargets: ["localhost", /^https:\/\/pongpong\.me/],
+	  }),
+	  new Sentry.Replay(),
+	],
+	// Performance Monitoring
+	tracesSampleRate: 1.0, // Capture 100% of the transactions
+	// Session Replay
+	replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
+	replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+  });
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
