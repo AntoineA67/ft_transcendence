@@ -70,12 +70,16 @@ export default class Room {
 			this.endGame(Number(winner));
 		} else if (Date.now() - this.startTime > 3 * 1000 * 60) { // 3 * 60 * 1000
 			const players = Object.values(this.players);
-			if (players[0].score > players[1].score) {
-				this.endGame(Number(players[0].id));
-			} else if (players[0].score < players[1].score) {
-				this.endGame(Number(players[1].id));
+			if (players[0] && players[1]) {
+				if (players[0].score > players[1].score) {
+					this.endGame(Number(players[0].id));
+				} else if (players[0].score < players[1].score) {
+					this.endGame(Number(players[1].id));
+				} else {
+					this.endGame(-1); // -1 means nobody won
+				}
 			} else {
-				this.endGame(-1); // -1 means nobody won
+				this.endGame(-1);
 			}
 		}
 	}
