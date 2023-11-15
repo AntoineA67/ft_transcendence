@@ -136,7 +136,7 @@ export class UsersService {
 				data
 			});
 		} catch (err: any) {
-			Logger.log(err);
+			// Logger.log(err);
 			return (false);
 		}
 		return (true);

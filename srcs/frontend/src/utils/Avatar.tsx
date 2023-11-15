@@ -45,7 +45,7 @@ export function Avatar({ size, user }: avatarProp) {
 	}, [status])
 	
 	useEffect(() => {
-		socket.emit('getUser', user.id, (res: userType) => {
+		socket.emit('getUser', (res: userType) => {
 			setStatus(res.status);
 		})
 		// set Avatar
