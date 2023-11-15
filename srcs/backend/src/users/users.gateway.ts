@@ -130,7 +130,9 @@ export class UsersGateway
 	}
 
 	@SubscribeMessage('getUser')
-	async handleGetUser(@MessageBody() data: number): Promise<UserDto> {
-		return await this.usersService.getUserById(data);
+	async handleGetUser(@ConnectedSocket() client: Socket): Promise<UserDto> {
+		const id: number = client.data.user.id;
+		
+		return await this.usersService.getUserById(id);
 	}
 } 
