@@ -5,8 +5,11 @@ import { UsersService } from './users.service';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
-import { Logger } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
+import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
+
+@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true })
 export class UsersGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {

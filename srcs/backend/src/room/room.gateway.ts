@@ -10,7 +10,10 @@ import { Block, Member, Message } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms, checkPassword, checkUserRoomName } from './roomDto';
 import { type } from 'os';
+import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
+import { UseFilters } from '@nestjs/common';
 
+@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {

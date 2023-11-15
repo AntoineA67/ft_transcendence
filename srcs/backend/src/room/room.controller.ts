@@ -5,7 +5,10 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { MemberService } from 'src/member/member.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
+import { UseFilters } from '@nestjs/common';
 
+@UseFilters(AllExceptionsFilter)
 @Controller('api/rooms')
 export class RoomController {
   constructor(

@@ -30,6 +30,7 @@ export class UsersController {
 	@Get('exception')
 	async getExcept() {
 		throw new ForbiddenException();
+		throw new Error();
 	}
 	
 }

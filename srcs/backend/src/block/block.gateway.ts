@@ -4,6 +4,10 @@ import { BlockService } from './block.service';
 import { UsersService } from 'src/users/users.service';
 import { UserDto } from 'src/dto/user.dto';
 import { Logger } from '@nestjs/common';
+import { UseFilters } from '@nestjs/common';
+import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
+
+@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class BlockGateway {
  

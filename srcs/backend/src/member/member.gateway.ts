@@ -1,8 +1,11 @@
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, ConnectedSocket, SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MemberService } from './member.service';
-import { Logger } from '@nestjs/common';
+import { Logger, UseFilters } from '@nestjs/common';
+import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
+
+@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'chats'  })
 export class MemberGateway
   implements OnGatewayConnection, OnGatewayDisconnect {
