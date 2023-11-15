@@ -57,7 +57,6 @@ export class GameGateway
         this.gamesService.cancelMatchmake(socket, this.wss, payload);
     }
 
-
     @SubscribeMessage('cancel')
     async handleLeave(socket: Socket): Promise<void> {
         this.gamesService.disconnect(socket);

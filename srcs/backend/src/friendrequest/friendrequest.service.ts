@@ -1,13 +1,11 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma, ReqState } from '@prisma/client';
+import { ReqState } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { FriendshipService } from 'src/friendship/friendship.service';
 import { BlockService } from 'src/block/block.service';
 import { UserDto } from 'src/dto/user.dto';
 
-// const friendReq = Prisma.validator<Prisma.FriendRequestDefaultArgs>()({})
-// export type FriendReq = Prisma.FriendRequestGetPayload<typeof friendReq>
 
 @Injectable()
 export class FriendRequestService {
@@ -46,11 +44,6 @@ export class FriendRequestService {
 			await this.blockService.isBlocked(user.id, x.id) == false
 		));
 		return (pendings);
-		// let ret: UserDto[] = [];
-		// for (let p of pendings) {
-		// 	ret.push({ ...p, avatar: this.usersService.bufferToBase64(p.avatar) })
-		// }
-		// return (ret);
 	}
 
 	async sendFriendReq(id: number, nick: string): Promise<boolean> {

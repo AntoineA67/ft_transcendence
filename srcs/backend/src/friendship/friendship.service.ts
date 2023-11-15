@@ -1,6 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
 import { UserDto } from 'src/dto/user.dto';
@@ -19,7 +18,7 @@ export class FriendshipService {
 		private prisma: PrismaService
 	) { }
 
-	//return all friends of a user, id, nick, avatar, status
+	// return all friends of a user, id, nick, avatar, status
 	// minus those that block you or those that you block
 	async findAllFriends(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserById(id);
@@ -50,7 +49,7 @@ export class FriendshipService {
 		return (myFriends)
 	}
 
-	//return all friends of a user, id, nick, avatar, status
+	// return all friends of a user, id, nick, avatar, status
 	// and those that block you or those that you block
 	async findAllFriendsIncludeBlocks(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserById(id);
@@ -70,7 +69,6 @@ export class FriendshipService {
 		})
 		let myFriends: UserDto[] = friendships.map((x) => (
 			(x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			// return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
 		))
 		return (myFriends)
 	}
@@ -81,7 +79,6 @@ export class FriendshipService {
 		if (!user || !friend) return (false);
 		const areFriends = await this.isFriend(id, otherId);
 		if (areFriends) return (true);
-		// this.logger.log('before create')
 		try {
 			await this.prisma.friendship.create({
 				data: {
@@ -91,7 +88,6 @@ export class FriendshipService {
 		} catch (err: any) {
 			return (false)
 		}
-		// this.logger.log('adter create')
 		return (true);
 	}
 

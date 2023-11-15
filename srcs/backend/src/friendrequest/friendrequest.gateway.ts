@@ -13,11 +13,9 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	server: Server;
 
 	handleConnection(client: Socket) {
-		// this.logger.log('new connection')
 	}
 
 	handleDisconnect(client: Socket) {
-		// this.logger.log('disconnection')
 	}
 
 	constructor(

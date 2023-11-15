@@ -6,10 +6,9 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { RoomService } from './room.service';
 import { Server, Socket } from 'socket.io';
 import { MessagesService } from 'src/message/messages.service';
-import { Block, Member, Message } from '@prisma/client';
+import { Member } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms, checkPassword, checkUserRoomName } from './roomDto';
-import { type } from 'os';
 
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway

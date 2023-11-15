@@ -3,8 +3,6 @@ import { Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
-
-import { ProfileDto } from '../dto/profile.dto';
 import { ProfileService } from './profile.service';
 
 @WebSocketGateway({ cors: true })
