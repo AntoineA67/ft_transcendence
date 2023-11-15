@@ -1,4 +1,4 @@
-import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { BlockService } from './block.service';
 import { UsersService } from 'src/users/users.service';
@@ -58,6 +58,7 @@ export class BlockGateway {
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const result = await this.blockService.unBlock(id, otherId);
+		
 		// if fails, no emit
 		if (!result) return (result);
 		this.server.to(id.toString()).emit('unblock', otherUser);
