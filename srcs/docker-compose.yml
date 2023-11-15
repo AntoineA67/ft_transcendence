@@ -88,8 +88,8 @@ services:
     restart: always
     container_name: proxy
     ports:
-      - 80:80
-      - 443:443
+      - 8080:8080
+      # - 443:443
     env_file:
       - .env
     depends_on:
