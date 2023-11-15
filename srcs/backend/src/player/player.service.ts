@@ -17,8 +17,6 @@ export class PlayerService {
 			include: {
 				game: {
 					include: {
-						// loser: { select: { userId: true } },
-						// winner: { select: { userId: true } },
 						players: {
 							include: {
 								user: { select: { username: true } }
@@ -38,7 +36,6 @@ export class PlayerService {
 			) : (x.game.players[0].user.username),
 			score: x.game.score
 		}))
-		// this.logger.log(history);
 		return (history);
 	}
 
@@ -73,39 +70,4 @@ export class PlayerService {
 			});
 		}
 	}
-
-	//   async getPlayerById(id: number): Promise<Player> {
-	//     const player = await this.prisma.player.findUnique({
-	//       where: {
-	//         id,
-	//       },
-	//     });
-	//     if (!player) {
-	//       throw new NotFoundException('Player not found');
-	//     }
-	//     return player;
-	//   }
-
-	//   async getAllPlayers(): Promise<Player[]> {
-	//     return this.prisma.player.findMany();
-	//   }
-
-	//   async updatePlayer(id: number, data: Prisma.PlayerUpdateInput): Promise<Player | null> {
-	//     const existingPlayer = await this.prisma.player.findUnique({ where: { id } });
-	//     if (!existingPlayer) {
-	//       throw new NotFoundException(`Player with ID ${id} not found`);
-	//     }
-	//     return this.prisma.player.update({
-	//       where: { id },
-	//       data,
-	//     });
-	//   }
-
-	//   async deletePlayer(id: number): Promise<Player | null> {
-	//     const existingPlayer = await this.prisma.player.findUnique({ where: { id } });
-	//     if (!existingPlayer) {
-	//       throw new NotFoundException(`Player with ID ${id} not found`);
-	//     }
-	//     return this.prisma.player.delete({ where: { id } });
-	//   }
 }
