@@ -27,6 +27,8 @@ export class ProfileGateway {
 
 	@SubscribeMessage('Profile')
 	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
+		if (typeof otherNick != 'string')
+			return ;
 		this.logger.log('Profile')
 		const id: number = client.data.user.id;
 		return (await this.profileService.getUserProfileByNick(id, otherNick))

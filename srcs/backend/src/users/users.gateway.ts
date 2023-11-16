@@ -45,6 +45,8 @@ export class UsersGateway
 
 	@SubscribeMessage('UpdateProfile')
 	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
+		if (data instanceof UpdateUserDto == false)
+			return ;
 		if (!client.data.user.id || client.data.user.id.length > 6) {
 			return (null);
 		}
