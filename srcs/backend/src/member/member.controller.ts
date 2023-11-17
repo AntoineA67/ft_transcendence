@@ -1,10 +1,8 @@
-import { Controller, Get, Post, Param, Body, Put, Delete, UseFilters } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Put, Delete } from '@nestjs/common';
 import { MemberService } from './member.service';
 import { Member, Prisma } from '@prisma/client';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
 
-@UseFilters(AllExceptionsFilter)
 @Controller('api/members')
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}

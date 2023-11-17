@@ -5,10 +5,8 @@ import { Server, Socket } from 'socket.io';
 import { FriendshipService } from './friendship.service';
 import { SubscribeMessage, MessageBody } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
-import { Logger, UseFilters } from '@nestjs/common';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
+import { Logger } from '@nestjs/common';
 
-@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class FriendshipGateway {
 	

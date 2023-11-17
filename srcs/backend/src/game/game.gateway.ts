@@ -1,4 +1,4 @@
-import { Logger, UseFilters } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
     ConnectedSocket,
     OnGatewayConnection,
@@ -11,10 +11,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
 
-@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {

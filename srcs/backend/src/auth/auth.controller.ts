@@ -2,16 +2,14 @@ import { Req, Res } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { Controller, Post, Body, Get, Param, UseGuards, HttpCode, HttpStatus, UseFilters } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { FortyTwoAuthGuard } from 'src/auth/guards/forty-two-auth.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { Intra42Dto, SigninDto, SignupDto, CallBackDto } from '../dto';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
 
-@UseFilters(AllExceptionsFilter)
 @Controller('api/auth')
 export class AuthController {
 	constructor(

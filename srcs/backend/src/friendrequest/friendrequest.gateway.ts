@@ -1,12 +1,10 @@
-import { Logger, UseFilters } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, ConnectedSocket, MessageBody } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { FriendRequestService } from './friendrequest.service';
 import { UserDto } from 'src/dto/user.dto';
 import { UsersService } from 'src/users/users.service';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
-@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisconnect {
 	private logger = new Logger('FriendReqGateway')

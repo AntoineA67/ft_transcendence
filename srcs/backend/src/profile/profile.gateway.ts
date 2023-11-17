@@ -1,14 +1,12 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { Logger, UseFilters } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket } from '@nestjs/websockets';
 
 import { ProfileDto } from '../dto/profile.dto';
 import { ProfileService } from './profile.service';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
-@UseFilters(AllExceptionsFilter)
 @WebSocketGateway({ cors: true })
 export class ProfileGateway {
 	

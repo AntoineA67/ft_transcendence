@@ -1,11 +1,9 @@
-import { Controller, Get, Req, UseGuards, Param, HttpException, HttpStatus, Logger, UseFilters } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards, Param, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
-import { AllExceptionsFilter } from 'src/AllExceptionsFilter';
 
 
-@UseFilters(AllExceptionsFilter)
 @Controller('api/profile')
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) {
