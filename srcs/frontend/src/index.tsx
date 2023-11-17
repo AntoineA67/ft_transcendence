@@ -43,6 +43,7 @@ import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
+import Gyro from './pages/Gyro';
 
 Sentry.init({
 	dsn: "https://01bf5be943109047867ae54d1eb150a7@o4506224690200576.ingest.sentry.io/4506224693542912",
@@ -132,6 +133,9 @@ const router = createBrowserRouter(
 							<Route index element={<SettingMenu />} loader={() => (loader('profile', 'me'))} />
 							<Route path='2fa' element={<TwoFactorAuth />} />
 						</Route>
+					</Route>
+
+					<Route path='gyro' element={<Gyro />}>
 					</Route>
 
 					<Route path="search" element={<Search />} loader={() => (loader('users', 'all'))}>

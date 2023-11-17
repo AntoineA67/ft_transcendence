@@ -24,11 +24,10 @@ import { Timer } from "../components/game/Timer"
 import { CameraFOVHandler } from "../components/game/CameraFOVHandler"
 import { GameSummaryModal } from "../components/game/GameSummaryModal"
 import { GameWaitingRoom } from "../components/game/GameWaitingRoom"
-import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
-import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { enqueueSnackbar } from "notistack";
 import { useNavigate } from 'react-router-dom';
 
 export enum GameStatus {
@@ -56,12 +55,11 @@ export default function GamePage() {
 	const location = useLocation();
 	const [webcam, setWebcam] = useState<boolean>(false);
 	const [opponent, setOpponent] = useState<any>(null);
+	const [tiltLR, setTiltLR] = useState<number>(0);
 
 	const navigate = useNavigate();
 
-
 	let indexTime = 0;
-
 
 	const changeHandPos = (pos: number = -1) => {
 		handPos.current = pos
@@ -79,7 +77,6 @@ export default function GamePage() {
 		if (newClients.ball) {
 			setBall(newClients.ball);
 		}
-
 
 		if (clients && cameraShakeRef.current) {
 			for (const client of Object.values(newClients.clients) as any) {
