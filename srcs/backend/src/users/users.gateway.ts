@@ -24,6 +24,7 @@ export class UsersGateway
 		client.join(id.toString())
 		//emit to everyone
 		client.broadcast.emit('online', id);
+		this.usersService.updateUser(id, { status: 'ONLINE' })
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -33,6 +34,7 @@ export class UsersGateway
 		client.leave(id.toString())
 		// emit to everyone
 		client.broadcast.emit('offline', id);
+		this.usersService.updateUser(id, { status: 'OFFLINE' })
 	}
 
 	@SubscribeMessage('getAllUsers')
