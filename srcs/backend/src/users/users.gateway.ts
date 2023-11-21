@@ -43,6 +43,7 @@ export class UsersGateway
 
 	@SubscribeMessage('UpdateUsername')
 	async handleUpdateUsername(@ConnectedSocket() client: Socket, @MessageBody() username: string) {
+		this.logger.log(username)
 		if (typeof username != 'string') {
 			return false;
 		}
@@ -52,6 +53,7 @@ export class UsersGateway
 	
 	@SubscribeMessage('UpdateBio')
 	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
+		this.logger.log(bio)
 		if (typeof bio != 'string') {
 			return false;
 		}
