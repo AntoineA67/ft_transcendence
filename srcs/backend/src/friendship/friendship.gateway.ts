@@ -39,18 +39,24 @@ export class FriendshipGateway {
 	@SubscribeMessage('isFriend')
 	async handleIsFriend(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() otherId: number): Promise<boolean> {
+		@MessageBody() otherId: number
+	): Promise<boolean> {
+		if (typeof otherId != 'number') {
+			return (false)
+		}
 		const id: number = client.data.user.id;
-
 		return (await this.friendshipService.isFriend(id, otherId))
 	}
 	
 	@SubscribeMessage('Unfriend')
 	async handleUnfriend(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() otherId: number): Promise<boolean> {
+		@MessageBody() otherId: number
+	): Promise<boolean> {
+		if (typeof otherId != 'number') {
+			return (false)
+		}
 		const id: number = client.data.user.id;
-
 		return (await this.friendshipService.unFriend(id, otherId))	
 	}
 

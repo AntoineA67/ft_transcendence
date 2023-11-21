@@ -38,6 +38,9 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number') {
+			return ;
+		}
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
@@ -54,6 +57,9 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number') {
+			return ;
+		}
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);

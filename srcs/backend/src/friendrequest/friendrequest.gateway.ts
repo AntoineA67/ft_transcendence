@@ -33,7 +33,11 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('sendReq')
 	async handleSendReq(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() nick: string): Promise<boolean> {
+		@MessageBody() nick: string
+	): Promise<boolean> {
+		if (typeof nick != 'string') {
+			return false;
+		}
 		const id: number = client.data.user.id;
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
@@ -51,7 +55,11 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	async handleReplyReq(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody('other') otherId: number, 
-		@MessageBody('result') result: boolean): Promise<boolean> {
+		@MessageBody('result') result: boolean
+	): Promise<boolean> {
+		if (typeof otherId != 'number' || typeof result != 'boolean') {
+			return false;
+		}
 		const id: number = client.data.user.id;
 		const replier: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
@@ -66,7 +74,11 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	@SubscribeMessage('reqSent')
 	async handleReqSent(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() otherId): Promise<boolean> {
+		@MessageBody() otherId: number
+	): Promise<boolean> {
+		if (typeof otherId != 'number') {
+			return false;
+		}
 		const id: number = client.data.user.id;
 		const pendings = await this.friendReqService.getPendingReq(id, otherId);
 		if (pendings.length == 0) return (false)
