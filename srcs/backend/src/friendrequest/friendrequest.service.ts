@@ -56,7 +56,6 @@ export class FriendRequestService {
 		if (blocked) return (false);
 		// check if they are already friends
 		const isFriend = await this.friendshipService.isFriend(id, friend.id);
-		this.logger.log(isFriend)
 		if (isFriend) return (false);
 		//check if there are pending requests
 		const pendings = await this.getPendingReq(id, friend.id);

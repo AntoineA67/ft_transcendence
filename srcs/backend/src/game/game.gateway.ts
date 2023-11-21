@@ -26,11 +26,9 @@ export class GameGateway
     @WebSocketServer() wss: Server;
 
     afterInit(server: Server) {
-        this.logger.log('Initialized');
     }
 
     handleDisconnect(socket: Socket) {
-        this.logger.log(`Player Disconnected: ${socket.id} from ${socket.rooms}`);
         this.gamesService.disconnect(socket);
     }
 
@@ -81,7 +79,6 @@ export class GameGateway
 
     @SubscribeMessage('getMyGameSettings')
     async getMyGameSettings(@ConnectedSocket() client: Socket) {
-        this.logger.log('getMyGameSettings')
         const userId: number = client.data.user.id;
         return (await this.gameSettingsService.getUserGameSettings(userId))
     }

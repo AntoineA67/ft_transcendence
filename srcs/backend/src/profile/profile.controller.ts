@@ -6,7 +6,6 @@ import { Request } from 'express';
 @Controller('api/profile')
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) {
-		this.logger.log('profile controller created')
 	}
 
 	private logger = new Logger('profile');
@@ -14,7 +13,6 @@ export class ProfileController {
 	@UseGuards(JwtAuthGuard)
 	@Get('me')
 	async getMyProfile(@Req() req: Request) {
-		this.logger.log('me')
 		const id = req.user.id;
 		const profile = await this.profileService.getUserProfileById(id, id)
 		if (!profile) {

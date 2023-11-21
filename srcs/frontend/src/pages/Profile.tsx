@@ -84,10 +84,10 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 		if (type === 'bio' && !checkBio(mod, enqueueSnackbar)) {
 			return;
 		}
-
-		let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
-		socket.emit('UpdateProfile', data, (success: boolean) => {
-			if (success) {
+		
+		if (type == 'nick') {
+			socket.emit('UpdateUsername', mod, (success: boolean) => {
+				if (!success) return ;
 				setProfile((prev) => {
 					if (prev) {
 						if ('username' in obj && typeof obj.username === 'string') {
@@ -99,8 +99,40 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 					}
 					return prev;
 				});
-			}
-		});
+			})
+		} else {
+			socket.emit('UpdateBio', mod.trim(), (success: boolean) => {
+				if (!success) return ;
+				setProfile((prev) => {
+					if (prev) {
+						if ('username' in obj && typeof obj.username === 'string') {
+							return { ...prev, username: obj.username.trim() };
+						}
+						if ('bio' in obj && typeof obj.bio === 'string') {
+							return { ...prev, bio: obj.bio.trim() };
+						}
+					}
+					return prev;
+				});
+			})
+		}
+
+		// let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
+		// socket.emit('UpdateProfile', data, (success: boolean) => {
+		// 	if (success) {
+		// 		setProfile((prev) => {
+		// 			if (prev) {
+		// 				if ('username' in obj && typeof obj.username === 'string') {
+		// 					return { ...prev, username: obj.username.trim() };
+		// 				}
+		// 				if ('bio' in obj && typeof obj.bio === 'string') {
+		// 					return { ...prev, bio: obj.bio.trim() };
+		// 				}
+		// 			}
+		// 			return prev;
+		// 		});
+		// 	}
+		// });
 		setEdit('done');
 	}
 

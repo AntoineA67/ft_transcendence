@@ -21,11 +21,9 @@ export class MessageGateway
   server: Server;
 
   afterInit(server: Server) {
-    this.logger.log('Messages Initialized');
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client Disconnected: ${client.id}`);
     if (this.clients && this.clients[client.id]) {
       delete this.clients[client.id];
       this.server.emit('removeClient', client.id);
@@ -33,7 +31,6 @@ export class MessageGateway
   }
 
   handleConnection(client: Socket) {
-    this.logger.log(`Client Connected: ${client.id}`);
     this.clients[client.id] = {};
     this.server.emit('id', client.id);
   }
