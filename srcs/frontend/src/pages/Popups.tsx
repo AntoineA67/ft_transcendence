@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHourglass } from '@fortawesome/free-solid-svg-icons';
 import { redirect, useNavigate } from "react-router-dom";
 import { gamesSocket } from "../utils/socket";
-import { enqueueSnackbar } from "notistack";
+import { closeSnackbar, enqueueSnackbar } from "notistack";
 
 
 type popupProp = {
@@ -15,6 +15,8 @@ type popupProp = {
 export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 	const [id, setId] = useState<NodeJS.Timeout>();
 	const navigate = useNavigate();
+
+	closeSnackbar();
 
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
