@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { MemberService } from './member.service';
 import { Logger } from '@nestjs/common';
 
+
 @WebSocketGateway({ cors: true, namespace: 'chats'  })
 export class MemberGateway
   implements OnGatewayConnection, OnGatewayDisconnect {

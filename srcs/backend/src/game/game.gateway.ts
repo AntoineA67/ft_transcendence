@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 
+
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {

@@ -3,6 +3,7 @@ import { ProfileService } from './profile.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 
+
 @Controller('api/profile')
 export class ProfileController {
 	constructor(private readonly profileService: ProfileService) {

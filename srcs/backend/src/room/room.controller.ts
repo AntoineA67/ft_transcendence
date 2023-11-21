@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { MemberService } from 'src/member/member.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+
 @Controller('api/rooms')
 export class RoomController {
   constructor(

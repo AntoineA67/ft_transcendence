@@ -4,6 +4,7 @@ import { BlockService } from './block.service';
 import { UsersService } from 'src/users/users.service';
 import { UserDto } from 'src/dto/user.dto';
 import { Logger } from '@nestjs/common';
+
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class BlockGateway {
  
@@ -38,6 +39,8 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number')
+			return ;
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
@@ -54,6 +57,8 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number')
+			return;
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);

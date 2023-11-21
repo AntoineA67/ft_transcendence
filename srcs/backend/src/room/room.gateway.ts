@@ -10,6 +10,7 @@ import { Member } from '@prisma/client';
 import { MemberService } from 'src/member/member.service';
 import { MessageWithUsername, ProfileTest, Pvrooms, checkPassword, checkUserRoomName } from './roomDto';
 
+
 @WebSocketGateway({ cors: true, namespace: 'chats' })
 export class RoomGateway
 	implements OnGatewayConnection, OnGatewayDisconnect {

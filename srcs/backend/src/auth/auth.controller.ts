@@ -9,6 +9,7 @@ import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { Intra42Dto, SigninDto, SignupDto, CallBackDto } from '../dto';
 
+
 @Controller('api/auth')
 export class AuthController {
 	constructor(
