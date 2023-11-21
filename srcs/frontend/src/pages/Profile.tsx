@@ -86,7 +86,7 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 		}
 		
 		if (type == 'nick') {
-			socket.emit('UpdateUsername', {username: mod}, (success: boolean) => {
+			socket.emit('UpdateUsername', mod, (success: boolean) => {
 				if (!success) return ;
 				setProfile((prev) => {
 					if (prev) {
@@ -101,7 +101,7 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 				});
 			})
 		} else {
-			socket.emit('UpdateBio', {bio: mod.trim()}, (success: boolean) => {
+			socket.emit('UpdateBio', mod.trim(), (success: boolean) => {
 				if (!success) return ;
 				setProfile((prev) => {
 					if (prev) {
