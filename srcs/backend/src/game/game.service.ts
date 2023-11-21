@@ -36,8 +36,15 @@ export class GamesService {
     let otherIdNumber;
     try {
       otherIdNumber = parseInt(otherId);
+      if (otherIdNumber === socket.data.user.id) throw new Error('cannot matchmake against yourself');
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
+      const senderUser = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
       if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
+      if (senderUser === null) throw new Error('user not online');
+      if (senderUser.status !== 'ONLINE') throw new Error('already in game');
+      if (this.matches[otherIdNumber]) throw new Error('already in game');
+      if (this.isInQueue(otherId) || this.isInQueue(socket.data.user.id.toString())) throw new Error('user already in queue');
+      if (this.matches[socket.data.user.id]) throw new Error('already in game');
     } catch (error) {
       socket.emit('cancelledMatchmake', { reason: error.message });
       return;
@@ -70,13 +77,19 @@ export class GamesService {
   }
 
   addToQueue(socket: Socket, wss: Server) {
-    if (this.isInQueue(socket)) return;
+    if (this.isInQueue(socket.data.user.id)) return;
+    if (this.clients[socket.data.user.id]) return;
+    console.log(socket.data.user.id);
+
+
     this.matchmakingQueue.push(socket);
     this.tryMatchPlayers(wss);
   }
 
-  isInQueue(client: Socket) {
-    return this.matchmakingQueue.includes(client);
+  isInQueue(userid: string): boolean {
+    return this.matchmakingQueue.some((client) =>
+      client.data.user.id === userid
+    )
   }
 
   async disconnect(client: Socket) {
@@ -93,7 +106,7 @@ export class GamesService {
           }
         });
       }
-    } else if (this.isInQueue(client)) {
+    } else if (this.isInQueue(client.data.user.id)) {
       const index = this.matchmakingQueue.indexOf(client);
       if (index !== -1) {
         this.matchmakingQueue.splice(index, 1);
@@ -120,6 +133,7 @@ export class GamesService {
       const player1 = this.matchmakingQueue.pop();
       const player2 = this.matchmakingQueue.pop();
       if (!player1 || !player2) return;
+      if (player1.data.user.id === player2.data.user.id) return;
 
       // Create a new room for the clients
       const roomId = uuidv4();
