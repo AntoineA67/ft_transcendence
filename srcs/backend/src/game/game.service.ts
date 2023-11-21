@@ -39,12 +39,16 @@ export class GamesService {
       if (otherIdNumber === socket.data.user.id) throw new Error('cannot matchmake against yourself');
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
       const senderUser = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
-      if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
-      if (senderUser === null) throw new Error('user not online');
-      if (senderUser.status !== 'ONLINE') throw new Error('already in game');
-      if (this.matches[otherIdNumber]) throw new Error('already in game');
-      if (this.isInQueue(otherId) || this.isInQueue(socket.data.user.id.toString())) throw new Error('user already in queue');
+
+      if (otherUser === null) throw new Error('Other user not exists');
+      if (otherUser.status !== 'ONLINE') throw new Error('user not online');
+
+      if (senderUser === null) throw new Error('Sender user not exists');
+      if (senderUser.status !== 'ONLINE') throw new Error('user not online');
+
       if (this.matches[socket.data.user.id]) throw new Error('already in game');
+      if (this.isInQueue(otherId) || this.isInQueue(socket.data.user.id.toString())) throw new Error('user already in queue');
+
     } catch (error) {
       socket.emit('cancelledMatchmake', { reason: error.message });
       return;
@@ -78,7 +82,6 @@ export class GamesService {
 
   addToQueue(socket: Socket, wss: Server) {
     if (this.isInQueue(socket.data.user.id)) return;
-    if (this.clients[socket.data.user.id]) return;
     console.log(socket.data.user.id);
 
 
