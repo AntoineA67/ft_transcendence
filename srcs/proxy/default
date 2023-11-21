@@ -5,6 +5,7 @@ server {
     ssl_certificate /etc/letsencrypt/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/privkey.pem;
 
+
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
