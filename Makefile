@@ -18,7 +18,7 @@ dev :
 	@sleep 5
 	@success=false; \
 	for i in $$(seq 1 ${RETRIES}); do \
-		if curl -f http://localhost:8080/ > /dev/null 2>&1; then \
+		if curl -f http://localhost/ > /dev/null 2>&1; then \
 			success=true; \
 			break; \
 		else \
