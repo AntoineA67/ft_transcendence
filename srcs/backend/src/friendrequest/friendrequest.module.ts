@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { FriendRequestService } from './friendrequest.service';
-import { FriendRequestController } from './friendrequest.controller';
 import { FriendRequestGateway } from './friendrequest.gateway'; // Importez la passerelle
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
@@ -10,7 +9,7 @@ import { FriendshipModule } from 'src/friendship/friendship.module';
 @Module({
 	imports: [PrismaModule, UsersModule, BlockModule, FriendshipModule],
 	providers: [FriendRequestService, FriendRequestGateway],
-	controllers: [FriendRequestController],
+	controllers: [],
 	exports: [FriendRequestService],
 })
 export class FriendRequestModule {}
