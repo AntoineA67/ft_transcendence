@@ -16,14 +16,15 @@ export class ProfileGateway {
 	
 	@SubscribeMessage('MyProfile')
 	async handleMyProfile(@ConnectedSocket() client: Socket) {
-		this.logger.log('MyProfile')
 		const id: number = client.data.user.id;
 		return (await this.profileService.getUserProfileById(id, id))
 	}
 
 	@SubscribeMessage('Profile')
 	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
-		this.logger.log('Profile')
+		if (typeof otherNick != 'string') {
+			return ;
+		}
 		const id: number = client.data.user.id;
 		return (await this.profileService.getUserProfileByNick(id, otherNick))
 	}

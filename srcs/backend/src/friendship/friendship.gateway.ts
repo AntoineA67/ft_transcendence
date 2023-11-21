@@ -15,14 +15,12 @@ export class FriendshipGateway {
 	private logger = new Logger('FriendshipGateway')
 
 	handleConnection(client: Socket) {
-		this.logger.log('new connection')
 		// Gestion de la connexion du client
 		const id: number = client.data.user.id;
 		client.join(id.toString());
 	}
 
 	handleDisconnect(client: Socket) {
-		this.logger.log('disconnection')
 		// Gestion de la déconnexion du client
 		const id: number = client.data.user.id;
 		client.leave(id.toString());
@@ -39,18 +37,24 @@ export class FriendshipGateway {
 	@SubscribeMessage('isFriend')
 	async handleIsFriend(
 		@ConnectedSocket() client: Socket, 
-		@MessageBody() otherId: number): Promise<boolean> {
+		@MessageBody() otherId: number
+	): Promise<boolean> {
+		if (typeof otherId != 'number') {
+			return (false)
+		}
 		const id: number = client.data.user.id;
-
 		return (await this.friendshipService.isFriend(id, otherId))
 	}
 	
 	@SubscribeMessage('Unfriend')
 	async handleUnfriend(
 		@ConnectedSocket() client: Socket,
-		@MessageBody() otherId: number): Promise<boolean> {
+		@MessageBody() otherId: number
+	): Promise<boolean> {
+		if (typeof otherId != 'number') {
+			return (false)
+		}
 		const id: number = client.data.user.id;
-
 		return (await this.friendshipService.unFriend(id, otherId))	
 	}
 

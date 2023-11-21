@@ -1,9 +1,8 @@
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { UpdateUserDto } from './dto/UpdateUserDto';
 import { UsersService } from './users.service';
 import { MessageBody } from '@nestjs/websockets';
-import { ConnectedSocket } from '@nestjs/websockets';
+import { ConnectedSocket, WsException } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
 import { Logger } from '@nestjs/common';
 
@@ -42,15 +41,24 @@ export class UsersGateway
 		return (await this.usersService.getAllUsers());
 	}
 
-	@SubscribeMessage('UpdateProfile')
-	async handleUpdateProfile(@ConnectedSocket() client: Socket, @MessageBody() data: UpdateUserDto) {
-		if (!client.data.user.id || client.data.user.id.length > 6) {
-			return (null);
+	@SubscribeMessage('UpdateUsername')
+	async handleUpdateUsername(@ConnectedSocket() client: Socket, @MessageBody() username: string) {
+		if (typeof username != 'string') {
+			return false;
 		}
 		const id: number = client.data.user.id;
-		this.logger.log(data);
-		return (await this.usersService.updateUser(id, data))
+		return (await this.usersService.updateUser(id, {username: username}))
 	}
+	
+	@SubscribeMessage('UpdateBio')
+	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
+		if (typeof bio != 'string') {
+			return false;
+		}
+		const id: number = client.data.user.id;
+		return (await this.usersService.updateUser(id, {bio: bio}))
+	}
+	
 
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
@@ -84,7 +92,7 @@ export class UsersGateway
 
 	@SubscribeMessage('Activate2FA')
 	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (!client.data.user || data.length > 6) {
+		if (typeof data != 'string' || data.length > 6) {
 			return (false);
 		}
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
@@ -97,7 +105,7 @@ export class UsersGateway
 
 	@SubscribeMessage('Disable2FA')
 	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (data.length > 6 || !client.data.user) {
+		if (typeof data != 'string' || data.length > 6) {
 			return (false);
 		}
 		const isValid = await this.usersService.verify2FA(client.data.user, data);
@@ -109,16 +117,16 @@ export class UsersGateway
 	}
 
 	@SubscribeMessage('myAvatar')
-	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string | null> {
-		if (!client.data.user || !client.data.user.id || client.data.user.id.length > 6) {
-			return (null);
-		}
+	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string> {
 		const id: number = client.data.user.id;
 		return (await this.usersService.getAvatar(id))
 	}
 
 	@SubscribeMessage('ChangePassword')
-	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
+	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any): Promise<boolean> {
+		if (typeof data?.oldPassowrd != 'string' || typeof data?.newPassword != 'string') {
+			return (false);
+		}
 		if (data.oldPassword.length > 100 || data.newPassword.length > 100) {
 			return (false);
 		}
@@ -134,7 +142,7 @@ export class UsersGateway
 	@SubscribeMessage('getUser')
 	async handleGetUser(@MessageBody() id: number): Promise<UserDto | null> {
 		if (typeof id != 'number') {
-			return null;
+			return (null);
 		}		
 		return await this.usersService.getUserById(id);
 	}

@@ -18,12 +18,10 @@ export class BlockGateway {
 	private logger = new Logger('BlockGateway')
 
 	handleConnection(client: Socket) {
-		this.logger.log('new connection')
 		// Gestion de la connexion du client
 	}
 
 	handleDisconnect(client: Socket) {
-		this.logger.log('disconnection')
 		// Gestion de la déconnexion du client
 	}
 
@@ -38,6 +36,9 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number') {
+			return ;
+		}
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
@@ -54,6 +55,9 @@ export class BlockGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	) {
+		if (typeof otherId != 'number') {
+			return ;
+		}
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
