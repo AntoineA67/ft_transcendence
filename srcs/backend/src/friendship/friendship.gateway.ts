@@ -15,14 +15,12 @@ export class FriendshipGateway {
 	private logger = new Logger('FriendshipGateway')
 
 	handleConnection(client: Socket) {
-		this.logger.log('new connection')
 		// Gestion de la connexion du client
 		const id: number = client.data.user.id;
 		client.join(id.toString());
 	}
 
 	handleDisconnect(client: Socket) {
-		this.logger.log('disconnection')
 		// Gestion de la déconnexion du client
 		const id: number = client.data.user.id;
 		client.leave(id.toString());

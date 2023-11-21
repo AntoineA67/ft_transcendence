@@ -214,7 +214,6 @@ export class RoomGateway
 			return false;
 		}
 		const user = await this.roomService.getUserbyId(userid);
-		this.logger.log('message', message);
 		const member = await this.memberService.getMemberDatabyRoomId(user.id, roomid);
 		const room = await this.roomService.getRoomDataById(roomid);
 		if (!room.isChannel) {
@@ -271,7 +270,6 @@ export class RoomGateway
 			return false;
 		}
 		const bool = await this.roomService.changeRoomTitle(userId, roomid, content.roomtitle);
-		this.logger.log(bool);
 		if (bool) {
 			const response = {
 				roomid: roomid,
@@ -294,7 +292,6 @@ export class RoomGateway
 		}
 		const roomid = parseInt(content.roomId, 10);
 		const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
-		this.logger.log(bool);
 
 		if (bool) {
 			const leavechan = {
@@ -327,7 +324,6 @@ export class RoomGateway
 		}
 		const roomId = parseInt(content.roomId, 10);
 		const bool = await this.roomService.muteMember(userId, roomId, content.memberId, content.duration);
-		this.logger.log(bool);
 		if (bool) {
 			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomId.toString();
@@ -357,7 +353,6 @@ export class RoomGateway
 		const roomid = parseInt(content.roomId, 10);
 
 		const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
-		this.logger.log(bool);
 		if (bool) {
 			const usertoban = await this.roomService.getMemberDatabyId(content.memberId);
 			const roomName = "room_" + roomid.toString();
@@ -390,7 +385,6 @@ export class RoomGateway
 		}
 
 		const bool = await this.roomService.blockUser(userid, content.memberId, content.action);
-		this.logger.log(bool);
 		const usertoblock = await this.roomService.getMemberDatabyId(content.memberId);
 		const SocketToBlock = this.clients[usertoblock.id.toString()];
 		const profileupdated = await this.roomService.getProfileForUser(content.memberId);
@@ -415,7 +409,6 @@ export class RoomGateway
 		const nbid = await this.roomService.inviteUser(userid, roomid, content.username);
 		const usertoadd = await this.roomService.getMemberDatabyUsername(content.username);
 
-		this.logger.log(nbid > 0 ? true : false);
 
 		if (nbid > 0) {
 			const roomName = "room_" + roomid.toString();
@@ -445,7 +438,6 @@ export class RoomGateway
 		const roomId = parseInt(content.roomid, 10);
 
 		const bool = await this.roomService.changeRole(userid, roomId, content.memberId, content.owner, content.admin);
-		this.logger.log(bool);
 
 		if (bool) {
 			const usertochangerole = await this.roomService.getMemberDatabyId(content.memberId);
@@ -479,7 +471,6 @@ export class RoomGateway
 		const roomId = parseInt(content.roomId, 10);
 
 		const bool = await this.roomService.changePassword(userid, roomId, content.password);
-		this.logger.log(bool);
 
 		if (bool) {
 			return true;
@@ -496,7 +487,6 @@ export class RoomGateway
 		const roomIdNumber = parseInt(roomId, 10);
 
 		const bool = await this.roomService.deleteRoom(roomIdNumber);
-		this.logger.log(bool);
 
 		if (bool) {
 			const roomName = "room_" + roomIdNumber.toString();

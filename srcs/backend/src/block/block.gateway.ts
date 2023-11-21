@@ -18,12 +18,10 @@ export class BlockGateway {
 	private logger = new Logger('BlockGateway')
 
 	handleConnection(client: Socket) {
-		this.logger.log('new connection')
 		// Gestion de la connexion du client
 	}
 
 	handleDisconnect(client: Socket) {
-		this.logger.log('disconnection')
 		// Gestion de la déconnexion du client
 	}
 
