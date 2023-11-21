@@ -375,7 +375,6 @@ export class RoomService {
 				]
 			},
 		});
-		this.logger.log(userId, roomid, newTitle)
 
 		if (!member) {
 			return false;
@@ -769,7 +768,6 @@ export class RoomService {
 				userId: memberId,
 			},
 		});
-		this.logger.log(member, memberToMute);
 		if (!member || !memberToMute || memberToMute.ban
 			|| !member.admin || (!member.owner && memberToMute.owner)) {
 			return false;

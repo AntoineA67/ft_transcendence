@@ -43,7 +43,6 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
 		const result = await this.friendReqService.sendFriendReq(id, nick);
 		// if fail, no emit
-		this.logger.log(result)
 		if (!result) return (result);
 		this.server.to(recver.id.toString()).emit('recvfriendReq', sender);
 		this.server.to(sender.id.toString()).emit('sendfriendReq', recver);
