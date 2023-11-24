@@ -18,7 +18,6 @@ export class RoomGateway
 		private readonly messagesService: MessagesService,
 		private readonly memberService: MemberService,
 	) { }
-	private logger: Logger = new Logger('RoomGateway');
 
 	private clients: Record<string, Socket> = {};
 

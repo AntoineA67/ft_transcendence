@@ -330,6 +330,7 @@ export class RoomService {
 				id: roomid,
 				title: roomname,
 				isChannel: true,
+				private: false,
 			},
 		});
 		let passwordMatch = true;
