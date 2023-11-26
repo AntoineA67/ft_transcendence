@@ -1,11 +1,7 @@
-import { Link, Outlet, useLocation, useLoaderData } from "react-router-dom";
-import Form from 'react-bootstrap/Form';
-import { Button } from 'react-bootstrap';
+import { Outlet, useLocation, useLoaderData } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { userType } from '../../types/user';
-import { socket } from '../utils/socket';
 import { UserItem } from '../utils/UserItem';
-// import '../styles/index.css';
 
 export function SearchBar() {
 	const users = useLoaderData() as userType[];

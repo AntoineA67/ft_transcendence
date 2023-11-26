@@ -511,7 +511,7 @@ export class RoomService {
 				members: {
 					where: {
 						NOT: [
-							{ userId: userId }, // Exclude the user making the request
+							{ userId: userId },
 						],
 					},
 					include: {
@@ -563,7 +563,7 @@ export class RoomService {
 					members: {
 						where: {
 							NOT: [
-								{ userId: userId }, // Exclude the user making the request
+								{ userId: userId },
 							],
 						},
 						include: {

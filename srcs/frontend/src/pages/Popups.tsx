@@ -20,7 +20,6 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
-			// emit event 
 			setPopup('no')
 		}, 30000);
 		setId(timeoutId);
@@ -33,7 +32,6 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 
 	const onAccept = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-		// emit event
 		clearTimeout(id);
 		setPopup('no')
 		navigate(`/`, { state: { gameUserId: popupId }, replace: true });
@@ -42,7 +40,6 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 	const onDecline = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		gamesSocket.emit('cancelMatchmake', popupId);
-		// emit event
 		clearTimeout(id);
 		setPopup('no')
 	}
@@ -70,7 +67,7 @@ export function PongPopup({ nick, setPopup }: popupProp) {
 
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
-			// emit event 
+ 
 			setPopup('no')
 		}, 30000);
 
@@ -80,7 +77,6 @@ export function PongPopup({ nick, setPopup }: popupProp) {
 	const onCancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		clearTimeout(id);
-		// emit event
 		setPopup('no');
 	}
 

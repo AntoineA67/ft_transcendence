@@ -1,5 +1,3 @@
-// import '../styles/index.css'
-
 import { profileType } from "../../types/user";
 import { Avatar } from "./Avatar";
 import Stat from "../pages/Stat";

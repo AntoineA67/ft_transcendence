@@ -68,7 +68,7 @@ export default class Room {
 		const winner = this.ball.update(this.players);
 		if (winner) {
 			this.endGame(Number(winner));
-		} else if (Date.now() - this.startTime > 3 * 1000 * 60) { // 3 * 60 * 1000
+		} else if (Date.now() - this.startTime > 3 * 1000 * 60) {
 			const players = Object.values(this.players);
 			if (players[0] && players[1]) {
 				if (players[0].score > players[1].score) {
@@ -76,7 +76,7 @@ export default class Room {
 				} else if (players[0].score < players[1].score) {
 					this.endGame(Number(players[1].id));
 				} else {
-					this.endGame(-1); // -1 means nobody won
+					this.endGame(-1);
 				}
 			} else {
 				this.endGame(-1);

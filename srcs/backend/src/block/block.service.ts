@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Block, Prisma } from '@prisma/client';
 import { UserDto } from 'src/dto/user.dto';
 
@@ -30,11 +30,6 @@ export class BlockService {
 		})
 		const blocked = data.map((x) => (x.blocked));
 		return (blocked);
-		// let ret: UserDto[] = [];
-		// for (let x of blocked) {
-		// 	ret.push({ ...x, avatar: this.usersService.bufferToBase64(x.avatar) })
-		// }
-		// return (ret);
 	}
 
 	async createBlock(id: number, otherId: number): Promise<Boolean> {
@@ -77,7 +72,6 @@ export class BlockService {
 		return (true);
 	}
 
-	// whether first person block second person
 	async isBlocked(id: number, otherId: number): Promise<boolean> {
 		const user = await this.usersService.getUserById(id);
 		const block = await this.usersService.getUserById(otherId);

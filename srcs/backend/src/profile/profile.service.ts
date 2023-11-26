@@ -21,7 +21,6 @@ export class ProfileService {
 		private readonly achieveService: AchievementService,
 	) { }
 
-	// the freind, block, blocked should be given by other services
 	async getUserProfileById(userId: number, otherId: number): Promise<ProfileDto | null> {
 		let profile = await this.usersService.getHalfProfile(otherId);
 		if (!profile) return (null);

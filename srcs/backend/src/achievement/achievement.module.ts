@@ -7,7 +7,7 @@ import { PlayerModule } from 'src/player/player.module';
 @Module({
   imports: [PrismaModule, PlayerModule],
   controllers: [],
-  providers: [AchievementService], // Ajoutez la passerelle aux providers
+  providers: [AchievementService],
   exports: [AchievementService]
 })
 export class AchievementModule {}

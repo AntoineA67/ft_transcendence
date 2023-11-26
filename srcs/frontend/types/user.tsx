@@ -4,7 +4,7 @@ import { gameHistoryType } from "./gameHistoryType";
 export type userType = {
 	id: number;
 	username: string;
-	avatar: string | null; // ArrayBuffer
+	avatar: string | null;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 }
 
@@ -18,8 +18,8 @@ export type profileType = {
 	activated2FA: boolean,
 	gameHistory: gameHistoryType[],
 	achieve: AchieveType,
-	friend: boolean | null,   // null when the profile is user himself
+	friend: boolean | null,
 	sent: boolean | null,
-	block: boolean | null,    // do I block this person
-	blocked: boolean | null   // does this person block me
+	block: boolean | null,
+	blocked: boolean | null
 }

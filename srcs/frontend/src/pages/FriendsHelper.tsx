@@ -1,6 +1,3 @@
-// import '../styles/index.css'
-// import '../styles/iconButton.css';
-
 import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
 import { friendsSocket } from "../utils/socket";
@@ -73,7 +70,6 @@ export function FriendReqList() {
 		})
 		function handleReq(sender: userType) {
 			setReqs((prev) => ([sender, ...prev]))
-			// setReqs([...reqs, sender]);
 		}
 		friendsSocket.on('recvfriendReq', handleReq);
 		return (() => {

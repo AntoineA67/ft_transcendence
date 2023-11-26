@@ -28,8 +28,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const id: number = client.data.user.id;
 		return (await this.friendReqService.findAllPendings(id));
 	}
-	
-	// emit event 'friendReq' to recver
+
 	@SubscribeMessage('sendReq')
 	async handleSendReq(
 		@ConnectedSocket() client: Socket, 
@@ -42,14 +41,13 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
 		const result = await this.friendReqService.sendFriendReq(id, nick);
-		// if fail, no emit
+
 		if (!result) return (result);
 		this.server.to(recver.id.toString()).emit('recvfriendReq', sender);
 		this.server.to(sender.id.toString()).emit('sendfriendReq', recver);
 		return (result);
 	}
 
-	// emit event 'friendReqAccept' to the original sender
 	@SubscribeMessage('replyReq')
 	async handleReplyReq(
 		@ConnectedSocket() client: Socket, 
@@ -63,7 +61,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const replier: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
-		// if fail, no emit
+
 		if (!ret) return (ret);
 		result && this.server.to(otherId.toString()).emit('friendReqAccept', replier)
 		result && this.server.to(id.toString()).emit('friendReqAccept', otherUser)

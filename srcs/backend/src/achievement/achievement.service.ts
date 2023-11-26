@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { PlayerService } from 'src/player/player.service';
 import { AchieveDto } from 'src/dto/achieve.dto';
@@ -11,7 +11,6 @@ export class AchievementService {
 		private playerService: PlayerService
 	) {}
 
-	// the id stands for userId, NOT the id of achievement
 	async getAchieveById(id: number): Promise<AchieveDto> {
 		const achieve = await this.prisma.achievement.upsert({
 			where: { userId: id },
@@ -23,7 +22,6 @@ export class AchievementService {
 		return {userId: id,  ...achieve};
 	}
 	
-	// the id stands for userId, NOT the id of achievement
 	async updateAchievement(id: number) {
 		const allWin: number = await this.playerService.getAllWin(id);
 		const allGame: number = await this.playerService.getAllGame(id);

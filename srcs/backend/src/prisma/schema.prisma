@@ -44,12 +44,12 @@ model GameSettings {
 model User {
   id              Int             @id(map: "PK_758b8ce7c18b9d347461b30228d") @unique @default(autoincrement())
   status          OnlineStatus    @default(ONLINE)
-  username        String          @unique @db.VarChar // @autoincrement?
+  username        String          @unique @db.VarChar
   email           String          @unique(sort: Asc) @db.VarChar
   firstConnexion  String          @default("true")
-  hashPassword    String?         @db.VarChar // To hashPassword
+  hashPassword    String?         @db.VarChar
   u2fHash         String?         @db.VarChar
-  otpHash         String?         @db.VarChar // try removing all the db.VarChar
+  otpHash         String?         @db.VarChar
   activated2FA    Boolean         @default(false)
   avatar          String?
   avatar42        String?
@@ -85,7 +85,6 @@ model Achievement {
   play1000Games   Boolean @default(false)
 }
 
-// latest message first
 model Message {
   id        Int      @id(map: "PK_ba01f0a3e0123651915008bc578") @unique(sort: Desc) @default(autoincrement())
   message   String   @db.VarChar
@@ -149,14 +148,8 @@ model Block {
 model RefreshToken {
   id    Int    @id @default(autoincrement())
   token String @unique
-
-  // This field is the scalar that will store the foreign key
   userId Int
-
-  // This field is the relation field that lets you fetch the actual User object. 
-  // The fields and references arguments define how the relationship is mapped.
   user User @relation("refreshToken", fields: [userId], references: [id], onDelete: Cascade)
-
   createdAt DateTime @default(now())
   expiresAt DateTime
 }

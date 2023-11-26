@@ -830,14 +830,10 @@ export function NewChat({ setPage }: { setPage: React.Dispatch<React.SetStateAct
 	const navigate = useNavigate();
 
 	const handleCreateGroup = () => {
-		// Room Title validation
 		if (!checkUserRoomName(create, enqueueSnackbar, 'Room Title')) {
 			return;
 		}
-
 		const password = !isPublic ? "" : createPassword;
-
-		// Password validation
 		if (password) {
 			if (!checkPassword(password, enqueueSnackbar)) {
 				return;

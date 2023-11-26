@@ -116,23 +116,6 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 				});
 			})
 		}
-
-		// let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
-		// socket.emit('UpdateProfile', data, (success: boolean) => {
-		// 	if (success) {
-		// 		setProfile((prev) => {
-		// 			if (prev) {
-		// 				if ('username' in obj && typeof obj.username === 'string') {
-		// 					return { ...prev, username: obj.username.trim() };
-		// 				}
-		// 				if ('bio' in obj && typeof obj.bio === 'string') {
-		// 					return { ...prev, bio: obj.bio.trim() };
-		// 				}
-		// 			}
-		// 			return prev;
-		// 		});
-		// 	}
-		// });
 		setEdit('done');
 	}
 
@@ -153,7 +136,7 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 						enqueueSnackbar('Character count exceeds the limit (200 characters)', { variant: 'error' });
 					}
 				}}
-				maxLength={201} // Set the maxLength to enforce the character limit
+				maxLength={201}
 			></textarea>
 			<button type="submit" className="ok" />
 		</form>
@@ -194,7 +177,6 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 					id="new-avatar"
 					type="file"
 					name="new-avatar"
-					// accept="image/*"
 					accept=".png, .jpg, .jpeg"
 					onChange={autoUpload}
 				/>

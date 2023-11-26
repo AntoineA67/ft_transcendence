@@ -1,13 +1,6 @@
 import Stack from 'react-bootstrap/Stack';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-// import '../styles/index.css'
-
-import eyeopen from '../assets/eyeopen.svg';
-import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
-//import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
@@ -171,14 +164,6 @@ export function SettingMenu() {
 	const [success, setSuccess] = useState<string>('');
 	const [formSubmitted, setFormSubmitted] = useState(false);
 	const navigate = useNavigate();
-
-	// useEffect(() => {
-	// 	if (!profile) {
-	// 		socket.emit('MyProfile', profile, (res: profileType) => {
-	// 			setProfile(res);
-	// 		});
-	// 	}
-	// }, [profile]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
 		setErr('');

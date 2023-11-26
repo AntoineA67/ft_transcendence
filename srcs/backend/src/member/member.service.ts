@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Member, Prisma } from '@prisma/client';
 import { RoomService } from 'src/room/room.service';
 

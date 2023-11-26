@@ -37,7 +37,6 @@ export function AddOption({ profile, setProfile }: optionProp) {
 	}, [profile])
 
 	useEffect(() => {
-		// define socket listener
 		function handleReqAccept(newFriend: userType) {
 			if (newFriend.id == profile.id) {
 				setProfile((prev) => ({ ...prev!, sent: false, friend: true }))

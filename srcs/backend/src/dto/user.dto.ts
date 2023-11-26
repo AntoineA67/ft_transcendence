@@ -29,7 +29,7 @@ export class UserDto {
 	password?: string;
 
 	@IsString() 							bio?: string;
-											avatar: string | null; // ArrayBuffer
+											avatar: string | null;
 											status: 'ONLINE' | 'OFFLINE' | 'INGAME';
 											otpHash?: string;
 											activated2FA?: boolean;

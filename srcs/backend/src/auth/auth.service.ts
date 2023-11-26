@@ -56,7 +56,7 @@ export class AuthService {
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				if (error.code === 'P2002') {
-				throw new ForbiddenException('Credentials taken'); // is it needed ? just error instead of credentials taken 
+				throw new ForbiddenException('Credentials taken');
 			}
 		}
 		throw error;
@@ -64,28 +64,21 @@ export class AuthService {
 	  }
   
 	async signin(dto: SigninDto) {
-		// find user with email
 		const user = await this.usersService.getUserByEmail(dto.email);
-		// if user not found throw exception
 		if (!user)
 			throw new NotFoundException('User not found',);
-		// compare password
 		const passwordMatch = await argon.verify(user.hashPassword, dto.password,);
-		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		// let response;
 		if (!dto.token2FA && user.activated2FA) {
 			return {
 				_2fa: true
 			};
 		}
-		// if 2fa is activated and user have sent token
 		if (dto.token2FA && user.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(user, dto.token2FA);
 
 			if (!_2FAValid) {
-			  // If 2FA token is invalid, throw an exception
 			  throw new UnauthorizedException('2FA token invalid or required');
 			}
 		  }
@@ -102,14 +95,12 @@ export class AuthService {
 	  }
 
 	  async signin42(dto: Intra42Dto, res: Response, @Req() req) {
-		// if 2fa is activated and user have not sent token
 		let response;
 		if (!dto.token2FA && dto.activated2FA) {
 			response = {
 				id: dto.id,
 				_2fa: true
 			};
-		// if 2fa is activated and user have sent token
 		} else if (dto.token2FA && dto.activated2FA) {
 			const _2FAValid = await this.usersService.verify2FA(dto.user, dto.token2FA);
 			if (_2FAValid) {
@@ -117,13 +108,10 @@ export class AuthService {
 			} else {
 				res.status(HttpStatus.UNAUTHORIZED).json({ '_2fa': 'need token' });
 			}
-		// no 2fa
 		} else 
 			response = await this.signJwtTokens(dto.id, dto.email, dto.firstConnexion);
 			const data = { firstConnexion: "false"};
 			await this.usersService.updateUser(dto.id, data);
-			
-		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
 
@@ -192,9 +180,9 @@ export class AuthService {
 	}
 
 	async createRefreshToken(userId: number): Promise<string> {
-        const refreshToken = randomBytes(40).toString('hex'); // Generates a random 40-character hex string
+        const refreshToken = randomBytes(40).toString('hex');
         const expiration = new Date();
-        expiration.setDate(expiration.getDate() + 7); // Set refreshToken expiration date within 7 days
+        expiration.setDate(expiration.getDate() + 7);
         await this.prisma.refreshToken.create({
             data: {
                 token: refreshToken,
@@ -248,7 +236,7 @@ export class AuthService {
 			return true;
 	}
 
-	async signout(req: Request): Promise<{ message: string }> { // Invalidate the refresh token to make the signout more secure
+	async signout(req: Request): Promise<{ message: string }> {
 		const refreshToken = req.body.refreshToken;
 		if (!refreshToken) {
 			throw new UnauthorizedException("Refresh token is missing");

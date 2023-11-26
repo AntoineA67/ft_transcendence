@@ -1,6 +1,3 @@
-// import { useOutletContext, Link } from "react-router-dom";
-import { useState } from 'react';
-
 /**
  * @brief Validates the given password against certain criteria
  * 

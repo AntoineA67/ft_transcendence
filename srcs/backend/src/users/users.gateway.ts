@@ -19,9 +19,7 @@ export class UsersGateway
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
 		await this.usersService.updateUser(id, { status: 'ONLINE' });
-		// client join a room 
 		client.join(id.toString())
-		//emit to everyone
 		client.broadcast.emit('online', id);
 		this.usersService.updateUser(id, { status: 'ONLINE' })
 	}
@@ -29,9 +27,7 @@ export class UsersGateway
 	async handleDisconnect(client: Socket) {
 		const id: number = client.data.user.id;
 		await this.usersService.updateUser(id, { status: 'OFFLINE' });
-		// client leave a room 
 		client.leave(id.toString())
-		// emit to everyone
 		client.broadcast.emit('offline', id);
 		this.usersService.updateUser(id, { status: 'OFFLINE' })
 	}
@@ -67,15 +63,12 @@ export class UsersGateway
 		const fileCheck = async (file: Buffer) => {
 			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
 			const type = await fileTypeFromBuffer(file);
-			// if type undefined, or if file isn't image
 			if (type?.ext != 'jpg' && type?.ext != 'png') {
 				return (false);
 			}
-			// if file too big
 			if (file.byteLength >= 10485760) {
 				return (false);
 			}
-			// transform to base64
 			let base64 = file.toString('base64');
 			base64 = `data:image/jpeg;base64,${base64}`;
 			return (await this.usersService.updateUser(id, { avatar: base64 }));

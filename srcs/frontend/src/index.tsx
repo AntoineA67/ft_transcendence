@@ -25,17 +25,14 @@ import { DefaultErrorPage } from './pages/DefaultErrorPage';
 import { DefaultFriendPage } from './pages/DefaultFriendPage';
 import { DefaultSearchPage } from './pages/DefaultSearchPage';
 
-//bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/customButton.css';
 
-// css
 import './styles/index.css';
 import './styles/iconButton.css';
 import './styles/Chat.css';
 import './styles/Stat.css';
 
-// sentry
 import * as Sentry from "@sentry/react";
 
 import { CallBack42, Protected } from './utils/AuthProvider';
@@ -48,16 +45,13 @@ Sentry.init({
 	dsn: "https://01bf5be943109047867ae54d1eb150a7@o4506224690200576.ingest.sentry.io/4506224693542912",
 	integrations: [
 	  new Sentry.BrowserTracing({
-		// Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
 		tracePropagationTargets: ["localhost", /^https:\/\/pongpong\.me/],
 	  }),
 	  new Sentry.Replay(),
 	],
-	// Performance Monitoring
-	tracesSampleRate: 1.0, // Capture 100% of the transactions
-	// Session Replay
-	replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-	replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
+	tracesSampleRate: 1.0,
+	replaysSessionSampleRate: 0.1,
+	replaysOnErrorSampleRate: 1.0,
   });
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
@@ -95,7 +89,6 @@ async function loader(route: string, param?: string, refresh = false) {
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('firstConnexion');
 			return redirect("/login");
-			// throw new Response(res.statusText, { status: res.status })
 		}
 		const newTokens = await res.json();
 		localStorage.setItem('token', newTokens.token);
@@ -166,13 +159,6 @@ const router = createBrowserRouter(
 );
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-	// with strict mode, fetch fails. I don't know why
-	// <React.StrictMode>
 	<RouterProvider router={router} />
-	// </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

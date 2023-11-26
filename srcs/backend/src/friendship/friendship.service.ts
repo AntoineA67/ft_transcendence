@@ -4,9 +4,6 @@ import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
 import { UserDto } from 'src/dto/user.dto';
 
-// const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
-// export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
-
 @Injectable()
 export class FriendshipService {
 
@@ -18,8 +15,6 @@ export class FriendshipService {
 		private prisma: PrismaService
 	) { }
 
-	// return all friends of a user, id, nick, avatar, status
-	// minus those that block you or those that you block
 	async findAllFriends(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
@@ -38,9 +33,7 @@ export class FriendshipService {
 		})
 		let myFriends: UserDto[] = friendships.map((x) => (
 			(x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			// return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
 		))
-		// filter does not work with async
 		const promises = await Promise.all(myFriends.map(async (x) => (
 			await this.blockService.isBlocked(id, x.id) == false
 			&& await this.blockService.isBlocked(x.id, user.id) == false
@@ -49,8 +42,6 @@ export class FriendshipService {
 		return (myFriends)
 	}
 
-	// return all friends of a user, id, nick, avatar, status
-	// and those that block you or those that you block
 	async findAllFriendsIncludeBlocks(id: number): Promise<UserDto[]> {
 		const user = await this.usersService.getUserById(id);
 		if (!user) return ([]);
@@ -128,7 +119,6 @@ export class FriendshipService {
 		return (myFriends.length != 0 ? true : false);
 	}
 
-	// return all users that's not friends
 	async getOthers(id: number): Promise<UserDto[]> {
 		const all: UserDto[] = await this.usersService.getAllUsers();
 		const friends: UserDto[] = await this.findAllFriendsIncludeBlocks(id);

@@ -116,7 +116,6 @@ export class GamesService {
       }
     } else if (this.matches[userId]) {
       this.matches[userId].receiver.emit('cancelledMatchmake');
-      // delete this.matches[this.matches[userId]];
       delete this.matches[userId];
     }
     await this.prisma.user.update({ where: { id: client.data.user.id }, data: { status: 'ONLINE' } });
@@ -124,7 +123,6 @@ export class GamesService {
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
     try {
-      // Will catch if the client is not in a room
       this.rooms[this.clients[clientId]].handleKey(clientId, keysPressed)
     } catch (error) {
       return;
@@ -138,7 +136,6 @@ export class GamesService {
       if (!player1 || !player2) return;
       if (player1.data.user.id === player2.data.user.id) return;
 
-      // Create a new room for the clients
       const roomId = uuidv4();
 
       try {
@@ -158,8 +155,6 @@ export class GamesService {
   }
 
   public async matchmakePlayers(wss, player1: Socket, player2: Socket) {
-
-    // Create a new room for the clients
     const roomId = uuidv4();
 
     player1.join(roomId);

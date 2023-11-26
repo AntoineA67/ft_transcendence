@@ -1,5 +1,3 @@
-// friendship.gateway.ts
-
 import { WebSocketGateway, ConnectedSocket } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { FriendshipService } from './friendship.service';
@@ -15,13 +13,11 @@ export class FriendshipGateway {
 	private logger = new Logger('FriendshipGateway')
 
 	handleConnection(client: Socket) {
-		// Gestion de la connexion du client
 		const id: number = client.data.user.id;
 		client.join(id.toString());
 	}
 
 	handleDisconnect(client: Socket) {
-		// Gestion de la déconnexion du client
 		const id: number = client.data.user.id;
 		client.leave(id.toString());
 	}

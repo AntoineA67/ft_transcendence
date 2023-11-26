@@ -5,11 +5,11 @@ export class ProfileDto {
 	id: number;
 	username: string;
 	bio: string;
-	avatar: string | null; // ArrayBuffer
+	avatar: string | null;
 	status: 'ONLINE' | 'INGAME' | 'OFFLINE';
 	gameHistory: HistoryDto[];
 	achieve: AchieveDto | null;
-	friend: boolean | null;   // null when the profile is user himself
+	friend: boolean | null;
 	sent: boolean | null;
 	block: boolean | null;
 	blocked: boolean | null;

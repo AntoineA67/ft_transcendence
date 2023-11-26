@@ -18,11 +18,11 @@ export class BlockGateway {
 	private logger = new Logger('BlockGateway')
 
 	handleConnection(client: Socket) {
-		// Gestion de la connexion du client
+
 	}
 
 	handleDisconnect(client: Socket) {
-		// Gestion de la déconnexion du client
+
 	}
 
 	@SubscribeMessage('findAllBlocks')
@@ -43,7 +43,6 @@ export class BlockGateway {
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const result = await this.blockService.createBlock(id, otherId); 
-		// if fails, no emit
 		if (!result) return (result);
 		this.server.to(id.toString()).emit('block', otherUser);
 		this.server.to(otherId.toString()).emit('blocked', user);
@@ -63,7 +62,6 @@ export class BlockGateway {
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
 		const result = await this.blockService.unBlock(id, otherId);
 		
-		// if fails, no emit
 		if (!result) return (result);
 		this.server.to(id.toString()).emit('unblock', otherUser);
 		this.server.to(otherId.toString()).emit('unblocked', user);

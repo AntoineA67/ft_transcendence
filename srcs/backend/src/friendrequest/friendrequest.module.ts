@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { FriendRequestService } from './friendrequest.service';
-import { FriendRequestGateway } from './friendrequest.gateway'; // Importez la passerelle
+import { FriendRequestGateway } from './friendrequest.gateway';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { UsersModule } from 'src/users/users.module';
 import { BlockModule } from 'src/block/block.module';

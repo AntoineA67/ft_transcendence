@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'utiliser le chemin correct
+import { PrismaService } from 'src/prisma/prisma.service';
 import { GameSettings, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -22,7 +22,6 @@ export class GameSettingsService {
           userId,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return gameSettings;
   }
@@ -75,7 +74,6 @@ export class GameSettingsService {
           paddleColor: color,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return this.prisma.gameSettings.update({
       where: { userId },
@@ -98,7 +96,6 @@ export class GameSettingsService {
           graphicEffects: checked,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return this.prisma.gameSettings.update({
       where: { userId },
