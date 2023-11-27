@@ -185,6 +185,10 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		}	
 		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
+				enqueueSnackbar("Bad photo format !", {
+					variant: 'error',
+					autoHideDuration: 3000,
+				})
 				return;
 			}
 			socket.emit('myAvatar', (avatar: string) => {
