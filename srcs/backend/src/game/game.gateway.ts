@@ -42,8 +42,12 @@ export class GameGateway
 
     @SubscribeMessage('match')
     async handleMatch(socket: Socket): Promise<void> {
-        if (!this.gamesService.isInQueue(socket.data.user.id)) {
-            this.gamesService.addToQueue(socket, this.wss);
+        try {
+            await this.gamesService.addToQueue(socket, this.wss).catch(() => {
+                socket.emit('cancelledMatchmake');
+            });
+        } catch {
+            socket.emit('cancelledMatchmake');
         }
     }
     @SubscribeMessage('matchAgainst')
