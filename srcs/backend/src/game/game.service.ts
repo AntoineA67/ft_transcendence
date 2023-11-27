@@ -42,7 +42,6 @@ export class GamesService {
   }
 
   async matchAgainst(socket: Socket, wss: Server, otherIdDTO: { id: string }) {
-
     const otherId = otherIdDTO.id;
     let otherIdNumber;
     try {
@@ -50,7 +49,7 @@ export class GamesService {
       if (otherIdNumber === socket.data.user.id) throw new Error('cannot matchmake against yourself');
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
 
-      if (!otherUser) throw new Error('Other user not exists');
+      if (!otherUser || this.isInQueue(otherIdNumber)) throw new Error('Other user not exists');
       await this.checkUserInGame(socket.data.user.id);
 
     } catch (error) {
