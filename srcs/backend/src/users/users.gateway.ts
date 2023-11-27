@@ -124,14 +124,8 @@ export class UsersGateway
 
 	@SubscribeMessage('ChangePassword')
 	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any): Promise<boolean> {
-		if (typeof data?.oldPassowrd != 'string' || typeof data?.newPassword != 'string') {
+		if (typeof data?.oldPassword != 'string' || typeof data?.newPassword != 'string') {
 			return (false);
-		}
-		if (data.oldPassword.length > 100 || data.newPassword.length > 100) {
-			return (false);
-		}
-		if (data.oldPassowrd === '' || data.newPassword === '') {
-			return (false)
 		}
 		const passwordRespond = await this.usersService.changePassword(
 			client.data.user.id, data.oldPassword, data.newPassword
