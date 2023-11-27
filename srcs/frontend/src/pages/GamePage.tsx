@@ -90,7 +90,7 @@ export default function GamePage() {
 		}
 		if (handPos.current === -1) return;
 		for (const client of Object.keys(newClients.clients)) {
-			if (client === id.current) {
+			if (client == id.current) {
 				const pos = 100 - handPos.current * 100;
 				const currentPos = newClients.clients[id.current.toString()].y;
 				if (indexTime++ % 5 !== 0) return;
@@ -270,8 +270,8 @@ export default function GamePage() {
 						{Object.keys(clients)
 							.map((client) => {
 								const { y, dir, score } = clients[client]
-								const pos = [client === id.current ? -97.5 : 97.5, y, 0]
-								const myPaddleColor = client === id.current ? paddleColor : '#fff';
+								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
+								const myPaddleColor = client == id.current ? paddleColor : '#fff';
 								return (
 									<UserWrapper
 										key={client}
