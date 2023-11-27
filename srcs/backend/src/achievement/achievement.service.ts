@@ -13,14 +13,20 @@ export class AchievementService {
 
 	// the id stands for userId, NOT the id of achievement
 	async getAchieveById(id: number): Promise<AchieveDto> {
-		const achieve = await this.prisma.achievement.upsert({
-			where: { userId: id },
-			create: { user: {connect: {id} }}, 
-			update: {}
-		});
-		delete achieve.id;
-		delete achieve.userId;
-		return {userId: id,  ...achieve};
+
+		const achieve = await this.prisma.achievement.findUnique({
+			where: {userId: id}
+		})
+		if (achieve) {
+			delete achieve.id;
+			return achieve;
+		}		
+		const new_achieve = await this.prisma.achievement.create({
+			data: {userId: id}
+		})
+		delete new_achieve.id;
+		return new_achieve;
+		
 	}
 	
 	// the id stands for userId, NOT the id of achievement
