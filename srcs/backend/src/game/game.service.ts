@@ -51,7 +51,7 @@ export class GamesService {
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
 
       if (!otherUser) throw new Error('Other user not exists');
-      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const user = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
       if (this.isInQueue(socket.data.user.id) || user.status != 'ONLINE') throw new Error('Already in game');
       await this.checkUserInGame(socket.data.user.id);
 
