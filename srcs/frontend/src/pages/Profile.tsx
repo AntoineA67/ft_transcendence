@@ -170,12 +170,19 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		const file = input.files ? input.files[0] : null;
 		if (!file) return;
 		if (file.size >= 1048576) {
-			enqueueSnackbar("Oups, la taille limite de la photo est d'1 MB !", {
+			enqueueSnackbar("Oops, the photo size limit is 1 MB!", {
 				variant: 'error',
 				autoHideDuration: 3000,
 			})
 			return;
 		}
+		if (!/\.(png|jpg)$/i.test(file.name)) {
+			enqueueSnackbar("Please upload a .png or .jpg file.", {
+				variant: 'error',
+				autoHideDuration: 3000,
+			})
+			return;
+		}	
 		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
 				return;
