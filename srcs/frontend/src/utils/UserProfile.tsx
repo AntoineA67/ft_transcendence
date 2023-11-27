@@ -3,21 +3,19 @@
 import { profileType } from "../../types/user";
 import { Avatar } from "./Avatar";
 import Stat from "../pages/Stat";
-import { Navigate, useLocation, useParams, useLoaderData } from "react-router-dom";
+import { useParams, useLoaderData } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { socket } from "./socket";
 import { Options } from "./Options";
 import { GoUp } from './GoUp'
 
 export function UserProfile() {
 	const { userNick } = useParams();
-	const location = useLocation();
 	const loaderData = useLoaderData() as profileType;
 	const [profile, setProfile] = useState<profileType>(loaderData);
 
 	useEffect(() => {
 		setProfile(loaderData);
-	}, [userNick])
+	}, [userNick, loaderData])
 
 	return (
 		<>
@@ -47,7 +45,7 @@ export function UserProfile() {
 						</p>
 					</div>
 				</div>
-				<Options profile={{...profile}} setProfile={setProfile} />
+				<Options profile={{ ...profile }} setProfile={setProfile} />
 				<Stat gameHistory={profile.gameHistory.map((a) => ({ ...a }))} achieve={{ ...(profile.achieve) }} />
 
 			</div>

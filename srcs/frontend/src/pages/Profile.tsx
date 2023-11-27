@@ -16,26 +16,25 @@ type textProp = {
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 text-center";
-	const [err, setErr] = useState('');
 
 	return (
 		<div className='w-75'>
-			
-				{type == 'nick' ? (
-					<h5 className={`${classname} white-text`}>
-						{profile.username}
-						<span>
-							<button className="edit-pen" onClick={() => setEdit(type)} />
-						</span>
-					</h5>
-				) : (
-					<p className={`${classname} white-text`}>
-						{profile.bio}
-						<span>
-							<button className="edit-pen" onClick={() => setEdit(type)} />
-						</span>
-					</p>
-				)}
+
+			{type === 'nick' ? (
+				<h5 className={`${classname} white-text`}>
+					{profile.username}
+					<span>
+						<button className="edit-pen" onClick={() => setEdit(type)} />
+					</span>
+				</h5>
+			) : (
+				<p className={`${classname} white-text`}>
+					{profile.bio}
+					<span>
+						<button className="edit-pen" onClick={() => setEdit(type)} />
+					</span>
+				</p>
+			)}
 		</div>
 	);
 }
@@ -84,10 +83,10 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 		if (type === 'bio' && !checkBio(mod, enqueueSnackbar)) {
 			return;
 		}
-		
-		if (type == 'nick') {
+
+		if (type === 'nick') {
 			socket.emit('UpdateUsername', mod, (success: boolean) => {
-				if (!success) return ;
+				if (!success) return;
 				setProfile((prev) => {
 					if (prev) {
 						if ('username' in obj && typeof obj.username === 'string') {
@@ -102,7 +101,7 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 			})
 		} else {
 			socket.emit('UpdateBio', mod.trim(), (success: boolean) => {
-				if (!success) return ;
+				if (!success) return;
 				setProfile((prev) => {
 					if (prev) {
 						if ('username' in obj && typeof obj.username === 'string') {
@@ -182,7 +181,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 				autoHideDuration: 3000,
 			})
 			return;
-		}	
+		}
 		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
 				enqueueSnackbar("Bad photo format !", {
@@ -213,7 +212,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		</form>
 	);
 }
-  
+
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
@@ -233,13 +232,13 @@ function Profile() {
 				</div>
 				<NewAvatar setProfile={setProfile} />
 
-				{(edit == 'nick'
+				{(edit === 'nick'
 				) ? (
 					<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (
 					<Text type='nick' profile={profile} setEdit={setEdit} />)}
 
-				{(edit == 'bio'
+				{(edit === 'bio'
 				) ? (
 					<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (

@@ -1,6 +1,6 @@
 import { profileType, userType } from "../../types/user";
 import { useEffect, useState } from "react";
-import { socket, friendsSocket, chatsSocket } from "./socket";
+import { friendsSocket, chatsSocket } from "./socket";
 import { useNavigate } from "react-router-dom";
 import { handlePlayClickinMess } from "../pages/Chat";
 
@@ -39,12 +39,12 @@ export function AddOption({ profile, setProfile }: optionProp) {
 	useEffect(() => {
 		// define socket listener
 		function handleReqAccept(newFriend: userType) {
-			if (newFriend.id == profile.id) {
+			if (newFriend.id === profile.id) {
 				setProfile((prev) => ({ ...prev!, sent: false, friend: true }))
 			}
 		}
 		function handleSendFriendReq(recver: userType) {
-			if (recver.id == profile.id) {
+			if (recver.id === profile.id) {
 				setProfile((prev) => ({ ...prev!, sent: true }))
 			}
 		}
@@ -59,7 +59,7 @@ export function AddOption({ profile, setProfile }: optionProp) {
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-		if (text == 'Add') {
+		if (text === 'Add') {
 			friendsSocket.emit('sendReq', profile.username);
 		}
 	}
@@ -81,11 +81,11 @@ export function BlockOption({ profile, setProfile }: optionProp) {
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-		if (text == 'Block') {
+		if (text === 'Block') {
 			friendsSocket.emit('block', profile.id);
 			setProfile((prev) => ({ ...prev!, block: true }))
 		}
-		if (text == 'Unblock') {
+		if (text === 'Unblock') {
 			friendsSocket.emit('unblock', profile.id);
 			setProfile((prev) => ({ ...prev!, block: false }))
 		}
@@ -135,7 +135,7 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-		if (text == 'Chat') {
+		if (text === 'Chat') {
 			chatsSocket.emit('createPrivateRoom', profile.username, (response: number) => {
 				if (response > 0) {
 					navigate(`/chat/${response}`);
@@ -187,7 +187,7 @@ export function PongOption({ profile, setProfile }: optionProp) {
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
-		if (text == 'Pong') {
+		if (text === 'Pong') {
 			handlePlayClickinMess(profile.id, profile.username);
 		}
 	}

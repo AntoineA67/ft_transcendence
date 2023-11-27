@@ -104,10 +104,6 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 			});
 		}
 	};
-	// Check if webcam access is supported.
-	function hasGetUserMedia() {
-		return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-	}
 	// Enable the live webcam view and start detection.
 	function enableCam() {
 		if (!handLandmarker.current) {

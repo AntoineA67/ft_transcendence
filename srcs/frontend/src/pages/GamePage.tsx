@@ -24,11 +24,10 @@ import { Timer } from "../components/game/Timer"
 import { CameraFOVHandler } from "../components/game/CameraFOVHandler"
 import { GameSummaryModal } from "../components/game/GameSummaryModal"
 import { GameWaitingRoom } from "../components/game/GameWaitingRoom"
-import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
-import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { enqueueSnackbar } from "notistack";
 import { useNavigate } from 'react-router-dom';
 
 export enum GameStatus {
@@ -91,7 +90,7 @@ export default function GamePage() {
 		}
 		if (handPos.current === -1) return;
 		for (const client of Object.keys(newClients.clients)) {
-			if (client == id.current) {
+			if (client === id.current) {
 				const pos = 100 - handPos.current * 100;
 				const currentPos = newClients.clients[id.current.toString()].y;
 				if (indexTime++ % 5 !== 0) return;
@@ -270,9 +269,9 @@ export default function GamePage() {
 						<Timer time={time} />
 						{Object.keys(clients)
 							.map((client) => {
-								const { y, dir, score, xDistance } = clients[client]
-								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
-								const myPaddleColor = client == id.current ? paddleColor : '#fff';
+								const { y, dir, score } = clients[client]
+								const pos = [client === id.current ? -97.5 : 97.5, y, 0]
+								const myPaddleColor = client === id.current ? paddleColor : '#fff';
 								return (
 									<UserWrapper
 										key={client}

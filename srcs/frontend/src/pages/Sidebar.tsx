@@ -100,8 +100,8 @@ export default function Sidebar() {
 			</SnackbarProvider>
 			{/* <button className='btn btn-primary' onClick={() => (setPopup('pong'))}>Pong</button>
 			<button className='btn btn-primary'  onClick={() => (setPopup('ponged'))}>Ponged</button> */}
-			{popup == 'pong' && <PongPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
-			{popup == 'ponged' && <PongedPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
+			{popup === 'pong' && <PongPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
+			{popup === 'ponged' && <PongedPopup nick={popupNick} popupId={popupId} setPopup={setPopup} />}
 		</>
 	)
 }
