@@ -37,20 +37,12 @@ export class GamesService {
   async checkUserInGame(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User does not exist');
-    console.log(user.status, typeof user.status, user.status == 'ONLINE')
     if (this.isInQueue(userId) || user.status != 'ONLINE') throw new Error('Already in game');
     if (this.matches[userId.toString()]) throw new Error('Already in private game');
-    console.log('MATCHES')
-    console.log(this.matches, typeof Object.keys(this.matches)[0])
-    console.log('QUEUE')
-    console.log(this.matchmakingQueue)
-    console.log('ONLINES')
-    console.log(await  this.prisma.user.findMany({where: {status: 'ONLINE'}}))
   }
 
   async matchAgainst(socket: Socket, wss: Server, otherIdDTO: { id: string }) {
 
-    console.log("SENDER", socket.data.user.id)
     const otherId = otherIdDTO.id;
     let otherIdNumber;
     try {
@@ -83,12 +75,16 @@ export class GamesService {
           return;
         }
       }
-      console.log("iefefwfwf")
       for (let s of sockets) {
         if (s.data.user.id === otherIdNumber) {
+          const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
+          if (otherUser.status != 'ONLINE') {
+            socket.emit('cancelledMatchmake', { reason: 'Other user already in game' });
+            await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
+            return;
+          }
           const username = (await this.prisma.user.findUnique({ where: { id: socket.data.user.id }, select: { username: true } })).username;
           await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'INGAME' } });
-          console.log(await this.prisma.user.findUnique({ where: { id: socket.data.user.id }}))
           s.emit('ponged', { nick: username, id: socket.data.user.id })
           this.matches[socket.data.user.id] = { receiverId: otherId, sender: socket, receiver: s };
           break;
