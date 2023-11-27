@@ -22,7 +22,6 @@ export class GameSettingsService {
           userId,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return gameSettings;
   }
@@ -75,7 +74,6 @@ export class GameSettingsService {
           paddleColor: color,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return this.prisma.gameSettings.update({
       where: { userId },
@@ -98,7 +96,6 @@ export class GameSettingsService {
           graphicEffects: checked,
         },
       })
-      // throw new NotFoundException('GameSettings item not found');
     }
     return this.prisma.gameSettings.update({
       where: { userId },

@@ -52,7 +52,7 @@ export class GameGateway
     }
     @SubscribeMessage('matchAgainst')
     async handleMatchAgainst(socket: Socket, payload: { id: string }): Promise<void> {
-        this.gamesService.matchAgainst(socket, this.wss, payload);
+        await this.gamesService.matchAgainst(socket, this.wss, payload)
     }
     @SubscribeMessage('cancelMatchmake')
     async handleCancelMatchmake(socket: Socket, payload: string): Promise<void> {
