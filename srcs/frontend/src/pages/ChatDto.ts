@@ -1,4 +1,4 @@
-import { EnqueueSnackbar, SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { EnqueueSnackbar } from "notistack";
 
 export type Message = {
 	id: number,

@@ -4,10 +4,9 @@ import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { set } from 'lodash-es';
 
 export function CallBack42() {
-	const [status, setStatus] = useState<'loading' | 'done' |'2fa'>('loading');
+	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
 	let [searchParams] = useSearchParams();
 	const code = searchParams.get('code') || null;
 	const _2fa = JSON.parse(localStorage.getItem('_2fa') || '{}');
@@ -103,9 +102,9 @@ export function Protected() {
 	return (
 		<>
 			{/* <Outlet /> */}
-			{status == 'loading' && <p className='white-text'> loading ... </p>}
-			{status == 'connect' && <Outlet />}
-			{status == 'error' && <Navigate to="/login" replace />}
+			{status === 'loading' && <p className='white-text'> loading ... </p>}
+			{status === 'connect' && <Outlet />}
+			{status === 'error' && <Navigate to="/login" replace />}
 		</>
 	);
 }

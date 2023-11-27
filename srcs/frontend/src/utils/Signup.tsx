@@ -77,6 +77,7 @@ export function Signup() {
 									id="eye"
 									src={eyeopen}
 									onClick={togglePassword}
+									alt="eye"
 									className="togglePassword" />
 							</div>
 						</div>

@@ -1,22 +1,12 @@
 import Stack from 'react-bootstrap/Stack';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-// import '../styles/index.css'
-
-import eyeopen from '../assets/eyeopen.svg';
-import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
-//import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
 import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
-import { Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { set } from 'lodash-es';
-import { checkPassword } from './ChatDto';
 import { enqueueSnackbar } from 'notistack';
 
 export function Title({ title }: { title: string }) {

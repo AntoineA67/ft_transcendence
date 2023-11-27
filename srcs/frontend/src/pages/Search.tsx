@@ -1,48 +1,43 @@
-import { Link, Outlet, useLocation, useLoaderData } from "react-router-dom";
-import Form from 'react-bootstrap/Form';
-import { Button } from 'react-bootstrap';
+import { Outlet, useLocation, useLoaderData } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { userType } from '../../types/user';
-import { socket } from '../utils/socket';
 import { UserItem } from '../utils/UserItem';
-// import '../styles/index.css';
 
 export function SearchBar() {
 	const users = useLoaderData() as userType[];
 	const [search, setSearch] = useState('');
-	const [list, setList] = useState(users);
 	const [temp, setTemp] = useState(users);
 
 	useEffect(() => {
 		const myFilter = (item: userType): boolean => {
 			return (item.username.toLowerCase().includes(search.toLowerCase()))
 		}
-		setTemp(list.filter(myFilter));
+		setTemp(temp.filter(myFilter));
 	}, [search])
-	
+
 	const myMap = (item: userType) => {
 		return (
 			<li key={item.id} className='p-0 m-0 w-100'>
-				<UserItem 
-					user={{...item}}
-					linkTo={`${item.username}`}/>
+				<UserItem
+					user={{ ...item }}
+					linkTo={`${item.username}`} />
 			</li>
 		)
 	}
-	
+
 	return (
 		<div className='d-flex flex-column align-items-center p-0 m-0 w-100' >
 			<div className='py-2 px-3 w-100'>
-				<input 
-					value={search} 
-					onChange={(e) => {setSearch(e.target.value)}}
+				<input
+					value={search}
+					onChange={(e) => { setSearch(e.target.value) }}
 					placeholder='Search by username'
 					autoFocus
 				/>
 			</div>
 			{!search && <h5 className='p-3 grey-text'>Type something</h5>}
-			{(search && temp.length == 0) && <h5 className='p-3 grey-text'>No result</h5>}
-			{(search && temp.length > 0) && 
+			{(search && temp.length === 0) && <h5 className='p-3 grey-text'>No result</h5>}
+			{(search && temp.length > 0) &&
 				<ul className='p-0 m-0 w-100 pb-5 mb-5'>
 					{temp.map(myMap)}
 				</ul>
@@ -62,9 +57,9 @@ export function SearchBar() {
 
 export function Search() {
 	const location = useLocation();
-	const classname1 = location.pathname == '/search' ? '' : 'd-none d-sm-flex';
-	const classname2 = location.pathname == '/search' ? 'd-none d-sm-flex' : '';
-	
+	const classname1 = location.pathname === '/search' ? '' : 'd-none d-sm-flex';
+	const classname2 = location.pathname === '/search' ? 'd-none d-sm-flex' : '';
+
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >
@@ -79,4 +74,3 @@ export function Search() {
 	);
 }
 
-	
