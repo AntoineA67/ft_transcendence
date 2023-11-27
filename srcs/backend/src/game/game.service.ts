@@ -93,7 +93,7 @@ export class GamesService {
 
   isInQueue(userid: string): boolean {
     return this.matchmakingQueue.some((client) =>
-      client.data.user.id === userid
+      client.data.user.id == userid
     )
   }
 
