@@ -1,4 +1,4 @@
-import { Game, Prisma } from '@prisma/client';
+import { Game, OnlineStatus, Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Server, Socket } from 'socket.io';
@@ -40,11 +40,11 @@ export class GamesService {
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
       const senderUser = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
 
-      if (otherUser === null) throw new Error('Other user not exists');
-      if (otherUser.status !== 'ONLINE') throw new Error('user not online');
+      if (!otherUser) throw new Error('Other user not exists');
+      if (otherUser.status !== OnlineStatus.ONLINE) throw new Error('user not online');
 
-      if (senderUser === null) throw new Error('Sender user not exists');
-      if (senderUser.status !== 'ONLINE') throw new Error('user not online');
+      if (!senderUser) throw new Error('Sender user not exists');
+      if (senderUser.status !== OnlineStatus.ONLINE) throw new Error('user not online');
 
       if (this.matches[socket.data.user.id]) throw new Error('already in game');
       if (this.isInQueue(otherId) || this.isInQueue(socket.data.user.id.toString())) throw new Error('user already in queue');
@@ -81,6 +81,7 @@ export class GamesService {
   }
 
   addToQueue(socket: Socket, wss: Server) {
+    const user = 
     if (this.isInQueue(socket.data.user.id)) return;
     console.log(socket.data.user.id);
 
