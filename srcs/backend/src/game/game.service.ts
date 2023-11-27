@@ -47,9 +47,10 @@ export class GamesService {
     try {
       otherIdNumber = parseInt(otherId);
       if (otherIdNumber === socket.data.user.id) throw new Error('cannot matchmake against yourself');
+      if (this.isInQueue(otherIdNumber)) throw new Error('other user already in queue');
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
 
-      if (!otherUser || this.isInQueue(otherIdNumber)) throw new Error('Other user not exists');
+      if (!otherUser) throw new Error('Other user not exists');
       await this.checkUserInGame(socket.data.user.id);
 
     } catch (error) {
