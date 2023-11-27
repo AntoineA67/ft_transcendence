@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/plugin-transform-class-properties": "^7",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
     "@fortawesome/free-brands-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
@@ -10,10 +11,12 @@
     "@mediapipe/control_utils": "^0.6.1675466023",
     "@mediapipe/tasks-vision": "^0.10.7",
     "@pmndrs/branding": "^0.0.8",
+    "@popperjs/core": "^2.11.8",
     "@react-three/drei": "^9.79.4",
     "@react-three/fiber": "^8.13.5",
     "@react-three/postprocessing": "^2.15.1",
     "@sentry/react": "^7.80.1",
+    "@testing-library/react": "^14",
     "@tweenjs/tween.js": "^21.0.0",
     "@types/dat.gui": "^0.7.10",
     "@types/lodash-es": "^4.17.8",
@@ -45,9 +48,7 @@
     "three": "^0.158.0",
     "typescript": "^4",
     "valtio": "^1.11.0",
-    "web-vitals": "^3",
-    "@testing-library/react": "^14",
-    "@babel/plugin-proposal-private-property-in-object": "^7"
+    "web-vitals": "^3"
   },
   "scripts": {
     "start": "cross-env PORT=8000 react-scripts start",
