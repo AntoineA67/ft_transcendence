@@ -8,6 +8,7 @@ import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
 import axios from 'axios';
 import { enqueueSnackbar } from 'notistack';
+import { checkPassword } from './ChatDto';
 
 export function Title({ title }: { title: string }) {
 	return (
