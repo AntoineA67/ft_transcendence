@@ -30,7 +30,10 @@ export function SearchBar() {
 			<div className='py-2 px-3 w-100'>
 				<input
 					value={search}
-					onChange={(e) => { setSearch(e.target.value) }}
+					onChange={(e) => {
+						if (e.target.value.length < 20)
+							setSearch(e.target.value)
+					}}
 					placeholder='Search by username'
 					autoFocus
 				/>
