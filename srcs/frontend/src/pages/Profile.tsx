@@ -183,7 +183,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 			})
 			return;
 		}	
-		socket.emit('newAvatar', file, file.name, (success: boolean) => {
+		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
 				return;
 			}

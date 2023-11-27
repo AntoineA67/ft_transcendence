@@ -61,15 +61,13 @@ export class UsersGateway
 	
 
 	@SubscribeMessage('newAvatar')
-	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() data: { file: Buffer, fileName: string }) {
+	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
 		const id: number = client.data.user.id;
 
-		const fileCheck = async (file: Buffer, fileName: string) => {
-			console.log(fileName);
+		const fileCheck = async (file: Buffer) => {
 			const { fileTypeFromBuffer } = await (eval('import("file-type")') as Promise<typeof import('file-type')>);
 			const type = await fileTypeFromBuffer(file);
 			// if type undefined, or if file isn't image
-			console.log(type);
 			if (type?.ext != 'jpg' && type?.ext != 'png') {
 				return (false);
 			}
@@ -82,8 +80,7 @@ export class UsersGateway
 			base64 = `data:image/jpeg;base64,${base64}`;
 			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
-	
-		return (await fileCheck(data.file, data.fileName));
+		return (await fileCheck(file));
 	}
 
 	@SubscribeMessage('Create2FA')
