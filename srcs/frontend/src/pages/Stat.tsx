@@ -104,7 +104,6 @@ function PieChart({ win, lose, draw }: pieProp) {
 		let total: number = win + lose;
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
-		// if total == 0 , draw a grey circle
 		if (total === 0) {
 			ctx.beginPath();
 			ctx.strokeStyle = 'grey';
@@ -118,7 +117,6 @@ function PieChart({ win, lose, draw }: pieProp) {
 		const cyan = '#34fafa';
 		const winDegree = (2 * Math.PI) * (win / total);
 		const loseDegree = (2 * Math.PI) * (lose / total);
-		// const drawDegree = (2 * Math.PI) * (draw / total);
 		const tran = winDegree < loseDegree ? winDegree / 2 : loseDegree / 2;
 		const degree = [loseDegree - tran, tran, winDegree - tran, tran];
 		const color = [cyan, cyan, magenta, magenta];

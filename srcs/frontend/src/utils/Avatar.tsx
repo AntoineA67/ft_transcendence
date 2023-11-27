@@ -51,8 +51,6 @@ export function Avatar({ size, user }: avatarProp) {
 			setAvatar(DefaultAvatar);
 		} else {
 			setAvatar(user.avatar);
-			// var base64 = user.avatar;
-			// setAvatar(`data:image/jpeg;base64,${base64}`)
 		}
 	}, [user])
 
