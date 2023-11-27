@@ -80,9 +80,10 @@ export class GamesService {
     }
   }
 
-  addToQueue(socket: Socket, wss: Server) {
-    const user = 
-    if (this.isInQueue(socket.data.user.id)) return;
+  async addToQueue(socket: Socket, wss: Server) {
+    const user = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
+    if (this.isInQueue(socket.data.user.id) || user.status !== OnlineStatus.ONLINE) return;
+    if (this.matches[socket.data.user.id]) return;
     console.log(socket.data.user.id);
 
 
