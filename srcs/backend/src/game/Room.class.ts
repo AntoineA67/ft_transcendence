@@ -6,11 +6,13 @@ import { GamesService } from './game.service';
 import { PlayerService } from 'src/player/player.service';
 
 import { Result } from '@prisma/client';
+import { AchievementService } from 'src/achievement/achievement.service';
 
 export default class Room {
 	private prisma: PrismaService = new PrismaService();
 	private gameService: GamesService = new GamesService(this.prisma);
 	private playerService: PlayerService = new PlayerService(this.prisma);
+	private achieveService: AchievementService = new AchievementService(this.prisma, this.playerService);
 	private players: { [id: string]: Player } = {};
 	private ball: Ball | null = null;
 	private interval: NodeJS.Timeout | null = null;
@@ -129,13 +131,15 @@ export default class Room {
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
 		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
-		const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
-		if (wins.length == 1) {
-			await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
-		} else if (wins.length == 10) {
-			await this.prisma.achievement.update({ where: { userId: winner }, data: { win10Games: true } });
-		} else if (wins.length == 100) {
-			await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
-		}
+		// const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
+		// if (wins.length == 1) {
+		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
+		// } else if (wins.length == 10) {
+		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { win10Games: true } });
+		// } else if (wins.length == 100) {
+		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
+		// }
+		this.achieveService.updateAchievement(winner)
+		this.achieveService.updateAchievement(loser)
 	}
 }
