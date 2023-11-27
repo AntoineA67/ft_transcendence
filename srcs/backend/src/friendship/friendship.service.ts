@@ -4,9 +4,6 @@ import { UsersService } from 'src/users/users.service';
 import { BlockService } from 'src/block/block.service';
 import { UserDto } from 'src/dto/user.dto';
 
-// const friendship = Prisma.validator<Prisma.FriendshipDefaultArgs>()({})
-// export type Friendship = Prisma.FriendshipGetPayload<typeof friendship>
-
 @Injectable()
 export class FriendshipService {
 
@@ -38,9 +35,7 @@ export class FriendshipService {
 		})
 		let myFriends: UserDto[] = friendships.map((x) => (
 			(x.friends[0].username != user.username) ? (x.friends[0]) : (x.friends[1])
-			// return ({ ...ret, avatar: this.usersService.bufferToBase64(ret.avatar) })
 		))
-		// filter does not work with async
 		const promises = await Promise.all(myFriends.map(async (x) => (
 			await this.blockService.isBlocked(id, x.id) == false
 			&& await this.blockService.isBlocked(x.id, user.id) == false

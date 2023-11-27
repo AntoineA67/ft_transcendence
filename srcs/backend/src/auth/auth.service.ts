@@ -74,7 +74,6 @@ export class AuthService {
 		// if password wrong throw exception
 		if (!passwordMatch)
 			throw new ForbiddenException('Incorrect password',);
-		// let response;
 		if (!dto.token2FA && user.activated2FA) {
 			return {
 				_2fa: true
@@ -123,7 +122,6 @@ export class AuthService {
 			const data = { firstConnexion: "false"};
 			await this.usersService.updateUser(dto.id, data);
 			
-		// return response;
 		res.status(HttpStatus.OK).json(response);
 	}
 

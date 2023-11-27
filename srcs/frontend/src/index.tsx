@@ -94,7 +94,6 @@ async function loader(route: string, param?: string, refresh = false) {
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('firstConnexion');
 			return redirect("/login");
-			// throw new Response(res.statusText, { status: res.status })
 		}
 		const newTokens = await res.json();
 		localStorage.setItem('token', newTokens.token);
@@ -165,13 +164,7 @@ const router = createBrowserRouter(
 );
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-	// with strict mode, fetch fails. I don't know why
-	// <React.StrictMode>
 	<RouterProvider router={router} />
-	// </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

@@ -29,13 +29,7 @@ export default function Sidebar() {
 	}, [location])
 
 	useEffect(() => {
-		// game start can be a separate event ? 
-		function handleGame(redirect: string) {
-			// redirect ?
-		}
 
-		// I expect that server emit an event as response, 
-		// so the function can be triggered
 		function handlePong(nick: string) {
 			setPopupNick(nick);
 			setPopup('ponged')
@@ -49,12 +43,10 @@ export default function Sidebar() {
 
 		gamesSocket.on('ponged', handlePonged);
 		gamesSocket.on('pong', handlePong);
-		gamesSocket.on('game', handleGame);
 
 		return (() => {
 			gamesSocket.off('ponged', handlePonged);
 			gamesSocket.off('pong', handlePong);
-			gamesSocket.off('game', handleGame);
 		})
 
 	}, [])

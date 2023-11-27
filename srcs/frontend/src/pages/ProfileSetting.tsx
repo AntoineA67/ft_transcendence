@@ -163,13 +163,6 @@ export function SettingMenu() {
 	const [formSubmitted, setFormSubmitted] = useState(false);
 	const navigate = useNavigate();
 
-	// useEffect(() => {
-	// 	if (!profile) {
-	// 		socket.emit('MyProfile', profile, (res: profileType) => {
-	// 			setProfile(res);
-	// 		});
-	// 	}
-	// }, [profile]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
 		setErr('');
