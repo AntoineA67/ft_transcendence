@@ -22,7 +22,9 @@ export class AchievementService {
 			return achieve;
 		}		
 		const new_achieve = await this.prisma.achievement.create({
-			data: {userId: id}
+			data: {
+				user: {connect: {id: id }}
+			}
 		})
 		delete new_achieve.id;
 		return new_achieve;
