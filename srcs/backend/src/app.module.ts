@@ -1,14 +1,11 @@
 import { Module } from '@nestjs/common';
 import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
-// import { GameController } from './game/game.controller';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-// import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo';
 
 import { AuthModule } from './auth/auth.module';
-// import { APP_GUARD } from '@nestjs/core';
 import { JwtStrategy } from './auth/strategies/jwt.strategy';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { PrismaModule } from './prisma/prisma.module';
@@ -49,11 +46,6 @@ import { ProfileModule } from './profile/profile.module';
   controllers: [AppController],
   providers: [
     AppService,
-    // JwtStrategy,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
   ],
 })
 export class AppModule { }

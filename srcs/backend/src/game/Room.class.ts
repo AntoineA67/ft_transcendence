@@ -118,6 +118,8 @@ export default class Room {
 		const winnerPlayer = this.players[winner];
 		const winnerUser = await this.prisma.user.findUnique({ where: { id: winner }, select: { username: true, avatar: true, } });
 		const loserUser = await this.prisma.user.findUnique({ where: { id: loser }, select: { username: true, avatar: true, } });
+		await this.prisma.user.update({ where: { id: winner }, data: { status: 'ONLINE' } });
+		await this.prisma.user.update({ where: { id: loser }, data: { status: 'ONLINE' } });
 		this.wss.to(this.roomId).emit('gameOver', { winner: { ...winnerUser, score: winnerPlayer.score }, loser: { ...loserUser, score: loserPlayer.score } });
 
 		const newGame = await this.gameService.create({});
@@ -131,14 +133,6 @@ export default class Room {
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
 		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
-		// const wins = await this.prisma.player.findMany({ where: { userId: winner, win: Result.WIN } });
-		// if (wins.length == 1) {
-		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { firstWin: true } });
-		// } else if (wins.length == 10) {
-		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { win10Games: true } });
-		// } else if (wins.length == 100) {
-		// 	await this.prisma.achievement.update({ where: { userId: winner }, data: { win100Games: true } });
-		// }
 		this.achieveService.updateAchievement(winner)
 		this.achieveService.updateAchievement(loser)
 	}

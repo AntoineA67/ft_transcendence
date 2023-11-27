@@ -1,5 +1,3 @@
-// import '../styles/index.css'
-
 import { useEffect, useState } from 'react';
 import { friendsSocket } from '../utils/socket';
 import { useLocation } from 'react-router-dom';
