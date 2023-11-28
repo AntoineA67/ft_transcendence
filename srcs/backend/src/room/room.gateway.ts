@@ -63,6 +63,8 @@ export class RoomGateway
 			};
 		}
 		const roomid = parseInt(roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return null;
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
 		const members = await this.memberService.getMembersByRoomId(roomid);
 		if (!memberStatus || memberStatus.ban)
@@ -158,58 +160,60 @@ export class RoomGateway
 		@ConnectedSocket() client: Socket,
 		@MessageBody() username: string,
 	): Promise<Number> {
-			if (!checkUserRoomName(username)) {
-				console.error('Username must be between 4 and 16 characters, alphanumeric only, and "-"');
-				return -1;
-			}
+		if (!checkUserRoomName(username)) {
+			console.error('Username must be between 4 and 16 characters, alphanumeric only, and "-"');
+			return -1;
+		}
 
-			const userId: number = client.data.user.id;
-			const createdRoom = await this.roomService.createPrivateRoom(userId, username);
+		const userId: number = client.data.user.id;
+		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 
-			if (createdRoom && createdRoom.id) {
-				const pvroomuser1 = {
-					id: createdRoom.id,
-					isChannel: false,
-					title: username,
-					private: true,
-					password: '',
-					messages: [],
-				};
-				const roomName = "room_" + createdRoom.id.toString();
-				client.join(roomName);
-				client.emit('newRoom', pvroomuser1);
+		if (createdRoom && createdRoom.id) {
+			const pvroomuser1 = {
+				id: createdRoom.id,
+				isChannel: false,
+				title: username,
+				private: true,
+				password: '',
+				messages: [],
+			};
+			const roomName = "room_" + createdRoom.id.toString();
+			client.join(roomName);
+			client.emit('newRoom', pvroomuser1);
 
-				const user1 = await this.roomService.getMemberDatabyId(userId);
-				const user2 = await this.roomService.getMemberDatabyUsername(username);
+			const user1 = await this.roomService.getMemberDatabyId(userId);
+			const user2 = await this.roomService.getMemberDatabyUsername(username);
 
-				if (user2) {
-					const socketUser2 = this.clients[user2.id.toString()];
-					if (socketUser2) {
-						const pvroomuser2 = {
-							id: createdRoom.id,
-							isChannel: false,
-							title: user1.username,
-							private: true,
-							password: '',
-							messages: [],
-						};
-						const roomNameUser2 = "room_" + createdRoom.id.toString();
-						socketUser2.join(roomNameUser2);
-						socketUser2.emit('newRoom', pvroomuser2);
-					}
+			if (user2) {
+				const socketUser2 = this.clients[user2.id.toString()];
+				if (socketUser2) {
+					const pvroomuser2 = {
+						id: createdRoom.id,
+						isChannel: false,
+						title: user1.username,
+						private: true,
+						password: '',
+						messages: [],
+					};
+					const roomNameUser2 = "room_" + createdRoom.id.toString();
+					socketUser2.join(roomNameUser2);
+					socketUser2.emit('newRoom', pvroomuser2);
 				}
-
-				return createdRoom.id;
-			} else {
-				return createdRoom;
 			}
+
+			return createdRoom.id;
+		} else {
+			return createdRoom;
+		}
 	}
 
 	@SubscribeMessage('sendMessage')
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string }) {
 		const roomid = parseInt(message.roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return null;
 		const userid = client.data.user.id;
-		if (Number.isNaN(roomid) || !message.content.trim() || !message.roomId.trim() || !/^[0-9]+$/.test(message.roomId) || typeof message.roomId !== 'string' || typeof message.content !== 'string' || message.content.length > 10000) {
+		if (!message.content.trim() || !message.roomId.trim() || !/^[0-9]+$/.test(message.roomId) || typeof message.roomId !== 'string' || typeof message.content !== 'string' || message.content.length > 10000) {
 			return false;
 		}
 		const user = await this.roomService.getUserbyId(userid);
@@ -334,7 +338,7 @@ export class RoomGateway
 			};
 			this.server.to(roomName).emit('newmemberListStatus', membertosend);
 			const profileupdated = await this.roomService.getProfileForUser(content.memberId);
-			if (SockettoMute){
+			if (SockettoMute) {
 				SockettoMute.emit('newmemberStatus', membertosend);
 				SockettoMute.emit('newProfile', profileupdated);
 			}
@@ -461,7 +465,7 @@ export class RoomGateway
 		@MessageBody() content: { roomId: string, password: string, delPass: boolean }
 	): Promise<boolean> {
 		const userid: number = client.data.user.id;
-		if (!content.roomId.trim()  || typeof content.roomId !== 'string' || typeof content.delPass !== 'boolean') {
+		if (!content.roomId.trim() || typeof content.roomId !== 'string' || typeof content.delPass !== 'boolean') {
 			return false;
 		}
 		if (!content.delPass && (typeof content.password !== 'string' || !checkPassword(content.password))) {

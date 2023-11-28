@@ -18,6 +18,8 @@ export class RoomController {
   async getRoomDataById(@Req() req: Request, @Param('id') id: string) {
     const userId = req.user.id;
     const roomId = parseInt(id, 10);
+    if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+      return null;
     const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomId);
     const members = await this.memberService.getMembersByRoomId(roomId);
     if (!memberStatus || memberStatus.ban) {
