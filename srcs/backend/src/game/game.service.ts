@@ -20,17 +20,16 @@ export class GamesService {
     try {
       otherIdNumber = parseInt(otherIdDTO);
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
-      if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
+      if (otherUser === null) throw new Error('user not online');
     } catch (error) {
       socket.emit('cancelledMatchmake', { reason: error.message });
       await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
       return;
     }
-    if (this.matches[otherIdDTO]) {
+    if (this.matches[otherIdDTO] && this.matches[otherIdDTO].receiverId === socket.data.user.id) {
       this.matches[otherIdDTO].sender.emit('cancelledMatchmake');
       await this.prisma.user.update({ where: { id: otherIdNumber }, data: { status: 'ONLINE' } });
       delete this.matches[otherIdDTO];
-
     }
   }
 
@@ -166,8 +165,9 @@ export class GamesService {
         this.clients[player1.data.user.id] = roomId;
         this.clients[player2.data.user.id] = roomId;
       } catch (error) {
-        player1.disconnect();
-        player2.disconnect();
+        player1.emit('cancelledMatchmake');
+        player2.emit('cancelledMatchmake');
+        return;
       }
 
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
