@@ -45,13 +45,18 @@ export class RoomGateway
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
+		if (!id || Number.isNaN(id) || id > 100000 || id <= 0)
+			return null;
 		return (await this.roomService.getAllRoomsByUserid(id));
 	}
 
 	@SubscribeMessage('getRoomData')
 	async handleGetRoomData(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<{ messages: MessageWithUsername[], roomTitle: string, roomChannel: boolean, members: Member[], memberStatus: Member, private: boolean, password: boolean }> {
 		const userId: number = client.data.user.id;
-		if (!roomId.trim() || !/^[0-9]+$/.test(roomId) || typeof roomId !== 'string') {
+		const roomid = parseInt(roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0 ||
+			!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0 ||
+			!roomId || typeof roomId !== 'string' || !roomId.trim() || !/^[0-9]+$/.test(roomId)) {
 			return {
 				messages: [],
 				roomTitle: '',
@@ -62,9 +67,6 @@ export class RoomGateway
 				password: false,
 			};
 		}
-		const roomid = parseInt(roomId, 10);
-		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
-			return null;
 		const memberStatus = await this.memberService.getMemberDatabyRoomId(userId, roomid);
 		const members = await this.memberService.getMembersByRoomId(roomid);
 		if (!memberStatus || memberStatus.ban)
@@ -105,6 +107,8 @@ export class RoomGateway
 			}
 
 			const userId: number = client.data.user.id;
+			if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+				throw new Error('Invalid userid');
 			const createdRoom = await this.roomService.createChannelRoom(data.roomTitle, data.isPublic, data.password, userId);
 
 			if (createdRoom) {
@@ -126,7 +130,11 @@ export class RoomGateway
 		@MessageBody() roomdata: { roomTitle: string, roomid: string, password: string },
 	): Promise<boolean> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return false;
 		const roomId = parseInt(roomdata.roomid, 10);
+		if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+			return false;
 
 		if (Number.isNaN(roomId) ||
 			!roomdata.roomTitle.trim() || !roomdata.roomid.trim() ||
@@ -166,6 +174,8 @@ export class RoomGateway
 		}
 
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return -1;
 		const createdRoom = await this.roomService.createPrivateRoom(userId, username);
 
 		if (createdRoom && createdRoom.id) {
@@ -211,8 +221,10 @@ export class RoomGateway
 	async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() message: { content: string, roomId: string }) {
 		const roomid = parseInt(message.roomId, 10);
 		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
-			return null;
+			return false;
 		const userid = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!message.content.trim() || !message.roomId.trim() || !/^[0-9]+$/.test(message.roomId) || typeof message.roomId !== 'string' || typeof message.content !== 'string' || message.content.length > 10000) {
 			return false;
 		}
@@ -246,29 +258,41 @@ export class RoomGateway
 	@SubscribeMessage('getProfileForUser')
 	async handlegetProfileForUser(@ConnectedSocket() client: Socket): Promise<ProfileTest | null> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return null;
 		return await this.roomService.getProfileForUser(userId);
 	}
 
 	@SubscribeMessage('getallPrivateRooms')
 	async handleallPrivateRooms(@ConnectedSocket() client: Socket): Promise<Pvrooms[] | null> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return null;
 		return await this.roomService.getAllPrivateRooms(userId);
 	}
 
 	@SubscribeMessage('getPrivateRoom')
 	async handlePrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<Pvrooms | null> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return null;
 		const roomid = parseInt(roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return null;
 		return await this.roomService.getPrivateRoomById(userId, roomid);
 	}
 
 	@SubscribeMessage('changeRoomTitle')
 	async handlechangeRoomTitle(@ConnectedSocket() client: Socket, @MessageBody() content: { roomId: string, roomtitle: string }): Promise<boolean> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return false;
 		if (!content.roomtitle.trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.roomtitle !== 'string') {
 			return false;
 		}
 		const roomid = parseInt(content.roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return false;
 		if (!checkUserRoomName(content.roomtitle)) {
 			return false;
 		}
@@ -290,10 +314,14 @@ export class RoomGateway
 	@SubscribeMessage('UserLeaveChannel')
 	async handleUserLeaveChannel(@ConnectedSocket() client: Socket, @MessageBody() content: { usertoKick: number, roomId: string }): Promise<any> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!content.usertoKick.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.usertoKick !== 'number') {
 			return false;
 		}
 		const roomid = parseInt(content.roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return false;
 		const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
 
 		if (bool) {
@@ -322,10 +350,14 @@ export class RoomGateway
 	@SubscribeMessage('muteMember')
 	async handleMuteMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, duration: number }): Promise<boolean> {
 		const userId: number = client.data.user.id;
+		if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
+			return false;
 		if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.memberId !== 'number' || typeof content.duration !== 'number' || content.duration < 0) {
 			return false;
 		}
 		const roomId = parseInt(content.roomId, 10);
+		if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+			return false;
 		const bool = await this.roomService.muteMember(userId, roomId, content.memberId, content.duration);
 		if (bool) {
 			const usertomute = await this.roomService.getMemberDatabyId(content.memberId);
@@ -350,10 +382,14 @@ export class RoomGateway
 	@SubscribeMessage('banMember')
 	async handleBanMember(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomId: string, action: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.memberId !== 'number' || typeof content.action !== 'boolean') {
 			return false;
 		}
 		const roomid = parseInt(content.roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return false;
 
 		const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
 		if (bool) {
@@ -383,6 +419,8 @@ export class RoomGateway
 	@SubscribeMessage('blockUser')
 	async handleBlockUser(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, action: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!content.memberId.toString().trim() || typeof content.memberId !== 'number' || typeof content.action !== 'boolean') {
 			return false;
 		}
@@ -404,10 +442,14 @@ export class RoomGateway
 	@SubscribeMessage('inviteUser')
 	async handleinviteUser(@ConnectedSocket() client: Socket, @MessageBody() content: { username: string, roomId: string }): Promise<Member | number> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return -1;
 		if (!content.username.trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.username !== 'string') {
 			return -1;
 		}
 		const roomid = parseInt(content.roomId, 10);
+		if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			return -1;
 
 		const nbid = await this.roomService.inviteUser(userid, roomid, content.username);
 		const usertoadd = await this.roomService.getMemberDatabyUsername(content.username);
@@ -435,10 +477,14 @@ export class RoomGateway
 	@SubscribeMessage('changeRole')
 	async handlechangeRole(@ConnectedSocket() client: Socket, @MessageBody() content: { memberId: number, roomid: string, owner: boolean, admin: boolean }): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!content.memberId.toString().trim() || !content.roomid.trim() || !/^[0-9]+$/.test(content.roomid) || typeof content.roomid !== 'string' || typeof content.memberId !== 'number' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean') {
 			return false;
 		}
 		const roomId = parseInt(content.roomid, 10);
+		if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+			return false;
 
 		const bool = await this.roomService.changeRole(userid, roomId, content.memberId, content.owner, content.admin);
 
@@ -465,6 +511,8 @@ export class RoomGateway
 		@MessageBody() content: { roomId: string, password: string, delPass: boolean }
 	): Promise<boolean> {
 		const userid: number = client.data.user.id;
+		if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
+			return false;
 		if (!content.roomId.trim() || typeof content.roomId !== 'string' || typeof content.delPass !== 'boolean') {
 			return false;
 		}
@@ -472,6 +520,8 @@ export class RoomGateway
 			return false;
 		}
 		const roomId = parseInt(content.roomId, 10);
+		if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+			return false;
 
 		const bool = await this.roomService.changePassword(userid, roomId, content.password);
 
@@ -481,13 +531,15 @@ export class RoomGateway
 		return false;
 	}
 
-
+// TODO : use client userid to check if he is the owner of the room
 	@SubscribeMessage('deleteChannel')
 	async handledeleteRoom(@ConnectedSocket() client: Socket, @MessageBody() roomId: string): Promise<boolean> {
 		if (!roomId.trim() || !/^[0-9]+$/.test(roomId) || typeof roomId !== 'string') {
 			return false;
 		}
 		const roomIdNumber = parseInt(roomId, 10);
+		if (!roomIdNumber || Number.isNaN(roomIdNumber) || roomIdNumber > 100000 || roomIdNumber <= 0)
+			return false;
 
 		const bool = await this.roomService.deleteRoom(roomIdNumber);
 
