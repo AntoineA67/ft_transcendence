@@ -13,9 +13,6 @@ import { GamesService } from './game.service';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 import { z } from 'zod';
 
-const matchAgainstPayloadSchema = z.object({
-    id: z.string(),
-});
 const cancelMatchmakePayloadSchema = z.string();
 const keyPressesPayloadSchema = z.object({
     up: z.boolean(),
@@ -79,8 +76,7 @@ export class GameGateway
     @SubscribeMessage('matchAgainst')
     async handleMatchAgainst(socket: Socket, payload: { id: string }): Promise<void> {
         try {
-            const validatedPayload = matchAgainstPayloadSchema.parse(payload);
-            await this.gamesService.matchAgainst(socket, this.wss, { id: validatedPayload.id })
+            await this.gamesService.matchAgainst(socket, this.wss, payload)
         } catch (error) {
             socket.emit('cancelledMatchmake');
         }
@@ -88,8 +84,7 @@ export class GameGateway
     @SubscribeMessage('cancelMatchmake')
     async handleCancelMatchmake(socket: Socket, payload: string): Promise<void> {
         try {
-            const validatedPayload = cancelMatchmakePayloadSchema.parse(payload);
-            await this.gamesService.cancelMatchmake(socket, this.wss, validatedPayload);
+            await this.gamesService.cancelMatchmake(socket, this.wss, payload.toString());
         } catch (error) {
             socket.emit('cancelledMatchmake');
         }
