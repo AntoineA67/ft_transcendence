@@ -23,6 +23,19 @@ const keyPressesPayloadSchema = z.object({
     time: z.number(),
 });
 
+function hexToRgb(hex: string) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function rgbToHex(r: number, g: number, b: number) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
 const hexToNumber = (hex: string): number => parseInt(hex.replace('#', ''), 16);
 
 @WebSocketGateway({ cors: true, namespace: 'game' })
@@ -67,7 +80,7 @@ export class GameGateway
     async handleMatchAgainst(socket: Socket, payload: { id: string }): Promise<void> {
         try {
             const validatedPayload = matchAgainstPayloadSchema.parse(payload);
-            await this.gamesService.matchAgainst(socket, this.wss, validatedPayload)
+            await this.gamesService.matchAgainst(socket, this.wss, { id: validatedPayload.id })
         } catch (error) {
             socket.emit('cancelledMatchmake');
         }
@@ -85,7 +98,7 @@ export class GameGateway
 
     @SubscribeMessage('cancel')
     async handleLeave(socket: Socket): Promise<void> {
-        this.gamesService.disconnect(socket);
+        await this.gamesService.disconnect(socket);
     }
 
 
@@ -93,7 +106,7 @@ export class GameGateway
     async handleKeyPresses(socket: Socket, payload: { up: boolean, down: boolean, time: number }): Promise<void> {
         try {
             const validatedPayload = keyPressesPayloadSchema.parse(payload);
-            this.gamesService.handleKeysPresses(socket.data.user.id, validatedPayload);
+            this.gamesService.handleKeysPresses(socket.data.user.id, { up: validatedPayload.up, down: validatedPayload.down, time: validatedPayload.time });
         } catch (error) {
             socket.emit('invalidKeyPressesPayload');
         }
@@ -103,11 +116,17 @@ export class GameGateway
     async changeColor(socket: Socket, payload: string): Promise<void> {
         try {
             const colorValue = hexToNumber(payload);
-            ;
             if (colorValue < hexToNumber('#000000') || colorValue > hexToNumber('#FFFFFF')) {
                 return;
             }
-            this.gameSettingsService.handleColor(socket.data.user.id, payload);
+            // Convert hex color to RGB 
+            const rgbColor = hexToRgb(payload);
+            if (rgbColor.b + rgbColor.g + rgbColor.r < 255) {
+                return;
+            }
+            // Convert RGB color back to hex
+            const halfBrightnessColor = rgbToHex(rgbColor.r, rgbColor.g, rgbColor.b);
+            await this.gameSettingsService.handleColor(socket.data.user.id, halfBrightnessColor);
         } catch (error) {
             return;
         }
@@ -117,7 +136,7 @@ export class GameGateway
     async setGraphicEffects(socket: Socket, payload: boolean): Promise<void> {
         try {
             const validatedPayload = z.boolean().parse(payload);
-            this.gameSettingsService.setGraphicEffects(socket.data.user.id, validatedPayload);
+            await this.gameSettingsService.setGraphicEffects(socket.data.user.id, validatedPayload);
         } catch (error) {
             return;
         }
@@ -125,8 +144,13 @@ export class GameGateway
 
     @SubscribeMessage('getMyGameSettings')
     async getMyGameSettings(@ConnectedSocket() client: Socket) {
-        const userId: number = client.data.user.id;
-        return (await this.gameSettingsService.getUserGameSettings(userId))
+        try {
+
+            const userId: number = client.data.user.id;
+            return (await this.gameSettingsService.getUserGameSettings(userId))
+        } catch (error) {
+            return;
+        }
     }
 }
 
