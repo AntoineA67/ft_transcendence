@@ -42,6 +42,9 @@ export class BlockGateway {
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
+		if (!user || ! otherUser) {
+			return ;
+		}
 		const result = await this.blockService.createBlock(id, otherId); 
 		// if fails, no emit
 		if (!result) return (result);
@@ -61,6 +64,9 @@ export class BlockGateway {
 		const id: number = client.data.user.id;
 		const user: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
+		if (!user || !otherUser) {
+			return;
+		}
 		const result = await this.blockService.unBlock(id, otherId);
 		
 		// if fails, no emit
