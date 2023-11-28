@@ -41,6 +41,9 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const id: number = client.data.user.id;
 		const sender: UserDto = await this.usersService.getUserById(id);
 		const recver: UserDto = await this.usersService.getUserByNick(nick);
+		if (!sender || !recver) {
+			return false;
+		}
 		const result = await this.friendReqService.sendFriendReq(id, nick);
 		// if fail, no emit
 		if (!result) return (result);
@@ -62,6 +65,9 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		const id: number = client.data.user.id;
 		const replier: UserDto = await this.usersService.getUserById(id);
 		const otherUser: UserDto = await this.usersService.getUserById(otherId);
+		if (!replier || !otherUser) {
+			return false ;
+		}
 		const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
 		// if fail, no emit
 		if (!ret) return (ret);
