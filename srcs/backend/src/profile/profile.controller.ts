@@ -32,10 +32,6 @@ export class ProfileController {
 		return (profile);
 	}
 
-	@Get('test')
-	getTest() {
-		return ('test');
-	}
 
 	
 
