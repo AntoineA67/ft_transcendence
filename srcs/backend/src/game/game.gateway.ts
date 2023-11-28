@@ -12,6 +12,8 @@ import { Server, Socket } from 'socket.io';
 import { GamesService } from './game.service';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 
+const hexToNumber = (hex: string): number => parseInt(hex.replace('#', ''), 16);
+
 @WebSocketGateway({ cors: true, namespace: 'game' })
 export class GameGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -73,7 +75,15 @@ export class GameGateway
 
     @SubscribeMessage('changeColor')
     async changeColor(socket: Socket, payload: string): Promise<void> {
-        this.gameSettingsService.handleColor(socket.data.user.id, payload);
+        const colorValue = hexToNumber(payload);
+        if (colorValue < hexToNumber('#000000') || colorValue > hexToNumber('#FFFFFF')) {
+            return null;
+        }
+        try {
+            this.gameSettingsService.handleColor(socket.data.user.id, payload);
+        } catch (error) {
+            return;
+        }
     }
 
     @SubscribeMessage('setGraphicEffects')
