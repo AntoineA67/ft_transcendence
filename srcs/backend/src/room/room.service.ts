@@ -419,24 +419,36 @@ export class RoomService {
 		});
 	}
 
-	async deleteRoom(roomid: number): Promise<Room | null> {
+	async deleteRoom(roomid: number, userid: number): Promise<Room | null> {
 		const existingRoom = await this.prisma.room.findFirst({
-		  where: {
-			id: roomid,
-		  },
+			where: {
+				id: roomid,
+			},
 		});
-	  
-		if (!existingRoom) {
-		  throw new NotFoundException(`Room with ID ${roomid} not found`);
+
+		const member = await this.prisma.member.findFirst({
+			where: {
+				roomId: roomid,
+				userId: userid,
+				owner: true
+			},
+		});
+
+		if (!member) {
+			return null;
 		}
-	  
+
+		if (!existingRoom) {
+			throw new NotFoundException(`Room with ID ${roomid} not found`);
+		}
+
 		return this.prisma.room.delete({
-		  where: {
-			id: roomid,
-		  },
+			where: {
+				id: roomid,
+			},
 		});
-	  }
-	  
+	}
+
 
 	async getProfileForUser(userId: number): Promise<ProfileTest | null> {
 		const user = await this.prisma.user.findUnique({
@@ -526,7 +538,7 @@ export class RoomService {
 				},
 			},
 		});
-		
+
 		const roomData = await Promise.all(privateRooms.map(async (room) => {
 			if (room.members.length !== 1) {
 				this.prisma.room.delete({
@@ -817,7 +829,7 @@ export class RoomService {
 
 		const blocked = await this.prisma.block.findFirst({
 			where: {
-				OR : [
+				OR: [
 					{
 						userId: userId,
 						blockedId: userToInvite.id,
@@ -952,19 +964,19 @@ export class RoomService {
 			include: {
 				members: {
 					where: {
-						userId: {not: userId},
+						userId: { not: userId },
 					},
 				},
 			},
 		});
-	
+
 		if (!room) {
 			return false;
 		}
-	
+
 		const blocked = await this.prisma.block.findFirst({
 			where: {
-				OR : [
+				OR: [
 					{
 						userId: userId,
 						blockedId: room.members[0].userId,
@@ -976,12 +988,12 @@ export class RoomService {
 				],
 			},
 		});
-	
+
 		if (blocked) {
 			return true;
 		}
-	
+
 		return false;
 	}
-	
+
 }
