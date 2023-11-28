@@ -23,6 +23,8 @@ export class MemberGateway
   async GetMemberDatabyRoomId(@ConnectedSocket() client: Socket, @MessageBody() roomId: string) {
     const id: number = client.data.user.id;
     const roomid = parseInt(roomId, 10);
+    if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+      return null;
     return (await this.memberService.getMemberDatabyRoomId(id, roomid));
   }
 }
