@@ -51,12 +51,12 @@ export class AuthController {
 		if (typeof dto.password !== 'string' || dto.password.length > 50) {
 			return;
 		}
-		try {
-			const result = await this.authService.signin(dto);
-			return result;
-		} catch (error) {
-			return;
-		}
+		// try {
+		const result = await this.authService.signin(dto);
+		return result;
+		// } catch (error) {
+		// 	return;
+		// }
 	}
 
 	@Public()
@@ -73,12 +73,12 @@ export class AuthController {
 		if (refreshToken.length > 100) {
 			return;
 		}
-		try {
-			const result = await this.authService.signout(refreshToken);
-			return result;
-		} catch (error) {
-			return;
-		}
+		// try {
+		const result = await this.authService.signout(refreshToken);
+		return result;
+		// } catch (error) {
+		// 	return;
+		// }
 	}
 
 	@UseGuards(FortyTwoAuthGuard)
