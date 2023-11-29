@@ -193,10 +193,10 @@ export default function GamePage() {
 			setGraphicEffects(res.graphicEffects);
 		});
 		return () => {
-			cancelOrLeave();
+			// cancelOrLeave();
 			unsubscribeToGamesSocketMessages();
 		}
-	}, [gamesSocket])
+	}, [])
 
 	useEffect(() => {
 		const firstConnexion = localStorage.getItem('firstConnexion') || null;
