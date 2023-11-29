@@ -14,23 +14,25 @@ export class AchievementService {
 
 	// the id stands for userId, NOT the id of achievement
 	async getAchieveById(id: number): Promise<AchieveDto | null> {
-
-		// const achieve = await this.prisma.achievement.findFirst({
-		// 	where: {userId: id}
-		// })
-		// if (achieve) {
-		// 	delete achieve.id;
-		// 	return achieve;
-		// }
-		// console.log('userid: ', id)	
 		try {
-			const new_achieve = await this.prisma.achievement.create({
-				data: {
-					user: {connect: {id: id }}
-				}
+			if (!id || typeof id !== 'number' || id <= 0 || id > 100000)
+				return null;
+			const achieve = await this.prisma.achievement.findFirst({
+				where: {userId: id}
 			})
-			delete new_achieve.id;
-			return new_achieve;
+			if (!achieve) {
+				const new_achieve = await this.prisma.achievement.create({
+					data: {
+						user: {connect: {id: id }}
+					}
+				})
+				delete new_achieve.id;
+				return new_achieve;
+			}
+			else {
+				delete achieve.id;
+				return achieve;
+			}
 		} catch (e: any) {
 			const achieve = await this.prisma.achievement.findFirst({
 				where: {userId: id}
@@ -39,12 +41,11 @@ export class AchievementService {
 				delete achieve.id;
 				return achieve;
 			}
+			console.log('Achievement return null')
+			return null
 		}
-		console.log('Achievement return null')
-		return null
-		
 	}
-	
+
 	// the id stands for userId, NOT the id of achievement
 	async updateAchievement(id: number) {
 		const allWin: number = await this.playerService.getAllWin(id);

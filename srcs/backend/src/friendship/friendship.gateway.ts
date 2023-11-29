@@ -41,7 +41,7 @@ export class FriendshipGateway {
 	): Promise<boolean> {
 		
 		try {
-			if (typeof otherId != 'number') {
+			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return (false)
 			}
 			const id: number = client.data.user.id;
@@ -58,7 +58,7 @@ export class FriendshipGateway {
 	): Promise<boolean> {
 		
 		try {
-			if (typeof otherId != 'number') {
+			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return (false)
 			}
 			const id: number = client.data.user.id;

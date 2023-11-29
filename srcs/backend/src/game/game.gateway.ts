@@ -13,7 +13,6 @@ import { GamesService } from './game.service';
 import { GameSettingsService } from 'src/gameSettings/gameSettings.service';
 import { z } from 'zod';
 
-const cancelMatchmakePayloadSchema = z.string();
 const keyPressesPayloadSchema = z.object({
     up: z.boolean(),
     down: z.boolean(),
