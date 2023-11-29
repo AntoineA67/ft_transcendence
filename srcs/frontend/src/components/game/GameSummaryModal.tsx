@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal, Image } from "react-bootstrap";
+import DefaultAvatar from '../../assets/defaultAvatar.png'
 
 export const GameSummaryModal = ({ summary }: any) => {
 	const [show, setShow] = useState(false);
@@ -23,7 +24,7 @@ export const GameSummaryModal = ({ summary }: any) => {
 						{summary.winner ?
 							<>
 
-								<Image style={{ objectFit: "cover", marginRight: "1rem" }} src={summary.winner.avatar} height={50} width={50} roundedCircle />
+								<Image style={{ objectFit: "cover", marginRight: "1rem" }} src={summary.winner.avatar || DefaultAvatar} height={50} width={50} roundedCircle />
 								<Modal.Title className="text-black">{summary.winner.username} won the game !</Modal.Title>
 							</> : <Modal.Title className="text-black">It's a draw !</Modal.Title>}
 					</Modal.Header>

@@ -43,20 +43,30 @@ export class UsersGateway
 
 	@SubscribeMessage('UpdateUsername')
 	async handleUpdateUsername(@ConnectedSocket() client: Socket, @MessageBody() username: string) {
-		if (typeof username != 'string') {
+		
+		try {
+			if (typeof username != 'string') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			return (await this.usersService.updateUser(id, {username: username}))
+		} catch(e: any) {
 			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.usersService.updateUser(id, {username: username}))
 	}
 	
 	@SubscribeMessage('UpdateBio')
 	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
-		if (typeof bio != 'string') {
+		
+		try {
+			if (typeof bio != 'string') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			return (await this.usersService.updateUser(id, {bio: bio}))
+		} catch(e: any) {
 			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.usersService.updateUser(id, {bio: bio}))
 	}
 	
 
@@ -80,7 +90,11 @@ export class UsersGateway
 			base64 = `data:image/jpeg;base64,${base64}`;
 			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
-		return (await fileCheck(file));
+		try {
+			return (await fileCheck(file));
+		} catch(e: any) {
+			return false;
+		}
 	}
 
 	@SubscribeMessage('Create2FA')
@@ -92,28 +106,38 @@ export class UsersGateway
 
 	@SubscribeMessage('Activate2FA')
 	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (typeof data != 'string' || data.length > 6) {
+		
+		try {
+			if (typeof data != 'string' || data.length > 6) {
+				return (false);
+			}
+			const isValid = await this.usersService.verify2FA(client.data.user, data);
+			if (isValid === true) {
+				this.usersService.updateUser(client.data.user.id, { activated2FA: true });
+				return (true);
+			}
 			return (false);
+		} catch(e: any) {
+			return false;
 		}
-		const isValid = await this.usersService.verify2FA(client.data.user, data);
-		if (isValid === true) {
-			this.usersService.updateUser(client.data.user.id, { activated2FA: true });
-			return (true);
-		}
-		return (false);
 	}
 
 	@SubscribeMessage('Disable2FA')
 	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (typeof data != 'string' || data.length > 6) {
+		
+		try {
+			if (typeof data != 'string' || data.length > 6) {
+				return (false);
+			}
+			const isValid = await this.usersService.verify2FA(client.data.user, data);
+			if (isValid === true) {
+				this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
+				return (true);
+			}
 			return (false);
+		} catch(e: any) {
+			return false;
 		}
-		const isValid = await this.usersService.verify2FA(client.data.user, data);
-		if (isValid === true) {
-			this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
-			return (true);
-		}
-		return (false);
 	}
 
 	@SubscribeMessage('myAvatar')
@@ -124,20 +148,30 @@ export class UsersGateway
 
 	@SubscribeMessage('ChangePassword')
 	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any): Promise<boolean> {
-		if (typeof data?.oldPassword != 'string' || typeof data?.newPassword != 'string') {
-			return (false);
+		
+		try {
+			if (typeof data?.oldPassword != 'string' || typeof data?.newPassword != 'string') {
+				return (false);
+			}
+			const passwordRespond = await this.usersService.changePassword(
+				client.data.user.id, data.oldPassword, data.newPassword
+			);
+			return (passwordRespond);
+		} catch (e: any) {
+			return false;
 		}
-		const passwordRespond = await this.usersService.changePassword(
-			client.data.user.id, data.oldPassword, data.newPassword
-		);
-		return (passwordRespond);
 	}
 
 	@SubscribeMessage('getUser')
 	async handleGetUser(@MessageBody() id: number): Promise<UserDto | null> {
-		if (typeof id != 'number') {
-			return (null);
-		}		
-		return await this.usersService.getUserById(id);
+		
+		try {
+			if (typeof id != 'number') {
+				return (null);
+			}		
+			return await this.usersService.getUserById(id);
+		} catch (e: any) {
+			return null;
+		}
 	}
 } 

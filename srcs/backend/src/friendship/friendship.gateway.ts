@@ -39,11 +39,16 @@ export class FriendshipGateway {
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() otherId: number
 	): Promise<boolean> {
-		if (typeof otherId != 'number') {
-			return (false)
+		
+		try {
+			if (typeof otherId != 'number') {
+				return (false)
+			}
+			const id: number = client.data.user.id;
+			return (await this.friendshipService.isFriend(id, otherId))
+		} catch(e: any) {
+			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.friendshipService.isFriend(id, otherId))
 	}
 	
 	@SubscribeMessage('Unfriend')
@@ -51,11 +56,16 @@ export class FriendshipGateway {
 		@ConnectedSocket() client: Socket,
 		@MessageBody() otherId: number
 	): Promise<boolean> {
-		if (typeof otherId != 'number') {
-			return (false)
+		
+		try {
+			if (typeof otherId != 'number') {
+				return (false)
+			}
+			const id: number = client.data.user.id;
+			return (await this.friendshipService.unFriend(id, otherId))	
+		} catch(e: any) {
+			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.friendshipService.unFriend(id, otherId))	
 	}
 
 	@SubscribeMessage('findOthers')
