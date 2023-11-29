@@ -22,22 +22,67 @@ export class AuthController {
 	@Post('signup')
 	@HttpCode(HttpStatus.CREATED)
 	async signup(@Body() dto: SignupDto) {
-		return await this.authService.signup(dto);
+		if (!dto || Object.keys(dto).length === 0) {
+			return;
+		}
+		if (typeof dto.username !== 'string' || dto.username.length > 50) {
+			return;
+		}
+		if (typeof dto.email !== 'string' || dto.email.length > 50) {
+			return;
+		}
+		if (typeof dto.password !== 'string' || dto.password.length > 50) {
+			return;
+		}
+		try {
+			const result = await this.authService.signup(dto);
+			return result;
+		} catch (error) {
+			return;
+		}
 	}
 
 	@Public()
 	@Post('signin')
 	@HttpCode(HttpStatus.OK)
 	async signin(@Body() dto: SigninDto) {
-		return this.authService.signin(dto);
+		if (!dto || Object.keys(dto).length === 0) {
+			return;
+		}
+		if (typeof dto.email !== 'string' || dto.email.length > 50) {
+			return;
+		}
+		if (typeof dto.password !== 'string' || dto.password.length > 50) {
+			return;
+		}
+		try {
+			const result = await this.authService.signin(dto);
+			return result;
+		} catch (error) {
+			return;
+		}
 	}
 
 	@Public()
 	@Post('signout')
 	@HttpCode(HttpStatus.OK)
 	async signout(@Req() req: Request) {
-		const refreshToken = req;
-		return await this.authService.signout(refreshToken);
+		const refreshToken = req.body.refreshToken;
+		if (refreshToken === undefined) {
+			return;
+		}
+		if (typeof refreshToken !== 'string') {
+			return;
+		}
+		if (refreshToken.length > 100) {
+			return;
+		}
+		try {
+			const result = await this.authService.signout(refreshToken);
+			return result;
+		} catch (error) {
+			return;
+		}
 	}
 
 	@UseGuards(FortyTwoAuthGuard)
