@@ -56,55 +56,98 @@ export function CallBack42() {
 }
 
 export function Protected() {
-	const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
-	const connectedSockets = useRef<number>(0);
+	// const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
+	const [ready, setReady] = useState<boolean>(false)
+	const [err, setErr] = useState<boolean>(false)
+	
+	const [mainConnect, setMainConnect] = useState<boolean>(false)
+	const [friendConnect, setFriendConnect] = useState<boolean>(false)
+	const [chatConnect, setChatConnect] = useState<boolean>(false)
+	const [gameConnect, setGameConnect] = useState<boolean>(false)
+
+	
+	// const connectedSockets = useRef<number>(0);
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
+		
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
 		chatsSocket.auth = { token: token };
 		gamesSocket.auth = { token: token };
+		
 		socket.connect();
 		friendsSocket.connect();
 		chatsSocket.connect();
 		gamesSocket.connect();
 		//socket io regitsre event
-		function onConnect() {
-			connectedSockets.current += 1;
-			setStatus('loading')
-			if (connectedSockets.current === 4) {
-				setStatus('connect')
-			}
+		// function onConnect() {
+		// 	connectedSockets.current += 1;
+		// 	console.log('connectedsocket: ', connectedSockets)
+		// 	setStatus('loading')
+		// 	if (connectedSockets.current >= 4) {
+		// 		setStatus('connect')
+		// 	}
+		// }
+		// function onDisconnect() {
+		// 	socket.connect()
+		// }
+		function onError(err: any) {
+			setErr(true)
 		}
 		function onDisconnect() {
+			setMainConnect(false)
+			setFriendConnect(false)
+			setChatConnect(false)
+			setGameConnect(false)
+
+			
 			socket.connect()
+			friendsSocket.connect();
+			chatsSocket.connect();
+			gamesSocket.connect();
 		}
-		function onError(err: any) {
-			setStatus('error')
+		function onMainConnect() {
+			setMainConnect(true)
 		}
-		socket.on('connect', onConnect);
-		friendsSocket.on('connect', onConnect);
-		chatsSocket.on('connect', onConnect);
-		gamesSocket.on('connect', onConnect);
+		function onFriendConnect() {
+			setFriendConnect(true)
+		}
+		function onChatConnect() {
+			setChatConnect(true)
+		}
+		function onGameConnect() {
+			setGameConnect(true)
+		}
+		socket.on('connect', onMainConnect);
+		friendsSocket.on('connect', onFriendConnect);
+		chatsSocket.on('connect', onChatConnect);
+		gamesSocket.on('connect', onGameConnect);
+		
 		socket.on('disconnect', onDisconnect);
 		socket.on('connect_error', onError);
 		return () => {
-			socket.off('connect', onConnect);
+			socket.off('connect', onMainConnect);
+			friendsSocket.off('connect', onFriendConnect);
+			chatsSocket.off('connect', onChatConnect);
+			gamesSocket.off('connect', onGameConnect);
+			
 			socket.off('disconnect', onDisconnect);
-			socket.off('connect_error', onError);
-			friendsSocket.off('connect', onConnect);
-			chatsSocket.off('connect', onConnect);
-			gamesSocket.off('connect', onConnect);
+			socket.off('connect_error', onError)
 		};
 	}, []);
+	
+	useEffect(() => {
+		if (mainConnect && friendConnect && chatConnect && gameConnect) {
+			setReady(true)
+		}
+	}, [mainConnect, friendConnect, chatConnect, gameConnect])
 
 	return (
 		<>
-			{/* <Outlet /> */}
-			{status === 'loading' && <p className='white-text'> loading ... </p>}
-			{status === 'connect' && <Outlet />}
-			{status === 'error' && <Navigate to="/login" replace />}
+			{!ready && !err && <p className='white-text'> loading ... </p>}
+			{ready && !err && <Outlet />}
+			{err && <Navigate to="/login" replace />}
 		</>
 	);
 }
