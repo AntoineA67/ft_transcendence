@@ -56,6 +56,16 @@ export class GameGateway
 
     handleConnection(socket: Socket, ...args: any[]) {
         try {
+            // this.wss.sockets.sockets.forEach(s => {
+            //     console.log(s.data.user.id, socket.data.user.id)
+            //     console.log(s.data.user.id, socket.data.user.id)
+            //     if (s.data.user.id === socket.data.user.id) {
+            //         // console.log('already authenticated')
+            //         // next(new Error('already authenticated'));
+            //         socket.disconnect();
+            //         return;
+            //     }
+            // })
             socket.emit('id', socket.data.user.id)
         } catch (error) {
             socket.disconnect();
