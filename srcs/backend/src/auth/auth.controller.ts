@@ -153,13 +153,17 @@ export class AuthController {
 	@Post('refreshToken')
 	@HttpCode(HttpStatus.CREATED)
 	async refreshToken(@Req() req: Request, @Res() res: Response) {
+		if (typeof req.body.refreshToken !== 'string' || req.body.refreshToken.length > 100) {
+			return res.status(401).json({ message: "refresh token is invalid" });
+		}
 		if (req.body.refreshToken === undefined) {
 			return res.status(401).json({ message: "refresh token is undefined" });
 		}
-		if (req.body.refreshToken.length > 100) {
+		try {
+			const result = await this.authService.refreshToken(req.body.refreshToken, req, res);
+			return res.status(201).json(result);
+		} catch (error) {
 			return res.status(401).json({ message: "refresh token is invalid" });
 		}
-		const ret = await this.authService.refreshToken(req.body.refreshToken, req, res);
-		return res.status(201).json(ret);
 	}
 }
