@@ -27,7 +27,7 @@ export const AlreadyConnectedModal = ({ summary }: any) => {
 						Oops, you are already connected elsewhere, please disconnect first.
 					</Modal.Body>
 					<Modal.Footer>
-						<button className="btn btn-primary" onClick={() => { location.reload() }}>
+						<button className="btn btn-primary" onClick={() => { window.location.reload() }}>
 							Retry
 						</button>
 					</Modal.Footer>

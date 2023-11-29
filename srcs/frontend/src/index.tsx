@@ -34,30 +34,11 @@ import './styles/iconButton.css';
 import './styles/Chat.css';
 import './styles/Stat.css';
 
-// sentry
-import * as Sentry from "@sentry/react";
-
 import { CallBack42, Protected } from './utils/AuthProvider';
 import { Guest } from './utils/Guest';
 
 import axios from 'axios';
 import reportWebVitals from './reportWebVitals';
-
-Sentry.init({
-	dsn: "https://01bf5be943109047867ae54d1eb150a7@o4506224690200576.ingest.sentry.io/4506224693542912",
-	integrations: [
-		new Sentry.BrowserTracing({
-			// Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-			tracePropagationTargets: ["localhost", /^https:\/\/pongpong\.me/],
-		}),
-		new Sentry.Replay(),
-	],
-	// Performance Monitoring
-	tracesSampleRate: 1.0, // Capture 100% of the transactions
-	// Session Replay
-	replaysSessionSampleRate: 0.1, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-	replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-});
 
 axios.defaults.baseURL = process.env.REACT_APP_BACKEND_URL;
 axios.defaults.headers.common['Authorization'] = localStorage.getItem('token');
