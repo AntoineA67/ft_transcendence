@@ -96,7 +96,16 @@ export function Protected() {
 			setErr(true)
 		}
 		function onDisconnect() {
+			setMainConnect(false)
+			setFriendConnect(false)
+			setChatConnect(false)
+			setGameConnect(false)
+
+			
 			socket.connect()
+			friendsSocket.connect();
+			chatsSocket.connect();
+			gamesSocket.connect();
 		}
 		function onMainConnect() {
 			setMainConnect(true)
