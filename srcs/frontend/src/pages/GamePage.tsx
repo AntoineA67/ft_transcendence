@@ -193,7 +193,7 @@ export default function GamePage() {
 			setGraphicEffects(res.graphicEffects);
 		});
 		return () => {
-			// cancelOrLeave();
+			cancelOrLeave();
 			unsubscribeToGamesSocketMessages();
 		}
 	}, [])
