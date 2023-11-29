@@ -22,7 +22,7 @@ export class ProfileGateway {
 
 	@SubscribeMessage('Profile')
 	async handleProfile(@ConnectedSocket() client: Socket, @MessageBody() otherNick: string) {
-		if (typeof otherNick != 'string') {
+		if (typeof otherNick != 'string' || otherNick.length == 0 || otherNick.length > 20 || !otherNick.match(/^[A-Za-z0-9-]+$/)) {
 			return ;
 		}
 		const id: number = client.data.user.id;
