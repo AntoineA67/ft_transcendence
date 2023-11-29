@@ -23,21 +23,26 @@ export class ProfileService {
 
 	// the freind, block, blocked should be given by other services
 	async getUserProfileById(userId: number, otherId: number): Promise<ProfileDto | null> {
-		let profile = await this.usersService.getHalfProfile(otherId);
-		if (!profile) return (null);
-		const gameHistory = await this.playerService.getHistory(otherId);
-		const achieve = await this.achieveService.getAchieveById(otherId);
-		if (userId == otherId) {
-			return ({ ...profile, gameHistory, achieve })
+		
+		try {
+			let profile = await this.usersService.getHalfProfile(otherId);
+			if (!profile) return (null);
+			const gameHistory = await this.playerService.getHistory(otherId);
+			const achieve = await this.achieveService.getAchieveById(otherId);
+			if (userId == otherId) {
+				return ({ ...profile, gameHistory, achieve })
+			}
+			const friend = await this.friendService.isFriend(userId, otherId);
+			const sent = (await this.friendReqService.getPendingReq(userId, otherId)).length == 0 ? false : true;
+			const block = await this.blockService.isBlocked(userId, otherId);
+			const blocked = await this.blockService.isBlocked(otherId, userId);
+			return ({
+				...profile,
+				friend, block, blocked, sent, gameHistory, achieve
+			})
+		} catch(e: any) {
+			return null;
 		}
-		const friend = await this.friendService.isFriend(userId, otherId);
-		const sent = (await this.friendReqService.getPendingReq(userId, otherId)).length == 0 ? false : true;
-		const block = await this.blockService.isBlocked(userId, otherId);
-		const blocked = await this.blockService.isBlocked(otherId, userId);
-		return ({
-			...profile,
-			friend, block, blocked, sent, gameHistory, achieve
-		})
 	}
 
 	async getUserProfileByNick(userId: number, otherNick: string): Promise<ProfileDto | null> {

@@ -25,8 +25,13 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 
 	@SubscribeMessage('findAllReqs')
 	async handleFindAllReqs(@ConnectedSocket() client: Socket): Promise<UserDto[]> {
-		const id: number = client.data.user.id;
-		return (await this.friendReqService.findAllPendings(id));
+		try {
+			const id: number = client.data.user.id;
+			return (await this.friendReqService.findAllPendings(id));
+		} catch(e: any) {
+			return []
+		}
+		
 	}
 	
 	// emit event 'friendReq' to recver
@@ -35,18 +40,26 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() nick: string
 	): Promise<boolean> {
-		if (typeof nick != 'string') {
+		
+		try {
+			if (typeof nick != 'string') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			const sender: UserDto = await this.usersService.getUserById(id);
+			const recver: UserDto = await this.usersService.getUserByNick(nick);
+			if (!sender || !recver) {
+				return false;
+			}
+			const result = await this.friendReqService.sendFriendReq(id, nick);
+			// if fail, no emit
+			if (!result) return (result);
+			this.server.to(recver.id.toString()).emit('recvfriendReq', sender);
+			this.server.to(sender.id.toString()).emit('sendfriendReq', recver);
+			return (result);
+		} catch(e: any) {
 			return false;
 		}
-		const id: number = client.data.user.id;
-		const sender: UserDto = await this.usersService.getUserById(id);
-		const recver: UserDto = await this.usersService.getUserByNick(nick);
-		const result = await this.friendReqService.sendFriendReq(id, nick);
-		// if fail, no emit
-		if (!result) return (result);
-		this.server.to(recver.id.toString()).emit('recvfriendReq', sender);
-		this.server.to(sender.id.toString()).emit('sendfriendReq', recver);
-		return (result);
 	}
 
 	// emit event 'friendReqAccept' to the original sender
@@ -56,18 +69,27 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@MessageBody('other') otherId: number, 
 		@MessageBody('result') result: boolean
 	): Promise<boolean> {
-		if (typeof otherId != 'number' || typeof result != 'boolean') {
-			return false;
+		
+		try {
+			if (typeof otherId != 'number' || typeof result != 'boolean') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			const replier: UserDto = await this.usersService.getUserById(id);
+			const otherUser: UserDto = await this.usersService.getUserById(otherId);
+			if (!replier || !otherUser) {
+				return false ;
+			}
+			const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
+			// if fail, no emit
+			if (!ret) return (ret);
+			result && this.server.to(otherId.toString()).emit('friendReqAccept', replier)
+			result && this.server.to(id.toString()).emit('friendReqAccept', otherUser)
+			return (ret);
+		} catch(e: any) {
+			return false ;
 		}
-		const id: number = client.data.user.id;
-		const replier: UserDto = await this.usersService.getUserById(id);
-		const otherUser: UserDto = await this.usersService.getUserById(otherId);
-		const ret = await this.friendReqService.replyFriendReq(id, otherId, result);
-		// if fail, no emit
-		if (!ret) return (ret);
-		result && this.server.to(otherId.toString()).emit('friendReqAccept', replier)
-		result && this.server.to(id.toString()).emit('friendReqAccept', otherUser)
-		return (ret);
+		
 	}
 
 	@SubscribeMessage('reqSent')
@@ -75,12 +97,17 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		@ConnectedSocket() client: Socket,
 		@MessageBody() otherId: number
 	): Promise<boolean> {
-		if (typeof otherId != 'number') {
-			return false;
+		
+		try {
+			if (typeof otherId != 'number') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			const pendings = await this.friendReqService.getPendingReq(id, otherId);
+			if (pendings.length == 0) return (false)
+			return (true);
+		} catch(e: any) {
+			return false ;
 		}
-		const id: number = client.data.user.id;
-		const pendings = await this.friendReqService.getPendingReq(id, otherId);
-		if (pendings.length == 0) return (false)
-		return (true);
 	}
 }
