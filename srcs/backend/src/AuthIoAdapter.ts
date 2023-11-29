@@ -23,21 +23,28 @@ export class AuthIoAdapter extends IoAdapter {
 				token = socket.handshake?.headers?.authorization;
 			}
 			if (!token) { next(new Error('no token')); }
-			try {
-				const decode = this.authService.jwtService.verify(token);
-				// console.log("eklfjekfjejf")
-				// console.log(decode.id)
-				server.sockets.sockets.forEach(s => {
-					// console.log(s.data.user.id, decode.id)
-					if (s.data.user.id === decode.id) {
-						next(new Error('already authenticated'));
-					}
-				})
-				socket.data.user = decode;
-				next();
-			} catch (err: any) {
-				next(new Error('token invalid'))
-			}
+			// try {
+			const decode = this.authService.jwtService.verify(token);
+			// console.log("eklfjekfjejf")
+			// console.log(decode.id)
+			// const namespaces = ['/friends', '/chats', '/game', '/'];
+			// console.log(namespaces)
+			// namespaces.forEach(ns => {
+			// console.log(socket.nsp.name, server.of(socket.nsp.name).sockets)
+			// server.of(socket.nsp.name).sockets.forEach(s => {
+			// 	console.log(s.data.user.id, decode.id)
+			// 	console.log(s.data.user.id, decode.id)
+			// 	if (s.data.user.id === decode.id) {
+			// 		// console.log('already authenticated')
+			// 		next(new Error('already authenticated'));
+			// 	}
+			// })
+			// })
+			socket.data.user = decode;
+			next();
+			// } catch (err: any) {
+			// 	next(new Error('token invalid'))
+			// }
 		}
 
 		server.use(middleware);
