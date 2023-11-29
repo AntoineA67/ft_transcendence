@@ -36,6 +36,7 @@ export class GamesService {
   async checkUserInGame(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User does not exist');
+    console.log(user.status, user.status != 'ONLINE')
     if (this.isInQueue(userId) || user.status != 'ONLINE') throw new Error('Already in game');
     if (this.matches[userId.toString()]) throw new Error('Already in private game');
   }
