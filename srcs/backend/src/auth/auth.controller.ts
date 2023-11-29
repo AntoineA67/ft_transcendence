@@ -105,13 +105,13 @@ export class AuthController {
 		if (typeof dto.email !== 'string' || dto.email.length > 50) {
 			return;
 		}
-		if (typeof dto.token2FA !== 'string' || dto.token2FA.length > 6) {
+		if (dto.token2FA && (typeof dto.token2FA !== 'string' || dto.token2FA.length > 6)) {
 			return;
 		}
-		if (typeof dto.activated2FA !== 'boolean') {
+		if (dto.activated2FA && (typeof dto.activated2FA !== 'boolean')) {
 			return;
 		}
-		if (typeof dto.firstConnexion !== 'string' || dto.firstConnexion.length > 10) {
+		if (dto.firstConnexion && (typeof dto.firstConnexion !== 'string' || dto.firstConnexion.length > 10)) {
 			return;
 		}
 		try {
