@@ -143,7 +143,6 @@ export function Protected() {
 	}, []);
 
 	useEffect(() => {
-		console.log('connected socket: ', mainConnect, friendConnect, chatConnect, gameConnect )
 		if (mainConnect && friendConnect && chatConnect && gameConnect) {
 			setReady(true)
 		}
