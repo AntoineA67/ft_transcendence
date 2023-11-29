@@ -73,7 +73,7 @@ export function Protected() {
 	// const connectedSockets = useRef<number>(0);
 
 	useEffect(() => {
-		const token = localStorage.getItem('token');
+		const token = localStorage.getItem('token') || null;
 
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
@@ -106,10 +106,6 @@ export function Protected() {
 		}
 		function onDisconnect() {
 			setMainConnect(false)
-			setFriendConnect(false)
-			setChatConnect(false)
-			setGameConnect(false)
-
 
 			socket.connect()
 			friendsSocket.connect();
@@ -147,6 +143,7 @@ export function Protected() {
 	}, []);
 
 	useEffect(() => {
+		console.log('connected socket: ', mainConnect, friendConnect, chatConnect, gameConnect )
 		if (mainConnect && friendConnect && chatConnect && gameConnect) {
 			setReady(true)
 		}
