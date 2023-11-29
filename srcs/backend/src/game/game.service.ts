@@ -22,7 +22,7 @@ export class GamesService {
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
       if (otherUser === null) throw new Error('user not online');
     } catch (error) {
-      socket.emit('cancelledMatchmake', { reason: error.message });
+      socket.emit('cancelledMatchmake');
       await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
       return;
     }
@@ -56,7 +56,7 @@ export class GamesService {
       await this.checkUserInGame(socket.data.user.id);
 
     } catch (error) {
-      socket.emit('cancelledMatchmake', { reason: error.message });
+      socket.emit('cancelledMatchmake');
       await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
       return;
     }
