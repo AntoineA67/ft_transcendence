@@ -36,8 +36,8 @@ export class GamesService {
   async checkUserInGame(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User does not exist');
-    console.log(user.status, user.status != 'ONLINE')
-    if (this.isInQueue(userId) || user.status != 'ONLINE') throw new Error('Already in game');
+    console.log(user.status, user.status == 'INGAME')
+    if (this.isInQueue(userId) || user.status == 'INGAME') throw new Error('Already in game');
     if (this.matches[userId.toString()]) throw new Error('Already in private game');
   }
 
@@ -52,7 +52,7 @@ export class GamesService {
 
       if (!otherUser) throw new Error('Other user not exists');
       const user = await this.prisma.user.findUnique({ where: { id: socket.data.user.id } });
-      if (this.isInQueue(socket.data.user.id) || user.status != 'ONLINE') throw new Error('Already in game');
+      if (this.isInQueue(socket.data.user.id) || user.status == 'INGAME') throw new Error('Already in game');
       await this.checkUserInGame(socket.data.user.id);
 
     } catch (error) {
@@ -80,7 +80,7 @@ export class GamesService {
       for (let s of sockets) {
         if (s.data.user.id === otherIdNumber) {
           const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
-          if (otherUser.status != 'ONLINE') {
+          if (otherUser.status == 'INGAME') {
             socket.emit('cancelledMatchmake', { reason: 'Other user already in game' });
             await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
             return;
