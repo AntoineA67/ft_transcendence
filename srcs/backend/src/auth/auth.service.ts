@@ -246,8 +246,7 @@ export class AuthService {
 			return true;
 	}
 
-	async signout(req: Request): Promise<{ message: string }> { // Invalidate the refresh token to make the signout more secure
-		const refreshToken = req.body.refreshToken;
+	async signout(refreshToken: string): Promise<{ message: string }> { // Invalidate the refresh token to make the signout more secure
 		if (!refreshToken) {
 			throw new UnauthorizedException("Refresh token is missing");
 		}

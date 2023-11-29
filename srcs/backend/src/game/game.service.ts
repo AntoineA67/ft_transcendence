@@ -20,17 +20,16 @@ export class GamesService {
     try {
       otherIdNumber = parseInt(otherIdDTO);
       const otherUser = await this.prisma.user.findUnique({ where: { id: otherIdNumber } });
-      if (otherUser === null || otherUser.status !== 'ONLINE') throw new Error('user not online');
+      if (otherUser === null) throw new Error('user not online');
     } catch (error) {
       socket.emit('cancelledMatchmake', { reason: error.message });
       await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'ONLINE' } });
       return;
     }
-    if (this.matches[otherIdDTO]) {
+    if (this.matches[otherIdDTO] && this.matches[otherIdDTO].receiverId === socket.data.user.id) {
       this.matches[otherIdDTO].sender.emit('cancelledMatchmake');
       await this.prisma.user.update({ where: { id: otherIdNumber }, data: { status: 'ONLINE' } });
       delete this.matches[otherIdDTO];
-    
     }
   }
 
@@ -109,31 +108,36 @@ export class GamesService {
   }
 
   async disconnect(client: Socket) {
-    const userId = client.data.user.id;
-    const userIdString = userId.toString()
-    const roomId = this.clients[userId];
-    if (roomId) {
-      const room = this.rooms[roomId];
-      if (room) {
-        if (room.isEmpty()) return;
-        room.leave(userId).then(() => {
-          delete this.clients[userId];
-          if (room.isEmpty()) {
-            delete this.rooms[roomId];
-          }
-        });
+    try {
+      const userId = client.data.user.id;
+      const userIdString = userId.toString()
+      const roomId = this.clients[userId];
+      if (roomId) {
+        const room = this.rooms[roomId];
+        if (room) {
+          if (room.isEmpty()) return;
+          room.leave(userId).then(() => {
+            delete this.clients[userId];
+            if (room.isEmpty()) {
+              delete this.rooms[roomId];
+            }
+          });
+        }
+      } else if (this.isInQueue(client.data.user.id)) {
+        const index = this.matchmakingQueue.indexOf(client);
+        if (index !== -1) {
+          this.matchmakingQueue.splice(index, 1);
+        }
+      } else if (this.matches[userIdString]) {
+        this.matches[userIdString].receiver.emit('cancelledMatchmake');
+        delete this.matches[userIdString];
+        await this.prisma.user.update({ where: { id: userId }, data: { status: 'ONLINE' } });
       }
-    } else if (this.isInQueue(client.data.user.id)) {
-      const index = this.matchmakingQueue.indexOf(client);
-      if (index !== -1) {
-        this.matchmakingQueue.splice(index, 1);
-      }
-    } else if (this.matches[userIdString]) {
-      this.matches[userIdString].receiver.emit('cancelledMatchmake');
-      delete this.matches[userIdString];
-      await this.prisma.user.update({ where: { id: userId }, data: { status: 'ONLINE' } });
+      await this.prisma.user.update({ where: { id: client.data.user.id }, data: { status: 'ONLINE' } });
+    } catch (error) {
+      client.disconnect();
+      return;
     }
-    await this.prisma.user.update({ where: { id: client.data.user.id }, data: { status: 'ONLINE' } });
   }
 
   handleKeysPresses(clientId: string, keysPressed: { up: boolean, down: boolean, time: number }) {
@@ -161,8 +165,9 @@ export class GamesService {
         this.clients[player1.data.user.id] = roomId;
         this.clients[player2.data.user.id] = roomId;
       } catch (error) {
-        player1.disconnect();
-        player2.disconnect();
+        player1.emit('cancelledMatchmake');
+        player2.emit('cancelledMatchmake');
+        return;
       }
 
       this.rooms[roomId] = new Room(roomId, wss, player1, player2);
