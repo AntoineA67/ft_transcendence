@@ -59,6 +59,12 @@ export function ChatBox() {
 	const [passwordStatus, setPasswordStatus] = useState<boolean>(false);
 
 	useEffect(() => {
+		if (data === undefined || data === null || !(data && 'roomTitle' in data && 'messages' in data && 'roomChannel' in data && 'members' in data && 'memberStatus' in data && 'private' in data && 'password' in data && 'profile' in data)) {
+			navigate('/chat');
+			if (data)
+				console.log(data);
+			return;
+		}
 		setroomTitle(data.roomTitle);
 		setMessages(data.messages);
 		setRoomChannel(data.roomChannel);
