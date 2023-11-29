@@ -45,7 +45,7 @@ export class BlockGateway {
 		@MessageBody() otherId: number
 	) {
 		try {
-			if (typeof otherId != 'number') {
+			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return ;
 			}
 			const id: number = client.data.user.id;
@@ -71,10 +71,16 @@ export class BlockGateway {
 		@MessageBody() otherId: number
 	) {
 		try {
-			if (typeof otherId != 'number') {
+			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return ;
 			}
 			const id: number = client.data.user.id;
+			if (id === otherId) {
+				return ;
+			}
+			if (id <= 0 || id > 100000) {
+				return ;
+			}
 			const user: UserDto = await this.usersService.getUserById(id);
 			const otherUser: UserDto = await this.usersService.getUserById(otherId);
 			if (!user || !otherUser) {
