@@ -39,10 +39,15 @@ export class RoomGateway
 
 	@SubscribeMessage('getAllRoomsByUserid')
 	async GetAllRoomsByUserid(@ConnectedSocket() client: Socket) {
-		const id: number = client.data.user.id;
-		if (!id || Number.isNaN(id) || id > 100000 || id <= 0)
+		try {
+			const id: number = client.data.user.id;
+			if (!id || Number.isNaN(id) || id > 100000 || id <= 0)
+				return null;
+			return (await this.roomService.getAllRoomsByUserid(id));
+		}
+		catch (error) {
 			return null;
-		return (await this.roomService.getAllRoomsByUserid(id));
+		}
 	}
 
 	@SubscribeMessage('getRoomData')
@@ -580,7 +585,7 @@ export class RoomGateway
 		try {
 			if (!content || !('memberId' in content) || !('roomid' in content) || !('owner' in content) || !('admin' in content) || Object.keys(content).length !== 4)
 				return false;
-			if (typeof content.memberId !== 'number' || typeof content.roomid !== 'string' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean' 
+			if (typeof content.memberId !== 'number' || typeof content.roomid !== 'string' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean'
 				|| !content.memberId.toString().trim() || !content.roomid.trim() || !/^[0-9]+$/.test(content.roomid)) {
 				return false;
 			}
