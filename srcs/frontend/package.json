@@ -15,7 +15,6 @@
     "@react-three/drei": "^9.79.4",
     "@react-three/fiber": "^8.13.5",
     "@react-three/postprocessing": "^2.15.1",
-    "@sentry/react": "^7.80.1",
     "@testing-library/react": "^14",
     "@tweenjs/tween.js": "^21.0.0",
     "@types/dat.gui": "^0.7.10",
