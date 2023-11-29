@@ -78,7 +78,7 @@ export class FriendRequestService {
 		const friend = await this.usersService.getUserById(otherId);
 		const status = accept ? ReqState.ACCEPT : ReqState.DECLINE;
 		if (!me || !friend) return (false);
-		const pendings = await this.getPendingReq(id, otherId);
+		const pendings = await this.getPendingReq(otherId, id);
 		if (pendings.length == 0) {
 			return false;
 		}
