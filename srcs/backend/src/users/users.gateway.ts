@@ -18,12 +18,15 @@ export class UsersGateway
 
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
-		await this.usersService.updateUser(id, { status: 'ONLINE' });
-		// client join a room 
-		client.join(id.toString())
-		//emit to everyone
-		client.broadcast.emit('online', id);
-		this.usersService.updateUser(id, { status: 'ONLINE' })
+		const user = await this.usersService.getUserById(id)
+		if (user.status == 'OFFLINE') {
+			await this.usersService.updateUser(id, { status: 'ONLINE' });
+			// client join a room 
+			client.join(id.toString())
+			//emit to everyone
+			client.broadcast.emit('online', id);
+			this.usersService.updateUser(id, { status: 'ONLINE' })
+		}
 	}
 
 	async handleDisconnect(client: Socket) {
