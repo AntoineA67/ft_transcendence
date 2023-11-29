@@ -388,7 +388,7 @@ export class RoomGateway
 			if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
 				return false;
 			const roomid = parseInt(content.roomId, 10);
-			if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0 || content.usertoKick > 100000 || content.usertoKick <= 0)
 				return false;
 			const bool = await this.roomService.userLeaveChannel(userid, roomid, content.usertoKick);
 
@@ -427,9 +427,10 @@ export class RoomGateway
 			const userId: number = client.data.user.id;
 			if (!userId || Number.isNaN(userId) || userId > 100000 || userId <= 0)
 				return false;
-			if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string' || typeof content.memberId !== 'number' || typeof content.duration !== 'number' || content.duration < 0) {
+			if (!content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId) || typeof content.roomId !== 'string'
+				|| typeof content.memberId !== 'number' || typeof content.duration !== 'number' || Number.isNaN(content.duration) || content.duration < 0
+				|| content.duration > 1000000 || content.memberId > 100000 || content.memberId <= 0)
 				return false;
-			}
 			const roomId = parseInt(content.roomId, 10);
 			if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
 				return false;
@@ -463,16 +464,16 @@ export class RoomGateway
 		try {
 			if (!content || !('memberId' in content) || !('roomId' in content) || !('action' in content) || Object.keys(content).length !== 3)
 				return false;
-			if (typeof content.memberId !== 'number' || typeof content.roomId !== 'string' || typeof content.action !== 'boolean' || !content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId)) {
+			if (typeof content.memberId !== 'number' || typeof content.roomId !== 'string' || typeof content.action !== 'boolean'
+				|| !content.memberId.toString().trim() || !content.roomId.trim() || !/^[0-9]+$/.test(content.roomId)) {
 				return false;
 			}
 			const userid: number = client.data.user.id;
 			if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
 				return false;
 			const roomid = parseInt(content.roomId, 10);
-			if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0)
+			if (!roomid || Number.isNaN(roomid) || roomid > 100000 || roomid <= 0 || content.memberId > 100000 || content.memberId <= 0)
 				return false;
-
 			const bool = await this.roomService.banMember(userid, roomid, content.memberId, content.action);
 			if (bool) {
 				const usertoban = await this.roomService.getMemberDatabyId(content.memberId);
@@ -507,7 +508,7 @@ export class RoomGateway
 		try {
 			if (!content || !('memberId' in content) || !('action' in content) || Object.keys(content).length !== 2)
 				return false;
-			if (typeof content.memberId !== 'number' || typeof content.action !== 'boolean' || !content.memberId.toString().trim()) {
+			if (typeof content.memberId !== 'number' || typeof content.action !== 'boolean' || !content.memberId.toString().trim() || content.memberId > 100000 || content.memberId <= 0) {
 				return false;
 			}
 			const userid: number = client.data.user.id;
@@ -579,14 +580,15 @@ export class RoomGateway
 		try {
 			if (!content || !('memberId' in content) || !('roomid' in content) || !('owner' in content) || !('admin' in content) || Object.keys(content).length !== 4)
 				return false;
-			if (typeof content.memberId !== 'number' || typeof content.roomid !== 'string' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean' || !content.memberId.toString().trim() || !content.roomid.trim() || !/^[0-9]+$/.test(content.roomid)) {
+			if (typeof content.memberId !== 'number' || typeof content.roomid !== 'string' || typeof content.owner !== 'boolean' || typeof content.admin !== 'boolean' 
+				|| !content.memberId.toString().trim() || !content.roomid.trim() || !/^[0-9]+$/.test(content.roomid)) {
 				return false;
 			}
 			const userid: number = client.data.user.id;
 			if (!userid || Number.isNaN(userid) || userid > 100000 || userid <= 0)
 				return false;
 			const roomId = parseInt(content.roomid, 10);
-			if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0)
+			if (!roomId || Number.isNaN(roomId) || roomId > 100000 || roomId <= 0 || content.memberId > 100000 || content.memberId <= 0)
 				return false;
 
 			const bool = await this.roomService.changeRole(userid, roomId, content.memberId, content.owner, content.admin);
