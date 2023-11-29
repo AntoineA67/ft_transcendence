@@ -4,7 +4,6 @@ import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { AlreadyConnectedModal } from './AlreadyConnectedModal';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -67,10 +66,6 @@ export function Protected() {
 	const [friendConnect, setFriendConnect] = useState<boolean>(false)
 	const [chatConnect, setChatConnect] = useState<boolean>(false)
 	const [gameConnect, setGameConnect] = useState<boolean>(false)
-	const [alreadyConnected, setAlreadyConnected] = useState<boolean>(false)
-
-
-	// const connectedSockets = useRef<number>(0);
 
 	useEffect(() => {
 		const token = localStorage.getItem('token') || null;
@@ -84,24 +79,7 @@ export function Protected() {
 		friendsSocket.connect();
 		chatsSocket.connect();
 		gamesSocket.connect();
-		//socket io regitsre event
-		// function onConnect() {
-		// 	connectedSockets.current += 1;
-		// 	console.log('connectedsocket: ', connectedSockets)
-		// 	setStatus('loading')
-		// 	if (connectedSockets.current >= 4) {
-		// 		setStatus('connect')
-		// 	}
-		// }
-		// function onDisconnect() {
-		// 	socket.connect()
-		// }
 		function onError(err: any) {
-			// console.log("onError connect", err.message, err.message === "already authenticated")
-			if (err.message === "already authenticated") {
-				setAlreadyConnected(true);
-				return;
-			}
 			setErr(true)
 		}
 		function onDisconnect() {
@@ -153,7 +131,6 @@ export function Protected() {
 			{!ready && !err && <p className='white-text'> loading ... </p>}
 			{ready && !err && <Outlet />}
 			{err && <Navigate to="/login" replace />}
-			<AlreadyConnectedModal summary={alreadyConnected} />
 		</>
 	);
 }
