@@ -25,6 +25,14 @@ export class AuthIoAdapter extends IoAdapter {
 			if (!token) { next(new Error('no token')); }
 			try {
 				const decode = this.authService.jwtService.verify(token);
+				// console.log("eklfjekfjejf")
+				// console.log(decode.id)
+				server.sockets.sockets.forEach(s => {
+					// console.log(s.data.user.id, decode.id)
+					if (s.data.user.id === decode.id) {
+						next(new Error('already authenticated'));
+					}
+				})
 				socket.data.user = decode;
 				next();
 			} catch (err: any) {
