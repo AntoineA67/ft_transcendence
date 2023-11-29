@@ -2,13 +2,13 @@ import Stack from 'react-bootstrap/Stack';
 import Container from 'react-bootstrap/Container';
 import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
-import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
 import axios from 'axios';
 import { enqueueSnackbar } from 'notistack';
 import { checkPassword } from './ChatDto';
+import { friendsSocket, chatsSocket, gamesSocket, socket } from '../utils/socket';
 
 export function Title({ title }: { title: string }) {
 	return (
@@ -200,6 +200,10 @@ export function SettingMenu() {
 			});
 			['token', 'random', 'email', 'refreshToken', 'firstConnexion'].forEach(item => localStorage.removeItem(item));
 			window.location.href = '/';
+			socket.disconnect()
+			friendsSocket.disconnect()
+			chatsSocket.disconnect()
+			gamesSocket.disconnect()
 		} catch (err: any) {
 		}
 	}
