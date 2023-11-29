@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { chatsSocket, friendsSocket, gamesSocket, socket } from './socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { AlreadyConnectedModal } from './AlreadyConnectedModal';
 
 export function CallBack42() {
 	const [status, setStatus] = useState<'loading' | 'done' | '2fa'>('loading');
@@ -55,27 +56,30 @@ export function CallBack42() {
 	);
 }
 
+
+
 export function Protected() {
 	// const [status, setStatus] = useState<'connect' | 'error' | 'loading'>('loading');
 	const [ready, setReady] = useState<boolean>(false)
 	const [err, setErr] = useState<boolean>(false)
-	
+
 	const [mainConnect, setMainConnect] = useState<boolean>(false)
 	const [friendConnect, setFriendConnect] = useState<boolean>(false)
 	const [chatConnect, setChatConnect] = useState<boolean>(false)
 	const [gameConnect, setGameConnect] = useState<boolean>(false)
+	const [alreadyConnected, setAlreadyConnected] = useState<boolean>(false)
 
-	
+
 	// const connectedSockets = useRef<number>(0);
 
 	useEffect(() => {
 		const token = localStorage.getItem('token');
-		
+
 		socket.auth = { token: token };
 		friendsSocket.auth = { token: token };
 		chatsSocket.auth = { token: token };
 		gamesSocket.auth = { token: token };
-		
+
 		socket.connect();
 		friendsSocket.connect();
 		chatsSocket.connect();
@@ -93,6 +97,11 @@ export function Protected() {
 		// 	socket.connect()
 		// }
 		function onError(err: any) {
+			// console.log("onError connect", err.message, err.message === "already authenticated")
+			if (err.message === "already authenticated") {
+				setAlreadyConnected(true);
+				return;
+			}
 			setErr(true)
 		}
 		function onDisconnect() {
@@ -101,7 +110,7 @@ export function Protected() {
 			setChatConnect(false)
 			setGameConnect(false)
 
-			
+
 			socket.connect()
 			friendsSocket.connect();
 			chatsSocket.connect();
@@ -123,7 +132,7 @@ export function Protected() {
 		friendsSocket.on('connect', onFriendConnect);
 		chatsSocket.on('connect', onChatConnect);
 		gamesSocket.on('connect', onGameConnect);
-		
+
 		socket.on('disconnect', onDisconnect);
 		socket.on('connect_error', onError);
 		return () => {
@@ -131,12 +140,12 @@ export function Protected() {
 			friendsSocket.off('connect', onFriendConnect);
 			chatsSocket.off('connect', onChatConnect);
 			gamesSocket.off('connect', onGameConnect);
-			
+
 			socket.off('disconnect', onDisconnect);
 			socket.off('connect_error', onError)
 		};
 	}, []);
-	
+
 	useEffect(() => {
 		if (mainConnect && friendConnect && chatConnect && gameConnect) {
 			setReady(true)
@@ -148,6 +157,7 @@ export function Protected() {
 			{!ready && !err && <p className='white-text'> loading ... </p>}
 			{ready && !err && <Outlet />}
 			{err && <Navigate to="/login" replace />}
+			<AlreadyConnectedModal summary={alreadyConnected} />
 		</>
 	);
 }
