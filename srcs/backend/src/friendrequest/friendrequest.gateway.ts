@@ -42,7 +42,7 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 	): Promise<boolean> {
 		
 		try {
-			if (typeof nick != 'string') {
+			if (typeof nick != 'string' || nick.length == 0 || nick.length > 20 || !nick.match(/^[A-Za-z0-9-]+$/)) {
 				return false;
 			}
 			const id: number = client.data.user.id;
