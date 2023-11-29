@@ -72,8 +72,9 @@ export function Protected() {
 		//socket io regitsre event
 		function onConnect() {
 			connectedSockets.current += 1;
+			console.log('connectedsocket: ', connectedSockets)
 			setStatus('loading')
-			if (connectedSockets.current === 4) {
+			if (connectedSockets.current >= 4) {
 				setStatus('connect')
 			}
 		}
