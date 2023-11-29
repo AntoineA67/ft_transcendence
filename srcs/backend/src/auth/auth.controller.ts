@@ -98,7 +98,29 @@ export class AuthController {
 			user: req.user,
 			firstConnexion: req.user.firstConnexion,
 		}
-		return await this.authService.signin42(dto, res, req);
+
+		if (typeof dto.id !== 'number' || dto.id < 0 || dto.id > 1000000) {
+			return;
+		}
+		if (typeof dto.email !== 'string' || dto.email.length > 50) {
+			return;
+		}
+		if (typeof dto.token2FA !== 'string' || dto.token2FA.length > 6) {
+			return;
+		}
+		if (typeof dto.activated2FA !== 'boolean') {
+			return;
+		}
+		if (typeof dto.firstConnexion !== 'string' || dto.firstConnexion.length > 10) {
+			return;
+		}
+		try {
+			const result = await this.authService.signin42(dto, res, req);
+			return result;
+		}
+		catch (error) {
+			return;
+		}
 	}
 
 	@Public()
