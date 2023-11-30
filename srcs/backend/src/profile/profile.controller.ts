@@ -14,25 +14,31 @@ export class ProfileController {
 	@Get('me')
 	async getMyProfile(@Req() req: Request) {
 		const id = req.user.id;
-		const profile = await this.profileService.getUserProfileById(id, id)
-		if (!profile) {
+		try {
+
+			const profile = await this.profileService.getUserProfileById(id, id)
+			if (!profile) {
+				throw new HttpException('User me not found', HttpStatus.NOT_FOUND);
+			}
+			return (profile);
+		} catch (error) {
 			throw new HttpException('User me not found', HttpStatus.NOT_FOUND);
 		}
-		return (profile);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Get(':nick')
 	async getProfile(@Req() req: Request, @Param('nick') nick: string) {
-		const id = req.user.id;
-		const profile = await this.profileService.getUserProfileByNick(id, nick);
-		if (!profile) {
+		try {
+
+			const id = req.user.id;
+			const profile = await this.profileService.getUserProfileByNick(id, nick);
+			if (!profile) {
+				throw new HttpException(`User ${nick} not found`, HttpStatus.NOT_FOUND);
+			}
+			return (profile);
+		} catch (error) {
 			throw new HttpException(`User ${nick} not found`, HttpStatus.NOT_FOUND);
 		}
-		return (profile);
 	}
-
-
-	
-
 }

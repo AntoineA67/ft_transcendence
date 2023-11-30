@@ -71,16 +71,16 @@ export class RoomService {
 		return user;
 	}
 
-	async createMessage(messageContent: string, roomId: number, userid: number): Promise<Message> { 
-		return this.prisma.message.create({
-		  data: {
-			message: messageContent,
-			send_date: new Date(),
-			room: { connect: { id: roomId } },
-			user: { connect: { id: userid } },
-		  },
+	async createMessage(messageContent: string, roomId: number, userid: number): Promise<Message> {
+		return await this.prisma.message.create({
+			data: {
+				message: messageContent,
+				send_date: new Date(),
+				room: { connect: { id: roomId } },
+				user: { connect: { id: userid } },
+			},
 		});
-	  }
+	}
 
 	async getRoomDataById(roomid: number): Promise<Room | null> {
 		const room = await this.prisma.room.findUnique({
@@ -936,13 +936,18 @@ export class RoomService {
 	}
 
 	async changePassword(userid: number, roomId: number, password: string): Promise<boolean> {
-		const user = await this.prisma.member.findFirst({
-			where: {
-				roomId,
-				userId: userid,
-				owner: true,
-			},
-		});
+		let user;
+		try {
+			user = await this.prisma.member.findFirst({
+				where: {
+					roomId,
+					userId: userid,
+					owner: true,
+				},
+			});
+		} catch (error) {
+			return false;
+		}
 
 		if (!user) {
 			return false;
