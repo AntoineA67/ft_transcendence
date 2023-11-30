@@ -9,8 +9,8 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true, namespace: 'friends' })
 export class FriendshipGateway {
-	
-	constructor(private readonly friendshipService: FriendshipService) {}
+
+	constructor(private readonly friendshipService: FriendshipService) { }
 
 	private logger = new Logger('FriendshipGateway')
 
@@ -30,40 +30,43 @@ export class FriendshipGateway {
 	async handlefindAllFriends(
 		@ConnectedSocket() client: Socket): Promise<UserDto[]> {
 		const id: number = client.data.user.id;
-
-		return (await this.friendshipService.findAllFriends(id));
+		try {
+			return (await this.friendshipService.findAllFriends(id));
+		} catch (error) {
+			return [];
+		}
 	}
-	
+
 	@SubscribeMessage('isFriend')
 	async handleIsFriend(
-		@ConnectedSocket() client: Socket, 
+		@ConnectedSocket() client: Socket,
 		@MessageBody() otherId: number
 	): Promise<boolean> {
-		
+
 		try {
 			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return (false)
 			}
 			const id: number = client.data.user.id;
 			return (await this.friendshipService.isFriend(id, otherId))
-		} catch(e: any) {
+		} catch (e: any) {
 			return false;
 		}
 	}
-	
+
 	@SubscribeMessage('Unfriend')
 	async handleUnfriend(
 		@ConnectedSocket() client: Socket,
 		@MessageBody() otherId: number
 	): Promise<boolean> {
-		
+
 		try {
 			if (typeof otherId != 'number' || otherId <= 0 || otherId > 100000) {
 				return (false)
 			}
 			const id: number = client.data.user.id;
-			return (await this.friendshipService.unFriend(id, otherId))	
-		} catch(e: any) {
+			return (await this.friendshipService.unFriend(id, otherId))
+		} catch (e: any) {
 			return false;
 		}
 	}
@@ -71,6 +74,10 @@ export class FriendshipGateway {
 	@SubscribeMessage('findOthers')
 	async handleFindOthers(@ConnectedSocket() client: Socket) {
 		const id: number = client.data.user.id;
-		return (await this.friendshipService.getOthers(id));
+		try {
+			return (await this.friendshipService.getOthers(id));
+		} catch (error) {
+			return [];
+		}
 	}
 }

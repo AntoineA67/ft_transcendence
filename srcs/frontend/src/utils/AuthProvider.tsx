@@ -102,6 +102,8 @@ export function Protected() {
 		function onGameConnect() {
 			setGameConnect(true)
 		}
+
+		const onWsException = (msg: any) => { console.log(`Error:`, msg) }
 		socket.on('connect', onMainConnect);
 		friendsSocket.on('connect', onFriendConnect);
 		chatsSocket.on('connect', onChatConnect);
@@ -109,6 +111,8 @@ export function Protected() {
 
 		socket.on('disconnect', onDisconnect);
 		socket.on('connect_error', onError);
+
+		socket.on('exception', onWsException)
 		return () => {
 			socket.off('connect', onMainConnect);
 			friendsSocket.off('connect', onFriendConnect);
@@ -117,6 +121,7 @@ export function Protected() {
 
 			socket.off('disconnect', onDisconnect);
 			socket.off('connect_error', onError)
+			socket.off('exception', onWsException)
 		};
 	}, []);
 
