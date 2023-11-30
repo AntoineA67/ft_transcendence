@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma, OnlineStatus, ReqState } from '@prisma/client'
 import { UpdateUserDto } from './dto/UpdateUserDto';
@@ -22,12 +22,12 @@ export class UsersService {
 	constructor(private prisma: PrismaService) { }
 
 	async createUser(username: string, email: string, password: string, avatar: string = null) {
-		let hashPassword;
-		if (password == "nopass")
-			hashPassword = "nopass";
-		else
-			hashPassword = await argon.hash(password);
 		try {
+			let hashPassword;
+			if (password == "nopass")
+				hashPassword = "nopass";
+			else
+				hashPassword = await argon.hash(password);
 			const user = await this.prisma.user.create({
 				data: {
 					username: username,
@@ -43,19 +43,24 @@ export class UsersService {
 					throw new ForbiddenException('Credentials taken');
 				}
 			}
-			throw error;
+			else if (error instanceof Error)
+				throw new BadRequestException('Could not create user');
 		}
 	}
 
 	async getAllUsers(): Promise<UserDto[]> {
-		return await this.prisma.user.findMany({
-			select: {
-				id: true,
-				username: true,
-				avatar: true,
-				status: true,
-			}
-		});
+		try {
+			return await this.prisma.user.findMany({
+				select: {
+					id: true,
+					username: true,
+					avatar: true,
+					status: true,
+				}
+			});
+		} catch (error) {
+			return [];
+		}
 	}
 
 	async checkDataforUserUpdate(data: UpdateUserDto): Promise<boolean> {
@@ -115,7 +120,6 @@ export class UsersService {
 			}
 			return true;
 		} catch (error) {
-			console.error(error);
 			return false;
 		}
 	}
@@ -126,11 +130,11 @@ export class UsersService {
 		if (!bool)
 			return false;
 		let user: User;
-		if (data.password) {
-			const hashPassword = await argon.hash(data.password);
-			data.password = hashPassword;
-		}
 		try {
+			if (data.password) {
+				const hashPassword = await argon.hash(data.password);
+				data.password = hashPassword;
+			}
 			user = await this.prisma.user.update({
 				where: { id },
 				data
@@ -194,49 +198,6 @@ export class UsersService {
 		})
 	}
 
-	async getUserProfileById(id: number): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { id },
-			select: {
-				id: true,
-				hashPassword: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-				activated2FA: true,
-			}
-		});
-		if (profile && profile.hashPassword === "nopass") {
-			profile = { ...profile, hashPassword: "nopass" };
-		} else {
-			profile = { ...profile, hashPassword: null };
-		}
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
-
-	async getUserProfileByNick(nick: string): Promise<ProfileDto | null> {
-		let profile = await this.prisma.user.findUnique({
-			where: { username: nick },
-			select: {
-				id: true,
-				username: true,
-				avatar: true,
-				bio: true,
-				status: true,
-			}
-		});
-		return ({
-			...profile,
-			friend: null, block: null, blocked: null, sent: null,
-			gameHistory: [], achieve: null
-		})
-	}
-
 	async getUserByNick(nick: string): Promise<UserDto> {
 		return await this.prisma.user.findUnique({
 			where: { username: nick },
@@ -247,23 +208,6 @@ export class UsersService {
 				status: true,
 			}
 		})
-	}
-
-	async getUserByUsername(username: string): Promise<User> {
-		try {
-			const user = await this.prisma.user.findFirst({
-				where: {
-					username: username,
-				},
-			});
-			if (!user) {
-				throw new NotFoundException(`User not found with username ${username}`);
-			}
-			return user;
-		} catch (error) {
-			console.error(`Error fetching user with username ${username}`, error);
-			throw error;
-		}
 	}
 
 	async generate2FASecret(user: User) {
@@ -333,18 +277,27 @@ export class UsersService {
 			where: { id: id }
 		});
 
-		const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
-		if (passwordMatch) {
-			if (!checkPassword(newPassword))
-				return false;
-			const hashNewPassword = await argon.hash(newPassword);
-			await this.prisma.user.update({
-				where: { id: id },
-				data: { hashPassword: hashNewPassword }
-			});
-			return (true);
+		if (!user) {
+			return false;
 		}
-		return (false);
+
+		try {
+
+			const passwordMatch = await argon.verify(user.hashPassword, oldPassword);
+			if (passwordMatch) {
+				if (!checkPassword(newPassword))
+					return false;
+				const hashNewPassword = await argon.hash(newPassword);
+				await this.prisma.user.update({
+					where: { id: id },
+					data: { hashPassword: hashNewPassword }
+				});
+				return (true);
+			}
+			return (false);
+		} catch (error) {
+			return false;
+		}
 	}
 
 }

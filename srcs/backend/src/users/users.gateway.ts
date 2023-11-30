@@ -41,37 +41,39 @@ export class UsersGateway
 
 	@SubscribeMessage('getAllUsers')
 	async handleGetAllUsers(): Promise<UserDto[]> {
-		return (await this.usersService.getAllUsers());
+		try {
+			return (await this.usersService.getAllUsers());
+		} catch (error) {
+			return [];
+		}
 	}
 
 	@SubscribeMessage('UpdateUsername')
 	async handleUpdateUsername(@ConnectedSocket() client: Socket, @MessageBody() username: string) {
-		
 		try {
 			if (typeof username != 'string') {
 				return false;
 			}
 			const id: number = client.data.user.id;
-			return (await this.usersService.updateUser(id, {username: username}))
-		} catch(e: any) {
+			return (await this.usersService.updateUser(id, { username: username }))
+		} catch (e: any) {
 			return false;
 		}
 	}
-	
+
 	@SubscribeMessage('UpdateBio')
 	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
-		
 		try {
 			if (typeof bio != 'string') {
 				return false;
 			}
 			const id: number = client.data.user.id;
-			return (await this.usersService.updateUser(id, {bio: bio}))
-		} catch(e: any) {
+			return (await this.usersService.updateUser(id, { bio: bio }))
+		} catch (e: any) {
 			return false;
 		}
 	}
-	
+
 
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
@@ -95,21 +97,25 @@ export class UsersGateway
 		};
 		try {
 			return (await fileCheck(file));
-		} catch(e: any) {
+		} catch (e: any) {
 			return false;
 		}
 	}
 
 	@SubscribeMessage('Create2FA')
 	async handleCreate2FA(@ConnectedSocket() client: Socket) {
-		const data = this.usersService.generate2FASecret(client.data.user);
-		this.usersService.updateUser(client.data.user.id, { otpHash: (await data).secret });
-		return (await data);
+		try {
+			const data = await this.usersService.generate2FASecret(client.data.user);
+			this.usersService.updateUser(client.data.user.id, { otpHash: data.secret });
+			return data;
+		} catch (error) {
+			throw new WsException("Could not generate 2FA secret");
+		}
 	}
 
 	@SubscribeMessage('Activate2FA')
 	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		
+
 		try {
 			if (typeof data != 'string' || data.length > 6) {
 				return (false);
@@ -120,14 +126,14 @@ export class UsersGateway
 				return (true);
 			}
 			return (false);
-		} catch(e: any) {
+		} catch (e: any) {
 			return false;
 		}
 	}
 
 	@SubscribeMessage('Disable2FA')
 	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		
+
 		try {
 			if (typeof data != 'string' || data.length > 6) {
 				return (false);
@@ -138,7 +144,7 @@ export class UsersGateway
 				return (true);
 			}
 			return (false);
-		} catch(e: any) {
+		} catch (e: any) {
 			return false;
 		}
 	}
@@ -146,12 +152,16 @@ export class UsersGateway
 	@SubscribeMessage('myAvatar')
 	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string> {
 		const id: number = client.data.user.id;
-		return (await this.usersService.getAvatar(id))
+		try {
+			return (await this.usersService.getAvatar(id))
+		} catch (error) {
+			return '';
+		}
 	}
 
 	@SubscribeMessage('ChangePassword')
 	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any): Promise<boolean> {
-		
+
 		try {
 			if (typeof data?.oldPassword != 'string' || typeof data?.newPassword != 'string') {
 				return (false);
@@ -167,11 +177,11 @@ export class UsersGateway
 
 	@SubscribeMessage('getUser')
 	async handleGetUser(@MessageBody() id: number): Promise<UserDto | null> {
-		
+
 		try {
 			if (typeof id != 'number') {
 				return (null);
-			}		
+			}
 			return await this.usersService.getUserById(id);
 		} catch (e: any) {
 			return null;
