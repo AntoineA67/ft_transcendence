@@ -28,7 +28,8 @@ export function TwoFactorAuth() {
 
 	async function create2FASubmit() {
 		socket.emit('Create2FA', (response: any) => {
-			setQrCodePath(response.otpauthUrl);
+			if (response)
+				setQrCodePath(response.otpauthUrl);
 		});
 	}
 

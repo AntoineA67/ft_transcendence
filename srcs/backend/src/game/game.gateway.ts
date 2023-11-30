@@ -92,7 +92,11 @@ export class GameGateway
 
     @SubscribeMessage('cancel')
     async handleLeave(socket: Socket): Promise<void> {
-        await this.gamesService.disconnect(socket);
+        try {
+            await this.gamesService.disconnect(socket);
+        } catch (error) {
+            return;
+        }
     }
 
 
