@@ -42,17 +42,9 @@ export class AuthController {
 	@Post('signin')
 	@HttpCode(HttpStatus.OK)
 	async signin(@Body() dto: SigninDto) {
-		if (!dto || Object.keys(dto).length === 0) {
-			return;
-		}
-		if (typeof dto.email !== 'string' || dto.email.length > 50) {
-			return;
-		}
-		if (typeof dto.password !== 'string' || dto.password.length > 50) {
-			return;
-		}
-		const result = await this.authService.signin(dto);
-		return result;
+		// const result = await this.authService.signin(dto);
+		// return result;
+		return await this.authService.signin(dto);
 	}
 
 	@Public()
