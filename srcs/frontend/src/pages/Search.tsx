@@ -12,7 +12,7 @@ export function SearchBar() {
 		const myFilter = (item: userType): boolean => {
 			return (item.username.toLowerCase().includes(search.toLowerCase()))
 		}
-		setTemp(temp.filter(myFilter));
+		setTemp(users.filter(myFilter));
 	}, [search])
 
 	const myMap = (item: userType) => {
