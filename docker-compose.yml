@@ -80,7 +80,7 @@ services:
 
   proxy:
     volumes:
-      - ./proxy/cert/:/etc/letsencrypt
+      - ./srcs/proxy/cert/:/etc/letsencrypt
     build:
       context: ./srcs/proxy
       target: ${ENV}
