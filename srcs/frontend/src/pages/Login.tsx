@@ -4,7 +4,6 @@ import eyeopen from '../assets/eyeopen.svg';
 import eyeclose from '../assets/eyeclose.svg';
 import { useState, useEffect } from 'react';
 import { Outlet, Link } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,8 +37,8 @@ export function Login() {
 		setErr(data.message);
 	}
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>,
-		user: newUser | login, 
-		setErr: React.Dispatch<React.SetStateAction<string>>, 
+		user: newUser | login,
+		setErr: React.Dispatch<React.SetStateAction<string>>,
 		set2FA: React.Dispatch<React.SetStateAction<boolean>>) {
 		e.preventDefault();
 
@@ -171,11 +170,11 @@ export function LandingPage() {
 
 	const github = process.env.REACT_APP_GITHUB_LINK;
 	const oauth42Url = Oauth42();
-	
+
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-	  }, []);
-	
+	}, []);
+
 
 	return (
 		<>
@@ -197,8 +196,8 @@ export function LandingPage() {
 									<button className="btn btn-outline-primary w-100"><b>Signup</b></button>
 								</Link>
 								<a href={oauth42Url}>
-								<span>Sign in with </span>
-								<img className='ms-1 d-inline-block' style={{ height: "30px" }} src={fortytwologo} />
+									<span>Sign in with </span>
+									<img className='ms-1 d-inline-block' alt='FortyTwo Logo' style={{ height: "30px" }} src={fortytwologo} />
 								</a>
 							</div>
 						</div>
@@ -207,7 +206,7 @@ export function LandingPage() {
 			</div>
 			<footer className="text-center d-flex flex-column align-items-center grey-text py-3">
 				Projet de fin de tronc-commun de l’école 42
-				<a href={github}><img src={githubLogo} /></a>
+				<a href={github}><img src={githubLogo} alt='Github Logo' /></a>
 				<p></p>
 			</footer>
 		</>

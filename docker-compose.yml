@@ -3,7 +3,7 @@ services:
 
   backend:
     build:
-      context: backend
+      context: ./srcs/backend
       target: ${ENV}
       args:
         - POSTGRES_HOST
@@ -16,7 +16,7 @@ services:
     restart: always
     container_name: backend
     volumes:
-      - "./backend/:/app"
+      - "./srcs/backend/:/app"
     env_file:
       - .env
     depends_on:
@@ -56,19 +56,18 @@ services:
 
   frontend:
     build:
-      context: frontend
+      context: ./srcs/frontend
       target: ${ENV}
     environment:
       - REACT_APP_FRONTEND_URL=${REACT_APP_FRONTEND_URL}
       - REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL}
       - REACT_APP_FORTYTWO_APP_ID=${REACT_APP_FORTYTWO_APP_ID}
       - REACT_APP_GITHUB_LINK=${REACT_APP_GITHUB_LINK}
-      - REACT_APP_URL_FEEDBACKS=${REACT_APP_URL_FEEDBACKS}
     restart: always
     container_name: frontend
     volumes:
-      - "./frontend/:/app"
-      - "../build/frontend/:/app/build"
+      - "./srcs/frontend/:/app"
+      - "./build/frontend/:/app/build"
     depends_on:
       backend:
         condition: service_healthy
@@ -83,13 +82,12 @@ services:
     volumes:
       - ./proxy/cert/:/etc/letsencrypt
     build:
-      context: proxy
+      context: ./srcs/proxy
       target: ${ENV}
     restart: always
     container_name: proxy
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
     env_file:
       - .env
     depends_on:

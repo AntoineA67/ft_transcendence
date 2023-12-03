@@ -18,12 +18,15 @@ export class UsersGateway
 
 	async handleConnection(client: Socket) {
 		const id: number = client.data.user.id;
-		await this.usersService.updateUser(id, { status: 'ONLINE' });
-		// client join a room 
-		client.join(id.toString())
-		//emit to everyone
-		client.broadcast.emit('online', id);
-		this.usersService.updateUser(id, { status: 'ONLINE' })
+		const user = await this.usersService.getUserById(id)
+		if (user.status == 'OFFLINE') {
+			await this.usersService.updateUser(id, { status: 'ONLINE' });
+			// client join a room 
+			client.join(id.toString())
+			//emit to everyone
+			client.broadcast.emit('online', id);
+			this.usersService.updateUser(id, { status: 'ONLINE' })
+		}
 	}
 
 	async handleDisconnect(client: Socket) {
@@ -38,27 +41,39 @@ export class UsersGateway
 
 	@SubscribeMessage('getAllUsers')
 	async handleGetAllUsers(): Promise<UserDto[]> {
-		return (await this.usersService.getAllUsers());
+		try {
+			return (await this.usersService.getAllUsers());
+		} catch (error) {
+			return [];
+		}
 	}
 
 	@SubscribeMessage('UpdateUsername')
 	async handleUpdateUsername(@ConnectedSocket() client: Socket, @MessageBody() username: string) {
-		if (typeof username != 'string') {
+		try {
+			if (typeof username != 'string') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			return (await this.usersService.updateUser(id, { username: username }))
+		} catch (e: any) {
 			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.usersService.updateUser(id, {username: username}))
 	}
-	
+
 	@SubscribeMessage('UpdateBio')
 	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
-		if (typeof bio != 'string') {
+		try {
+			if (typeof bio != 'string') {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			return (await this.usersService.updateUser(id, { bio: bio }))
+		} catch (e: any) {
 			return false;
 		}
-		const id: number = client.data.user.id;
-		return (await this.usersService.updateUser(id, {bio: bio}))
 	}
-	
+
 
 	@SubscribeMessage('newAvatar')
 	async handleNewAvatar(@ConnectedSocket() client: Socket, @MessageBody() file: Buffer) {
@@ -80,70 +95,96 @@ export class UsersGateway
 			base64 = `data:image/jpeg;base64,${base64}`;
 			return (await this.usersService.updateUser(id, { avatar: base64 }));
 		};
-		return (await fileCheck(file));
+		try {
+			return (await fileCheck(file));
+		} catch (e: any) {
+			return false;
+		}
 	}
 
 	@SubscribeMessage('Create2FA')
 	async handleCreate2FA(@ConnectedSocket() client: Socket) {
-		const data = this.usersService.generate2FASecret(client.data.user);
-		this.usersService.updateUser(client.data.user.id, { otpHash: (await data).secret });
-		return (await data);
+		try {
+			const data = await this.usersService.generate2FASecret(client.data.user);
+			this.usersService.updateUser(client.data.user.id, { otpHash: data.secret });
+			return data;
+		} catch (error) {
+			throw new WsException("Could not generate 2FA secret");
+		}
 	}
 
 	@SubscribeMessage('Activate2FA')
 	async handleActivate2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (typeof data != 'string' || data.length > 6) {
+
+		try {
+			if (typeof data != 'string' || data.length > 6) {
+				return (false);
+			}
+			const isValid = await this.usersService.verify2FA(client.data.user, data);
+			if (isValid === true) {
+				this.usersService.updateUser(client.data.user.id, { activated2FA: true });
+				return (true);
+			}
 			return (false);
+		} catch (e: any) {
+			return false;
 		}
-		const isValid = await this.usersService.verify2FA(client.data.user, data);
-		if (isValid === true) {
-			this.usersService.updateUser(client.data.user.id, { activated2FA: true });
-			return (true);
-		}
-		return (false);
 	}
 
 	@SubscribeMessage('Disable2FA')
 	async handleDisable2FA(@ConnectedSocket() client: Socket, @MessageBody() data) {
-		if (typeof data != 'string' || data.length > 6) {
+
+		try {
+			if (typeof data != 'string' || data.length > 6) {
+				return (false);
+			}
+			const isValid = await this.usersService.verify2FA(client.data.user, data);
+			if (isValid === true) {
+				this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
+				return (true);
+			}
 			return (false);
+		} catch (e: any) {
+			return false;
 		}
-		const isValid = await this.usersService.verify2FA(client.data.user, data);
-		if (isValid === true) {
-			this.usersService.updateUser(client.data.user.id, { otpHash: null, activated2FA: false });
-			return (true);
-		}
-		return (false);
 	}
 
 	@SubscribeMessage('myAvatar')
 	async handleMyAvatar(@ConnectedSocket() client: Socket): Promise<string> {
 		const id: number = client.data.user.id;
-		return (await this.usersService.getAvatar(id))
+		try {
+			return (await this.usersService.getAvatar(id))
+		} catch (error) {
+			return '';
+		}
 	}
 
 	@SubscribeMessage('ChangePassword')
 	async handleChangePassword(@ConnectedSocket() client: Socket, @MessageBody() data: any): Promise<boolean> {
-		if (typeof data?.oldPassowrd != 'string' || typeof data?.newPassword != 'string') {
-			return (false);
+
+		try {
+			if (typeof data?.oldPassword != 'string' || typeof data?.newPassword != 'string') {
+				return (false);
+			}
+			const passwordRespond = await this.usersService.changePassword(
+				client.data.user.id, data.oldPassword, data.newPassword
+			);
+			return (passwordRespond);
+		} catch (e: any) {
+			return false;
 		}
-		if (data.oldPassword.length > 100 || data.newPassword.length > 100) {
-			return (false);
-		}
-		if (data.oldPassowrd === '' || data.newPassword === '') {
-			return (false)
-		}
-		const passwordRespond = await this.usersService.changePassword(
-			client.data.user.id, data.oldPassword, data.newPassword
-		);
-		return (passwordRespond);
 	}
 
 	@SubscribeMessage('getUser')
 	async handleGetUser(@MessageBody() id: number): Promise<UserDto | null> {
-		if (typeof id != 'number') {
-			return (null);
-		}		
-		return await this.usersService.getUserById(id);
+
+		try {
+			if (typeof id != 'number') {
+				return (null);
+			}
+			return await this.usersService.getUserById(id);
+		} catch (e: any) {
+			return null;
+		}
 	}
 } 

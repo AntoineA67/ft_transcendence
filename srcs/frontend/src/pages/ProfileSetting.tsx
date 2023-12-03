@@ -1,23 +1,14 @@
 import Stack from 'react-bootstrap/Stack';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-// import '../styles/index.css'
-
-import eyeopen from '../assets/eyeopen.svg';
-import eyeclose from '../assets/eyeclose.svg';
 import { Link, Outlet, useNavigate, useLoaderData } from "react-router-dom";
-//import Form from 'react-bootstrap/Form';
 import Form from 'react-bootstrap/Form';
-import { socket } from '../utils/socket';
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { profileType } from '../../types/user';
-import { Alert } from 'react-bootstrap';
 import axios from 'axios';
-import { set } from 'lodash-es';
-import { checkPassword } from './ChatDto';
 import { enqueueSnackbar } from 'notistack';
+import { checkPassword } from './ChatDto';
+import { friendsSocket, chatsSocket, gamesSocket, socket } from '../utils/socket';
 
 export function Title({ title }: { title: string }) {
 	return (
@@ -37,7 +28,8 @@ export function TwoFactorAuth() {
 
 	async function create2FASubmit() {
 		socket.emit('Create2FA', (response: any) => {
-			setQrCodePath(response.otpauthUrl);
+			if (response)
+				setQrCodePath(response.otpauthUrl);
 		});
 	}
 
@@ -172,13 +164,6 @@ export function SettingMenu() {
 	const [formSubmitted, setFormSubmitted] = useState(false);
 	const navigate = useNavigate();
 
-	// useEffect(() => {
-	// 	if (!profile) {
-	// 		socket.emit('MyProfile', profile, (res: profileType) => {
-	// 			setProfile(res);
-	// 		});
-	// 	}
-	// }, [profile]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
 		setErr('');
@@ -216,6 +201,10 @@ export function SettingMenu() {
 			});
 			['token', 'random', 'email', 'refreshToken', 'firstConnexion'].forEach(item => localStorage.removeItem(item));
 			window.location.href = '/';
+			socket.disconnect()
+			friendsSocket.disconnect()
+			chatsSocket.disconnect()
+			gamesSocket.disconnect()
 		} catch (err: any) {
 		}
 	}

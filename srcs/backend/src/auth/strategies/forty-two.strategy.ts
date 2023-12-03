@@ -32,6 +32,8 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 		const user: any = await this.authService.login42(profile).then(
 			(user) => {
 				return cb(null, user);
+			}).catch((err) => {
+				return cb(err, null);
 			});
 	}
 }

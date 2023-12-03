@@ -54,7 +54,7 @@ function HistoryContent({ gameHistory }: gameHistoryProp) {
 	}
 
 	return (
-		(gameHistory.length == 0) ? (
+		(gameHistory.length === 0) ? (
 			<h3 className='p-3 grey-text pb-5'>Empty</h3>
 		) : (
 			<ul className="p-1 pb-5">
@@ -104,8 +104,7 @@ function PieChart({ win, lose, draw }: pieProp) {
 		let total: number = win + lose;
 		ctx.font = "20px normal";
 		ctx.fillStyle = '#fff';
-		// if total == 0 , draw a grey circle
-		if (total == 0) {
+		if (total === 0) {
 			ctx.beginPath();
 			ctx.strokeStyle = 'grey';
 			ctx.arc(xc, yc, r, 0, (2 * Math.PI), false);
@@ -118,7 +117,6 @@ function PieChart({ win, lose, draw }: pieProp) {
 		const cyan = '#34fafa';
 		const winDegree = (2 * Math.PI) * (win / total);
 		const loseDegree = (2 * Math.PI) * (lose / total);
-		// const drawDegree = (2 * Math.PI) * (draw / total);
 		const tran = winDegree < loseDegree ? winDegree / 2 : loseDegree / 2;
 		const degree = [loseDegree - tran, tran, winDegree - tran, tran];
 		const color = [cyan, cyan, magenta, magenta];
@@ -137,7 +135,7 @@ function PieChart({ win, lose, draw }: pieProp) {
 			let gradient: string | CanvasGradient = ctx.createLinearGradient(xStart, yStart, xEnd, yEnd);
 			gradient.addColorStop(0, startColor);
 			gradient.addColorStop(1.0, endColor);
-			if (startColor == endColor) {
+			if (startColor === endColor) {
 				gradient = startColor;
 			}
 
@@ -160,7 +158,7 @@ function PieChart({ win, lose, draw }: pieProp) {
 				<div className='col-sm-4 d-flex flex-column justify-content-center align-items-center'>
 					<canvas id="canvas" width='200' height='200' />
 					<h5 className='win-rate'>
-						{(win + lose == 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'}
+						{(win + lose === 0) ? ('NA') : (win * 100 / (win + lose)).toFixed(2) + '%'}
 					</h5>
 				</div>
 				<div className='col-sm-4 d-flex white-text justify-content-center align-items-center'>

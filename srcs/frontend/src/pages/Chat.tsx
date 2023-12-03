@@ -3,11 +3,11 @@ import { Link, Outlet, useLoaderData } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { chatsSocket, socket } from '../utils/socket';
+import { chatsSocket } from '../utils/socket';
 import { useNavigate } from 'react-router-dom';
 import { Message, Profile, Room, Member, Pvrooms, Block, ChatBoxData, ChannelCreationResponse, checkUserRoomName, checkPassword } from './ChatDto';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCommentSlash, faGamepad, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faCommentSlash, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BsArrowUpRight } from 'react-icons/bs';
 import { BsThreeDots } from "react-icons/bs";
 import { MdGroup, MdGroups2 } from 'react-icons/md';
@@ -59,6 +59,12 @@ export function ChatBox() {
 	const [passwordStatus, setPasswordStatus] = useState<boolean>(false);
 
 	useEffect(() => {
+		if (data === undefined || data === null || !(data && 'roomTitle' in data && 'messages' in data && 'roomChannel' in data && 'members' in data && 'memberStatus' in data && 'private' in data && 'password' in data && 'profile' in data)) {
+			navigate('/chat');
+			if (data)
+				console.log(data);
+			return;
+		}
 		setroomTitle(data.roomTitle);
 		setMessages(data.messages);
 		setRoomChannel(data.roomChannel);
@@ -1174,7 +1180,7 @@ export function ChatList() {
 			if (targetRoom) {
 				const filteredRooms = newRooms.filter((room) => room.id !== newMessage.roomId);
 				setRooms([targetRoom, ...filteredRooms]);
-				if (newMessage.userId !== profile?.id && (chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined) {
+				if (newMessage.userId !== profile?.id && ((chatId && newMessage.roomId !== parseInt(chatId)) || chatId === undefined)) {
 					enqueueSnackbar(`New message from ${newMessage.username.substring(0, 8)}.: ${newMessage.message.substring(0, 15)}...`, { variant: 'info', action });
 				}
 			}
@@ -1233,7 +1239,7 @@ export function ChatList() {
 		const textClass = isBanned ? 'banned-text' : '';
 		if (isBanned)
 			channelclass = 'chatListItemBan';
-		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId == roomId);
+		const privateroom = pvrooms.find((pvrooms) => pvrooms.roomId === roomId);
 		if (privateroom) {
 			roomtitle = privateroom.username2;
 			if (privateroom.blocked) {

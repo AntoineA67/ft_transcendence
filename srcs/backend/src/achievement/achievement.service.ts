@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Assurez-vous d'uti
 import { Prisma } from '@prisma/client';
 import { PlayerService } from 'src/player/player.service';
 import { AchieveDto } from 'src/dto/achieve.dto';
+import { devNull } from 'os';
 
 @Injectable()
 export class AchievementService {
@@ -12,17 +13,39 @@ export class AchievementService {
 	) {}
 
 	// the id stands for userId, NOT the id of achievement
-	async getAchieveById(id: number): Promise<AchieveDto> {
-		const achieve = await this.prisma.achievement.upsert({
-			where: { userId: id },
-			create: { user: {connect: {id} }}, 
-			update: {}
-		});
-		delete achieve.id;
-		delete achieve.userId;
-		return {userId: id,  ...achieve};
+	async getAchieveById(id: number): Promise<AchieveDto | null> {
+		try {
+			if (!id || typeof id !== 'number' || id <= 0 || id > 100000)
+				return null;
+			const achieve = await this.prisma.achievement.findFirst({
+				where: {userId: id}
+			})
+			if (!achieve) {
+				const new_achieve = await this.prisma.achievement.create({
+					data: {
+						user: {connect: {id: id }}
+					}
+				})
+				delete new_achieve.id;
+				return new_achieve;
+			}
+			else {
+				delete achieve.id;
+				return achieve;
+			}
+		} catch (e: any) {
+			const achieve = await this.prisma.achievement.findFirst({
+				where: {userId: id}
+			})
+			if (achieve) {
+				delete achieve.id;
+				return achieve;
+			}
+			console.log('Achievement return null')
+			return null
+		}
 	}
-	
+
 	// the id stands for userId, NOT the id of achievement
 	async updateAchievement(id: number) {
 		const allWin: number = await this.playerService.getAllWin(id);

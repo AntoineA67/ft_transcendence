@@ -24,11 +24,10 @@ import { Timer } from "../components/game/Timer"
 import { CameraFOVHandler } from "../components/game/CameraFOVHandler"
 import { GameSummaryModal } from "../components/game/GameSummaryModal"
 import { GameWaitingRoom } from "../components/game/GameWaitingRoom"
-import { WebcamConfirmModal } from "../components/game/WebcamConfirmModal";
 import { UserWrapper } from "../components/game/UserWrapper";
 import { BallWrapper } from "../components/game/BallWrapper";
 import { CanvasGraphicEffects } from "../components/game/CanvasGraphicEffects";
-import { SnackbarKey, closeSnackbar, enqueueSnackbar } from "notistack";
+import { enqueueSnackbar } from "notistack";
 import { useNavigate } from 'react-router-dom';
 
 export enum GameStatus {
@@ -197,7 +196,7 @@ export default function GamePage() {
 			cancelOrLeave();
 			unsubscribeToGamesSocketMessages();
 		}
-	}, [gamesSocket])
+	}, [])
 
 	useEffect(() => {
 		const firstConnexion = localStorage.getItem('firstConnexion') || null;
@@ -270,7 +269,7 @@ export default function GamePage() {
 						<Timer time={time} />
 						{Object.keys(clients)
 							.map((client) => {
-								const { y, dir, score, xDistance } = clients[client]
+								const { y, dir, score } = clients[client]
 								const pos = [client == id.current ? -97.5 : 97.5, y, 0]
 								const myPaddleColor = client == id.current ? paddleColor : '#fff';
 								return (

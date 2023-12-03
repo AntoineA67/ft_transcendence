@@ -1,6 +1,3 @@
-// import { useOutletContext, Link } from "react-router-dom";
-import { useState } from 'react';
-
 /**
  * @brief Validates the given password against certain criteria
  * 
@@ -8,7 +5,7 @@ import { useState } from 'react';
  * 
  * @returns null if the password is valid, error message otherwise
  */
- export const validatePassword = (password: string): string | null => {
+export const validatePassword = (password: string): string | null => {
     if (password.length < 8) {
         return 'Password should be at least 8 characters long.';
     }
@@ -36,7 +33,7 @@ import { useState } from 'react';
  * @returns null if the password is valid, error message otherwise
  */
 
- export const validateUsername = (Username: string): string | null => {
+export const validateUsername = (Username: string): string | null => {
     if (Username.length < 3 || Username.length > 16) {
         return 'Username should be between 4 and 16 characters long.';
     }

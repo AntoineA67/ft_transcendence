@@ -104,10 +104,6 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 			});
 		}
 	};
-	// Check if webcam access is supported.
-	function hasGetUserMedia() {
-		return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-	}
 	// Enable the live webcam view and start detection.
 	function enableCam() {
 		if (!handLandmarker.current) {
@@ -127,16 +123,22 @@ export const WebcamPong = ({ changeHandPos, webcam, onWebcamFinishedLoading, onE
 		}
 
 		// Activate the webcam stream.
-		navigator.mediaDevices.getUserMedia({ video: true }).then(function (s) {
-			if (videoRef.current) {
-				videoRef.current.srcObject = s;
-				stream.current = s;
-			}
-		}).catch(function (err) {
+		try {
+			navigator.mediaDevices.getUserMedia({ video: true }).then(function (s) {
+				if (videoRef.current) {
+					videoRef.current.srcObject = s;
+					stream.current = s;
+				}
+			}).catch(function (err) {
+				enqueueSnackbar("Please allow access to webcam", { variant: "error" });
+				onError();
+				return;
+			});
+		} catch (error) {
 			enqueueSnackbar("Please allow access to webcam", { variant: "error" });
 			onError();
 			return;
-		});
+		}
 	}
 
 	useEffect(() => {

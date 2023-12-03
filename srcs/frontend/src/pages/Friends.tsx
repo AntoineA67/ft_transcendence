@@ -1,6 +1,4 @@
-// import '../styles/index.css'
-
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { friendsSocket } from '../utils/socket';
 import { useLocation } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
@@ -13,15 +11,15 @@ type AddPageProp = {
 	setPage: React.Dispatch<React.SetStateAction<'friendPage' | 'blockPage' | 'addPage'>>,
 }
 function AddPage({ setPage }: AddPageProp) {
-	const [ search, setSearch ] = useState('');
-	const [ list, setList ] = useState<userType[]>([]);
-	
+	const [search, setSearch] = useState('');
+	const [list, setList] = useState<userType[]>([]);
+
 	useEffect(() => {
 		friendsSocket.emit('findOthers', (res: userType[]) => {
 			setList(res);
 		})
 	}, [])
-	
+
 	const myFilter = (user: userType) => {
 		return (user.username.toLowerCase().includes(search.toLowerCase()))
 	}
@@ -33,16 +31,16 @@ function AddPage({ setPage }: AddPageProp) {
 			</li>
 		)
 	}
-	
+
 	return (
 		<div>
-			<button className='leftArrow m-2' onClick={() => setPage('friendPage')}/>		
+			<button className='leftArrow m-2' onClick={() => setPage('friendPage')} />
 			<div className='px-3 py-3'>
-				<input 
+				<input
 					autoFocus
 					placeholder='Search for new friends'
 					value={search}
-					onChange={(e) => {setSearch(e.target.value)}}
+					onChange={(e) => { setSearch(e.target.value) }}
 				/>
 			</div>
 			<ul>
@@ -59,9 +57,9 @@ function FriendPage({ setPage }: FriendPageProp) {
 	return (
 		<>
 			<div className='w-100 p-1 d-flex flex-row align-items-center bg-black'>
-				<button className='block me-auto' onClick={() => setPage('blockPage')}/>
+				<button className='block me-auto' onClick={() => setPage('blockPage')} />
 				<h5 className='white-text'>Friends</h5>
-				<button className='addFriend ms-auto' onClick={() => setPage('addPage')}/>
+				<button className='addFriend ms-auto' onClick={() => setPage('addPage')} />
 			</div>
 			<FriendReqList />
 			<FriendList />
@@ -76,8 +74,8 @@ function BlockPage({ setPage }: BlockPageProp) {
 	return (
 		<>
 			<div className='d-flex flex-row align-items-center bg-black'>
-				<button 
-					className='leftArrow m-2' 
+				<button
+					className='leftArrow m-2'
 					onClick={() => setPage('friendPage')}
 				/>
 				<h5 className='white-text'>Blocks</h5>
@@ -92,22 +90,22 @@ function RelationPages() {
 
 	return (
 		<div className='w-100'>
-			{page == 'friendPage' && <FriendPage 
+			{page === 'friendPage' && <FriendPage
 				setPage={setPage}
 			/>}
-			{page == 'blockPage' && <BlockPage 
+			{page === 'blockPage' && <BlockPage
 				setPage={setPage}
 			/>}
-			{page == 'addPage' && <AddPage setPage={setPage}/>}
+			{page === 'addPage' && <AddPage setPage={setPage} />}
 		</div>
 	)
 }
 
 export function Friends() {
 	const location = useLocation();
-	const classname1 = location.pathname == '/friends' ? '' : 'd-none d-sm-flex';
-	const classname2 = location.pathname == '/friends' ? 'd-none d-sm-flex' : '';
-	
+	const classname1 = location.pathname === '/friends' ? '' : 'd-none d-sm-flex';
+	const classname2 = location.pathname === '/friends' ? 'd-none d-sm-flex' : '';
+
 	return (
 		<div className='container-fluid h-100' >
 			<div className='row h-100' >

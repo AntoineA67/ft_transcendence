@@ -1,6 +1,3 @@
-// import '../styles/index.css'
-// import '../styles/iconButton.css';
-
 import { UserItem } from "../utils/UserItem";
 import { userType } from "../../types/user";
 import { friendsSocket } from "../utils/socket";
@@ -8,9 +5,9 @@ import { ReqItem } from "../utils/ReqItem";
 import { useEffect, useState } from "react";
 
 export function FriendList() {
-	const [ friends, setFriends ] = useState<userType[]>([]);
-	const [ search, setSearch] = useState('');
-	
+	const [friends, setFriends] = useState<userType[]>([]);
+	const [search, setSearch] = useState('');
+
 	const findAllFriends = () => {
 		friendsSocket.emit('findAllFriends', (res: userType[]) => {
 			setFriends(res);
@@ -19,24 +16,24 @@ export function FriendList() {
 	const handleFriendReqAccept = (replier: userType) => {
 		setFriends((prev) => ([...prev, replier]));
 	}
-	
+
 	useEffect(() => {
 		findAllFriends();
 		friendsSocket.on('friendReqAccept', handleFriendReqAccept);
 		friendsSocket.on('block', findAllFriends)
 		friendsSocket.on('unblock', findAllFriends)
-		
+
 		return (() => {
 			friendsSocket.off('friendReqAccept', handleFriendReqAccept);
 			friendsSocket.off('block', findAllFriends)
 			friendsSocket.off('unblock', findAllFriends)
 		});
 	}, [])
-	
+
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id} className='m-0 p-0'>
-				<UserItem user={{...user}} linkTo={user.username} />
+				<UserItem user={{ ...user }} linkTo={user.username} />
 			</li>
 		)
 	}
@@ -47,25 +44,25 @@ export function FriendList() {
 	return (
 		<div className="w-100">
 			<div className='px-3 py-2'>
-				{friends.length > 0 && <input 
-					onChange={(e) => {setSearch(e.target.value)}}
-					autoFocus 
+				{friends.length > 0 && <input
+					onChange={(e) => { setSearch(e.target.value) }}
+					autoFocus
 					placeholder="search a friend"
 				/>}
 			</div>
-			{(friends.length == 0) ? (
+			{(friends.length === 0) ? (
 				<h5 className='grey-text p-2'>No friends yet :(</h5>
-			 ) : (
+			) : (
 				<ul className='p-0 m-0'>
-					{friends.filter(myFilter).map(myMap) }
+					{friends.filter(myFilter).map(myMap)}
 				</ul>)}
-			
+
 		</div>
 	);
 }
 
 export function FriendReqList() {
-	const [ reqs, setReqs ] = useState<userType[]>([])
+	const [reqs, setReqs] = useState<userType[]>([])
 
 	useEffect(() => {
 		friendsSocket.emit('findAllReqs', (res: userType[]) => {
@@ -73,14 +70,13 @@ export function FriendReqList() {
 		})
 		function handleReq(sender: userType) {
 			setReqs((prev) => ([sender, ...prev]))
-			// setReqs([...reqs, sender]);
 		}
 		friendsSocket.on('recvfriendReq', handleReq);
 		return (() => {
 			friendsSocket.off('recvfriendReq', handleReq);
 		});
 	}, [])
-	
+
 	async function handleClick(
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
 		possibleFriendId: number,
@@ -89,7 +85,7 @@ export function FriendReqList() {
 		e.preventDefault();
 		friendsSocket.emit('replyReq', { other: possibleFriendId, result }, (success: boolean) => {
 			if (success) {
-				const update = reqs.filter((x) => (x.id != possibleFriendId))
+				const update = reqs.filter((x) => (x.id !== possibleFriendId))
 				setReqs(update);
 			}
 		})
@@ -98,11 +94,11 @@ export function FriendReqList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				<ReqItem 
-					user={{...user}} 
-					linkTo={user.username} 
-					onAccept={(e: any) => handleClick(e, user.id,true)} 
-					onDecline={(e: any) => handleClick(e, user.id, false)}/>
+				<ReqItem
+					user={{ ...user }}
+					linkTo={user.username}
+					onAccept={(e: any) => handleClick(e, user.id, true)}
+					onDecline={(e: any) => handleClick(e, user.id, false)} />
 			</li>
 		)
 	}
@@ -116,7 +112,7 @@ export function FriendReqList() {
 
 
 export function BlockList() {
-	const [ blocks, setBlocks ] = useState<userType[]>([])
+	const [blocks, setBlocks] = useState<userType[]>([])
 
 	useEffect(() => {
 		friendsSocket.emit('findAllBlocks', (res: userType[]) => {
@@ -126,8 +122,8 @@ export function BlockList() {
 		function handleBlock(otherUser: userType) {
 			setBlocks((prev) => ([...prev, otherUser]))
 		}
-		function handleUnblock(otherUser: userType) {			
-			setBlocks((prev) => (prev.filter((x) => (x.id != otherUser.id))))
+		function handleUnblock(otherUser: userType) {
+			setBlocks((prev) => (prev.filter((x) => (x.id !== otherUser.id))))
 		}
 		friendsSocket.on('block', handleBlock);
 		friendsSocket.on('unblock', handleUnblock);
@@ -140,13 +136,13 @@ export function BlockList() {
 	const myMap = (user: userType) => {
 		return (
 			<li key={user.id}>
-				<UserItem user={{...user}} linkTo={user.username} />	
+				<UserItem user={{ ...user }} linkTo={user.username} />
 			</li>
 		)
 	}
 
 	return (
-		(blocks.length == 0) ? (
+		(blocks.length === 0) ? (
 			<h5 className='grey-text m-1'>Empty</h5>
 		) : (
 			<ul className='p-0'>

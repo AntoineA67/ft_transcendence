@@ -16,26 +16,25 @@ type textProp = {
 
 function Text({ type, profile, setEdit }: textProp) {
 	const classname = "mt-3 text-center";
-	const [err, setErr] = useState('');
 
 	return (
 		<div className='w-75'>
-			
-				{type == 'nick' ? (
-					<h5 className={`${classname} white-text`}>
-						{profile.username}
-						<span>
-							<button className="edit-pen" onClick={() => setEdit(type)} />
-						</span>
-					</h5>
-				) : (
-					<p className={`${classname} white-text`}>
-						{profile.bio}
-						<span>
-							<button className="edit-pen" onClick={() => setEdit(type)} />
-						</span>
-					</p>
-				)}
+
+			{type === 'nick' ? (
+				<h5 className={`${classname} white-text`}>
+					{profile.username}
+					<span>
+						<button className="edit-pen" onClick={() => setEdit(type)} />
+					</span>
+				</h5>
+			) : (
+				<p className={`${classname} white-text`}>
+					{profile.bio}
+					<span>
+						<button className="edit-pen" onClick={() => setEdit(type)} />
+					</span>
+				</p>
+			)}
 		</div>
 	);
 }
@@ -84,10 +83,10 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 		if (type === 'bio' && !checkBio(mod, enqueueSnackbar)) {
 			return;
 		}
-		
-		if (type == 'nick') {
+
+		if (type === 'nick') {
 			socket.emit('UpdateUsername', mod, (success: boolean) => {
-				if (!success) return ;
+				if (!success) return;
 				setProfile((prev) => {
 					if (prev) {
 						if ('username' in obj && typeof obj.username === 'string') {
@@ -102,7 +101,7 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 			})
 		} else {
 			socket.emit('UpdateBio', mod.trim(), (success: boolean) => {
-				if (!success) return ;
+				if (!success) return;
 				setProfile((prev) => {
 					if (prev) {
 						if ('username' in obj && typeof obj.username === 'string') {
@@ -116,23 +115,6 @@ function EditText({ type, profile, setProfile, setEdit, enqueueSnackbar }: editT
 				});
 			})
 		}
-
-		// let data = (type === 'nick') ? { username: mod } : { bio: mod.trim() };
-		// socket.emit('UpdateProfile', data, (success: boolean) => {
-		// 	if (success) {
-		// 		setProfile((prev) => {
-		// 			if (prev) {
-		// 				if ('username' in obj && typeof obj.username === 'string') {
-		// 					return { ...prev, username: obj.username.trim() };
-		// 				}
-		// 				if ('bio' in obj && typeof obj.bio === 'string') {
-		// 					return { ...prev, bio: obj.bio.trim() };
-		// 				}
-		// 			}
-		// 			return prev;
-		// 		});
-		// 	}
-		// });
 		setEdit('done');
 	}
 
@@ -170,7 +152,14 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		const file = input.files ? input.files[0] : null;
 		if (!file) return;
 		if (file.size >= 1048576) {
-			enqueueSnackbar("Oups, la taille limite de la photo est d'1 MB !", {
+			enqueueSnackbar("Oops, the photo size limit is 1 MB!", {
+				variant: 'error',
+				autoHideDuration: 3000,
+			})
+			return;
+		}
+		if (!/\.(png|jpg)$/i.test(file.name)) {
+			enqueueSnackbar("Please upload a .png or .jpg file.", {
 				variant: 'error',
 				autoHideDuration: 3000,
 			})
@@ -178,6 +167,10 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		}
 		socket.emit('newAvatar', file, (success: boolean) => {
 			if (!success) {
+				enqueueSnackbar("Bad photo format !", {
+					variant: 'error',
+					autoHideDuration: 3000,
+				})
 				return;
 			}
 			socket.emit('myAvatar', (avatar: string) => {
@@ -194,7 +187,6 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 					id="new-avatar"
 					type="file"
 					name="new-avatar"
-					// accept="image/*"
 					accept=".png, .jpg, .jpeg"
 					onChange={autoUpload}
 				/>
@@ -202,7 +194,7 @@ function NewAvatar({ setProfile }: NewAvatarProp) {
 		</form>
 	);
 }
-  
+
 function Profile() {
 	const [profile, setProfile] = useState<profileType>(useLoaderData() as profileType);
 	const [edit, setEdit] = useState<'done' | 'nick' | 'bio'>('done');
@@ -222,13 +214,13 @@ function Profile() {
 				</div>
 				<NewAvatar setProfile={setProfile} />
 
-				{(edit == 'nick'
+				{(edit === 'nick'
 				) ? (
 					<EditText type='nick' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (
 					<Text type='nick' profile={profile} setEdit={setEdit} />)}
 
-				{(edit == 'bio'
+				{(edit === 'bio'
 				) ? (
 					<EditText type='bio' profile={profile} setProfile={setProfile} setEdit={setEdit} enqueueSnackbar={enqueueSnackbar} />
 				) : (

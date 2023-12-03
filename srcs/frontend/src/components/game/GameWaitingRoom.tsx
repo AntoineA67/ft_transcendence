@@ -1,5 +1,5 @@
 import { FidgetSpinner } from "react-loader-spinner";
-import { Button, Card, Container } from "react-bootstrap";
+import { Card, Container } from "react-bootstrap";
 import { gamesSocket } from '../../utils/socket';
 import { PaddleWheel } from "./PaddleWheel";
 import { GraphicEffectsSettingsCard } from "./GraphicEffectsSettingsCard";
