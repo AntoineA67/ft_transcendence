@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { MessageBody } from '@nestjs/websockets';
 import { ConnectedSocket, WsException } from '@nestjs/websockets';
 import { UserDto } from 'src/dto/user.dto';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 
 @WebSocketGateway({ cors: true })
 export class UsersGateway
@@ -55,6 +55,8 @@ export class UsersGateway
 				return false;
 			}
 			if (username.length > 16 || username.length < 4)
+				return false;
+			if (await this.usersService.getUserByNick(username))
 				return false;
 			const id: number = client.data.user.id;
 			return (await this.usersService.updateUser(id, { username: username }))

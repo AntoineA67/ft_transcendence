@@ -20,7 +20,7 @@ export class SignupDto {
     @IsString()
     @MaxLength(16, { message: "Username must be less than 16 characters long" })
     @MinLength(3, { message: "Username must be at least 3 characters long" })
-    @Matches(/^[A-Za-z0-9-]/,
+    @Matches(/^[A-Za-z0-9]*$/,
         { message: "Username should contain only alphanumeric characters and dashes." })
     username!: string;
 

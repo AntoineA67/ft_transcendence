@@ -62,10 +62,10 @@ export function Protected() {
 	const [ready, setReady] = useState<boolean>(false)
 	const [err, setErr] = useState<boolean>(false)
 
-	const [mainConnect, setMainConnect] = useState<boolean>(false)
-	const [friendConnect, setFriendConnect] = useState<boolean>(false)
-	const [chatConnect, setChatConnect] = useState<boolean>(false)
-	const [gameConnect, setGameConnect] = useState<boolean>(false)
+	const [mainConnect, setMainConnect] = useState<boolean>(socket.connected)
+	const [friendConnect, setFriendConnect] = useState<boolean>(friendsSocket.connected)
+	const [chatConnect, setChatConnect] = useState<boolean>(chatsSocket.connected)
+	const [gameConnect, setGameConnect] = useState<boolean>(gamesSocket.connected)
 
 	useEffect(() => {
 		const token = localStorage.getItem('token') || null;
