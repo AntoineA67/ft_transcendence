@@ -53,6 +53,11 @@ export class AuthService {
 					firstConnexion: "true",
 				},
 			});
+			const achieve = await this.prisma.achievement.create({
+				data: {
+					userId: user.id,
+				}
+			});
 			if (!user)
 				throw new BadRequestException('Bad request');
 			return this.signJwtTokens(user.id, user.email, user.firstConnexion);
