@@ -133,7 +133,7 @@ export default class Room {
 		await this.playerService.createPlayer({ win: Result.LOSE, gameId: this.gameId, userId: loser });
 
 		await this.gameService.update(this.gameId, { finish: true, end_date: new Date(Date.now()).toISOString(), score: `${winnerPlayer.score}:${loserPlayer.score}` });
-		this.achieveService.updateAchievement(winner)
-		this.achieveService.updateAchievement(loser)
+		await this.achieveService.updateAchievement(winner)
+		await this.achieveService.updateAchievement(loser)
 	}
 }

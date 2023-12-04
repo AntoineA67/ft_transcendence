@@ -15,34 +15,19 @@ export class AchievementService {
 	// the id stands for userId, NOT the id of achievement
 	async getAchieveById(id: number): Promise<AchieveDto | null> {
 		try {
-			if (!id || typeof id !== 'number' || id <= 0 || id > 100000)
-				return null;
-			const achieve = await this.prisma.achievement.findFirst({
-				where: {userId: id}
+			const achieve = await this.prisma.achievement.findUnique({
+				where: { userId: id }
 			})
 			if (!achieve) {
-				const new_achieve = await this.prisma.achievement.create({
+				return await this.prisma.achievement.create({
 					data: {
-						user: {connect: {id: id }}
+						userId: id
 					}
 				})
-				delete new_achieve.id;
-				return new_achieve;
 			}
-			else {
-				delete achieve.id;
-				return achieve;
-			}
+			return achieve;
 		} catch (e: any) {
-			const achieve = await this.prisma.achievement.findFirst({
-				where: {userId: id}
-			})
-			if (achieve) {
-				delete achieve.id;
-				return achieve;
-			}
-			console.log('Achievement return null')
-			return null
+			return null;
 		}
 	}
 
