@@ -173,6 +173,7 @@ export function LandingPage() {
 
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
+		localStorage.removeItem('email');
 	}, []);
 
 
