@@ -58,7 +58,7 @@ export class AuthController {
 			else if (e instanceof NotFoundException)
 				throw new NotFoundException(e.message);
 			else if (e instanceof ForbiddenException)
-				throw new NotFoundException(e.message);
+				throw new ForbiddenException(e.message);
 			
 			return;
 		}
