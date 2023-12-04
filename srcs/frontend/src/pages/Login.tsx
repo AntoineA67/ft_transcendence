@@ -126,6 +126,7 @@ export function TwoFAPage() {
 		const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
+			localStorage.removeItem('email');
 			window.location.href = oauth42Url;
 		} else {
 			setInvalidToken(true);
@@ -173,7 +174,6 @@ export function LandingPage() {
 
 	useEffect(() => {
 		localStorage.removeItem('_2fa');
-		localStorage.removeItem('email');
 	}, []);
 
 
