@@ -196,7 +196,7 @@ export default function Stat({ gameHistory, achieve }: statProp) {
 		<>
 			<PieChart win={gameHistory.filter((x) => (x.win === Result.WIN)).length} lose={gameHistory.filter((x) => (x.win === Result.LOSE)).length}
 				draw={gameHistory.filter((x) => (x.win === Result.DRAW)).length} />
-			<div className='container'>
+			<div className='container pb-3'>
 				{/* title: small screan */}
 				<div className="row d-sm-none">
 					<div className="col-6">

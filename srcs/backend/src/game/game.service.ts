@@ -36,7 +36,6 @@ export class GamesService {
   async checkUserInGame(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new Error('User does not exist');
-    console.log(user.status, user.status == 'INGAME')
     if (this.isInQueue(userId) || user.status == 'INGAME') throw new Error('Already in game');
     if (this.matches[userId.toString()]) throw new Error('Already in private game');
   }
@@ -98,7 +97,7 @@ export class GamesService {
   async addToQueue(socket: Socket, wss: Server) {
     await this.checkUserInGame(socket.data.user.id);
     this.matchmakingQueue.push(socket);
-    this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'INGAME' } });
+    await this.prisma.user.update({ where: { id: socket.data.user.id }, data: { status: 'INGAME' } });
     this.tryMatchPlayers(wss);
   }
 
@@ -124,7 +123,8 @@ export class GamesService {
             }
           });
         }
-      } else if (this.isInQueue(client.data.user.id)) {
+      }
+      if (this.isInQueue(client.data.user.id)) {
         const index = this.matchmakingQueue.indexOf(client);
         if (index !== -1) {
           this.matchmakingQueue.splice(index, 1);
