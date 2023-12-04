@@ -65,7 +65,7 @@ export default function Sidebar() {
 			>
 				<div className="container-fluid">
 					<div className="row">
-						<div className="col-sm vh-100 overflow-auto p-0" >
+						<div className="col-sm vh-100 overflow-auto p-0 pb-5" >
 							<Outlet />
 						</div>
 						<div className="col-sm-auto sticky-bottom order-sm-first bg-black">

@@ -1272,7 +1272,7 @@ export function ChatList() {
 
 
 	return (
-		<div className='w-100 h-100 d-flex flex-column'>
+		<div className='w-100 h-100 pb-2 d-flex flex-column'>
 			{page === 'newChat' && <NewChat setPage={setPage} />}
 			{page === 'chatList' && (
 				<>
