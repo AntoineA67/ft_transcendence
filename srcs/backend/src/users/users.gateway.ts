@@ -54,6 +54,8 @@ export class UsersGateway
 			if (typeof username != 'string') {
 				return false;
 			}
+			if (username.length > 16 || username.length < 4)
+				return false;
 			const id: number = client.data.user.id;
 			return (await this.usersService.updateUser(id, { username: username }))
 		} catch (e: any) {
@@ -65,6 +67,9 @@ export class UsersGateway
 	async handleUpdateBio(@ConnectedSocket() client: Socket, @MessageBody() bio: string) {
 		try {
 			if (typeof bio != 'string') {
+				return false;
+			}
+			if (bio.length > 200) {
 				return false;
 			}
 			const id: number = client.data.user.id;
