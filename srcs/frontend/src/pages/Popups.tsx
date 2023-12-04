@@ -20,14 +20,27 @@ export function PongedPopup({ nick, setPopup, popupId }: popupProp) {
 
 	useEffect(() => {
 		const timeoutId = setTimeout(() => {
-			// emit event 
+			// emit event
 			setPopup('no')
+			enqueueSnackbar('Invitation expired', { variant: 'info' });
+			gamesSocket.emit('cancelMatchmake', popupId);
 		}, 30000);
 		setId(timeoutId);
 		gamesSocket.on('cancelledMatchmake', () => {
-			clearTimeout(id);
+			clearTimeout(timeoutId);
 			setPopup('no');
 			enqueueSnackbar('Match cancelled', { variant: 'info' });
+		})
+		const handleUnload = () => {
+			setPopup('no');
+			gamesSocket.emit('cancelMatchmake', popupId);
+			clearTimeout(timeoutId);
+			gamesSocket.off('cancelledMatchmake');
+		}
+		window.addEventListener('beforeunload', handleUnload);
+
+		return (() => {
+			window.removeEventListener('beforeunload', handleUnload);
 		})
 	}, [])
 
@@ -69,12 +82,18 @@ export function PongPopup({ nick, setPopup }: popupProp) {
 	const [id, setId] = useState<NodeJS.Timeout>();
 
 	useEffect(() => {
+		console.log('pong timeout');
 		const timeoutId = setTimeout(() => {
-			// emit event 
+			// emit event
 			setPopup('no')
+			enqueueSnackbar('Invitation expired', { variant: 'info' });
+			gamesSocket.emit('cancelMatchmake', id);
 		}, 30000);
 
 		setId(timeoutId);
+		return (() => {
+			clearTimeout(id);
+		})
 	}, [])
 
 	const onCancel = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

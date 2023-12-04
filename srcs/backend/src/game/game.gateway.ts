@@ -50,8 +50,8 @@ export class GameGateway
     afterInit(server: Server) {
     }
 
-    handleDisconnect(socket: Socket) {
-        this.gamesService.disconnect(socket);
+    async handleDisconnect(socket: Socket) {
+        await this.gamesService.disconnect(socket);
     }
 
     handleConnection(socket: Socket, ...args: any[]) {
