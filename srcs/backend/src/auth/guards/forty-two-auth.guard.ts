@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, ForbiddenException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../public.decorator';
@@ -18,5 +18,11 @@ export class FortyTwoAuthGuard extends AuthGuard('42') {
 			return true;
 		}
 		return super.canActivate(context);
+	}
+	handleRequest(err, user, info, context): any {
+		if (err) {
+			throw new UnauthorizedException();
+		}
+		return user;
 	}
 }

@@ -131,6 +131,7 @@ export class GamesService {
         }
       } else if (this.matches[userIdString]) {
         this.matches[userIdString].receiver.emit('cancelledMatchmake');
+        this.matches[userIdString].sender.emit('cancelledMatchmake');
         delete this.matches[userIdString];
         await this.prisma.user.update({ where: { id: userId }, data: { status: 'ONLINE' } });
       }
