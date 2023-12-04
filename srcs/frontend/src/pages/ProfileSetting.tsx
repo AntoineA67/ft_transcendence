@@ -192,9 +192,9 @@ export function SettingMenu() {
 	};
 
 
-	const handleLogout = () => {
+	const handleLogout = async () => {
 		try {
-			axios.post(process.env.REACT_APP_BACKEND_URL + "/auth/signout", {
+			await axios.post(process.env.REACT_APP_BACKEND_URL + "/auth/signout", {
 				refreshToken: localStorage.getItem('refreshToken'),
 			}, {
 				headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
