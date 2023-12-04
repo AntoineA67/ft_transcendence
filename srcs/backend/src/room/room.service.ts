@@ -1088,10 +1088,6 @@ export class RoomService {
 		return membersList;
 	}
 
-	async getAllMembers(): Promise<Member[]> {
-		return this.prisma.member.findMany();
-	}
-
 	async updateMember(id: number, data: Prisma.MemberUpdateInput): Promise<Member | null> {
 		const existingMember = await this.prisma.member.findUnique({ where: { id } });
 		if (!existingMember) {
@@ -1103,11 +1099,16 @@ export class RoomService {
 		});
 	}
 
-	async deleteMember(id: number): Promise<Member | null> {
-		const existingMember = await this.prisma.member.findUnique({ where: { id } });
-		if (!existingMember) {
-			throw new NotFoundException(`Member with ID ${id} not found`);
+	async isBanned(userId: number, roomId: number): Promise<boolean> {
+		const member = await this.prisma.member.findFirst({
+			where: {
+				userId,
+				roomId,
+			},
+		});
+		if (!member) {
+			return false;
 		}
-		return this.prisma.member.delete({ where: { id } });
+		return member.ban;
 	}
 }
