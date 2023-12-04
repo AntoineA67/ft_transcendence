@@ -24,7 +24,6 @@ export function Login() {
 	const saveToken = (data: any, user: newUser | login) => {
 		localStorage.setItem('token', data.token);
 		localStorage.setItem('refreshToken', data.refreshToken);
-		localStorage.setItem('email', user.email);
 		localStorage.setItem('firstConnexion', data.firstConnexion);
 		navigate('/');
 	}
@@ -53,7 +52,7 @@ export function Login() {
 
 		let response;
 		try {
-			response = await fetch(url, fetchObj)
+			response = await fetch(url, fetchObj);
 			data = await response.json();
 			('error' in data) && dealError(data, setErr);
 			('_2fa' in data) && handle2FA(data, set2FA);
@@ -126,7 +125,6 @@ export function TwoFAPage() {
 		const response = await fetch(process.env.REACT_APP_BACKEND_URL + `/auth/_2fa/id=${_2fa.id}&token=${token}`);
 		const data = await response.json();
 		if (data._2fa === 'success') {
-			localStorage.removeItem('email');
 			window.location.href = oauth42Url;
 		} else {
 			setInvalidToken(true);
