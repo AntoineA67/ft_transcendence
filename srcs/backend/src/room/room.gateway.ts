@@ -295,7 +295,7 @@ export class RoomGateway
 				const roomMembers = await this.roomService.getMembersByRoomId(roomid);
 				for (const member of roomMembers) {
 					const socket = this.clients[member.userId.toString()];
-					if (socket && (user.id === member.userId || !await this.roomService.isBlockedBy(user.id, member.userId))) {
+					if (socket && (user.id === member.userId || (!await this.roomService.isBlockedBy(user.id, member.userId) && !await this.roomService.isBanned(member.userId, roomid)))) {
 						socket.emit('messageSent', newMessage);
 					}
 				}
