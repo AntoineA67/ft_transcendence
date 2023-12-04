@@ -272,6 +272,8 @@ export class RoomGateway
 			const user = await this.roomService.getUserbyId(userid);
 			const member = await this.roomService.getMemberDatabyRoomId(user.id, roomid);
 			const room = await this.roomService.getRoomDataById(roomid);
+			if (!room)
+				return false;
 			if (!room.isChannel) {
 				const blockedinPrivRoom = await this.roomService.PrivRoomisBlocked(user.id, roomid);
 				if (blockedinPrivRoom)
@@ -290,7 +292,13 @@ export class RoomGateway
 					roomId: createdMessage.roomId,
 					username: user.username,
 				};
-				this.server.to(roomName).emit('messageSent', newMessage);
+				const roomMembers = await this.roomService.getMembersByRoomId(roomid);
+				for (const member of roomMembers) {
+					const socket = this.clients[member.userId.toString()];
+					if (socket && (user.id === member.userId || !await this.roomService.isBlockedBy(user.id, member.userId))) {
+						socket.emit('messageSent', newMessage);
+					}
+				}
 				return true;
 			} else
 				return false;
