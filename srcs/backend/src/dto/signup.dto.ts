@@ -12,6 +12,8 @@ export class SignupDto {
     @IsNotEmpty()
     @IsString()
     @IsEmail()
+    @MaxLength(100, { message: "Email must be less than 100 characters long" })
+    @MinLength(3, { message: "Email must be at least 3 characters long" })
     email!: string;
 
     @IsNotEmpty()

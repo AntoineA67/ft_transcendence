@@ -1,4 +1,4 @@
-import { BadRequestException, Req, Res } from '@nestjs/common';
+import { BadRequestException, NotFoundException, Req, Res, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -53,6 +53,13 @@ export class AuthController {
 		} catch (e: any) {
 			if (e instanceof BadRequestException)
 				throw new BadRequestException(e.message);
+			else if (e instanceof UnauthorizedException)
+				throw new UnauthorizedException(e.message);
+			else if (e instanceof NotFoundException)
+				throw new NotFoundException(e.message);
+			else if (e instanceof ForbiddenException)
+				throw new ForbiddenException(e.message);
+			
 			return;
 		}
 	}

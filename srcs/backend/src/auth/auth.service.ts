@@ -79,7 +79,6 @@ export class AuthService {
 				throw new BadRequestException('Bad request for entry email');
 			}
 			if (dto.email.includes('@student.42') || dto.email.includes('@42'))
-
 				throw new BadRequestException('Please sign in in with 42 if you are a 42 student');
 			const user = await this.usersService.getUserByEmail(dto.email);
 			// if user not found throw exception
