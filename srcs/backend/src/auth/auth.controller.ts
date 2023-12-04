@@ -1,4 +1,4 @@
-import { BadRequestException, Req, Res } from '@nestjs/common';
+import { BadRequestException, Req, Res, UseFilters } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
