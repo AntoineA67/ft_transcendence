@@ -16,10 +16,14 @@ export function FriendList() {
 	const handleFriendReqAccept = (replier: userType) => {
 		setFriends((prev) => ([...prev, replier]));
 	}
+	const deleteFriend = (deletedFriend: userType) => {
+		setFriends((prev) => (prev.filter((x) => (x.id !== deletedFriend.id))));
+	}
 
 	useEffect(() => {
 		findAllFriends();
 		friendsSocket.on('friendReqAccept', handleFriendReqAccept);
+		friendsSocket.on('friendDeleted', deleteFriend);
 		friendsSocket.on('block', findAllFriends)
 		friendsSocket.on('unblock', findAllFriends)
 

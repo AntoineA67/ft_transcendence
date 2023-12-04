@@ -29,47 +29,57 @@ type optionProp = {
 }
 
 export function AddOption({ profile, setProfile }: optionProp) {
-	const [text, setText] = useState<'Add' | 'Sent' | 'Friend!'>('Add')
+	const [text, setText] = useState<'Add' | 'Sent' | 'Delete'>('Add');
 
 	useEffect(() => {
 		profile.sent ? setText('Sent') : setText('Add');
-		profile.friend && setText('Friend!');
-	}, [profile])
+		profile.friend && setText('Delete');
+	}, [profile]);
 
 	useEffect(() => {
 		// define socket listener
 		function handleReqAccept(newFriend: userType) {
 			if (newFriend.id === profile.id) {
-				setProfile((prev) => ({ ...prev!, sent: false, friend: true }))
+				setProfile((prev) => ({ ...prev!, sent: false, friend: true }));
 			}
 		}
 		function handleSendFriendReq(recver: userType) {
 			if (recver.id === profile.id) {
-				setProfile((prev) => ({ ...prev!, sent: true }))
+				setProfile((prev) => ({ ...prev!, sent: true }));
 			}
 		}
+		function handleFriendDeletion(deletedFriend: userType) {
+			if (deletedFriend.id === profile.id) {
+				setProfile((prev) => ({ ...prev!, friend: false }));
+			}
+		}
+
 		friendsSocket.on('friendReqAccept', handleReqAccept);
 		friendsSocket.on('sendfriendReq', handleSendFriendReq);
+		friendsSocket.on('friendDeleted', handleFriendDeletion);
 
-		return (() => {
+		return () => {
 			friendsSocket.off('friendReqAccept', handleReqAccept);
 			friendsSocket.off('sendfriendReq', handleSendFriendReq);
-		})
-	}, [profile])
+			friendsSocket.off('friendDeleted', handleFriendDeletion);
+		};
+	}, [profile, setProfile]);
 
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		e.preventDefault();
 		if (text === 'Add') {
 			friendsSocket.emit('sendReq', profile.username);
+		} else if (text === 'Delete') {
+			friendsSocket.emit('deleteFriend', profile.username);
 		}
-	}
+	};
 
 	return (
 		<div className='d-flex flex-column align-items-center'>
 			<button className='addOption' onClick={handleClick} />
 			<p className='magenta-text'>{text}</p>
 		</div>
-	)
+	);
 }
 
 export function BlockOption({ profile, setProfile }: optionProp) {
@@ -127,7 +137,7 @@ export function ChatOption({ profile, setProfile }: optionProp) {
 			friendsSocket.off('unblocked', handleUnblocked)
 		})
 
-	}, [])
+	}, [setProfile])
 
 	useEffect(() => {
 		(profile.block || profile.blocked) ? setText('block') : setText('Chat');
@@ -179,7 +189,7 @@ export function PongOption({ profile, setProfile }: optionProp) {
 			friendsSocket.off('unblocked', handleUnblocked)
 		})
 
-	}, [])
+	}, [setProfile])
 
 	useEffect(() => {
 		(profile.block || profile.blocked) ? setText('block') : setText('Pong');

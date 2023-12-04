@@ -62,6 +62,33 @@ export class FriendRequestGateway implements OnGatewayConnection, OnGatewayDisco
 		}
 	}
 
+	@SubscribeMessage('deleteFriend')
+	async handleDeleteFriend(
+		@ConnectedSocket() client: Socket, 
+		@MessageBody() otherusername: string
+	): Promise<boolean> {
+		
+		try {
+			if (typeof otherusername != 'string' || otherusername.length == 0 || otherusername.length > 20 || !otherusername.match(/^[A-Za-z0-9-]+$/)) {
+				return false;
+			}
+			const id: number = client.data.user.id;
+			const sender: UserDto = await this.usersService.getUserById(id);
+			const recver: UserDto = await this.usersService.getUserByNick(otherusername);
+			if (!sender || !recver) {
+				return false;
+			}
+			const result = await this.friendReqService.deleteFriend(id, otherusername);
+			// if fail, no emit
+			if (!result) return (result);
+			this.server.to(recver.id.toString()).emit('friendDeleted', sender);
+			this.server.to(sender.id.toString()).emit('friendDeleted', recver);
+			return (result);
+		} catch(e: any) {
+			return false;
+		}
+	}
+
 	// emit event 'friendReqAccept' to the original sender
 	@SubscribeMessage('replyReq')
 	async handleReplyReq(

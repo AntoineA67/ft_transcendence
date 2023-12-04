@@ -73,6 +73,54 @@ export class FriendRequestService {
 		return (true);
 	}
 
+	async deleteFriend(id: number, otherusername: string): Promise<boolean> {
+		const me = await this.usersService.getUserById(id);
+		const friend = await this.usersService.getUserByNick(otherusername);
+
+		if (!me || !friend) return false;
+
+		const isFriend = await this.friendshipService.isFriend(id, friend.id);
+		if (!isFriend) return false;
+
+		const pendings = await this.getPendingReq(id, friend.id);
+
+		if (pendings.length > 0) {
+			await this.prisma.friendRequest.deleteMany({
+				where: {
+					AND: [
+						{ userId: id },
+						{ possibleFriendId: friend.id },
+						{ status: 'PENDING' },
+					],
+				},
+			});
+		}
+
+		// Remove the specific friendship relationship between two users
+		await this.prisma.friendship.deleteMany({
+			where: {
+				AND: [
+					{
+						friends: {
+							some: {
+								id: id,
+							},
+						},
+					},
+					{
+						friends: {
+							some: {
+								id: friend.id,
+							},
+						},
+					},
+				],
+			},
+		});
+
+		return true;
+	}
+
 	async replyFriendReq(id: number, otherId: number, accept: boolean): Promise<boolean> {
 		const me = await this.usersService.getUserById(id);
 		const friend = await this.usersService.getUserById(otherId);
