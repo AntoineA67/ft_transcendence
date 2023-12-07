@@ -5,3 +5,7 @@ node_modules
 test
 build/
 *.pem
+
+__pycache__
+.pytest_cache
+.venv
