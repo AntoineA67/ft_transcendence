@@ -101,3 +101,6 @@ class TestAuth:
         }
         res = requests.post(SIGNUP, json=body)
         assert res.status_code == 400
+
+
+
