@@ -1,77 +1,105 @@
-# Transcendence
+<h1 align="center">Transcendence</h1>
 
-![Alt text](./images/image-7.png)
+Projet final du tronc-commun de [42](https://42.fr/), dont le but est la création d'un site web pour jouer au jeu Pong en ligne.
 
-## Résumé
-Bienvenue dans le projet ft_transcendence, où le C et le C++ cèdent la place à une aventure inédite. Ce projet vous invite à revisiter vos débuts en informatique et à briller avec vos compétences actuelles. Préparez-vous à créer un site web pour une compétition du jeu Pong, avec une touche moderne et interactive.
+Ce projet couvre les aspects suivants :
 
-## Table des Matières
-1. [Préambule](#préambule)
-2. [Partie Obligatoire](#partie-obligatoire)
-   1. [Vue d'ensemble](#vue-densemble)
-   2. [Questions de sécurité](#questions-de-sécurité)
-   3. [Compte utilisateur](#compte-utilisateur)
-   4. [Chat](#chat)
-   5. [Le jeu](#le-jeu)
-3. [Rendu et Peer-Evaluation](#rendu-et-peer-evaluation)
+- Développement d'une application web monopage.
+- Mise en place d'un backend en NestJS et d'un frontend en React.
+- Intégration d'une base de données PostgreSQL.
+- Implémentation de fonctionnalités de sécurité et de gestion des utilisateurs.
+- Dockérisation totale du projet.
 
 ---
 
-## Préambule
-Ce projet marque une étape importante dans votre parcours en informatique. Il vous invite à explorer de nouvelles technologies et à créer une application web dynamique et interactive.
+### Fonctionnalités :
+#### Compte utilisateur
+- Inscription et connexion via OAuth (intranet 42).
+- Choix d'un nom d'utilisateur unique et téléchargement d'un avatar.
+- Activation de l'authentification à deux facteurs (2FA).
+- Gestion des amis et affichage du statut en temps réel.
+- Consultation des statistiques et de l'historique des matchs.
+#### Chat
+- Création de channels (publics, privés, protégés par mot de passe).
+- Envoi de messages directs et blocage d'utilisateurs.
+- Gestion des channels par les propriétaires et administrateurs.
+- Invitation à jouer via l'interface de chat.
+#### Jeu
+- Lancement de parties de Pong en temps réel contre d'autres joueurs.
+- Système de matchmaking automatique.
+- Options de customisation et jeu fidèle au Pong original.
+- Jeu responsive et gestion des latences réseau.
+- Possibilité d'utiliser les mains comme controleur.
 
-## Partie Obligatoire
-
-### Vue d'ensemble
-Votre mission est de développer un site web permettant aux utilisateurs de jouer au Pong. Les exigences clés sont :
-
-- **Backend** : NestJS.
-- **Frontend** : Framework TypeScript au choix.
-- **Bibliothèques** : Utiliser les dernières versions stables.
-- **Base de données** : PostgreSQL exclusivement.
-- **Application web monopage** : Support des boutons Précédent et Suivant du navigateur.
-- **Compatibilité** : Dernière version stable de Google Chrome et un autre navigateur.
-- **Gestion des erreurs** : Pas d'erreurs non gérées ou d'avertissements.
-- **Déploiement** : Utilisation de `docker-compose up --build`.
-
-### Questions de sécurité
-- **Chiffrement des mots de passe** dans la base de données.
-- **Protection contre les injections SQL**.
-- **Validation côté serveur** pour les formulaires et requêtes utilisateur.
-- **Gestion des informations sensibles** via un fichier `.env` exclu de git.
-
-### Compte utilisateur
-- **Authentification** via le système OAuth de l'intranet 42.
-- **Nom d'utilisateur unique**, téléchargement d'avatar, et avatar par défaut.
-- **Authentification à deux facteurs** (2FA).
-- **Gestion des amis** et visualisation de leur statut.
-- **Affichage des statistiques** et historique des matchs.
-
-### Chat
-- **Création de channels** : publics, privés ou protégés par mot de passe.
-- **Messages directs** et possibilité de bloquer d'autres utilisateurs.
-- **Gestion des channels** par le créateur.
-- **Invitations à jouer au Pong** via le chat.
-- **Accès aux profils** des joueurs depuis le chat.
-
-### Le jeu
-- **Parties de Pong en live** contre d'autres joueurs.
-- **Système de matching** automatique.
-- **Fidélité au Pong original de 1972** avec options de customisation.
-- **Responsive design** et gestion des problèmes de réseau.
-
-## Rendu et Peer-Evaluation
-Le projet doit être soumis sur votre dépôt Git. Assurez-vous que la structure des dossiers et des fichiers soit conforme aux exigences du sujet.
 
 ---
 
-**Transcendence** : Un voyage à travers le temps et la technologie, du Pong classique à l'ère moderne du développement web.
+### Pré-requis :
 
-**Annexes**
+- Docker >= 26.1.1
+- Docker Compose >= v2.27.0
 
-![Alt text](./images/image.png)
-![Alt text](./images/image-1.png)
-![Alt text](./images/image-2.png)
-![Alt text](./images/image-3.png)
-![Alt text](./images/image-5.png)
-![Alt text](./images/image-6.png)
+### Configuration et déploiement :
+
+Fichier `.env` à la racine du projet avec les paramètres suivants :
+
+```
+ENV=prod
+APP_NAME=pingpanpong
+
+REACT_APP_FRONTEND_URL=http://localhost:8080
+REACT_APP_BACKEND_URL=http://localhost:8080/api
+
+REACT_APP_FORTYTWO_APP_ID=<secret>
+FORTYTWO_APP_SECRET=<secret>
+
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+POSTGRES_USERNAME=postgres
+POSTGRES_PASSWORD=<secret>
+POSTGRES_NAME=transcendence
+
+DATABASE_URL=postgresql://postgres:<secret>@db:5432/transcendence
+
+JWT_SECRET=<secret>
+
+REACT_APP_GITHUB_LINK=https://github.com/
+```
+
+Remplacer `<secret>` par des chaines de caracteres aléatoires ou des accès API valides.
+
+#### Commandes disponibles :
+
+- `docker-compose up --build` construction et lancement du projet.
+
+### Démonstration :
+
+![](./images/1.png)
+![](./images/2.png)
+![](./images/3.png)
+![](./images/4.png)
+![](./images/5.png)
+![](./images/6.png)
+![](./images/7.png)
+![](./images/8.png)
+![](./images/9.png)
+
+### Correction :
+
+| |
+| --- |
+| <img src="./images/note.png" style="zoom: 50%;" /> |
+
+| | |
+| --- | --- |
+| Correcteur 1 | <img src="./images/correction1.png" style="zoom: 67%;" /> |
+| Correcteur 2 | <img src="./images/correction2.png" style="zoom:67%;" /> |
+| Correcteur 3 | <img src="./images/correction3.png" style="zoom:67%;" /> |
+
+---
+
+### Contributeurs :
+
+| ![Sasha](https://github.com/sasha-liu.png?size=75) | ![Antoine](https://github.com/antoineA67.png?size=75) | ![Florian](https://github.com//florian-a.png?size=75) |![Alric](https://github.com//alpyt42.png?size=75) |![Ana](https://github.com//noushhhh.png?size=75) |
+|:-----------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|
+| **[Sasha](https://github.com/sasha-liu)**          | **[Antoine](https://github.com/antoineA67)**           |**[Florian](https://github.com/florian-a)**           |**[Alric](https://github.com/alpyt42)**           |**[Ana](https://github.com/noushhhh)**           |
