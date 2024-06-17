@@ -74,15 +74,12 @@ Remplacer `<secret>` par des chaines de caracteres aléatoires ou des accès API
 
 ### Démonstration :
 
-![](./images/1.png)
-![](./images/2.png)
-![](./images/3.png)
-![](./images/4.png)
-![](./images/5.png)
-![](./images/6.png)
-![](./images/7.png)
-![](./images/8.png)
-![](./images/9.png)
+<img src="./images/1.png" width="50%"><img src="./images/2.png" width="50%">
+<img src="./images/3.png" width="50%"><img src="./images/4.png" width="50%">
+<img src="./images/5.png" width="50%"><img src="./images/6.png" width="50%">
+<img src="./images/7.png" width="50%"><img src="./images/8.png" width="50%">
+<img src="./images/9.png" width="50%">
+
 
 ### Correction :
 
@@ -100,6 +97,8 @@ Remplacer `<secret>` par des chaines de caracteres aléatoires ou des accès API
 
 ### Contributeurs :
 
-| ![Sasha](https://github.com/sasha-liu.png?size=75) | ![Antoine](https://github.com/antoineA67.png?size=75) | ![Florian](https://github.com//florian-a.png?size=75) |![Alric](https://github.com//alpyt42.png?size=75) |![Ana](https://github.com//noushhhh.png?size=75) |
-|:-----------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|:--------------------------------------------------------:|
-| **[Sasha](https://github.com/sasha-liu)**          | **[Antoine](https://github.com/antoineA67)**           |**[Florian](https://github.com/florian-a)**           |**[Alric](https://github.com/alpyt42)**           |**[Ana](https://github.com/noushhhh)**           |
+### Contributeurs :
+
+| ![Sasha](https://github.com/sasha-liu.png?s=75) | ![Antoine](https://github.com/antoineA67.png?s=75) | ![Florian](https://github.com/florian-a.png?s=75) | ![Alric](https://github.com/alpyt42.png?s=75) | ![Ana](https://github.com/noushhhh.png?s=75) |
+|:----------------------------------------------:|:------------------------------------------------:|:------------------------------------------------:|:-----------------------------------------------:|:-----------------------------------------------:|
+| **[Sasha](https://github.com/sasha-liu)**       | **[Antoine](https://github.com/antoineA67)**      | **[Florian](https://github.com/florian-a)**      | **[Alric](https://github.com/alpyt42)**         | **[Ana](https://github.com/noushhhh)**         |
