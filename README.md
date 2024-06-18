@@ -1,36 +1,39 @@
 <h1 align="center">Transcendence</h1>
 
-Projet final du tronc-commun de [42](https://42.fr/), dont le but est la création d'un site web pour jouer au jeu Pong en ligne.
+
+Projet final du tronc commun de [42](https://42.fr/), dont le but est la création d'un site web pour jouer au jeu Pong en ligne.
 
 Ce projet couvre les aspects suivants :
 
 - Développement d'une application web monopage.
-- Mise en place d'un backend en NestJS et d'un frontend en React.
+- Mise en place d'un backend avec NestJS et d'un frontend en React.
 - Intégration d'une base de données PostgreSQL.
 - Implémentation de fonctionnalités de sécurité et de gestion des utilisateurs.
-- Dockérisation totale du projet.
+- Dockerisation complète du projet.
 
 ---
 
 ### Fonctionnalités :
+
 #### Compte utilisateur
 - Inscription et connexion via OAuth (intranet 42).
 - Choix d'un nom d'utilisateur unique et téléchargement d'un avatar.
 - Activation de l'authentification à deux facteurs (2FA).
 - Gestion des amis et affichage du statut en temps réel.
 - Consultation des statistiques et de l'historique des matchs.
+
 #### Chat
 - Création de channels (publics, privés, protégés par mot de passe).
 - Envoi de messages directs et blocage d'utilisateurs.
 - Gestion des channels par les propriétaires et administrateurs.
 - Invitation à jouer via l'interface de chat.
+
 #### Jeu
 - Lancement de parties de Pong en temps réel contre d'autres joueurs.
 - Système de matchmaking automatique.
-- Options de customisation et jeu fidèle au Pong original.
+- Options de personnalisation et jeu fidèle au Pong original.
 - Jeu responsive et gestion des latences réseau.
-- Possibilité d'utiliser les mains comme controleur.
-
+- Possibilité d'utiliser les mains comme contrôleur.
 
 ---
 
@@ -66,11 +69,22 @@ JWT_SECRET=<secret>
 REACT_APP_GITHUB_LINK=https://github.com/
 ```
 
-Remplacer `<secret>` par des chaines de caracteres aléatoires ou des accès API valides.
+Remplacer `<secret>` par des chaînes de caractères aléatoires ou des accès API valides.
 
 #### Commandes disponibles :
 
-- `docker-compose up --build` construction et lancement du projet.
+- `docker-compose up --build` : construction et lancement du projet.
+
+---
+
+### Diagrammes :
+
+##### Diagramme d'entité
+<img src="./docs/entitee-diagram.png" width="80%">
+
+##### Diagramme de déploiement
+<img src="./docs/deployment-diagram.png" width="80%">
+
 
 ### Démonstration :
 
@@ -80,22 +94,21 @@ Remplacer `<secret>` par des chaines de caracteres aléatoires ou des accès API
 <img src="./images/7.png" width="50%"><img src="./images/8.png" width="50%">
 <img src="./images/9.png" width="50%">
 
+---
 
 ### Correction :
 
 | |
 | --- |
-| <img src="./images/note.png" style="zoom: 50%;" /> |
+| <img src="./images/note.png" /> |
 
 | | |
 | --- | --- |
-| Correcteur 1 | <img src="./images/correction1.png" style="zoom: 67%;" /> |
-| Correcteur 2 | <img src="./images/correction2.png" style="zoom:67%;" /> |
-| Correcteur 3 | <img src="./images/correction3.png" style="zoom:67%;" /> |
+| Correcteur 1 | <img src="./images/correction1.png" /> |
+| Correcteur 2 | <img src="./images/correction2.png" /> |
+| Correcteur 3 | <img src="./images/correction3.png" /> |
 
 ---
-
-### Contributeurs :
 
 ### Contributeurs :
 
